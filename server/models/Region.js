@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const RegionSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   manager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
