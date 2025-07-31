@@ -1,15 +1,21 @@
 const express = require('express');
-const {
-  verifyWorker,
-  getPerformanceMetrics
-} = require('../controllers/adminController');
-const { protect, roleCheck } = require('../middleware/auth');
+// const {
+//   verifyWorker,
+//   getPerformanceMetrics
+// } = require('../controllers/adminController');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.use(protect, roleCheck('super_admin'));
+router.use(protect, authorize('super_admin'));
 
-router.put('/verify-worker/:id', verifyWorker);
-router.get('/performance', getPerformanceMetrics);
+// Placeholder routes - controllers will be implemented later
+router.put('/verify-worker/:id', (req, res) => {
+  res.json({ success: true, message: 'Admin verify worker endpoint - coming soon!' });
+});
+
+router.get('/performance', (req, res) => {
+  res.json({ success: true, message: 'Admin performance metrics endpoint - coming soon!' });
+});
 
 module.exports = router;
