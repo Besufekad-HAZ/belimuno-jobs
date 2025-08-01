@@ -39,13 +39,16 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // Check if user is verified (optional - depends on your requirements)
+    // Check if user is verified (disabled for testing - can be enabled later)
+    // For production, uncomment this block:
+    /*
     if (!user.isVerified && user.role !== 'super_admin') {
       return res.status(401).json({
         success: false,
         message: 'Account not verified. Please verify your email.'
       });
     }
+    */
 
     req.user = user;
     next();

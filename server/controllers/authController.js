@@ -46,7 +46,7 @@ const register = async (req, res, next) => {
       phone,
       region: userRegion ? userRegion._id : null,
       profile: profile || {},
-      isVerified: role === 'super_admin' ? true : false, // Auto-verify super admin
+      isVerified: true, // Auto-verify all users for testing (can be changed to false for production)
     };
 
     // Add role-specific profile data

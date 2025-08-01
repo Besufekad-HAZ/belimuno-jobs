@@ -8,7 +8,9 @@
     "prod": "node server.js",
     "seed": "node seedTestData.js",
     "test": "node test-api.js",
-    "test:full": "npm run seed && npm run test"
+    "test:full": "npm run seed && npm run test",
+    "test:register": "node test-registration.js",
+    "test:login": "node test-login.js"
   },
   "keywords": [],
   "author": "",
