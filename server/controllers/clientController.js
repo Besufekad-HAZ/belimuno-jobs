@@ -1,0 +1,497 @@
+const Job = require('../models/Job');
+const User = require('../models/User');
+const Application = require('../models/Application');
+const Notification = require('../models/Notification');
+const Payment = require('../models/Payment');
+const asyncHandler = require('../utils/asyncHandler');
+
+// @desc    Get client dashboard data
+// @route   GET /api/client/dashboard
+// @access  Private/Client
+exports.getDashboard = asyncHandler(async (req, res) => {
+  const clientId = req.user._id;
+
+  // Get client's jobs statistics
+  const jobs = await Job.find({ client: clientId });
+  const activeJobs = jobs.filter(job => ['posted', 'assigned', 'in_progress'].includes(job.status));
+  const completedJobs = jobs.filter(job => job.status === 'completed');
+  const totalSpent = completedJobs.reduce((sum, job) => sum + (job.payment?.totalAmount || 0), 0);
+
+  // Get recent applications for client's jobs
+  const recentApplications = await Application.find({
+    job: { $in: jobs.map(job => job._id) }
+  })
+    .populate('worker', 'name profile.avatar workerProfile.rating')
+    .populate('job', 'title')
+    .sort({ appliedAt: -1 })
+    .limit(5);
+
+  // Get notifications
+  const notifications = await Notification.find({ recipient: clientId, isRead: false })
+    .sort({ createdAt: -1 })
+    .limit(10);
+
+  const dashboardData = {
+    statistics: {
+      totalJobs: jobs.length,
+      activeJobs: activeJobs.length,
+      completedJobs: completedJobs.length,
+      totalSpent,
+      averageJobValue: jobs.length > 0 ? totalSpent / jobs.length : 0
+    },
+    recentApplications,
+    notifications,
+    activeJobs: activeJobs.slice(0, 5) // Latest 5 active jobs
+  };
+
+  res.status(200).json({
+    success: true,
+    data: dashboardData
+  });
+});
+
+// @desc    Get all client's jobs
+// @route   GET /api/client/jobs
+// @access  Private/Client
+exports.getJobs = asyncHandler(async (req, res) => {
+  const { status, page = 1, limit = 10, sort = '-createdAt' } = req.query;
+
+  const query = { client: req.user._id };
+  if (status) {
+    query.status = status;
+  }
+
+  const jobs = await Job.find(query)
+    .populate('worker', 'name profile.avatar workerProfile.rating')
+    .populate('region', 'name')
+    .sort(sort)
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
+
+  const total = await Job.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: jobs.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit)
+    },
+    data: jobs
+  });
+});
+
+// @desc    Create new job
+// @route   POST /api/client/jobs
+// @access  Private/Client
+exports.createJob = asyncHandler(async (req, res) => {
+  const jobData = {
+    ...req.body,
+    client: req.user._id
+  };
+
+  // Validate required fields
+  const requiredFields = ['title', 'description', 'category', 'budget', 'deadline', 'region'];
+  for (const field of requiredFields) {
+    if (!jobData[field]) {
+      return res.status(400).json({
+        success: false,
+        message: `${field} is required`
+      });
+    }
+  }
+
+  const job = await Job.create(jobData);
+  await job.populate('region', 'name');
+
+  // Create notification for area manager
+  if (job.region) {
+    const areaManager = await User.findOne({
+      role: 'area_manager',
+      region: job.region._id
+    });
+
+    if (areaManager) {
+      await Notification.create({
+        recipient: areaManager._id,
+        sender: req.user._id,
+        title: 'New Job Posted',
+        message: `A new job "${job.title}" has been posted in your region`,
+        type: 'job_posted',
+        relatedJob: job._id,
+        actionButton: {
+          text: 'View Job',
+          action: 'view_job'
+        }
+      });
+    }
+  }
+
+  res.status(201).json({
+    success: true,
+    data: job
+  });
+});
+
+// @desc    Get single job with applications
+// @route   GET /api/client/jobs/:id
+// @access  Private/Client
+exports.getJob = asyncHandler(async (req, res) => {
+  const job = await Job.findOne({
+    _id: req.params.id,
+    client: req.user._id
+  })
+    .populate('worker', 'name profile workerProfile')
+    .populate('region', 'name')
+    .populate('areaManager', 'name profile');
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  // Get applications for this job
+  const applications = await Application.find({ job: job._id })
+    .populate('worker', 'name profile.avatar workerProfile.rating workerProfile.skills')
+    .sort({ appliedAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      job,
+      applications
+    }
+  });
+});
+
+// @desc    Update job
+// @route   PUT /api/client/jobs/:id
+// @access  Private/Client
+exports.updateJob = asyncHandler(async (req, res) => {
+  let job = await Job.findOne({
+    _id: req.params.id,
+    client: req.user._id
+  });
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  // Prevent updating certain fields if job is already assigned
+  if (job.status === 'assigned' || job.status === 'in_progress') {
+    const restrictedFields = ['budget', 'deadline', 'requiredSkills'];
+    const hasRestrictedUpdates = restrictedFields.some(field => req.body[field]);
+
+    if (hasRestrictedUpdates) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot update budget, deadline, or required skills for assigned jobs'
+      });
+    }
+  }
+
+  job = await Job.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true
+  }).populate('region', 'name');
+
+  res.status(200).json({
+    success: true,
+    data: job
+  });
+});
+
+// @desc    Accept job application
+// @route   PUT /api/client/jobs/:jobId/applications/:applicationId/accept
+// @access  Private/Client
+exports.acceptApplication = asyncHandler(async (req, res) => {
+  const { jobId, applicationId } = req.params;
+
+  // Verify job belongs to client
+  const job = await Job.findOne({ _id: jobId, client: req.user._id });
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  // Check if job is still available for assignment
+  if (job.status !== 'posted') {
+    return res.status(400).json({
+      success: false,
+      message: 'Job is no longer available for assignment'
+    });
+  }
+
+  // Get the application
+  const application = await Application.findOne({
+    _id: applicationId,
+    job: jobId
+  }).populate('worker');
+
+  if (!application) {
+    return res.status(404).json({
+      success: false,
+      message: 'Application not found'
+    });
+  }
+
+  // Update application status
+  application.status = 'accepted';
+  application.reviewedAt = new Date();
+  application.reviewedBy = req.user._id;
+  await application.save();
+
+  // Update job with assigned worker
+  job.worker = application.worker._id;
+  job.status = 'assigned';
+  job.payment.totalAmount = application.proposedBudget;
+  await job.save();
+
+  // Reject all other applications for this job
+  await Application.updateMany(
+    { job: jobId, _id: { $ne: applicationId } },
+    { status: 'rejected', reviewedAt: new Date(), reviewedBy: req.user._id }
+  );
+
+  // Create notification for accepted worker
+  await Notification.create({
+    recipient: application.worker._id,
+    sender: req.user._id,
+    title: 'Application Accepted',
+    message: `Your application for "${job.title}" has been accepted!`,
+    type: 'job_assigned',
+    relatedJob: job._id,
+    actionButton: {
+      text: 'View Job',
+      action: 'view_job'
+    }
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Application accepted successfully',
+    data: { job, application }
+  });
+});
+
+// @desc    Reject job application
+// @route   PUT /api/client/jobs/:jobId/applications/:applicationId/reject
+// @access  Private/Client
+exports.rejectApplication = asyncHandler(async (req, res) => {
+  const { jobId, applicationId } = req.params;
+  const { reason } = req.body;
+
+  // Verify job belongs to client
+  const job = await Job.findOne({ _id: jobId, client: req.user._id });
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  // Get the application
+  const application = await Application.findOne({
+    _id: applicationId,
+    job: jobId
+  }).populate('worker');
+
+  if (!application) {
+    return res.status(404).json({
+      success: false,
+      message: 'Application not found'
+    });
+  }
+
+  // Update application status
+  application.status = 'rejected';
+  application.reviewedAt = new Date();
+  application.reviewedBy = req.user._id;
+  application.reviewNotes = reason;
+  await application.save();
+
+  // Create notification for rejected worker
+  await Notification.create({
+    recipient: application.worker._id,
+    sender: req.user._id,
+    title: 'Application Not Selected',
+    message: `Your application for "${job.title}" was not selected this time.`,
+    type: 'job_application',
+    relatedJob: job._id
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Application rejected',
+    data: application
+  });
+});
+
+// @desc    Mark job as completed and request review
+// @route   PUT /api/client/jobs/:id/complete
+// @access  Private/Client
+exports.markJobCompleted = asyncHandler(async (req, res) => {
+  const { rating, review } = req.body;
+
+  const job = await Job.findOne({
+    _id: req.params.id,
+    client: req.user._id
+  }).populate('worker');
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  if (job.status !== 'submitted') {
+    return res.status(400).json({
+      success: false,
+      message: 'Job must be submitted by worker before completion'
+    });
+  }
+
+  // Update job status and review
+  job.status = 'completed';
+  job.completionDate = new Date();
+  job.review.clientReview = {
+    rating,
+    comment: review,
+    reviewedAt: new Date()
+  };
+
+  await job.save();
+
+  // Update worker's rating and completed jobs count
+  if (job.worker) {
+    const worker = await User.findById(job.worker._id);
+    worker.workerProfile.completedJobs += 1;
+
+    // Calculate new average rating
+    const totalRating = (worker.workerProfile.rating * (worker.workerProfile.completedJobs - 1)) + rating;
+    worker.workerProfile.rating = totalRating / worker.workerProfile.completedJobs;
+
+    await worker.save();
+  }
+
+  // Create payment record
+  const payment = await Payment.create({
+    job: job._id,
+    client: req.user._id,
+    worker: job.worker._id,
+    amount: job.payment.totalAmount,
+    status: 'pending',
+    type: 'job_completion'
+  });
+
+  // Create notification for worker
+  await Notification.create({
+    recipient: job.worker._id,
+    sender: req.user._id,
+    title: 'Job Completed',
+    message: `Your work on "${job.title}" has been approved! Payment is being processed.`,
+    type: 'job_completed',
+    relatedJob: job._id,
+    relatedPayment: payment._id
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Job marked as completed',
+    data: job
+  });
+});
+
+// @desc    Request job revision
+// @route   PUT /api/client/jobs/:id/request-revision
+// @access  Private/Client
+exports.requestRevision = asyncHandler(async (req, res) => {
+  const { reason } = req.body;
+
+  const job = await Job.findOne({
+    _id: req.params.id,
+    client: req.user._id
+  }).populate('worker');
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: 'Job not found'
+    });
+  }
+
+  if (job.status !== 'submitted') {
+    return res.status(400).json({
+      success: false,
+      message: 'Can only request revision for submitted jobs'
+    });
+  }
+
+  // Update job status
+  job.status = 'revision_requested';
+  job.revisions.push({
+    requestedBy: req.user._id,
+    reason,
+    requestedAt: new Date()
+  });
+
+  await job.save();
+
+  // Create notification for worker
+  await Notification.create({
+    recipient: job.worker._id,
+    sender: req.user._id,
+    title: 'Revision Requested',
+    message: `The client has requested revisions for "${job.title}"`,
+    type: 'job_application',
+    relatedJob: job._id,
+    actionButton: {
+      text: 'View Details',
+      action: 'view_job'
+    }
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Revision requested',
+    data: job
+  });
+});
+
+// @desc    Get client's payments
+// @route   GET /api/client/payments
+// @access  Private/Client
+exports.getPayments = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+
+  const payments = await Payment.find({ client: req.user._id })
+    .populate('job', 'title')
+    .populate('worker', 'name profile.avatar')
+    .sort({ createdAt: -1 })
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
+
+  const total = await Payment.countDocuments({ client: req.user._id });
+
+  res.status(200).json({
+    success: true,
+    count: payments.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit)
+    },
+    data: payments
+  });
+});

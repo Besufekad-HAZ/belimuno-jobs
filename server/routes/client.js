@@ -1,19 +1,42 @@
 const express = require('express');
-const { protect, authorize } = require('../middleware/auth');
+const {
+  getDashboard,
+  getJobs,
+  createJob,
+  getJob,
+  updateJob,
+  acceptApplication,
+  rejectApplication,
+  markJobCompleted,
+  requestRevision,
+  getPayments
+} = require('../controllers/clientController');
+const { protect } = require('../middleware/auth');
+const { requireClient } = require('../middleware/roleCheck');
 
 const router = express.Router();
 
 // All client routes require authentication and client role
-router.use(protect, authorize('client'));
+router.use(protect, requireClient);
 
-// Client dashboard
-router.get('/dashboard', (req, res) => {
-  res.json({ success: true, message: 'Client dashboard - coming soon!' });
-});
+// Dashboard and overview
+router.get('/dashboard', getDashboard);
 
-// Get client's jobs
-router.get('/jobs', (req, res) => {
-  res.json({ success: true, message: 'Client jobs endpoint - coming soon!' });
-});
+// Job management
+router.get('/jobs', getJobs);
+router.post('/jobs', createJob);
+router.get('/jobs/:id', getJob);
+router.put('/jobs/:id', updateJob);
+
+// Application management
+router.put('/jobs/:jobId/applications/:applicationId/accept', acceptApplication);
+router.put('/jobs/:jobId/applications/:applicationId/reject', rejectApplication);
+
+// Job completion and review
+router.put('/jobs/:id/complete', markJobCompleted);
+router.put('/jobs/:id/request-revision', requestRevision);
+
+// Payments
+router.get('/payments', getPayments);
 
 module.exports = router;

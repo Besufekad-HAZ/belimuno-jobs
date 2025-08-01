@@ -1,21 +1,42 @@
 const express = require('express');
-// const {
-//   verifyWorker,
-//   getPerformanceMetrics
-// } = require('../controllers/adminController');
-const { protect, authorize } = require('../middleware/auth');
+const {
+  getDashboard,
+  getUsers,
+  getUser,
+  updateUser,
+  verifyWorker,
+  getJobs,
+  getPerformanceMetrics,
+  getPayments,
+  handlePaymentDispute,
+  deactivateUser
+} = require('../controllers/adminController');
+const { protect } = require('../middleware/auth');
+const { requireSuperAdmin } = require('../middleware/roleCheck');
 
 const router = express.Router();
 
-router.use(protect, authorize('super_admin'));
+// All admin routes require authentication and super admin role
+router.use(protect, requireSuperAdmin);
 
-// Placeholder routes - controllers will be implemented later
-router.put('/verify-worker/:id', (req, res) => {
-  res.json({ success: true, message: 'Admin verify worker endpoint - coming soon!' });
-});
+// Dashboard and overview
+router.get('/dashboard', getDashboard);
+router.get('/performance', getPerformanceMetrics);
 
-router.get('/performance', (req, res) => {
-  res.json({ success: true, message: 'Admin performance metrics endpoint - coming soon!' });
-});
+// User management
+router.get('/users', getUsers);
+router.get('/users/:id', getUser);
+router.put('/users/:id', updateUser);
+router.put('/users/:id/deactivate', deactivateUser);
+
+// Worker verification
+router.put('/verify-worker/:id', verifyWorker);
+
+// Job management
+router.get('/jobs', getJobs);
+
+// Payment management
+router.get('/payments', getPayments);
+router.put('/payments/:id/dispute', handlePaymentDispute);
 
 module.exports = router;

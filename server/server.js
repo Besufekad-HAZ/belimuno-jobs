@@ -43,6 +43,7 @@ const areaManager = require('./routes/areaManager');
 const worker = require('./routes/worker');
 const client = require('./routes/client');
 const job = require('./routes/job');
+const notification = require('./routes/notification');
 
 // API Info route
 app.get('/api', (req, res) => {
@@ -61,21 +62,47 @@ app.get('/api', (req, res) => {
         logout: 'POST /api/auth/logout'
       },
       admin: {
-        dashboard: 'GET /api/admin/performance',
-        verifyWorker: 'PUT /api/admin/verify-worker/:id'
+        dashboard: 'GET /api/admin/dashboard',
+        performance: 'GET /api/admin/performance',
+        users: 'GET /api/admin/users',
+        verifyWorker: 'PUT /api/admin/verify-worker/:id',
+        jobs: 'GET /api/admin/jobs',
+        payments: 'GET /api/admin/payments'
+      },
+      areaManager: {
+        dashboard: 'GET /api/area-manager/dashboard',
+        workers: 'GET /api/area-manager/workers',
+        verifyWorker: 'PUT /api/area-manager/workers/:id/verify',
+        jobs: 'GET /api/area-manager/jobs',
+        performance: 'GET /api/area-manager/performance'
       },
       workers: {
-        dashboard: 'GET /api/worker/jobs',
-        updateStatus: 'PUT /api/worker/jobs/:id/status'
+        dashboard: 'GET /api/worker/dashboard',
+        jobs: 'GET /api/worker/jobs',
+        updateStatus: 'PUT /api/worker/jobs/:id/status',
+        applications: 'GET /api/worker/applications',
+        earnings: 'GET /api/worker/earnings'
       },
       clients: {
         dashboard: 'GET /api/client/dashboard',
-        jobs: 'GET /api/client/jobs'
+        jobs: 'GET /api/client/jobs',
+        createJob: 'POST /api/client/jobs',
+        acceptApplication: 'PUT /api/client/jobs/:jobId/applications/:applicationId/accept',
+        payments: 'GET /api/client/payments'
       },
       jobs: {
         list: 'GET /api/jobs',
-        create: 'POST /api/jobs',
-        apply: 'POST /api/jobs/:id/apply'
+        single: 'GET /api/jobs/:id',
+        apply: 'POST /api/jobs/:id/apply',
+        categories: 'GET /api/jobs/categories',
+        search: 'GET /api/jobs/search',
+        stats: 'GET /api/jobs/stats'
+      },
+      notifications: {
+        list: 'GET /api/notifications',
+        markRead: 'PUT /api/notifications/:id/read',
+        markAllRead: 'PUT /api/notifications/read-all',
+        stats: 'GET /api/notifications/stats'
       }
     }
   });
@@ -98,6 +125,7 @@ app.use('/api/area-manager', areaManager);
 app.use('/api/worker', worker);
 app.use('/api/client', client);
 app.use('/api/jobs', job);
+app.use('/api/notifications', notification);
 
 // Catch 404 routes
 app.all('*', (req, res) => {

@@ -1,21 +1,38 @@
 const express = require('express');
-// const {
-//   updateJobStatus,
-//   getWorkerJobs
-// } = require('../controllers/workerController');
-const { protect, authorize } = require('../middleware/auth');
+const {
+  getDashboard,
+  getJobs,
+  getJob,
+  updateJobStatus,
+  getApplications,
+  withdrawApplication,
+  updateProfile,
+  getEarnings
+} = require('../controllers/workerController');
+const { protect } = require('../middleware/auth');
+const { requireWorker } = require('../middleware/roleCheck');
 
 const router = express.Router();
 
-router.use(protect, authorize('worker'));
+// All worker routes require authentication and worker role
+router.use(protect, requireWorker);
 
-// Placeholder routes - controllers will be implemented later
-router.put('/jobs/:id/status', (req, res) => {
-  res.json({ success: true, message: 'Worker update job status endpoint - coming soon!' });
-});
+// Dashboard and overview
+router.get('/dashboard', getDashboard);
 
-router.get('/jobs', (req, res) => {
-  res.json({ success: true, message: 'Worker jobs endpoint - coming soon!' });
-});
+// Job management
+router.get('/jobs', getJobs);
+router.get('/jobs/:id', getJob);
+router.put('/jobs/:id/status', updateJobStatus);
+
+// Application management
+router.get('/applications', getApplications);
+router.delete('/applications/:id', withdrawApplication);
+
+// Profile management
+router.put('/profile', updateProfile);
+
+// Earnings and payments
+router.get('/earnings', getEarnings);
 
 module.exports = router;

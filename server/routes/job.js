@@ -1,24 +1,30 @@
 const express = require('express');
-const { protect, authorize } = require('../middleware/auth');
+const {
+  getJobs,
+  getJob,
+  applyForJob,
+  getCategories,
+  getJobStats,
+  searchJobs,
+  getRecommendedJobs
+} = require('../controllers/jobController');
+const { protect } = require('../middleware/auth');
+const { requireWorker } = require('../middleware/roleCheck');
 
 const router = express.Router();
 
-// Public route to get all jobs
-router.get('/', (req, res) => {
-  res.json({ success: true, message: 'Jobs listing endpoint - coming soon!' });
-});
+// Public routes
+router.get('/', getJobs);
+router.get('/categories', getCategories);
+router.get('/stats', getJobStats);
+router.get('/search', searchJobs);
+router.get('/:id', getJob);
 
 // Protected routes
 router.use(protect);
 
-// Create new job (clients only)
-router.post('/', authorize('client'), (req, res) => {
-  res.json({ success: true, message: 'Create job endpoint - coming soon!' });
-});
-
-// Apply to job (workers only)
-router.post('/:id/apply', authorize('worker'), (req, res) => {
-  res.json({ success: true, message: 'Apply to job endpoint - coming soon!' });
-});
+// Worker-specific routes
+router.post('/:id/apply', requireWorker, applyForJob);
+router.get('/recommended', requireWorker, getRecommendedJobs);
 
 module.exports = router;
