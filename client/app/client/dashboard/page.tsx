@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Briefcase, DollarSign, Clock, CheckCircle, Users, Star, Eye } from 'lucide-react';
+import { Plus, Briefcase, DollarSign, Clock, CheckCircle, Users, Star, Eye, CreditCard, MessageSquare } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { clientAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
 
 interface ClientStats {
   totalJobs: number;
@@ -22,6 +24,11 @@ const ClientDashboard: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState<any>(null);
+  const [rating, setRating] = useState(5);
+  const [review, setReview] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -43,7 +50,7 @@ const ClientDashboard: React.FC = () => {
       ]);
 
       setStats(dashboardResponse.data);
-      setJobs(jobsResponse.data.jobs || []);
+      setJobs(jobsResponse.data.data || []);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
@@ -87,6 +94,60 @@ const ClientDashboard: React.FC = () => {
       fetchDashboardData(); // Refresh data
     } catch (error) {
       console.error('Failed to request revision:', error);
+    }
+  };
+
+  const handlePaymentAndRating = (job: any) => {
+    setSelectedJob(job);
+    setSelectedWorker(job.assignedWorker);
+    setShowPaymentModal(true);
+  };
+
+  const processPayment = async () => {
+    try {
+      // Mock Chapa payment integration
+      const paymentData = {
+        amount: selectedJob.acceptedApplication?.proposedBudget || selectedJob.budget,
+        currency: 'ETB',
+        jobId: selectedJob._id,
+        workerId: selectedWorker._id,
+      };
+
+      // In real implementation, this would integrate with Chapa API
+      console.log('Processing payment with Chapa:', paymentData);
+
+      // Complete the job
+      await clientAPI.completeJob(selectedJob._id);
+
+      setShowPaymentModal(false);
+      setShowRatingModal(true);
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Failed to process payment:', error);
+    }
+  };
+
+  const submitRating = async () => {
+    try {
+      // Mock rating submission
+      const ratingData = {
+        jobId: selectedJob._id,
+        workerId: selectedWorker._id,
+        rating,
+        review,
+      };
+
+      console.log('Submitting rating:', ratingData);
+
+      setShowRatingModal(false);
+      setRating(5);
+      setReview('');
+      setSelectedJob(null);
+      setSelectedWorker(null);
+
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Failed to submit rating:', error);
     }
   };
 
@@ -221,9 +282,10 @@ const ClientDashboard: React.FC = () => {
                         </Button>
                         <Button
                           size="sm"
-                          onClick={() => handleCompleteJob(job._id)}
+                          onClick={() => handlePaymentAndRating(job)}
                         >
-                          Approve & Complete
+                          <CreditCard className="h-4 w-4 mr-1" />
+                          Pay & Rate
                         </Button>
                       </>
                     )}
@@ -316,6 +378,147 @@ const ClientDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Payment Modal */}
+        <Modal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          title="Process Payment via Chapa"
+          size="md"
+        >
+          <div className="space-y-6">
+            {selectedJob && selectedWorker && (
+              <>
+                {/* Job Summary */}
+                <Card className="bg-gray-50">
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900">Job Summary</h4>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">Job Title</p>
+                        <p className="font-medium">{selectedJob.title}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Worker</p>
+                        <p className="font-medium">{selectedWorker.name}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Amount</p>
+                        <p className="font-semibold text-green-600">
+                          ETB {(selectedJob.acceptedApplication?.proposedBudget || selectedJob.budget)?.toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Status</p>
+                        <Badge variant="success">Ready for Payment</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Chapa Payment Integration */}
+                <Card className="bg-blue-50 border-blue-200">
+                  <div className="text-center">
+                    <CreditCard className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                    <h4 className="font-medium text-gray-900 mb-2">Secure Payment via Chapa</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Your payment will be processed securely through Chapa Payment Gateway
+                    </p>
+                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>SSL Encrypted</span>
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Bank Grade Security</span>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Payment Actions */}
+                <div className="flex space-x-3">
+                  <Button variant="outline" onClick={() => setShowPaymentModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={processPayment} className="flex-1">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Process Payment
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </Modal>
+
+        {/* Rating Modal */}
+        <Modal
+          isOpen={showRatingModal}
+          onClose={() => setShowRatingModal(false)}
+          title="Rate Worker Performance"
+          size="md"
+        >
+          <div className="space-y-6">
+            {selectedWorker && (
+              <>
+                {/* Worker Info */}
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h4 className="font-medium text-gray-900">{selectedWorker.name}</h4>
+                  <p className="text-sm text-gray-500">How was your experience working with this freelancer?</p>
+                </div>
+
+                {/* Rating Stars */}
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Rating</p>
+                  <div className="flex justify-center space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setRating(star)}
+                        className={`p-1 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
+                      >
+                        <Star className="h-8 w-8 fill-current" />
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">{rating} out of 5 stars</p>
+                </div>
+
+                {/* Review Text */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Review (Optional)
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={review}
+                    onChange={(e) => setReview(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Share your experience working with this freelancer..."
+                  />
+                </div>
+
+                {/* Submit Actions */}
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowRatingModal(false);
+                      setRating(5);
+                      setReview('');
+                    }}
+                  >
+                    Skip Rating
+                  </Button>
+                  <Button onClick={submitRating} className="flex-1">
+                    <Star className="h-4 w-4 mr-2" />
+                    Submit Rating
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </Modal>
       </div>
     </div>
   );

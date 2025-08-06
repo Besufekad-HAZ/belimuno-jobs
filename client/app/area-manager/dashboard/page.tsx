@@ -2,11 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Briefcase, MapPin, TrendingUp, CheckCircle, AlertTriangle, UserCheck, Settings } from 'lucide-react';
+import { Users, Briefcase, MapPin, TrendingUp, CheckCircle, AlertTriangle, UserCheck, Settings, FileText, MessageSquare, Clock, Download, BarChart3, Shield } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { areaManagerAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
+import Input from '@/components/ui/Input';
 
 interface AreaManagerStats {
   totalWorkers: number;
@@ -25,6 +28,19 @@ const AreaManagerDashboard: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showEscalationModal, setShowEscalationModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [escalationReason, setEscalationReason] = useState('');
+  const [regionalSettings, setRegionalSettings] = useState({
+    workingHours: { start: '09:00', end: '17:00' },
+    language: 'amharic',
+    payRates: { minimum: 100, bonus: 50 },
+    allowances: { transport: 50, meal: 30 },
+    holidays: ['Ethiopian New Year', 'Timkat', 'Meskel'],
+  });
+  const [escalations, setEscalations] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -40,17 +56,25 @@ const AreaManagerDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, workersResponse, jobsResponse, applicationsResponse] = await Promise.all([
+      const [dashboardResponse, workersResponse, jobsResponse, applicationsResponse, performanceResponse] = await Promise.all([
         areaManagerAPI.getDashboard(),
         areaManagerAPI.getWorkers(),
         areaManagerAPI.getJobs(),
         areaManagerAPI.getApplications(),
+        areaManagerAPI.getPerformance(),
       ]);
 
       setStats(dashboardResponse.data);
-      setWorkers(workersResponse.data.workers || []);
-      setJobs(jobsResponse.data.jobs || []);
-      setApplications(applicationsResponse.data.applications || []);
+      setWorkers(workersResponse.data.data.workers || []);
+      setJobs(jobsResponse.data.data || []);
+      setApplications(applicationsResponse.data.data.applications || []);
+
+      // Mock escalations data
+      setEscalations([
+        { id: 1, jobId: 'job_001', type: 'dispute', description: 'Client-worker payment dispute', status: 'pending', createdAt: new Date().toISOString() },
+        { id: 2, jobId: 'job_002', type: 'delay', description: 'Project deadline extension request', status: 'resolved', createdAt: new Date().toISOString() },
+        { id: 3, jobId: 'job_003', type: 'quality', description: 'Work quality concerns raised', status: 'investigating', createdAt: new Date().toISOString() },
+      ]);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
@@ -79,6 +103,62 @@ const AreaManagerDashboard: React.FC = () => {
     }
   };
 
+  const handleEscalation = (job: any) => {
+    setSelectedJob(job);
+    setShowEscalationModal(true);
+  };
+
+  const submitEscalation = async () => {
+    try {
+      await areaManagerAPI.escalateJob(selectedJob._id, escalationReason);
+      setShowEscalationModal(false);
+      setEscalationReason('');
+      setSelectedJob(null);
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Failed to submit escalation:', error);
+    }
+  };
+
+  const updateRegionalSettings = async () => {
+    try {
+      await areaManagerAPI.updateRegionSettings(regionalSettings);
+      setShowSettingsModal(false);
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Failed to update regional settings:', error);
+    }
+  };
+
+  const generateRegionalReport = async () => {
+    try {
+      const reportData = {
+        type: 'regional_performance',
+        region: 'Addis Ababa', // This would come from user context
+        generatedAt: new Date().toISOString(),
+        stats: stats,
+        workers: workers,
+        jobs: jobs,
+        escalations: escalations,
+        settings: regionalSettings,
+      };
+
+      const dataStr = JSON.stringify(reportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+      const exportFileDefaultName = `regional-report-${new Date().toISOString().split('T')[0]}.json`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+
+      setShowReportModal(false);
+    } catch (error) {
+      console.error('Failed to generate report:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -96,10 +176,22 @@ const AreaManagerDashboard: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900">Area Manager Dashboard</h1>
             <p className="text-gray-600 mt-2">Manage your regional workers and jobs</p>
           </div>
-          <Button onClick={() => router.push('/area-manager/settings')}>
-            <Settings className="h-4 w-4 mr-2" />
-            Regional Settings
-          </Button>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => setShowReportModal(true)}>
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Generate Report
+            </Button>
+            {escalations.filter(e => e.status === 'pending').length > 0 && (
+              <Button variant="outline" onClick={() => setShowEscalationModal(true)}>
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Escalations ({escalations.filter(e => e.status === 'pending').length})
+              </Button>
+            )}
+            <Button onClick={() => setShowSettingsModal(true)}>
+              <Settings className="h-4 w-4 mr-2" />
+              Regional Settings
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -265,15 +357,26 @@ const AreaManagerDashboard: React.FC = () => {
                     <p className="text-xs text-gray-500">
                       Posted {new Date(job.createdAt).toLocaleDateString()}
                     </p>
-                    {(job.status === 'disputed' || job.status === 'revision_requested') && (
+                    <div className="flex space-x-2">
+                      {(job.status === 'disputed' || job.status === 'revision_requested' || job.status === 'in_progress') && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEscalation(job)}
+                        >
+                          <Shield className="h-3 w-3 mr-1" />
+                          Handle
+                        </Button>
+                      )}
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={() => handleEscalateJob(job._id)}
+                        variant="ghost"
+                        onClick={() => alert('Messaging feature coming soon!')}
                       >
-                        Escalate
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Contact
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -344,6 +447,372 @@ const AreaManagerDashboard: React.FC = () => {
             </table>
           </div>
         </Card>
+
+        {/* Regional Settings Modal */}
+        <Modal
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+          title="Regional Settings"
+          size="lg"
+        >
+          <div className="space-y-6">
+            {/* Working Hours */}
+            <Card className="bg-gray-50">
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Working Hours</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Start Time"
+                    type="time"
+                    value={regionalSettings.workingHours.start}
+                    onChange={(e) => setRegionalSettings({
+                      ...regionalSettings,
+                      workingHours: { ...regionalSettings.workingHours, start: e.target.value }
+                    })}
+                  />
+                  <Input
+                    label="End Time"
+                    type="time"
+                    value={regionalSettings.workingHours.end}
+                    onChange={(e) => setRegionalSettings({
+                      ...regionalSettings,
+                      workingHours: { ...regionalSettings.workingHours, end: e.target.value }
+                    })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Language Settings */}
+            <Card className="bg-gray-50">
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Language & Localization</h4>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Primary Language
+                  </label>
+                  <select
+                    value={regionalSettings.language}
+                    onChange={(e) => setRegionalSettings({ ...regionalSettings, language: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="amharic">Amharic</option>
+                    <option value="oromo">Oromo</option>
+                    <option value="english">English</option>
+                    <option value="tigrinya">Tigrinya</option>
+                  </select>
+                </div>
+              </div>
+            </Card>
+
+            {/* Pay Rates */}
+            <Card className="bg-gray-50">
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Pay Rates & Allowances</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Minimum Hourly Rate (ETB)"
+                    type="number"
+                    value={regionalSettings.payRates.minimum}
+                    onChange={(e) => setRegionalSettings({
+                      ...regionalSettings,
+                      payRates: { ...regionalSettings.payRates, minimum: parseInt(e.target.value) }
+                    })}
+                  />
+                  <Input
+                    label="Performance Bonus (ETB)"
+                    type="number"
+                    value={regionalSettings.payRates.bonus}
+                    onChange={(e) => setRegionalSettings({
+                      ...regionalSettings,
+                      payRates: { ...regionalSettings.payRates, bonus: parseInt(e.target.value) }
+                    })}
+                  />
+                  <Input
+                    label="Transport Allowance (ETB)"
+                    type="number"
+                    value={regionalSettings.allowances.transport}
+                    onChange={(e) => setRegionalSettings({
+                      ...regionalSettings,
+                      allowances: { ...regionalSettings.allowances, transport: parseInt(e.target.value) }
+                    })}
+                  />
+                  <Input
+                    label="Meal Allowance (ETB)"
+                    type="number"
+                    value={regionalSettings.allowances.meal}
+                    onChange={(e) => setRegionalSettings({
+                      ...regionalSettings,
+                      allowances: { ...regionalSettings.allowances, meal: parseInt(e.target.value) }
+                    })}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Regional Holidays */}
+            <Card className="bg-gray-50">
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Regional Holidays</h4>
+                <div className="space-y-2">
+                  {regionalSettings.holidays.map((holiday, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                      <span className="text-sm">{holiday}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          const newHolidays = regionalSettings.holidays.filter((_, i) => i !== index);
+                          setRegionalSettings({ ...regionalSettings, holidays: newHolidays });
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const newHoliday = prompt('Enter holiday name:');
+                      if (newHoliday) {
+                        setRegionalSettings({
+                          ...regionalSettings,
+                          holidays: [...regionalSettings.holidays, newHoliday]
+                        });
+                      }
+                    }}
+                  >
+                    Add Holiday
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
+            {/* Save Settings */}
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={() => setShowSettingsModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={updateRegionalSettings} className="flex-1">
+                <Settings className="h-4 w-4 mr-2" />
+                Save Settings
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Escalation Modal */}
+        <Modal
+          isOpen={showEscalationModal}
+          onClose={() => setShowEscalationModal(false)}
+          title="Handle Escalation"
+          size="md"
+        >
+          <div className="space-y-6">
+            {selectedJob ? (
+              <>
+                {/* Job Info */}
+                <Card className="bg-gray-50">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-gray-900">Job Details</h4>
+                    <p className="text-sm text-gray-600">Title: {selectedJob.title}</p>
+                    <p className="text-sm text-gray-600">Status: {selectedJob.status}</p>
+                    <p className="text-sm text-gray-600">Budget: ETB {selectedJob.budget?.toLocaleString()}</p>
+                  </div>
+                </Card>
+
+                {/* Escalation Reason */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Escalation Details
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={escalationReason}
+                    onChange={(e) => setEscalationReason(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Describe the issue and proposed resolution..."
+                  />
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-3 gap-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEscalationReason('Payment dispute - requesting mediation')}
+                  >
+                    Payment Issue
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEscalationReason('Quality concerns - work does not meet requirements')}
+                  >
+                    Quality Issue
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEscalationReason('Timeline delay - requesting deadline extension')}
+                  >
+                    Timeline Issue
+                  </Button>
+                </div>
+
+                {/* Submit Actions */}
+                <div className="flex space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowEscalationModal(false);
+                      setEscalationReason('');
+                      setSelectedJob(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={submitEscalation}
+                    disabled={!escalationReason.trim()}
+                    className="flex-1"
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Submit Escalation
+                  </Button>
+                </div>
+              </>
+            ) : (
+              /* Escalations List */
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Active Escalations</h4>
+                {escalations.length > 0 ? (
+                  escalations.map((escalation) => (
+                    <Card key={escalation.id} className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h5 className="font-medium text-gray-900">Job #{escalation.jobId}</h5>
+                          <p className="text-sm text-gray-600">{escalation.description}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(escalation.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={
+                            escalation.status === 'pending' ? 'warning' :
+                            escalation.status === 'resolved' ? 'success' :
+                            'info'
+                          }
+                        >
+                          {escalation.status}
+                        </Badge>
+                      </div>
+
+                      {escalation.status === 'pending' && (
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            Investigate
+                          </Button>
+                          <Button size="sm">
+                            Resolve
+                          </Button>
+                        </div>
+                      )}
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Escalations</h3>
+                    <p className="text-gray-600">All issues in your region are resolved!</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </Modal>
+
+        {/* Regional Report Modal */}
+        <Modal
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          title="Generate Regional Report"
+          size="md"
+        >
+          <div className="space-y-6">
+            {/* Report Preview */}
+            <Card className="bg-gray-50">
+              <div className="space-y-3">
+                <h4 className="font-medium text-gray-900">Regional Performance Summary</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Total Workers</p>
+                    <p className="font-semibold">{stats?.totalWorkers || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Verified Workers</p>
+                    <p className="font-semibold">{stats?.verifiedWorkers || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Regional Jobs</p>
+                    <p className="font-semibold">{stats?.regionalJobs || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Completed Jobs</p>
+                    <p className="font-semibold">{stats?.completedJobs || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Regional Revenue</p>
+                    <p className="font-semibold">ETB {stats?.regionalRevenue?.toLocaleString() || 0}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Active Escalations</p>
+                    <p className="font-semibold">{escalations.filter(e => e.status === 'pending').length}</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Report Features */}
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900">Report Includes:</h4>
+              <div className="grid grid-cols-1 gap-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-600">Worker performance metrics</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-600">Job completion rates</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-600">Regional revenue analysis</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-600">Escalation tracking</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-gray-600">Regional settings overview</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Generate Report */}
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={() => setShowReportModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={generateRegionalReport} className="flex-1">
+                <Download className="h-4 w-4 mr-2" />
+                Download Regional Report
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );

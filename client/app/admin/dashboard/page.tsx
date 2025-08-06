@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Briefcase, DollarSign, TrendingUp, CheckCircle, AlertTriangle, Clock, UserCheck } from 'lucide-react';
+import { Users, Briefcase, DollarSign, TrendingUp, CheckCircle, AlertTriangle, Clock, UserCheck, FileText, Settings, Eye, Download, BarChart3 } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
 
 interface DashboardStats {
   totalUsers: number;
@@ -24,6 +26,11 @@ const AdminDashboard: React.FC = () => {
   const [recentUsers, setRecentUsers] = useState<any[]>([]);
   const [recentJobs, setRecentJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [selectedDispute, setSelectedDispute] = useState<any>(null);
+  const [reportType, setReportType] = useState('revenue');
+  const [disputes, setDisputes] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -39,15 +46,17 @@ const AdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, usersResponse, jobsResponse] = await Promise.all([
+      const [dashboardResponse, usersResponse, jobsResponse, paymentsResponse] = await Promise.all([
         adminAPI.getDashboard(),
         adminAPI.getUsers({ limit: 5, sort: '-createdAt' }),
         adminAPI.getAllJobs(),
+        adminAPI.getPayments(),
       ]);
 
       setStats(dashboardResponse.data);
-      setRecentUsers(usersResponse.data.users || []);
-      setRecentJobs(jobsResponse.data.jobs?.slice(0, 5) || []);
+      setRecentUsers(usersResponse.data.data.recent.users || []);
+      setRecentJobs(jobsResponse.data.data?.slice(0, 5) || []);
+      setDisputes(paymentsResponse.data.payments?.filter((p: any) => p.status === 'disputed') || []);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
@@ -64,6 +73,44 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleResolveDispute = async (disputeId: string, resolution: string) => {
+    try {
+      await adminAPI.handlePaymentDispute(disputeId, resolution);
+      setShowDisputeModal(false);
+      setSelectedDispute(null);
+      fetchDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to resolve dispute:', error);
+    }
+  };
+
+  const generateReport = async () => {
+    try {
+      // In a real implementation, this would generate and download a report
+      const reportData = {
+        type: reportType,
+        generatedAt: new Date().toISOString(),
+        stats: stats,
+        users: recentUsers,
+        jobs: recentJobs,
+      };
+
+      const dataStr = JSON.stringify(reportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+      const exportFileDefaultName = `belimuno-${reportType}-report-${new Date().toISOString().split('T')[0]}.json`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+
+      setShowReportsModal(false);
+    } catch (error) {
+      console.error('Failed to generate report:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -77,8 +124,24 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Monitor and manage the entire Belimuno Jobs platform</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
+              <p className="text-gray-600 mt-2">Monitor and manage the entire Belimuno Jobs platform</p>
+            </div>
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={() => setShowReportsModal(true)}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Generate Reports
+              </Button>
+              {disputes.length > 0 && (
+                <Button variant="outline" onClick={() => setShowDisputeModal(true)}>
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Resolve Disputes ({disputes.length})
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -258,6 +321,112 @@ const AdminDashboard: React.FC = () => {
             </Button>
           </div>
         </Card>
+
+        {/* Reports Modal */}
+        <Modal
+          isOpen={showReportsModal}
+          onClose={() => setShowReportsModal(false)}
+          title="Generate Reports"
+          size="md"
+        >
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Report Type
+              </label>
+              <select
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="revenue">Revenue Report</option>
+                <option value="completion">Completion Rates</option>
+                <option value="users">User Analytics</option>
+                <option value="performance">Performance Metrics</option>
+              </select>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium text-gray-900 mb-2">Report Preview</h4>
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>• Total Users: {stats?.totalUsers || 0}</p>
+                <p>• Total Jobs: {stats?.totalJobs || 0}</p>
+                <p>• Total Revenue: ETB {stats?.totalRevenue?.toLocaleString() || 0}</p>
+                <p>• Monthly Growth: +{stats?.monthlyGrowth || 0}%</p>
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <Button variant="outline" onClick={() => setShowReportsModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={generateReport}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Report
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Disputes Modal */}
+        <Modal
+          isOpen={showDisputeModal}
+          onClose={() => setShowDisputeModal(false)}
+          title="Payment Disputes"
+          size="lg"
+        >
+          <div className="space-y-4">
+            {disputes.length > 0 ? (
+              disputes.map((dispute) => (
+                <Card key={dispute._id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        Payment ID: {dispute._id?.slice(-6) || 'Unknown'}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Amount: ETB {dispute.amount?.toLocaleString() || 0}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Date: {new Date(dispute.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge variant="danger">Disputed</Badge>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResolveDispute(dispute._id, 'refund_client')}
+                    >
+                      Refund Client
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleResolveDispute(dispute._id, 'pay_worker')}
+                    >
+                      Pay Worker
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleResolveDispute(dispute._id, 'investigate')}
+                    >
+                      Investigate
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Disputes</h3>
+                <p className="text-gray-600">All payments are processing smoothly!</p>
+              </div>
+            )}
+          </div>
+        </Modal>
       </div>
     </div>
   );

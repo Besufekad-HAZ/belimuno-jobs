@@ -28,12 +28,14 @@ const JobsPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await jobsAPI.getAll({
-        status: 'open',
+        status: 'posted',
         ...filters,
       });
-      setJobs(response.data.jobs || []);
+      // The API returns jobs in response.data.data, not response.data.jobs
+      setJobs(response.data.data || []);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
+      setJobs([]);
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,15 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Belimuno Brand Colors */
+  --belimuno-primary: #2E4B8B; /* Navy Blue from logo */
+  --belimuno-secondary: #4A90E2; /* Light Blue from logo */
+  --belimuno-accent: #5BB3E8; /* Sky Blue from logo */
+  --belimuno-purple: #7B68B6; /* Purple from company materials */
+  --belimuno-cyan: #2BBAE8; /* Cyan from company materials */
+  --belimuno-dark: #1A2B5C; /* Dark navy */
+  --belimuno-light: #E8F3FF; /* Light blue background */
 }
 
 @theme inline {

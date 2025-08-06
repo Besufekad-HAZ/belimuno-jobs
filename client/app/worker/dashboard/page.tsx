@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send } from 'lucide-react';
+import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { workerAPI, jobsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import Badge from '@/components/ui/Badge';
+import Modal from '@/components/ui/Modal';
+import ProgressBar from '@/components/ui/ProgressBar';
 
 interface WorkerStats {
   totalApplications: number;
@@ -26,6 +29,10 @@ const WorkerDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [applicationData, setApplicationData] = useState({ proposal: '', proposedBudget: '' });
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [earnings, setEarnings] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -41,17 +48,26 @@ const WorkerDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, jobsResponse, myJobsResponse, applicationsResponse] = await Promise.all([
+      const [dashboardResponse, jobsResponse, myJobsResponse, applicationsResponse, earningsResponse] = await Promise.all([
         workerAPI.getDashboard(),
         jobsAPI.getAll({ status: 'open', limit: 10 }),
         workerAPI.getJobs(),
         workerAPI.getApplications(),
+        workerAPI.getEarnings(),
       ]);
 
       setStats(dashboardResponse.data);
-      setAvailableJobs(jobsResponse.data.jobs || []);
-      setMyJobs(myJobsResponse.data.jobs || []);
-      setApplications(applicationsResponse.data.applications || []);
+      setAvailableJobs(jobsResponse.data.data || []);
+      setMyJobs(myJobsResponse.data.data || []);
+      setApplications(applicationsResponse.data.data.applications || []);
+      setEarnings(earningsResponse.data);
+
+      // Mock notifications for demo
+      setNotifications([
+        { id: 1, type: 'job_accepted', message: 'Your application for "Website Development" has been accepted!', time: '2 hours ago', read: false },
+        { id: 2, type: 'payment', message: 'Payment of ETB 5,000 has been processed', time: '1 day ago', read: false },
+        { id: 3, type: 'job_completed', message: 'Job "Mobile App Design" marked as completed', time: '3 days ago', read: true },
+      ]);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
@@ -92,8 +108,31 @@ const WorkerDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Worker Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage your jobs and track your earnings</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Worker Dashboard</h1>
+              <p className="text-gray-600 mt-2">Manage your jobs and track your earnings</p>
+            </div>
+            <div className="flex space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowNotificationsModal(true)}
+                className="relative"
+              >
+                <Bell className="h-4 w-4 mr-2" />
+                Notifications
+                {notifications.filter(n => !n.read).length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {notifications.filter(n => !n.read).length}
+                  </span>
+                )}
+              </Button>
+              <Button variant="outline" onClick={() => setShowWalletModal(true)}>
+                <Wallet className="h-4 w-4 mr-2" />
+                Wallet
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -204,18 +243,13 @@ const WorkerDashboard: React.FC = () => {
                       {job.status.replace('_', ' ')}
                     </span>
                   </div>
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span>Progress</span>
-                      <span>{job.progress || 0}%</span>
+                                      <div className="mb-3">
+                      <ProgressBar
+                        progress={job.progress || 0}
+                        size="md"
+                        color={job.progress >= 100 ? 'green' : job.progress >= 50 ? 'blue' : 'yellow'}
+                      />
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${job.progress || 0}%` }}
-                      ></div>
-                    </div>
-                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">
                       ETB {job.acceptedApplication?.proposedBudget?.toLocaleString()}
@@ -292,6 +326,127 @@ const WorkerDashboard: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Wallet Modal */}
+        <Modal
+          isOpen={showWalletModal}
+          onClose={() => setShowWalletModal(false)}
+          title="Worker Wallet"
+          size="md"
+        >
+          <div className="space-y-6">
+            {/* Wallet Balance */}
+            <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+              <div className="text-center">
+                <Wallet className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  ETB {stats?.totalEarnings?.toLocaleString() || '0'}
+                </h3>
+                <p className="text-green-600 font-medium">Available Balance</p>
+              </div>
+            </Card>
+
+            {/* Recent Earnings */}
+            <div>
+              <h4 className="font-medium text-gray-900 mb-3">Recent Earnings</h4>
+              <div className="space-y-3">
+                {earnings?.recentPayments?.slice(0, 5).map((payment: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">{payment.jobTitle || 'Job Payment'}</p>
+                      <p className="text-sm text-gray-500">{payment.date || 'Recently'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-green-600">+ETB {payment.amount?.toLocaleString() || '1,000'}</p>
+                      <Badge variant="success" size="sm">Completed</Badge>
+                    </div>
+                  </div>
+                )) || [
+                  // Mock data for demo
+                  { jobTitle: 'Website Development', amount: 5000, date: '2 days ago' },
+                  { jobTitle: 'Logo Design', amount: 1500, date: '1 week ago' },
+                  { jobTitle: 'Data Entry', amount: 800, date: '2 weeks ago' },
+                ].map((payment, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium text-gray-900">{payment.jobTitle}</p>
+                      <p className="text-sm text-gray-500">{payment.date}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-green-600">+ETB {payment.amount.toLocaleString()}</p>
+                      <Badge variant="success" size="sm">Completed</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Withdrawal Button */}
+            <div className="pt-4 border-t border-gray-200">
+              <Button className="w-full" onClick={() => alert('Withdrawal feature coming soon!')}>
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Withdraw Funds
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Notifications Modal */}
+        <Modal
+          isOpen={showNotificationsModal}
+          onClose={() => setShowNotificationsModal(false)}
+          title="Notifications"
+          size="md"
+        >
+          <div className="space-y-4">
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <Card key={notification.id} className={`p-4 ${!notification.read ? 'bg-blue-50 border-blue-200' : ''}`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <Bell className={`h-4 w-4 ${!notification.read ? 'text-blue-600' : 'text-gray-400'}`} />
+                        <Badge
+                          variant={
+                            notification.type === 'payment' ? 'success' :
+                            notification.type === 'job_accepted' ? 'primary' :
+                            'secondary'
+                          }
+                          size="sm"
+                        >
+                          {notification.type.replace('_', ' ')}
+                        </Badge>
+                        {!notification.read && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                      </div>
+                      <p className="text-gray-900 mb-1">{notification.message}</p>
+                      <p className="text-sm text-gray-500">{notification.time}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
+                <p className="text-gray-600">You're all caught up!</p>
+              </div>
+            )}
+
+            {notifications.filter(n => !n.read).length > 0 && (
+              <div className="pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setNotifications(notifications.map(n => ({ ...n, read: true })));
+                  }}
+                >
+                  Mark All as Read
+                </Button>
+              </div>
+            )}
+          </div>
+        </Modal>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { getStoredUser, getRoleDashboardPath } from '@/lib/auth';
 import { jobsAPI } from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import Badge from '@/components/ui/Badge';
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
@@ -26,11 +27,11 @@ export default function Home() {
     try {
       const [statsResponse, jobsResponse] = await Promise.all([
         jobsAPI.getStats(),
-        jobsAPI.getAll({ limit: 6, status: 'open' }),
+        jobsAPI.getAll({ limit: 6, status: 'posted' }),
       ]);
 
       setStats(statsResponse.data);
-      setFeaturedJobs(jobsResponse.data.jobs || []);
+      setFeaturedJobs(jobsResponse.data.data || []);
     } catch (error) {
       console.error('Failed to fetch public data:', error);
     }
@@ -45,25 +46,34 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Connect Talent with
-              <span className="text-blue-600"> Opportunities</span>
+              <span className="bg-gradient-to-r from-blue-800 to-cyan-600 bg-clip-text text-transparent"> Opportunities</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers
               with businesses across the country. Join thousands of professionals building their careers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" onClick={handleGetStarted}>
+                            <Button
+                size="lg"
+                onClick={handleGetStarted}
+                className="bg-gradient-to-r from-blue-800 to-cyan-600 hover:from-blue-900 hover:to-cyan-700 shadow-lg text-white"
+              >
                 {user ? 'Go to Dashboard' : 'Get Started'}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="lg" variant="outline" onClick={() => router.push('/jobs')}>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => router.push('/jobs')}
+                className="border-2 border-blue-800 text-blue-800 hover:bg-gradient-to-r hover:from-blue-800 hover:to-cyan-600 hover:text-white transition-all duration-300"
+              >
                 Browse Jobs
               </Button>
             </div>
@@ -122,15 +132,15 @@ export default function Home() {
                 <p className="text-gray-600 text-sm mb-4 line-clamp-3">{job.description}</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    <Badge variant="primary" size="sm">
                       {job.category}
-                    </span>
+                    </Badge>
                     <span className="text-xs text-gray-500">
                       Due: {new Date(job.deadline).toLocaleDateString()}
                     </span>
                   </div>
                   <Link href={user ? `/jobs/${job._id}` : '/login'}>
-                    <Button size="sm">
+                    <Button size="sm" className="shadow-sm">
                       {user ? 'Apply Now' : 'Login to Apply'}
                     </Button>
                   </Link>
@@ -180,7 +190,7 @@ export default function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-16 bg-blue-600">
+      <div className="py-16 bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Start Your Journey?
@@ -189,10 +199,10 @@ export default function Home() {
             Join thousands of professionals already using Belimuno Jobs to advance their careers
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="outline" className="bg-white text-blue-600 hover:bg-gray-50">
+            <Button size="lg" variant="outline" className="bg-white text-blue-800 hover:bg-blue-50 border-2 border-white">
               Find Workers
             </Button>
-            <Button size="lg" className="bg-blue-700 hover:bg-blue-800 text-white">
+            <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg">
               Find Work
             </Button>
           </div>
