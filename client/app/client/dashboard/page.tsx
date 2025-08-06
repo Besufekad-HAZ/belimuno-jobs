@@ -1,0 +1,324 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Plus, Briefcase, DollarSign, Clock, CheckCircle, Users, Star, Eye } from 'lucide-react';
+import { getStoredUser, hasRole } from '@/lib/auth';
+import { clientAPI } from '@/lib/api';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+
+interface ClientStats {
+  totalJobs: number;
+  activeJobs: number;
+  completedJobs: number;
+  totalSpent: number;
+  averageRating: number;
+  pendingApplications: number;
+}
+
+const ClientDashboard: React.FC = () => {
+  const [stats, setStats] = useState<ClientStats | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (!user || !hasRole(user, ['client'])) {
+      router.push('/login');
+      return;
+    }
+
+    fetchDashboardData();
+  }, [router]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [dashboardResponse, jobsResponse] = await Promise.all([
+        clientAPI.getDashboard(),
+        clientAPI.getJobs(),
+      ]);
+
+      setStats(dashboardResponse.data);
+      setJobs(jobsResponse.data.jobs || []);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAcceptApplication = async (jobId: string, applicationId: string) => {
+    try {
+      await clientAPI.acceptApplication(jobId, applicationId);
+      fetchDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to accept application:', error);
+    }
+  };
+
+  const handleRejectApplication = async (jobId: string, applicationId: string) => {
+    try {
+      await clientAPI.rejectApplication(jobId, applicationId);
+      fetchDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to reject application:', error);
+    }
+  };
+
+  const handleCompleteJob = async (jobId: string) => {
+    try {
+      await clientAPI.completeJob(jobId);
+      fetchDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to complete job:', error);
+    }
+  };
+
+  const handleRequestRevision = async (jobId: string) => {
+    const reason = prompt('Please provide a reason for the revision request:');
+    if (!reason) return;
+
+    try {
+      await clientAPI.requestRevision(jobId, reason);
+      fetchDashboardData(); // Refresh data
+    } catch (error) {
+      console.error('Failed to request revision:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Client Dashboard</h1>
+            <p className="text-gray-600 mt-2">Post jobs and manage your projects</p>
+          </div>
+          <Button onClick={() => router.push('/client/jobs/new')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Post New Job
+          </Button>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          <Card className="bg-blue-50 border-blue-200">
+            <div className="text-center">
+              <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <p className="text-sm font-medium text-blue-600">Total Jobs</p>
+              <p className="text-2xl font-bold text-blue-900">{stats?.totalJobs || 0}</p>
+            </div>
+          </Card>
+
+          <Card className="bg-yellow-50 border-yellow-200">
+            <div className="text-center">
+              <Clock className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
+              <p className="text-sm font-medium text-yellow-600">Active</p>
+              <p className="text-2xl font-bold text-yellow-900">{stats?.activeJobs || 0}</p>
+            </div>
+          </Card>
+
+          <Card className="bg-green-50 border-green-200">
+            <div className="text-center">
+              <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <p className="text-sm font-medium text-green-600">Completed</p>
+              <p className="text-2xl font-bold text-green-900">{stats?.completedJobs || 0}</p>
+            </div>
+          </Card>
+
+          <Card className="bg-purple-50 border-purple-200">
+            <div className="text-center">
+              <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <p className="text-sm font-medium text-purple-600">Total Spent</p>
+              <p className="text-xl font-bold text-purple-900">ETB {stats?.totalSpent?.toLocaleString() || 0}</p>
+            </div>
+          </Card>
+
+          <Card className="bg-indigo-50 border-indigo-200">
+            <div className="text-center">
+              <Star className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+              <p className="text-sm font-medium text-indigo-600">Avg Rating</p>
+              <p className="text-2xl font-bold text-indigo-900">{stats?.averageRating?.toFixed(1) || 'N/A'}</p>
+            </div>
+          </Card>
+
+          <Card className="bg-orange-50 border-orange-200">
+            <div className="text-center">
+              <Users className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+              <p className="text-sm font-medium text-orange-600">Applications</p>
+              <p className="text-2xl font-bold text-orange-900">{stats?.pendingApplications || 0}</p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Jobs List */}
+        <Card>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">My Jobs</h3>
+          </div>
+          <div className="space-y-4">
+            {jobs.map((job) => (
+              <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h4 className="font-medium text-gray-900">{job.title}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{job.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`px-3 py-1 text-sm rounded-full ${
+                      job.status === 'open' ? 'bg-green-100 text-green-800' :
+                      job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                      job.status === 'completed' ? 'bg-gray-100 text-gray-800' :
+                      job.status === 'awaiting_completion' ? 'bg-purple-100 text-purple-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {job.status.replace('_', ' ')}
+                    </span>
+                    <p className="text-sm font-semibold text-gray-900 mt-1">
+                      ETB {job.budget?.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span>Due: {new Date(job.deadline).toLocaleDateString()}</span>
+                    <span>Applications: {job.applications?.length || 0}</span>
+                    {job.assignedWorker && (
+                      <span>Worker: {job.assignedWorker.name}</span>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedJob(job)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Details
+                    </Button>
+                    {job.status === 'awaiting_completion' && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRequestRevision(job._id)}
+                        >
+                          Request Revision
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleCompleteJob(job._id)}
+                        >
+                          Approve & Complete
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Applications for open jobs */}
+                {job.status === 'open' && job.applications && job.applications.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h5 className="font-medium text-gray-900 mb-3">Applications ({job.applications.length})</h5>
+                    <div className="space-y-3">
+                      {job.applications.slice(0, 3).map((application: any) => (
+                        <div key={application._id} className="flex items-center justify-between p-3 bg-white rounded border">
+                          <div>
+                            <p className="font-medium text-gray-900">{application.worker.name}</p>
+                            <p className="text-sm text-gray-600">{application.proposal}</p>
+                            <p className="text-sm font-semibold text-green-600">
+                              ETB {application.proposedBudget?.toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRejectApplication(job._id, application._id)}
+                            >
+                              Reject
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAcceptApplication(job._id, application._id)}
+                            >
+                              Accept
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Job Details Modal */}
+        {selectedJob && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-96 overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">{selectedJob.title}</h3>
+                <Button variant="ghost" onClick={() => setSelectedJob(null)}>
+                  ×
+                </Button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-gray-900">Description</h4>
+                  <p className="text-gray-600">{selectedJob.description}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900">Budget</h4>
+                    <p className="text-gray-600">ETB {selectedJob.budget?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Deadline</h4>
+                    <p className="text-gray-600">{new Date(selectedJob.deadline).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Category</h4>
+                    <p className="text-gray-600">{selectedJob.category}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">Status</h4>
+                    <p className="text-gray-600 capitalize">{selectedJob.status.replace('_', ' ')}</p>
+                  </div>
+                </div>
+                {selectedJob.requirements && (
+                  <div>
+                    <h4 className="font-medium text-gray-900">Requirements</h4>
+                    <ul className="text-gray-600 list-disc list-inside">
+                      {selectedJob.requirements.map((req: string, index: number) => (
+                        <li key={index}>{req}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ClientDashboard;
