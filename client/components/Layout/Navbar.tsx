@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-900 via-cyan-700 to-cyan-500 shadow-md border-b border-cyan-200">
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 via-cyan-700 to-cyan-500 shadow-md border-b border-cyan-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-8">
@@ -88,13 +88,22 @@ const Navbar: React.FC = () => {
 
             {/* Navigation Links */}
             <nav className="hidden md:flex space-x-6">
-              <Link href="/" className="text-cyan-100 hover:text-white font-medium transition-colors">
+              <Link
+                href="/"
+                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+              >
                 Home
               </Link>
-              <Link href="/about" className="text-cyan-100 hover:text-white font-medium transition-colors">
+              <Link
+                href="/about"
+                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+              >
                 About
               </Link>
-              <Link href="/jobs" className="text-cyan-100 hover:text-white font-medium transition-colors">
+              <Link
+                href="/jobs"
+                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+              >
                 Jobs
               </Link>
             </nav>
