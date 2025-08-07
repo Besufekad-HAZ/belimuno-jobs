@@ -50,7 +50,27 @@ const RegisterPage: React.FC = () => {
 
     try {
       // Prepare registration data based on role
-      const registrationData: any = {
+      interface RegistrationProfile {
+        phone: string;
+        location: string;
+        bio: string;
+        skills?: string[];
+        experience?: number;
+        hourlyRate?: number;
+        company?: string;
+        industry?: string;
+        website?: string;
+      }
+
+      interface RegistrationData {
+        name: string;
+        email: string;
+        password: string;
+        role: string;
+        profile: RegistrationProfile;
+      }
+
+      const registrationData: RegistrationData = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -77,9 +97,17 @@ const RegisterPage: React.FC = () => {
       const { token, user } = response.data;
 
       setAuth(token, user);
+      // Notify all tabs and components
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('authChanged'));
+      }
       router.push(getRoleDashboardPath(user.role));
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Registration failed');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+        setError((error as { response: { data: { message: string } } }).response.data.message);
+      } else {
+        setError('Registration failed');
+      }
     } finally {
       setLoading(false);
     }

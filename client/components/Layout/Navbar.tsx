@@ -3,32 +3,49 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Bell, User, Menu, X, LogOut } from 'lucide-react';
+import { Bell, User as UserIcon, Menu, X, LogOut } from 'lucide-react';
 import { getStoredUser, clearAuth, getRoleDashboardPath } from '@/lib/auth';
 import { notificationsAPI } from '@/lib/api';
 import type { User } from '@/lib/auth';
 
+type Notification = {
+  id: string;
+  message: string;
+  read: boolean;
+  // Add other fields as needed based on your API response
+};
+
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
 
-  useEffect(() => {
-    const currentUser = getStoredUser();
-    setUser(currentUser);
 
-    if (currentUser) {
-      fetchNotifications();
-    }
+  // Listen for login/logout events across tabs and on auth changes
+  useEffect(() => {
+    const updateUser = () => {
+      const currentUser = getStoredUser();
+      setUser(currentUser);
+      if (currentUser) {
+        fetchNotifications();
+      }
+    };
+    updateUser();
+    window.addEventListener('authChanged', updateUser);
+    window.addEventListener('storage', updateUser);
+    return () => {
+      window.removeEventListener('authChanged', updateUser);
+      window.removeEventListener('storage', updateUser);
+    };
   }, []);
 
   const fetchNotifications = async () => {
     try {
       const response = await notificationsAPI.getAll();
       setNotifications(response.data.notifications);
-      setUnreadCount(response.data.notifications.filter((n: any) => !n.read).length);
+      setUnreadCount(response.data.notifications.filter((n: Notification) => !n.read).length);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -37,6 +54,8 @@ const Navbar: React.FC = () => {
   const handleLogout = () => {
     clearAuth();
     setUser(null);
+    // Notify all tabs
+    window.dispatchEvent(new Event('authChanged'));
     router.push('/login');
   };
 
@@ -56,25 +75,26 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-gradient-to-r from-blue-900 via-cyan-700 to-cyan-500 shadow-md border-b border-cyan-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-8">
-            <Link href="/" className="flex-shrink-0">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-800 to-cyan-600 bg-clip-text text-transparent">
+            <Link href="/" className="flex-shrink-0 flex items-center gap-2">
+              <img src="/globe.svg" alt="Belimuno Logo" className="h-8 w-8" />
+              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
                 Belimuno Jobs
               </h1>
             </Link>
 
             {/* Navigation Links */}
             <nav className="hidden md:flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-blue-800 transition-colors">
+              <Link href="/" className="text-cyan-100 hover:text-white font-medium transition-colors">
                 Home
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-blue-800 transition-colors">
+              <Link href="/about" className="text-cyan-100 hover:text-white font-medium transition-colors">
                 About
               </Link>
-              <Link href="/jobs" className="text-gray-700 hover:text-blue-800 transition-colors">
+              <Link href="/jobs" className="text-cyan-100 hover:text-white font-medium transition-colors">
                 Jobs
               </Link>
             </nav>
@@ -83,7 +103,7 @@ const Navbar: React.FC = () => {
           {user ? (
             <div className="flex items-center space-x-4">
               {/* Notifications */}
-              <button className="relative p-2 text-gray-400 hover:text-gray-500">
+              <button className="relative p-2 text-cyan-100 hover:text-white">
                 <Bell className="h-6 w-6" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -96,34 +116,34 @@ const Navbar: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="flex items-center space-x-2 p-2 text-gray-700 hover:text-gray-900"
+                  className="flex items-center space-x-2 p-2 text-cyan-100 hover:text-white"
                 >
-                  <User className="h-6 w-6" />
-                  <span className="hidden md:block">{user.name}</span>
-                  <span className="hidden md:block text-sm text-gray-500">
+                  <UserIcon className="h-6 w-6" />
+                  <span className="hidden md:block font-semibold">{user.name}</span>
+                  <span className="hidden md:block text-xs text-cyan-200">
                     ({getRoleDisplayName(user.role)})
                   </span>
                 </button>
 
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-cyan-200">
                     <Link
                       href={getRoleDashboardPath(user.role)}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Dashboard
                     </Link>
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Profile
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
                     >
                       <LogOut className="inline h-4 w-4 mr-2" />
                       Logout
@@ -136,13 +156,13 @@ const Navbar: React.FC = () => {
             <div className="flex items-center space-x-4">
               <Link
                 href="/login"
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium"
+                className="text-cyan-100 hover:text-white px-3 py-2 text-sm font-medium border border-cyan-300 rounded-md"
               >
                 Login
               </Link>
               <Link
                 href="/register"
-                className="bg-gradient-to-r from-blue-800 to-cyan-600 hover:from-blue-900 hover:to-cyan-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm"
+                className="bg-gradient-to-r from-cyan-600 to-blue-900 hover:from-cyan-700 hover:to-blue-950 text-white px-4 py-2 rounded-md text-sm font-semibold shadow-md border border-cyan-300"
               >
                 Register
               </Link>

@@ -35,9 +35,17 @@ const LoginPage: React.FC = () => {
       const { token, user } = response.data;
 
       setAuth(token, user);
+      // Notify all tabs and components
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('authChanged'));
+      }
       router.push(getRoleDashboardPath(user.role));
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Login failed');
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error && error.response && typeof error.response === 'object' && 'data' in error.response && error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
+        setError((error.response as { data: { message?: string } }).data.message || 'Login failed');
+      } else {
+        setError('Login failed');
+      }
     } finally {
       setLoading(false);
     }

@@ -14,9 +14,11 @@ const JobsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
+  const [regionFilter, setRegionFilter] = useState('');
   const [budgetRange, setBudgetRange] = useState({ min: '', max: '' });
   const [user, setUser] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const currentUser = getStoredUser();
@@ -24,15 +26,29 @@ const JobsPage: React.FC = () => {
     fetchJobs();
   }, []);
 
-  const fetchJobs = async (filters: any = {}) => {
+  const fetchJobs = async (filters: any = {}, pageNum = 1) => {
     try {
       setLoading(true);
-      const response = await jobsAPI.getAll({
+      // Map frontend filters to backend params
+      const params: any = {
         status: 'posted',
-        ...filters,
-      });
-      // The API returns jobs in response.data.data, not response.data.jobs
+        page: pageNum,
+        limit: 10,
+      };
+      if (filters.search) params.q = filters.search; // for /search endpoint
+      if (filters.category) params.category = filters.category;
+      if (filters.region) params.region = filters.region;
+      if (filters.budgetMin) params.budgetMin = filters.budgetMin;
+      if (filters.budgetMax) params.budgetMax = filters.budgetMax;
+
+      let response;
+      if (filters.search) {
+        response = await jobsAPI.search(filters.search, params);
+      } else {
+        response = await jobsAPI.getAll(params);
+      }
       setJobs(response.data.data || []);
+      setTotalPages(response.data.pagination?.pages || 1);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
       setJobs([]);
@@ -45,19 +61,20 @@ const JobsPage: React.FC = () => {
     const filters: any = {};
     if (searchQuery) filters.search = searchQuery;
     if (categoryFilter) filters.category = categoryFilter;
-    if (locationFilter) filters.location = locationFilter;
-    if (budgetRange.min) filters.minBudget = parseFloat(budgetRange.min);
-    if (budgetRange.max) filters.maxBudget = parseFloat(budgetRange.max);
-
-    fetchJobs(filters);
+    if (regionFilter) filters.region = regionFilter;
+    if (budgetRange.min) filters.budgetMin = parseFloat(budgetRange.min);
+    if (budgetRange.max) filters.budgetMax = parseFloat(budgetRange.max);
+    setPage(1);
+    fetchJobs(filters, 1);
   };
 
   const clearFilters = () => {
     setSearchQuery('');
     setCategoryFilter('');
-    setLocationFilter('');
+    setRegionFilter('');
     setBudgetRange({ min: '', max: '' });
-    fetchJobs();
+    setPage(1);
+    fetchJobs({}, 1);
   };
 
   const categories = [
@@ -121,11 +138,37 @@ const JobsPage: React.FC = () => {
               </div>
 
               <Input
-                label="Location"
-                placeholder="Enter location"
-                value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
+                label="Region"
+                placeholder="Enter region"
+                value={regionFilter}
+                onChange={(e) => setRegionFilter(e.target.value)}
               />
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-8 space-x-2">
+            <Button
+              variant="outline"
+              disabled={page === 1}
+              onClick={() => {
+                setPage(page - 1);
+                handleSearch();
+              }}
+            >
+              Previous
+            </Button>
+            <span className="px-4 py-2 text-gray-700">Page {page} of {totalPages}</span>
+            <Button
+              variant="outline"
+              disabled={page === totalPages}
+              onClick={() => {
+                setPage(page + 1);
+                handleSearch();
+              }}
+            >
+              Next
+            </Button>
+          </div>
+        )}
 
               <Input
                 label="Min Budget (ETB)"
