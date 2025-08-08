@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Bell, User as UserIcon, Menu, X, LogOut } from 'lucide-react';
+import { Bell, User as UserIcon, LogOut } from 'lucide-react';
 import { getStoredUser, clearAuth, getRoleDashboardPath } from '@/lib/auth';
 import { notificationsAPI } from '@/lib/api';
 import type { User } from '@/lib/auth';
@@ -18,9 +19,9 @@ type Notification = {
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
+  const menuRef = useRef<HTMLDivElement>(null);
 
 
   // Listen for login/logout events across tabs and on auth changes
@@ -40,12 +41,22 @@ const Navbar: React.FC = () => {
       window.removeEventListener('storage', updateUser);
     };
   }, []);
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
 
   const fetchNotifications = async () => {
     try {
       const response = await notificationsAPI.getAll();
-      setNotifications(response.data.notifications);
-      setUnreadCount(response.data.notifications.filter((n: Notification) => !n.read).length);
+      const notif = response.data.notifications;
+      setUnreadCount(notif.filter((n: Notification) => !n.read).length);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -80,7 +91,9 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2">
-              <img src="/globe.svg" alt="Belimuno Logo" className="h-8 w-8" />
+              <div className="relative h-12 w-12 mix-blend-luminosity border border-cyan-200 rounded-full bg-amber-50">
+                <Image src="/belimuno.png" alt="Belimuno Logo" layout="fill" objectFit="contain" />
+              </div>
               <h1 className="text-2xl font-extrabold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
                 Belimuno Jobs
               </h1>
@@ -122,7 +135,7 @@ const Navbar: React.FC = () => {
               </button>
 
               {/* User Menu */}
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="flex items-center space-x-2 p-2 text-cyan-100 hover:text-white"
@@ -135,7 +148,7 @@ const Navbar: React.FC = () => {
                 </button>
 
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-cyan-200">
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-cyan-200 transition ease-out duration-200">
                     <Link
                       href={getRoleDashboardPath(user.role)}
                       className="block px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
