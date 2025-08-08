@@ -80,7 +80,8 @@ const PaymentSchema = new mongoose.Schema({
 });
 
 // Indexes for performance
-PaymentSchema.index({ transactionId: 1 });
+// Indexes for performance (unique transactionId index created by unique:true option)
+// PaymentSchema.index({ transactionId: 1 });
 PaymentSchema.index({ chapaTransactionId: 1 });
 PaymentSchema.index({ job: 1 });
 PaymentSchema.index({ payer: 1, status: 1 });

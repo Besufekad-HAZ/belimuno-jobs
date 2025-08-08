@@ -167,10 +167,10 @@ const ReportSchema = new mongoose.Schema({
   version: { type: Number, default: 1 },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
-});
+}, { suppressReservedKeysWarning: true });
 
-// Indexes for performance
-ReportSchema.index({ reportId: 1 });
+// Indexes for performance (unique index for reportId via unique:true)
+// ReportSchema.index({ reportId: 1 });
 ReportSchema.index({ generatedBy: 1, createdAt: -1 });
 ReportSchema.index({ type: 1, category: 1 });
 ReportSchema.index({ 'scope.region': 1 });
