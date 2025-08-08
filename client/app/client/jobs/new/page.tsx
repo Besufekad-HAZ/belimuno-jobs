@@ -83,18 +83,51 @@ const NewJobPage: React.FC = () => {
     setError('');
 
     try {
+  const user = getStoredUser();
+  // Support region being either a populated object or an id string
+      const regionId = (() => {
+        if (!user) return undefined;
+        if (typeof user.region === 'string') return user.region;
+        if (user.region && typeof user.region === 'object') {
+          const maybeObj = user.region as unknown as { _id?: string };
+          return maybeObj._id;
+        }
+        return undefined;
+      })();
+      if (!regionId) {
+        setError('Your account has no region assigned. Please contact support or update your profile.');
+        setLoading(false);
+        return;
+      }
       const jobData = {
-        ...formData,
+        // Map frontend form fields to backend schema expectations
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
         budget: parseFloat(formData.budget),
         deadline: new Date(formData.deadline),
-        requirements: formData.requirements.filter(req => req.trim()),
-        skills: formData.skills.filter(skill => skill.trim()),
+        priority: formData.priority,
+        location: formData.location,
+        workType: formData.workType,
+        // Backend expects 'requiredSkills'
+        requiredSkills: formData.skills.filter(skill => skill.trim()),
+        // Provide region from user context
+        region: regionId,
+        // Immediately post the job (instead of leaving as draft)
+        status: 'posted',
+        // Keep requirements as tags if we want (map to tags) or drop if not used
+  tags: formData.requirements.filter(req => req.trim()),
       };
 
       await clientAPI.createJob(jobData);
       router.push('/client/dashboard');
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to create job');
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error && 'response' in error) {
+        const axiosErr = error as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Failed to create job');
+      } else {
+        setError('Failed to create job');
+      }
     } finally {
       setLoading(false);
     }
@@ -236,6 +269,22 @@ const NewJobPage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="e.g. Addis Ababa, Ethiopia"
               />
+              {/* Region (derived from user) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                <input
+                  type="text"
+                  disabled
+                  value={(() => {
+                    const u = getStoredUser();
+                    if (!u) return 'Not set';
+                    if (typeof u.region === 'string') return 'Assigned';
+                    return u.region?.name || 'Assigned';
+                  })()}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 placeholder-gray-400 focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-gray-500">Region is taken from your account and required to post a job.</p>
+              </div>
             </div>
 
             {/* Requirements */}

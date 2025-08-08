@@ -7,7 +7,6 @@ import { getStoredUser, hasRole } from '@/lib/auth';
 import { workerAPI, jobsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import ProgressBar from '@/components/ui/ProgressBar';
@@ -19,20 +18,24 @@ interface WorkerStats {
   totalEarnings: number;
   averageRating: number;
   pendingApplications: number;
+  name?: string;
+  pendingApplicationsList?: { _id: string; job?: { title?: string }; appliedAt: string }[];
 }
 
 const WorkerDashboard: React.FC = () => {
   const [stats, setStats] = useState<WorkerStats | null>(null);
-  const [availableJobs, setAvailableJobs] = useState<any[]>([]);
-  const [myJobs, setMyJobs] = useState<any[]>([]);
-  const [applications, setApplications] = useState<any[]>([]);
+  interface SimpleJob { _id: string; title: string; description: string; budget: number; deadline: string; category?: string; region?: { name?: string }; status?: string; progress?: number; acceptedApplication?: { proposedBudget?: number }; applicationCount?: number; }
+  interface NotificationItem { id: number|string; type: string; message: string; time: string; read: boolean; }
+  interface EarningsData { recentPayments?: { jobTitle?: string; amount?: number; date?: string }[] }
+  const [availableJobs, setAvailableJobs] = useState<SimpleJob[]>([]);
+  const [myJobs, setMyJobs] = useState<SimpleJob[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
-  const [applicationData, setApplicationData] = useState({ proposal: '', proposedBudget: '' });
+  const [selectedJob, setSelectedJob] = useState<SimpleJob | null>(null);
+  const [applicationData, setApplicationData] = useState<{ proposal: string; proposedBudget: string; estimatedDuration?: string }>({ proposal: '', proposedBudget: '' });
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [earnings, setEarnings] = useState<any>(null);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -48,7 +51,7 @@ const WorkerDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, jobsResponse, myJobsResponse, applicationsResponse, earningsResponse] = await Promise.all([
+      const [dashboardResponse, jobsResponse, myJobsResponse, , earningsResponse] = await Promise.all([
         workerAPI.getDashboard(),
         jobsAPI.getAll({ status: 'open', limit: 10 }),
         workerAPI.getJobs(),
@@ -56,10 +59,9 @@ const WorkerDashboard: React.FC = () => {
         workerAPI.getEarnings(),
       ]);
 
-      setStats(dashboardResponse.data);
-      setAvailableJobs(jobsResponse.data.data || []);
-      setMyJobs(myJobsResponse.data.data || []);
-      setApplications(applicationsResponse.data.data.applications || []);
+  setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
+  setAvailableJobs(jobsResponse.data.data || []);
+  setMyJobs(myJobsResponse.data.data || []);
       setEarnings(earningsResponse.data);
 
       // Mock notifications for demo
@@ -141,7 +143,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-blue-600">Active Jobs</p>
-              <p className="text-2xl font-bold text-blue-900">{stats?.activeJobs || 0}</p>
+              <p className="text-2xl font-bold text-blue-900">{stats?.activeJobs ?? 0}</p>
             </div>
           </Card>
 
@@ -149,7 +151,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-green-600">Completed</p>
-              <p className="text-2xl font-bold text-green-900">{stats?.completedJobs || 0}</p>
+              <p className="text-2xl font-bold text-green-900">{stats?.completedJobs ?? 0}</p>
             </div>
           </Card>
 
@@ -157,7 +159,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <DollarSign className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-yellow-600">Total Earnings</p>
-              <p className="text-xl font-bold text-yellow-900">ETB {stats?.totalEarnings?.toLocaleString() || 0}</p>
+              <p className="text-xl font-bold text-yellow-900">ETB {(stats?.totalEarnings || 0).toLocaleString()}</p>
             </div>
           </Card>
 
@@ -165,7 +167,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <Star className="h-8 w-8 text-purple-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-purple-600">Rating</p>
-              <p className="text-2xl font-bold text-purple-900">{stats?.averageRating?.toFixed(1) || 'N/A'}</p>
+              <p className="text-2xl font-bold text-purple-900">{stats?.averageRating !== undefined ? stats.averageRating.toFixed(1) : 'N/A'}</p>
             </div>
           </Card>
 
@@ -173,7 +175,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <Send className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-indigo-600">Applications</p>
-              <p className="text-2xl font-bold text-indigo-900">{stats?.totalApplications || 0}</p>
+              <p className="text-2xl font-bold text-indigo-900">{stats?.totalApplications ?? 0}</p>
             </div>
           </Card>
 
@@ -181,7 +183,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <Clock className="h-8 w-8 text-orange-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-orange-600">Pending</p>
-              <p className="text-2xl font-bold text-orange-900">{stats?.pendingApplications || 0}</p>
+              <p className="text-2xl font-bold text-orange-900">{stats?.pendingApplications ?? 0}</p>
             </div>
           </Card>
         </div>
@@ -200,9 +202,14 @@ const WorkerDashboard: React.FC = () => {
                 <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-gray-900">{job.title}</h4>
-                    <span className="text-sm font-semibold text-green-600">
-                      ETB {job.budget?.toLocaleString()}
-                    </span>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-green-600 block">
+                          ETB {job.budget?.toLocaleString()}
+                        </span>
+                        { job.applicationCount !== undefined && (
+                          <span className="text-[11px] text-gray-500">{job.applicationCount} apps</span>
+                        )}
+                      </div>
                   </div>
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">{job.description}</p>
                   <div className="flex items-center justify-between">
@@ -232,7 +239,26 @@ const WorkerDashboard: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900">My Active Jobs</h3>
             </div>
             <div className="space-y-4 max-h-96 overflow-y-auto">
-              {myJobs.filter(job => ['in_progress', 'revision_requested'].includes(job.status)).map((job) => (
+          {/* Pending Applications Snapshot */}
+          <Card className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Pending Applications</h3>
+            {stats?.pendingApplicationsList?.length ? (
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {stats.pendingApplicationsList.map((app) => (
+                  <div key={app._id} className="p-3 bg-gray-50 rounded border flex items-center justify-between">
+                    <div className="mr-4">
+                      <p className="text-sm font-medium text-gray-900 line-clamp-1">{app.job?.title || 'Job'}</p>
+                      <p className="text-xs text-gray-500">Applied {new Date(app.appliedAt).toLocaleDateString()}</p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Pending</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No pending applications.</p>
+            )}
+          </Card>
+              {myJobs.filter(job => job.status && ['in_progress', 'revision_requested'].includes(job.status)).map((job) => (
                 <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-gray-900">{job.title}</h4>
@@ -240,14 +266,14 @@ const WorkerDashboard: React.FC = () => {
                       job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                       'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {job.status.replace('_', ' ')}
+                      {job.status ? job.status.replace('_', ' ') : ''}
                     </span>
                   </div>
                                       <div className="mb-3">
                       <ProgressBar
                         progress={job.progress || 0}
                         size="md"
-                        color={job.progress >= 100 ? 'green' : job.progress >= 50 ? 'blue' : 'yellow'}
+                        color={(job.progress || 0) >= 100 ? 'green' : (job.progress || 0) >= 50 ? 'blue' : 'yellow'}
                       />
                     </div>
                   <div className="flex items-center justify-between">
@@ -280,49 +306,122 @@ const WorkerDashboard: React.FC = () => {
           </Card>
         </div>
 
-        {/* Application Modal */}
+        {/* Enhanced Application Modal */}
         {selectedJob && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <h3 className="text-lg font-semibold mb-4">Apply to: {selectedJob.title}</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Proposal
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={applicationData.proposal}
-                    onChange={(e) => setApplicationData({ ...applicationData, proposal: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe how you'll complete this job..."
-                  />
-                </div>
-                <Input
-                  label="Proposed Budget (ETB)"
-                  type="number"
-                  value={applicationData.proposedBudget}
-                  onChange={(e) => setApplicationData({ ...applicationData, proposedBudget: e.target.value })}
-                  placeholder="Enter your proposed budget"
-                />
-                <div className="flex space-x-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedJob(null);
-                      setApplicationData({ proposal: '', proposedBudget: '' });
-                    }}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedJob(null)} />
+            <div className="relative w-full max-w-lg animate-[fadeIn_0.25s_ease]">
+              <Card className="p-0 overflow-hidden shadow-2xl border border-gray-200">
+                {/* Header */}
+                <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex items-start justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide opacity-80 mb-1">Apply to Job</p>
+                    <h3 className="text-lg font-semibold leading-snug line-clamp-2 pr-4">{selectedJob.title}</h3>
+                  </div>
+                  <button
+                    onClick={() => setSelectedJob(null)}
+                    className="text-white/70 hover:text-white transition-colors"
+                    aria-label="Close application form"
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => handleApplyToJob(selectedJob._id)}
-                    disabled={!applicationData.proposal || !applicationData.proposedBudget}
-                  >
-                    Submit Application
-                  </Button>
+                    ×
+                  </button>
                 </div>
-              </div>
+
+                {/* Job Quick Summary */}
+                <div className="px-6 pt-5 pb-4 bg-gray-50 grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Budget</p>
+                    <p className="font-medium text-gray-900">ETB {selectedJob.budget?.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Deadline</p>
+                    <p className="font-medium text-gray-900">{new Date(selectedJob.deadline).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Category</p>
+                    <p className="font-medium text-gray-900">{selectedJob.category}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Region</p>
+                    <p className="font-medium text-gray-900">{selectedJob.region?.name || '—'}</p>
+                  </div>
+                </div>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleApplyToJob(selectedJob._id);
+                  }}
+                  className="px-6 pb-6 pt-2 space-y-5"
+                >
+                  {/* Proposal */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium text-gray-700">Proposal</label>
+                      <span className={`text-xs ${applicationData.proposal.length > 1000 ? 'text-red-500' : 'text-gray-400'}`}>{applicationData.proposal.length}/1000</span>
+                    </div>
+                    <textarea
+                      rows={5}
+                      maxLength={1200}
+                      required
+                      value={applicationData.proposal}
+                      onChange={(e) => setApplicationData({ ...applicationData, proposal: e.target.value })}
+                      className="w-full resize-none rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Explain your approach, relevant experience, deliverables and timeline..."
+                    />
+                    <p className="mt-1 text-xs text-gray-500">A clear, concise proposal improves acceptance chances.</p>
+                  </div>
+
+                  {/* Budget & Duration */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Proposed Budget (ETB)</label>
+                      <input
+                        type="number"
+                        min={1}
+                        required
+                        value={applicationData.proposedBudget}
+                        onChange={(e) => setApplicationData({ ...applicationData, proposedBudget: e.target.value })}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="e.g. 4500"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">Client budget: ETB {selectedJob.budget?.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Duration</label>
+                      <input
+                        type="text"
+                        value={applicationData.estimatedDuration || ''}
+                        onChange={(e) => setApplicationData({ ...applicationData, estimatedDuration: e.target.value })}
+                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="e.g. 5 days"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">Optional – helps the client assess timeline.</p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedJob(null);
+                        setApplicationData({ proposal: '', proposedBudget: '' });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={!applicationData.proposal || !applicationData.proposedBudget}
+                      className="min-w-[160px]"
+                    >
+                      Submit Application
+                    </Button>
+                  </div>
+                </form>
+              </Card>
             </div>
           </div>
         )}
@@ -350,7 +449,7 @@ const WorkerDashboard: React.FC = () => {
             <div>
               <h4 className="font-medium text-gray-900 mb-3">Recent Earnings</h4>
               <div className="space-y-3">
-                {earnings?.recentPayments?.slice(0, 5).map((payment: any, index: number) => (
+                {earnings?.recentPayments?.slice(0, 5).map((payment: { jobTitle?: string; amount?: number; date?: string }, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900">{payment.jobTitle || 'Job Payment'}</p>
@@ -428,7 +527,7 @@ const WorkerDashboard: React.FC = () => {
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
-                <p className="text-gray-600">You're all caught up!</p>
+                <p className="text-gray-600">You&apos;re all caught up!</p>
               </div>
             )}
 

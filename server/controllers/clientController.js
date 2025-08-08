@@ -31,17 +31,29 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(10);
 
+  // Pending applications across open/posted jobs
+  const pendingApplications = await Application.countDocuments({
+    job: { $in: jobs.map(j => j._id) },
+    status: 'pending'
+  });
+
+  // Average rating client has given (clientReview ratings)
+  const ratings = completedJobs
+    .map(j => j.review?.clientReview?.rating)
+    .filter(r => typeof r === 'number');
+  const averageRating = ratings.length ? (ratings.reduce((a, b) => a + b, 0) / ratings.length) : 0;
+
   const dashboardData = {
-    statistics: {
-      totalJobs: jobs.length,
-      activeJobs: activeJobs.length,
-      completedJobs: completedJobs.length,
-      totalSpent,
-      averageJobValue: jobs.length > 0 ? totalSpent / jobs.length : 0
-    },
+    totalJobs: jobs.length,
+    activeJobs: activeJobs.length,
+    completedJobs: completedJobs.length,
+    totalSpent,
+    averageJobValue: jobs.length > 0 ? totalSpent / jobs.length : 0,
+    averageRating,
+    pendingApplications,
     recentApplications,
     notifications,
-    activeJobs: activeJobs.slice(0, 5) // Latest 5 active jobs
+    activeJobs: activeJobs.slice(0, 5)
   };
 
   res.status(200).json({
@@ -68,18 +80,44 @@ exports.getJobs = asyncHandler(async (req, res) => {
     .limit(limit * 1)
     .skip((page - 1) * limit);
 
+  // Fetch application counts & optionally sample applications
+  const jobIds = jobs.map(j => j._id);
+  const applications = await Application.find({ job: { $in: jobIds } })
+    .populate('worker', 'name profile.avatar workerProfile.rating')
+    .sort({ appliedAt: -1 });
+  const appsByJob = applications.reduce((acc, app) => {
+    acc[app.job.toString()] = acc[app.job.toString()] || [];
+    acc[app.job.toString()].push(app);
+    return acc;
+  }, {});
+  const enriched = jobs.map(j => {
+    const list = appsByJob[j._id.toString()] || [];
+    return {
+      ...j.toObject(),
+      applicationCount: list.length,
+      recentApplications: list.slice(0, 3).map(a => ({
+        _id: a._id,
+        proposal: a.proposal,
+        proposedBudget: a.proposedBudget,
+        status: a.status,
+        appliedAt: a.appliedAt,
+        worker: a.worker
+      }))
+    };
+  });
+
   const total = await Job.countDocuments(query);
 
   res.status(200).json({
     success: true,
-    count: jobs.length,
+  count: enriched.length,
     total,
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
       pages: Math.ceil(total / limit)
     },
-    data: jobs
+  data: enriched
   });
 });
 
@@ -145,7 +183,8 @@ exports.getJob = asyncHandler(async (req, res) => {
   })
     .populate('worker', 'name profile workerProfile')
     .populate('region', 'name')
-    .populate('areaManager', 'name profile');
+  .populate('areaManager', 'name profile')
+  .populate('messages.sender', 'name role');
 
   if (!job) {
     return res.status(404).json({
@@ -166,6 +205,47 @@ exports.getJob = asyncHandler(async (req, res) => {
       applications
     }
   });
+});
+
+// @desc    Get messages for a job
+// @route   GET /api/client/jobs/:id/messages
+// @access  Private/Client
+exports.getJobMessages = asyncHandler(async (req, res) => {
+  const job = await Job.findOne({ _id: req.params.id, client: req.user._id })
+    .populate('messages.sender', 'name role');
+
+  if (!job) {
+    return res.status(404).json({ success: false, message: 'Job not found' });
+  }
+
+  res.status(200).json({ success: true, data: job.messages || [] });
+});
+
+// @desc    Send message in a job thread
+// @route   POST /api/client/jobs/:id/messages
+// @access  Private/Client
+exports.sendJobMessage = asyncHandler(async (req, res) => {
+  const { content } = req.body;
+  if (!content || !content.trim()) {
+    return res.status(400).json({ success: false, message: 'Message content required' });
+  }
+
+  const job = await Job.findOne({ _id: req.params.id, client: req.user._id });
+  if (!job) {
+    return res.status(404).json({ success: false, message: 'Job not found' });
+  }
+
+  const message = {
+    sender: req.user._id,
+    content: content.trim(),
+    sentAt: new Date(),
+    attachments: []
+  };
+  job.messages.push(message);
+  await job.save();
+  await job.populate('messages.sender', 'name role');
+
+  res.status(201).json({ success: true, data: job.messages[job.messages.length - 1] });
 });
 
 // @desc    Update job

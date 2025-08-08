@@ -9,7 +9,9 @@ const {
   rejectApplication,
   markJobCompleted,
   requestRevision,
-  getPayments
+  getPayments,
+  getJobMessages,
+  sendJobMessage
 } = require('../controllers/clientController');
 const { protect } = require('../middleware/auth');
 const { requireClient } = require('../middleware/roleCheck');
@@ -27,6 +29,8 @@ router.get('/jobs', getJobs);
 router.post('/jobs', createJob);
 router.get('/jobs/:id', getJob);
 router.put('/jobs/:id', updateJob);
+router.get('/jobs/:id/messages', getJobMessages);
+router.post('/jobs/:id/messages', sendJobMessage);
 
 // Application management
 router.put('/jobs/:jobId/applications/:applicationId/accept', acceptApplication);

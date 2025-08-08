@@ -5,6 +5,12 @@ export interface User {
   name: string;
   email: string;
   role: 'super_admin' | 'area_manager' | 'worker' | 'client';
+  // Region can be populated (object) or just an id string depending on auth response
+  region?: {
+    _id: string;
+    name?: string;
+    code?: string;
+  } | string;
   profile?: {
     bio?: string;
     skills?: string[];

@@ -37,27 +37,26 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .limit(10);
 
+  // Application stats
+  const totalApplications = await Application.countDocuments({ worker: worker._id });
+  const pendingApplicationCount = await Application.countDocuments({ worker: worker._id, status: 'pending' });
+
+  const averageRating = worker.workerProfile?.rating || 0; // placeholder if rating aggregated differently later
+
   const dashboardData = {
-    worker: {
-      name: worker.name,
-      rating: worker.workerProfile?.rating || 0,
-      completedJobs: worker.workerProfile?.completedJobs || 0,
-      totalEarnings,
-      isVerified: worker.isVerified
-    },
-    jobs: {
-      active: activeJobs,
-      recent: jobs.slice(0, 5)
-    },
-    applications: pendingApplications,
-    notifications,
-    stats: {
-      totalJobs: jobs.length,
-      activeJobs: activeJobs.length,
-      completedJobs: completedJobs.length,
-      totalEarnings,
-      pendingApplications: pendingApplications.length
-    }
+    name: worker.name,
+    averageRating,
+    completedJobs: worker.workerProfile?.completedJobs || 0,
+    totalEarnings,
+    isVerified: worker.isVerified,
+    activeJobs: activeJobs.length,
+    totalJobs: jobs.length,
+    totalApplications,
+    pendingApplications: pendingApplicationCount,
+    recentJobs: jobs.slice(0, 5),
+    activeJobDetails: activeJobs,
+    pendingApplicationsList: pendingApplications,
+    notifications
   };
 
   res.status(200).json({
