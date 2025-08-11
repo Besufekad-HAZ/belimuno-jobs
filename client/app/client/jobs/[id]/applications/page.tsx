@@ -12,6 +12,7 @@ import { Search, Filter, User, Check, X, MessageCircle } from 'lucide-react';
 interface WorkerInfo { _id: string; name: string; profile?: { avatar?: string }; workerProfile?: { rating?: number; skills?: string[] } }
 interface Application { _id: string; proposal: string; proposedBudget: number; status: string; appliedAt: string; worker: WorkerInfo }
 interface JobDetail { _id: string; title: string; status: string; budget: number; deadline: string; description: string; }
+interface ChatMessage { content: string; sender?: { name?: string; role?: string }; sentAt: string }
 
 const ApplicationsPage: React.FC = () => {
   const router = useRouter();
@@ -24,7 +25,7 @@ const ApplicationsPage: React.FC = () => {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [messageModal, setMessageModal] = useState(false);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -79,8 +80,8 @@ const ApplicationsPage: React.FC = () => {
 
       <Card className="p-4 flex flex-wrap gap-4 items-center">
         <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-gray-500"/>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search proposals or workers" className="border rounded px-2 py-1 text-sm"/>
+          <Search className="h-4 w-4 text-gray-600"/>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search proposals or workers" className="border rounded px-2 py-1 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"/>
         </div>
         <div className="flex gap-2 items-center">
           <Filter className="h-4 w-4 text-gray-500"/>
@@ -156,17 +157,17 @@ const ApplicationsPage: React.FC = () => {
       <Modal isOpen={messageModal} onClose={()=>setMessageModal(false)} title="Job Messages" size="lg">
         <div className="flex flex-col h-96">
           <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-            {chatMessages.map((m:any,i:number)=>(
-              <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='client'?'bg-blue-50 ml-auto':'bg-gray-100'}`}>
+              {chatMessages.map((m,i:number)=>(
+              <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='client'?'bg-blue-50 ml-auto border border-blue-200':'bg-gray-100 border border-gray-200'}`}>
                 <p className="font-medium mb-1">{m.sender?.name||'You'}</p>
-                <p className="whitespace-pre-wrap text-gray-700">{m.content}</p>
+                <p className="whitespace-pre-wrap text-gray-800">{m.content}</p>
                 <p className="mt-1 text-[10px] text-gray-400">{new Date(m.sentAt).toLocaleTimeString()}</p>
               </div>
             ))}
             {chatMessages.length===0 && <div className="text-xs text-gray-400">No messages yet. Start the conversation.</div>}
           </div>
           <div className="mt-3 flex gap-2">
-            <input value={newMessage} onChange={e=>setNewMessage(e.target.value)} placeholder="Type a message" className="flex-1 border rounded px-3 py-2 text-sm"/>
+            <input value={newMessage} onChange={e=>setNewMessage(e.target.value)} placeholder="Type a message" className="flex-1 border rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"/>
             <Button disabled={sending} onClick={sendMessage}>Send</Button>
           </div>
         </div>

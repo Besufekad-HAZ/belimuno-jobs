@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Briefcase, DollarSign, TrendingUp, CheckCircle, AlertTriangle, Clock, UserCheck, FileText, Settings, Eye, Download, BarChart3 } from 'lucide-react';
+import { Users, Briefcase, DollarSign, TrendingUp, CheckCircle, AlertTriangle, Clock, UserCheck, Download, BarChart3 } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -21,16 +21,19 @@ interface DashboardStats {
   monthlyGrowth: number;
 }
 
+interface RecentUser { _id: string; name: string; email: string; role: string; isVerified?: boolean; profile?: { verified?: boolean } }
+interface RecentJob { _id: string; title: string; status: string; budget?: number; createdAt: string }
+interface PaymentDispute { _id: string; amount?: number; status: string; createdAt: string }
+
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentUsers, setRecentUsers] = useState<any[]>([]);
-  const [recentJobs, setRecentJobs] = useState<any[]>([]);
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
+  const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
-  const [selectedDispute, setSelectedDispute] = useState<any>(null);
   const [reportType, setReportType] = useState('revenue');
-  const [disputes, setDisputes] = useState<any[]>([]);
+  const [disputes, setDisputes] = useState<PaymentDispute[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,10 +56,21 @@ const AdminDashboard: React.FC = () => {
         adminAPI.getPayments(),
       ]);
 
-      setStats(dashboardResponse.data);
-      setRecentUsers(usersResponse.data.data.recent.users || []);
+      const overview = dashboardResponse.data?.data?.overview || dashboardResponse.data?.overview || null;
+      setStats(overview ? {
+        totalUsers: overview.totalUsers,
+        totalJobs: overview.totalJobs,
+        totalRevenue: overview.totalRevenue,
+        activeJobs: overview.activeJobs,
+        completedJobs: overview.completedJobs,
+        pendingVerifications: overview.pendingVerifications,
+        disputedPayments: 0,
+        monthlyGrowth: 0,
+      } : null);
+      setRecentUsers(usersResponse.data.data || []);
       setRecentJobs(jobsResponse.data.data?.slice(0, 5) || []);
-      setDisputes(paymentsResponse.data.payments?.filter((p: any) => p.status === 'disputed') || []);
+  const payments: PaymentDispute[] = (paymentsResponse.data.data || paymentsResponse.data.payments || []) as PaymentDispute[];
+  setDisputes(payments.filter((p) => p.status === 'disputed'));
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
@@ -73,11 +87,17 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleResolveDispute = async (disputeId: string, resolution: string) => {
+  const handleResolveDispute = async (disputeId: string, action: 'refund' | 'release' | 'partial' | 'investigate') => {
     try {
-      await adminAPI.handlePaymentDispute(disputeId, resolution);
+      if (action === 'investigate') {
+        // no-op for now, could open a detail modal
+        setShowDisputeModal(false);
+        return;
+      }
+      const resolution = action === 'refund' ? 'Refund to client' : action === 'release' ? 'Release payment to worker' : 'Partial refund to client';
+      await adminAPI.handlePaymentDispute(disputeId, action, resolution);
       setShowDisputeModal(false);
-      setSelectedDispute(null);
+
       fetchDashboardData(); // Refresh data
     } catch (error) {
       console.error('Failed to resolve dispute:', error);
@@ -245,7 +265,7 @@ const AdminDashboard: React.FC = () => {
                     <p className="text-sm text-gray-500">{user.email}</p>
                     <p className="text-xs text-gray-400 capitalize">{user.role.replace('_', ' ')}</p>
                   </div>
-                  {user.role === 'worker' && !user.profile?.verified && (
+                  {user.role === 'worker' && !user.isVerified && (
                     <Button
                       size="sm"
                       onClick={() => handleVerifyWorker(user._id)}
@@ -273,7 +293,7 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-gray-900 truncate">{job.title}</h4>
                     <span className={`px-2 py-1 text-xs rounded-full ${
-                      job.status === 'open' ? 'bg-green-100 text-green-800' :
+                      job.status === 'posted' ? 'bg-green-100 text-green-800' :
                       job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                       job.status === 'completed' ? 'bg-gray-100 text-gray-800' :
                       'bg-yellow-100 text-yellow-800'
@@ -398,14 +418,14 @@ const AdminDashboard: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleResolveDispute(dispute._id, 'refund_client')}
+                      onClick={() => handleResolveDispute(dispute._id, 'refund')}
                     >
                       Refund Client
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleResolveDispute(dispute._id, 'pay_worker')}
+                      onClick={() => handleResolveDispute(dispute._id, 'release')}
                     >
                       Pay Worker
                     </Button>

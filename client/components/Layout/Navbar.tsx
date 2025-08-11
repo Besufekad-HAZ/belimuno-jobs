@@ -92,7 +92,13 @@ const Navbar: React.FC = () => {
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2">
               <div className="relative h-12 w-12 mix-blend-luminosity border border-cyan-200 rounded-full bg-amber-50">
-                <Image src="/belimuno.png" alt="Belimuno Logo" layout="fill" objectFit="contain" />
+                <Image
+                  src="/belimuno.png"
+                  alt="Belimuno Logo"
+                  fill
+                  sizes="48px"
+                  className="object-contain"
+                />
               </div>
               <h1 className="text-2xl font-extrabold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
                 Belimuno Jobs

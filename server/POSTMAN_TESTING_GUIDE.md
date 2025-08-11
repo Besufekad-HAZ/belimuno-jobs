@@ -421,12 +421,12 @@ npm start
 ### Test Users:
 | Role | Email | Password |
 |------|--------|----------|
-| Super Admin | admin@belimuno.com | password123 |
-| Area Manager | manager.aa@belimuno.com | password123 |
-| Worker 1 | worker1@belimuno.com | password123 |
-| Worker 2 | worker2@belimuno.com | password123 |
-| Client 1 | client1@belimuno.com | password123 |
-| Client 2 | client2@belimuno.com | password123 |
+| Super Admin | admin@belimuno.com | Belimuno#2025! |
+| Area Manager | manager.aa@belimuno.com | Belimuno#2025! |
+| Worker 1 | worker1@belimuno.com | Belimuno#2025! |
+| Worker 2 | worker2@belimuno.com | Belimuno#2025! |
+| Client 1 | client1@belimuno.com | Belimuno#2025! |
+| Client 2 | client2@belimuno.com | Belimuno#2025! |
 
 ### Sample Region IDs:
 - Addis Ababa: `507f1f77bcf86cd799439011` (example ID)

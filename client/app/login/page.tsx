@@ -53,10 +53,10 @@ const LoginPage: React.FC = () => {
 
   // Test accounts for easy access
   const testAccounts = [
-    { email: 'admin@belimuno.com', password: 'password123', role: 'Super Admin' },
-    { email: 'manager.aa@belimuno.com', password: 'password123', role: 'Area Manager (AA)' },
-    { email: 'worker1@belimuno.com', password: 'password123', role: 'Worker' },
-    { email: 'client1@belimuno.com', password: 'password123', role: 'Client' },
+    { email: 'admin@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin' },
+    { email: 'manager.aa@belimuno.com', password: 'Belimuno#2025!', role: 'Area Manager (AA)' },
+    { email: 'worker1@belimuno.com', password: 'Belimuno#2025!', role: 'Worker' },
+    { email: 'client1@belimuno.com', password: 'Belimuno#2025!', role: 'Client' },
   ];
 
   const fillTestAccount = (email: string, password: string) => {
@@ -131,7 +131,7 @@ const LoginPage: React.FC = () => {
               ))}
             </div>
             <p className="mt-2 text-xs text-gray-500">
-              Click any test account to auto-fill the form
+              Click any test account to auto-fill the form (default password: Belimuno#2025!)
             </p>
           </div>
         </Card>

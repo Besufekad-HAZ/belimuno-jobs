@@ -125,6 +125,41 @@ const validateProfileUpdate = [
     .isLength({ max: 500 })
     .withMessage('Bio must not exceed 500 characters'),
 
+  body('profile.dob')
+    .optional({ nullable: true })
+    .isISO8601()
+    .withMessage('Date of birth must be a valid ISO8601 date (YYYY-MM-DD)'),
+
+  body('profile.cv')
+    .optional({ nullable: true })
+    .custom((value) => {
+      // Allow null (to delete), or an object with optional name/mimeType/data
+      if (value === null) return true;
+      if (typeof value !== 'object') throw new Error('CV must be an object or null');
+      return true;
+    }),
+
+  body('workerProfile.skills')
+    .optional()
+    .isArray()
+    .withMessage('Skills must be an array of strings'),
+  body('workerProfile.certifications')
+    .optional()
+    .isArray()
+    .withMessage('Certifications must be an array of strings'),
+  body('workerProfile.languages')
+    .optional()
+    .isArray()
+    .withMessage('Languages must be an array of strings'),
+  body('workerProfile.education')
+    .optional()
+    .isArray()
+    .withMessage('Education must be an array'),
+  body('workerProfile.workHistory')
+    .optional()
+    .isArray()
+    .withMessage('Work history must be an array'),
+
   handleValidationErrors
 ];
 

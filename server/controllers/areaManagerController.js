@@ -278,7 +278,12 @@ exports.getApplications = asyncHandler(async (req, res) => {
 // @route   PUT /api/area-manager/jobs/:id/escalate
 // @access  Private/Area Manager
 exports.handleEscalation = asyncHandler(async (req, res) => {
-  const { action, resolution, notes } = req.body; // action: 'resolve', 'escalate_to_admin'
+  let { action, resolution, notes, reason } = req.body; // action: 'resolve', 'escalate_to_admin'
+  // Backward-compat: if only reason provided, interpret as escalate_to_admin
+  if (!action && reason) {
+    action = 'escalate_to_admin';
+    notes = reason;
+  }
 
   const job = await Job.findOne({
     _id: req.params.id,
@@ -367,6 +372,60 @@ exports.handleEscalation = asyncHandler(async (req, res) => {
       data: job
     });
   }
+});
+
+// @desc    Get messages for any job in manager's region
+// @route   GET /api/area-manager/jobs/:id/messages
+// @access  Private/Area Manager
+exports.getJobMessages = asyncHandler(async (req, res) => {
+  const job = await Job.findOne({ _id: req.params.id, region: req.user.region })
+    .populate('messages.sender', 'name role');
+  if (!job) {
+    return res.status(404).json({ success: false, message: 'Job not found in your region' });
+  }
+  res.status(200).json({ success: true, data: job.messages || [] });
+});
+
+// @desc    Send a message to a job thread in manager's region
+// @route   POST /api/area-manager/jobs/:id/messages
+// @access  Private/Area Manager
+exports.sendJobMessage = asyncHandler(async (req, res) => {
+  const { content } = req.body;
+  if (!content || !content.trim()) {
+    return res.status(400).json({ success: false, message: 'Message content required' });
+  }
+  const job = await Job.findOne({ _id: req.params.id, region: req.user.region });
+  if (!job) {
+    return res.status(404).json({ success: false, message: 'Job not found in your region' });
+  }
+  job.messages.push({ sender: req.user._id, content: content.trim(), sentAt: new Date(), attachments: [] });
+  await job.save();
+  await job.populate('messages.sender', 'name role');
+  res.status(201).json({ success: true, data: job.messages[job.messages.length - 1] });
+});
+
+// @desc    Reject worker onboarding in region
+// @route   PUT /api/area-manager/workers/:id/reject
+// @access  Private/Area Manager
+exports.rejectWorker = asyncHandler(async (req, res) => {
+  const { reason } = req.body;
+  const worker = await User.findOne({ _id: req.params.id, role: 'worker', region: req.user.region });
+  if (!worker) {
+    return res.status(404).json({ success: false, message: 'Worker not found in your region' });
+  }
+  worker.isVerified = false;
+  worker.verificationNotes = reason;
+  await worker.save();
+
+  await Notification.create({
+    recipient: worker._id,
+    sender: req.user._id,
+    title: 'Verification Rejected',
+    message: `Your worker verification was rejected${reason ? `: ${reason}` : ''}.`,
+    type: 'profile_rejected'
+  });
+
+  res.status(200).json({ success: true, message: 'Worker verification rejected', data: worker });
 });
 
 // @desc    Get regional performance metrics

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Briefcase, MapPin, TrendingUp, CheckCircle, AlertTriangle, UserCheck, Settings, FileText, MessageSquare, Clock, Download, BarChart3, Shield } from 'lucide-react';
+import { Users, Briefcase, MapPin, TrendingUp, CheckCircle, AlertTriangle, UserCheck, Settings, MessageSquare, Download, BarChart3, Shield } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { areaManagerAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -22,16 +22,24 @@ interface AreaManagerStats {
   activeDisputes: number;
 }
 
+interface WorkerListItem { _id: string; name: string; email?: string; isVerified?: boolean; workerProfile?: { rating?: number } }
+interface JobItem { _id: string; title: string; status: string; budget?: number; createdAt: string }
+interface ApplicationItem { _id: string; status: string; appliedAt: string; proposedBudget?: number; worker?: { name?: string; email?: string }; job?: { title?: string } }
+
 const AreaManagerDashboard: React.FC = () => {
   const [stats, setStats] = useState<AreaManagerStats | null>(null);
-  const [workers, setWorkers] = useState<any[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [applications, setApplications] = useState<any[]>([]);
+  const [workers, setWorkers] = useState<WorkerListItem[]>([]);
+  const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [applications, setApplications] = useState<ApplicationItem[]>([]);
+  const [chatJobId, setChatJobId] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<{ content: string; sender?: { name?: string; role?: string }; sentAt: string }[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showEscalationModal, setShowEscalationModal] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [selectedJob, setSelectedJob] = useState<JobItem | null>(null);
   const [escalationReason, setEscalationReason] = useState('');
   const [regionalSettings, setRegionalSettings] = useState({
     workingHours: { start: '09:00', end: '17:00' },
@@ -40,7 +48,7 @@ const AreaManagerDashboard: React.FC = () => {
     allowances: { transport: 50, meal: 30 },
     holidays: ['Ethiopian New Year', 'Timkat', 'Meskel'],
   });
-  const [escalations, setEscalations] = useState<any[]>([]);
+  const [escalations, setEscalations] = useState<{ id: number; jobId: string; type: string; description: string; status: string; createdAt: string }[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -56,18 +64,28 @@ const AreaManagerDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, workersResponse, jobsResponse, applicationsResponse, performanceResponse] = await Promise.all([
+      const [dashboardResponse, workersResponse, jobsResponse, applicationsResponse] = await Promise.all([
         areaManagerAPI.getDashboard(),
         areaManagerAPI.getWorkers(),
         areaManagerAPI.getJobs(),
-        areaManagerAPI.getApplications(),
-        areaManagerAPI.getPerformance(),
+        areaManagerAPI.getApplications()
       ]);
 
-      setStats(dashboardResponse.data);
-      setWorkers(workersResponse.data.data.workers || []);
-      setJobs(jobsResponse.data.data || []);
-      setApplications(applicationsResponse.data.data.applications || []);
+      const d = dashboardResponse.data.data || dashboardResponse.data;
+      const s = d?.stats;
+      setStats(s ? {
+        totalWorkers: s.totalWorkers,
+        verifiedWorkers: s.verifiedWorkers,
+        pendingVerifications: s.unverifiedWorkers,
+        regionalJobs: s.totalJobs,
+        completedJobs: s.completedJobs,
+        regionalRevenue: s.regionalRevenue,
+        monthlyGrowth: 0,
+        activeDisputes: 0,
+      } : null);
+      setWorkers((workersResponse.data.data || []) as WorkerListItem[]);
+      setJobs((jobsResponse.data.data || []) as JobItem[]);
+      setApplications((applicationsResponse.data.data || []) as ApplicationItem[]);
 
       // Mock escalations data
       setEscalations([
@@ -91,26 +109,15 @@ const AreaManagerDashboard: React.FC = () => {
     }
   };
 
-  const handleEscalateJob = async (jobId: string) => {
-    const reason = prompt('Please provide a reason for escalation:');
-    if (!reason) return;
-
-    try {
-      await areaManagerAPI.escalateJob(jobId, reason);
-      fetchDashboardData(); // Refresh data
-    } catch (error) {
-      console.error('Failed to escalate job:', error);
-    }
-  };
-
-  const handleEscalation = (job: any) => {
+  const handleEscalation = (job: JobItem) => {
     setSelectedJob(job);
     setShowEscalationModal(true);
   };
 
   const submitEscalation = async () => {
     try {
-      await areaManagerAPI.escalateJob(selectedJob._id, escalationReason);
+      if (!selectedJob) return;
+      await areaManagerAPI.escalateJob(String(selectedJob._id), escalationReason);
       setShowEscalationModal(false);
       setEscalationReason('');
       setSelectedJob(null);
@@ -122,7 +129,22 @@ const AreaManagerDashboard: React.FC = () => {
 
   const updateRegionalSettings = async () => {
     try {
-      await areaManagerAPI.updateRegionSettings(regionalSettings);
+      // Map UI settings to backend schema
+      const payload = {
+        workHourRules: {
+          startTime: regionalSettings.workingHours.start,
+          endTime: regionalSettings.workingHours.end,
+        },
+        language: regionalSettings.language,
+        payRates: {
+          minimum: regionalSettings.payRates.minimum,
+          standard: regionalSettings.payRates.minimum, // placeholder mapping
+        },
+        settings: {
+          notifications: { email: true, sms: true, defaultLanguage: regionalSettings.language },
+        }
+      };
+      await areaManagerAPI.updateRegionSettings(payload);
       setShowSettingsModal(false);
       fetchDashboardData();
     } catch (error) {
@@ -305,18 +327,18 @@ const AreaManagerDashboard: React.FC = () => {
                     <p className="text-sm text-gray-500">{worker.email}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        worker.profile?.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                        worker.isVerified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {worker.profile?.verified ? 'Verified' : 'Pending'}
+                        {worker.isVerified ? 'Verified' : 'Pending'}
                       </span>
-                      {worker.profile?.rating && (
+                      {worker.workerProfile?.rating !== undefined && (
                         <span className="text-xs text-gray-500">
-                          ⭐ {worker.profile.rating.toFixed(1)}
+                          ⭐ {Number(worker.workerProfile.rating).toFixed(1)}
                         </span>
                       )}
                     </div>
                   </div>
-                  {!worker.profile?.verified && (
+                  {!worker.isVerified && (
                     <Button
                       size="sm"
                       onClick={() => handleVerifyWorker(worker._id)}
@@ -344,7 +366,7 @@ const AreaManagerDashboard: React.FC = () => {
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-gray-900 truncate">{job.title}</h4>
                     <span className={`px-2 py-1 text-xs rounded-full ${
-                      job.status === 'open' ? 'bg-green-100 text-green-800' :
+                      job.status === 'posted' ? 'bg-green-100 text-green-800' :
                       job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                       job.status === 'completed' ? 'bg-gray-100 text-gray-800' :
                       'bg-yellow-100 text-yellow-800'
@@ -368,11 +390,11 @@ const AreaManagerDashboard: React.FC = () => {
                           Handle
                         </Button>
                       )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => alert('Messaging feature coming soon!')}
-                      >
+                      <Button size="sm" variant="ghost" onClick={async()=>{
+                        setChatJobId(job._id);
+                        const res = await areaManagerAPI.getJobMessages(job._id);
+                        setChatMessages(res.data.data || []);
+                      }}>
                         <MessageSquare className="h-3 w-3 mr-1" />
                         Contact
                       </Button>
@@ -439,7 +461,7 @@ const AreaManagerDashboard: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(application.createdAt).toLocaleDateString()}
+                      {new Date(application.appliedAt).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}
@@ -447,6 +469,34 @@ const AreaManagerDashboard: React.FC = () => {
             </table>
           </div>
         </Card>
+
+        {/* Job Chat Modal */}
+        <Modal isOpen={!!chatJobId} onClose={()=>setChatJobId(null)} title="Job Messages" size="lg">
+          <div className="flex flex-col h-96">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+              {chatMessages.map((m,i)=>(
+                <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='area_manager'?'bg-blue-50 ml-auto border border-blue-200':'bg-gray-100 border border-gray-200'}`}>
+                  <p className="font-medium mb-1">{m.sender?.name||'You'}</p>
+                  <p className="whitespace-pre-wrap text-gray-800">{m.content}</p>
+                  <p className="mt-1 text-[10px] text-gray-400">{new Date(m.sentAt).toLocaleTimeString()}</p>
+                </div>
+              ))}
+              {chatMessages.length===0 && <div className="text-xs text-gray-400">No messages yet.</div>}
+            </div>
+            <div className="mt-3 flex gap-2">
+              <input value={newMessage} onChange={e=>setNewMessage(e.target.value)} placeholder="Type a message" className="flex-1 border rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"/>
+              <Button disabled={sending} onClick={async()=>{
+                if(!chatJobId || !newMessage.trim()) return;
+                setSending(true);
+                try {
+                  const res = await areaManagerAPI.sendJobMessage(chatJobId, newMessage.trim());
+                  setChatMessages(prev => [...prev, res.data.data]);
+                  setNewMessage('');
+                } finally { setSending(false); }
+              }}>Send</Button>
+            </div>
+          </div>
+        </Modal>
 
         {/* Regional Settings Modal */}
         <Modal

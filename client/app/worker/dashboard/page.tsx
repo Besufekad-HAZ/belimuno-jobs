@@ -67,8 +67,8 @@ const WorkerDashboard: React.FC = () => {
   setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
   setAvailableJobs(jobsResponse.data.data || []);
   setMyJobs(myJobsResponse.data.data || []);
-  const apps = applicationsResponse.data.data || [];
-  setAppliedJobIds(new Set(apps.map((a: any) => a.job?._id)));
+  const apps: { job?: { _id: string } }[] = applicationsResponse.data.data || [];
+  setAppliedJobIds(new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]));
       setEarnings(earningsResponse.data);
 
       // Mock notifications for demo
@@ -598,16 +598,16 @@ const WorkerDashboard: React.FC = () => {
           <div className="flex flex-col h-96">
             <div className="flex-1 overflow-y-auto space-y-3 pr-2">
               {chatMessages.map((m,i)=>(
-                <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='worker'?'bg-blue-50 ml-auto':'bg-gray-100'}`}>
+                <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='worker'?'bg-blue-50 ml-auto border border-blue-200':'bg-gray-100 border border-gray-200'}`}>
                   <p className="font-medium mb-1">{m.sender?.name||'You'}</p>
-                  <p className="whitespace-pre-wrap text-gray-700">{m.content}</p>
+                  <p className="whitespace-pre-wrap text-gray-800">{m.content}</p>
                   <p className="mt-1 text-[10px] text-gray-400">{new Date(m.sentAt).toLocaleTimeString()}</p>
                 </div>
               ))}
               {chatMessages.length===0 && <div className="text-xs text-gray-400">No messages yet.</div>}
             </div>
             <div className="mt-3 flex gap-2">
-              <input value={newMessage} onChange={e=>setNewMessage(e.target.value)} placeholder="Type a message" className="flex-1 border rounded px-3 py-2 text-sm"/>
+              <input value={newMessage} onChange={e=>setNewMessage(e.target.value)} placeholder="Type a message" className="flex-1 border rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"/>
               <Button disabled={sending} onClick={sendChat}>Send</Button>
             </div>
           </div>

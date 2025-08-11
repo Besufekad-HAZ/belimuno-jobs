@@ -64,7 +64,8 @@ const seedTestData = async () => {
     console.log(`✅ Created ${createdRegions.length} regions`);
 
     // Create users
-    const hashedPassword = await bcrypt.hash('password123', 12);
+  const strongTestPassword = 'Belimuno#2025!';
+  const hashedPassword = await bcrypt.hash(strongTestPassword, 12);
 
     const users = [
       {
@@ -320,7 +321,7 @@ const seedTestData = async () => {
     console.log('   Area Manager (Oromia): manager.oromia@belimuno.com');
     console.log('   Workers: worker1@belimuno.com, worker2@belimuno.com, worker3@belimuno.com');
     console.log('   Clients: client1@belimuno.com, client2@belimuno.com, client3@belimuno.com');
-    console.log('   Password for all: password123');
+  console.log(`   Password for all: ${strongTestPassword}`);
 
     process.exit(0);
   } catch (error) {

@@ -5,12 +5,14 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 ## 🚀 Features
 
 ### Multi-Role System
+
 - **Super Admin**: Complete system oversight, user management, analytics
 - **Area Manager**: Regional management, worker verification, dispute resolution
 - **Worker**: Job applications, progress tracking, earnings management
 - **Client**: Job posting, worker selection, payment processing
 
 ### Core Functionality
+
 - **Authentication & Authorization**: JWT-based auth with role-based access control
 - **Job Management**: Complete job lifecycle from posting to completion
 - **Application System**: Worker applications with approval/rejection workflow
@@ -22,12 +24,14 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 ## 📋 API Endpoints
 
 ### Authentication
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/auth/me` - Get current user profile
 - `POST /api/auth/logout` - Logout user
 
 ### Jobs (Public)
+
 - `GET /api/jobs` - List all jobs (with filters)
 - `GET /api/jobs/:id` - Get single job details
 - `GET /api/jobs/categories` - Get job categories
@@ -36,6 +40,7 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 - `POST /api/jobs/:id/apply` - Apply for job (Worker only)
 
 ### Client Portal
+
 - `GET /api/client/dashboard` - Client dashboard
 - `GET /api/client/jobs` - Get client's jobs
 - `POST /api/client/jobs` - Create new job
@@ -48,6 +53,7 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 - `GET /api/client/payments` - Get payment history
 
 ### Worker Portal
+
 - `GET /api/worker/dashboard` - Worker dashboard
 - `GET /api/worker/jobs` - Get worker's jobs
 - `GET /api/worker/jobs/:id` - Get single job details
@@ -58,6 +64,7 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 - `GET /api/worker/earnings` - Get earnings history
 
 ### Area Manager Portal
+
 - `GET /api/area-manager/dashboard` - Area manager dashboard
 - `GET /api/area-manager/workers` - Get regional workers
 - `PUT /api/area-manager/workers/:id/verify` - Verify worker
@@ -68,6 +75,7 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 - `PUT /api/area-manager/region/settings` - Update regional settings
 
 ### Super Admin Portal
+
 - `GET /api/admin/dashboard` - Admin dashboard
 - `GET /api/admin/users` - Get all users (with filters)
 - `GET /api/admin/users/:id` - Get single user details
@@ -80,6 +88,7 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 - `PUT /api/admin/payments/:id/dispute` - Handle payment disputes
 
 ### Notifications
+
 - `GET /api/notifications` - Get user notifications
 - `GET /api/notifications/stats` - Get notification statistics
 - `PUT /api/notifications/:id/read` - Mark notification as read
@@ -89,11 +98,13 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - MongoDB (v4.4 or higher)
 - npm or yarn
 
 ### Environment Variables
+
 Create a `.env` file in the server directory:
 
 ```env
@@ -119,11 +130,13 @@ CHAPA_PUBLIC_KEY=your_chapa_public_key
 ### Installation Steps
 
 1. **Clone and navigate to server directory**
+
    ```bash
    cd server
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -132,11 +145,13 @@ CHAPA_PUBLIC_KEY=your_chapa_public_key
    Make sure MongoDB is running on your system
 
 4. **Seed test data (optional)**
+
    ```bash
    npm run seed
    ```
 
 5. **Start the server**
+
    ```bash
    # Development mode with auto-reload
    npm start
@@ -146,6 +161,7 @@ CHAPA_PUBLIC_KEY=your_chapa_public_key
    ```
 
 6. **Test the API**
+
    ```bash
    # Run comprehensive API tests
    npm test
@@ -159,6 +175,7 @@ The server will start on `http://localhost:5000`
 ## 🧪 Testing
 
 ### API Testing
+
 The project includes a comprehensive test suite that verifies all endpoints:
 
 ```bash
@@ -170,29 +187,32 @@ npm run test:full
 ```
 
 ### Test Users
+
 After seeding, you can use these test accounts:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | admin@belimuno.com | password123 |
-| Area Manager (AA) | manager.aa@belimuno.com | password123 |
-| Area Manager (Oromia) | manager.oromia@belimuno.com | password123 |
-| Worker 1 | worker1@belimuno.com | password123 |
-| Worker 2 | worker2@belimuno.com | password123 |
-| Worker 3 | worker3@belimuno.com | password123 |
-| Client 1 | client1@belimuno.com | password123 |
-| Client 2 | client2@belimuno.com | password123 |
-| Client 3 | client3@belimuno.com | password123 |
+| Super Admin | <admin@belimuno.com> | password123 |
+| Area Manager (AA) | <manager.aa@belimuno.com> | password123 |
+| Area Manager (Oromia) | <manager.oromia@belimuno.com> | password123 |
+| Worker 1 | <worker1@belimuno.com> | password123 |
+| Worker 2 | <worker2@belimuno.com> | password123 |
+| Worker 3 | <worker3@belimuno.com> | password123 |
+| Client 1 | <client1@belimuno.com> | password123 |
+| Client 2 | <client2@belimuno.com> | password123 |
+| Client 3 | <client3@belimuno.com> | password123 |
 
 ## 📊 Database Models
 
 ### User Model
+
 - Basic information (name, email, password)
 - Role-based profiles (worker, client, admin)
 - Regional assignment
 - Verification status
 
 ### Job Model
+
 - Complete job lifecycle management
 - Payment tracking
 - Progress monitoring
@@ -200,21 +220,25 @@ After seeding, you can use these test accounts:
 - Dispute handling
 
 ### Application Model
+
 - Worker job applications
 - Proposal and budget information
 - Status tracking
 
 ### Notification Model
+
 - Multi-channel notifications
 - Type-based categorization
 - Read/unread status
 
 ### Region Model
+
 - Geographic management
 - Local settings and rules
 - Manager assignment
 
 ### Payment Model
+
 - Transaction tracking
 - Chapa integration ready
 - Dispute resolution
@@ -232,6 +256,7 @@ After seeding, you can use these test accounts:
 ## 🌍 Workflow Examples
 
 ### Client Workflow
+
 1. Client registers and creates account
 2. Posts job with requirements and budget
 3. Reviews worker applications
@@ -241,6 +266,7 @@ After seeding, you can use these test accounts:
 7. Approves payment or requests revisions
 
 ### Worker Workflow
+
 1. Worker registers and gets verified
 2. Browses available jobs
 3. Submits applications with proposals
@@ -250,6 +276,7 @@ After seeding, you can use these test accounts:
 7. Receives payment notification
 
 ### Area Manager Workflow
+
 1. Monitors regional activity
 2. Verifies new worker registrations
 3. Handles escalations and disputes
@@ -257,6 +284,7 @@ After seeding, you can use these test accounts:
 5. Adjusts local settings as needed
 
 ### Admin Workflow
+
 1. Oversees entire platform
 2. Manages user accounts
 3. Resolves complex disputes
@@ -266,6 +294,7 @@ After seeding, you can use these test accounts:
 ## 🚀 Deployment
 
 ### Production Checklist
+
 - [ ] Set `NODE_ENV=production`
 - [ ] Use strong JWT secret
 - [ ] Configure MongoDB Atlas or production database
@@ -276,6 +305,7 @@ After seeding, you can use these test accounts:
 - [ ] Set up backup strategy
 
 ### Environment Setup
+
 ```bash
 # Production environment variables
 NODE_ENV=production

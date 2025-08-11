@@ -23,6 +23,12 @@ const UserSchema = new mongoose.Schema({
     lastName: String,
     avatar: String,
     bio: String,
+    dob: Date,
+    cv: {
+      name: String,
+      mimeType: String,
+      data: String, // base64 data URL or raw base64
+    },
     address: {
       street: String,
       city: String,
@@ -44,6 +50,21 @@ const UserSchema = new mongoose.Schema({
     portfolio: [String], // URLs to portfolio items
     certifications: [String],
     languages: [String],
+    education: [{
+      school: String,
+      degree: String,
+      field: String,
+      startDate: String,
+      endDate: String,
+      description: String,
+    }],
+    workHistory: [{
+      company: String,
+      title: String,
+      startDate: String,
+      endDate: String,
+      description: String,
+    }],
     rating: { type: Number, default: 0, min: 0, max: 5 },
     totalJobs: { type: Number, default: 0 },
     completedJobs: { type: Number, default: 0 },

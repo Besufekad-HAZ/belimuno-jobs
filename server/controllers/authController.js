@@ -180,36 +180,52 @@ const getMe = async (req, res, next) => {
 // @access  Private
 const updateProfile = async (req, res, next) => {
   try {
-    const fieldsToUpdate = {
-      name: req.body.name,
-      phone: req.body.phone,
-      profile: req.body.profile,
-      notifications: req.body.notifications
-    };
+    // Build update operators to better control nested merges and unsets
+    const updateOps = { $set: {}, $unset: {} };
+
+    if (req.body.name !== undefined) updateOps.$set.name = req.body.name;
+    if (req.body.phone !== undefined) updateOps.$set.phone = req.body.phone;
+    if (req.body.notifications !== undefined) updateOps.$set.notifications = req.body.notifications;
+
+    // Profile: deep-merge with existing, and support explicit CV deletion when null is sent
+    if (req.body.profile !== undefined) {
+      const currentUser = await User.findById(req.user.id);
+      const currentProfile = (currentUser && currentUser.profile) ? currentUser.profile.toObject ? currentUser.profile.toObject() : currentUser.profile : {};
+      const incomingProfile = req.body.profile || {};
+
+      // If client sends cv === null, remove it using $unset
+      if (Object.prototype.hasOwnProperty.call(incomingProfile, 'cv') && incomingProfile.cv === null) {
+        updateOps.$unset['profile.cv'] = '';
+        delete incomingProfile.cv; // ensure it's not included in $set merge below
+      }
+
+      // Merge existing with incoming (shallow merge is enough for our fields)
+      const mergedProfile = { ...currentProfile, ...incomingProfile };
+      updateOps.$set.profile = mergedProfile;
+    }
 
     // Update role-specific profiles
-    if (req.user.role === 'worker' && req.body.workerProfile) {
-      fieldsToUpdate.workerProfile = {
-        ...req.user.workerProfile,
-        ...req.body.workerProfile
+    if (req.body.workerProfile) {
+      // Shallow-merge workerProfile; arrays are replaced as provided by client
+      updateOps.$set.workerProfile = {
+        ...(req.user.workerProfile || {}),
+        ...req.body.workerProfile,
       };
-    } else if (req.user.role === 'client' && req.body.clientProfile) {
-      fieldsToUpdate.clientProfile = {
-        ...req.user.clientProfile,
+    }
+    if (req.body.clientProfile) {
+      updateOps.$set.clientProfile = {
+        ...(req.user.clientProfile || {}),
         ...req.body.clientProfile
       };
     }
 
-    // Remove undefined fields
-    Object.keys(fieldsToUpdate).forEach(key => {
-      if (fieldsToUpdate[key] === undefined) {
-        delete fieldsToUpdate[key];
-      }
-    });
+    // Cleanup empty operators
+    if (Object.keys(updateOps.$set).length === 0) delete updateOps.$set;
+    if (Object.keys(updateOps.$unset).length === 0) delete updateOps.$unset;
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      fieldsToUpdate,
+      updateOps,
       {
         new: true,
         runValidators: true

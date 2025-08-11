@@ -7,7 +7,10 @@ const {
   getApplications,
   handleEscalation,
   getPerformanceMetrics,
-  updateRegionalSettings
+  updateRegionalSettings,
+  getJobMessages,
+  sendJobMessage,
+  rejectWorker
 } = require('../controllers/areaManagerController');
 const { protect } = require('../middleware/auth');
 const { requireAreaManagerOrAdmin } = require('../middleware/roleCheck');
@@ -24,10 +27,13 @@ router.get('/performance', getPerformanceMetrics);
 // Worker management
 router.get('/workers', getWorkers);
 router.put('/workers/:id/verify', verifyWorker);
+router.put('/workers/:id/reject', rejectWorker);
 
 // Job management
 router.get('/jobs', getJobs);
 router.get('/applications', getApplications);
+router.get('/jobs/:id/messages', getJobMessages);
+router.post('/jobs/:id/messages', sendJobMessage);
 
 // Escalation handling
 router.put('/jobs/:id/escalate', handleEscalation);

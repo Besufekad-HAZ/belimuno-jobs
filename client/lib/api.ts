@@ -36,17 +36,19 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (email: string, password: string) =>
     api.post('/auth/login', { email, password }),
-  register: (userData: any) =>
+  register: (userData: Record<string, unknown>) =>
     api.post('/auth/register', userData),
   getMe: () =>
     api.get('/auth/me'),
   logout: () =>
     api.post('/auth/logout'),
+  updateProfile: (profileData: Record<string, unknown>) =>
+    api.put('/auth/profile', profileData),
 };
 
 // Jobs API
 export const jobsAPI = {
-  getAll: (params?: any) =>
+  getAll: (params?: Record<string, unknown>) =>
     api.get('/jobs', { params }),
   getById: (id: string) =>
     api.get(`/jobs/${id}`),
@@ -54,8 +56,8 @@ export const jobsAPI = {
     api.post(`/jobs/${id}/apply`, { proposal, proposedBudget }),
   getCategories: () =>
     api.get('/jobs/categories'),
-  search: (query: string, params: any) =>
-    api.get('/jobs/search', { params: { q: query } }),
+  search: (query: string, params?: Record<string, unknown>) =>
+    api.get('/jobs/search', { params: { q: query, ...(params || {}) } }),
   getStats: () =>
     api.get('/jobs/stats'),
 };
@@ -66,11 +68,11 @@ export const clientAPI = {
     api.get('/client/dashboard'),
   getJobs: () =>
     api.get('/client/jobs'),
-  createJob: (jobData: any) =>
+  createJob: (jobData: Record<string, unknown>) =>
     api.post('/client/jobs', jobData),
   getJob: (id: string) =>
     api.get(`/client/jobs/${id}`),
-  updateJob: (id: string, jobData: any) =>
+  updateJob: (id: string, jobData: Record<string, unknown>) =>
     api.put(`/client/jobs/${id}`, jobData),
   acceptApplication: (jobId: string, applicationId: string) =>
     api.put(`/client/jobs/${jobId}/applications/${applicationId}/accept`),
@@ -104,7 +106,7 @@ export const workerAPI = {
     api.get('/worker/applications'),
   withdrawApplication: (id: string) =>
     api.delete(`/worker/applications/${id}`),
-  updateProfile: (profileData: any) =>
+  updateProfile: (profileData: Record<string, unknown>) =>
     api.put('/worker/profile', profileData),
   getEarnings: () =>
     api.get('/worker/earnings'),
@@ -126,15 +128,21 @@ export const areaManagerAPI = {
     api.get('/area-manager/workers'),
   verifyWorker: (id: string) =>
     api.put(`/area-manager/workers/${id}/verify`),
+  rejectWorker: (id: string, reason?: string) =>
+    api.put(`/area-manager/workers/${id}/reject`, { reason }),
   getJobs: () =>
     api.get('/area-manager/jobs'),
   getApplications: () =>
     api.get('/area-manager/applications'),
   escalateJob: (id: string, reason: string) =>
     api.put(`/area-manager/jobs/${id}/escalate`, { reason }),
+  getJobMessages: (id: string) =>
+    api.get(`/area-manager/jobs/${id}/messages`),
+  sendJobMessage: (id: string, content: string) =>
+    api.post(`/area-manager/jobs/${id}/messages`, { content }),
   getPerformance: () =>
     api.get('/area-manager/performance'),
-  updateRegionSettings: (settings: any) =>
+  updateRegionSettings: (settings: Record<string, unknown>) =>
     api.put('/area-manager/region/settings', settings),
 };
 
@@ -142,14 +150,16 @@ export const areaManagerAPI = {
 export const adminAPI = {
   getDashboard: () =>
     api.get('/admin/dashboard'),
-  getUsers: (params?: any) =>
+  getUsers: (params?: Record<string, unknown>) =>
     api.get('/admin/users', { params }),
   getUser: (id: string) =>
     api.get(`/admin/users/${id}`),
-  updateUser: (id: string, userData: any) =>
+  updateUser: (id: string, userData: Record<string, unknown>) =>
     api.put(`/admin/users/${id}`, userData),
-  deactivateUser: (id: string) =>
-    api.put(`/admin/users/${id}/deactivate`),
+  deactivateUser: (id: string, reason?: string) =>
+    api.put(`/admin/users/${id}/deactivate`, { reason }),
+  activateUser: (id: string) =>
+    api.put(`/admin/users/${id}/activate`),
   verifyWorker: (id: string) =>
     api.put(`/admin/verify-worker/${id}`),
   getAllJobs: () =>
@@ -158,8 +168,8 @@ export const adminAPI = {
     api.get('/admin/performance'),
   getPayments: () =>
     api.get('/admin/payments'),
-  handlePaymentDispute: (id: string, resolution: string) =>
-    api.put(`/admin/payments/${id}/dispute`, { resolution }),
+  handlePaymentDispute: (id: string, action: 'refund' | 'release' | 'partial', resolution: string) =>
+    api.put(`/admin/payments/${id}/dispute`, { action, resolution }),
 };
 
 // Notifications API

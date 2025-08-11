@@ -9,7 +9,8 @@ const {
   getPerformanceMetrics,
   getPayments,
   handlePaymentDispute,
-  deactivateUser
+  deactivateUser,
+  activateUser
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/auth');
 const { requireSuperAdmin } = require('../middleware/roleCheck');
@@ -28,6 +29,7 @@ router.get('/users', getUsers);
 router.get('/users/:id', getUser);
 router.put('/users/:id', updateUser);
 router.put('/users/:id/deactivate', deactivateUser);
+router.put('/users/:id/activate', activateUser);
 
 // Worker verification
 router.put('/verify-worker/:id', verifyWorker);

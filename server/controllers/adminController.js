@@ -606,3 +606,40 @@ exports.deactivateUser = asyncHandler(async (req, res) => {
     data: user
   });
 });
+
+// @desc    Activate (reactivate) user
+// @route   PUT /api/admin/users/:id/activate
+// @access  Private/Super Admin
+exports.activateUser = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    {
+      isActive: true,
+      deactivationReason: undefined,
+      deactivatedAt: undefined,
+      deactivatedBy: undefined
+    },
+    { new: true }
+  ).select('-password');
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'User not found'
+    });
+  }
+
+  // Create notification
+  await Notification.create({
+    recipient: user._id,
+    title: 'Account Reactivated',
+    message: 'Your account has been reactivated. You can now access your account again.',
+    type: 'system_announcement'
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'User activated successfully',
+    data: user
+  });
+});
