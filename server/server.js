@@ -138,23 +138,51 @@ app.all('*', (req, res) => {
 // Error handler middleware (must be last)
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 5000;
+let server; // http.Server
 
-const server = app.listen(PORT, () => {
-  console.log(`
+const startServer = (port, attemptsLeft = 5) => {
+  return new Promise((resolve, reject) => {
+    const srv = app.listen(port, () => {
+      console.log(`
 🚀 Belimuno Jobs Server Started!
 📍 Environment: ${process.env.NODE_ENV || 'development'}
-🌐 Port: ${PORT}
-🔗 Health Check: http://localhost:${PORT}/api/health
-📚 API Base: http://localhost:${PORT}/api
-  `);
-});
+🌐 Port: ${port}
+🔗 Health Check: http://localhost:${port}/api/health
+📚 API Base: http://localhost:${port}/api
+      `);
+      resolve(srv);
+    });
+    srv.on('error', (err) => {
+      if (err && err.code === 'EADDRINUSE' && attemptsLeft > 0) {
+        const nextPort = port + 1;
+        console.warn(`⚠️  Port ${port} is in use. Trying ${nextPort}...`);
+        setTimeout(() => {
+          startServer(nextPort, attemptsLeft - 1).then(resolve).catch(reject);
+        }, 150);
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
+
+startServer(DEFAULT_PORT)
+  .then((srv) => { server = srv; })
+  .catch((err) => {
+    console.error('❌ Failed to start server:', err.message || err);
+    process.exit(1);
+  });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
   console.log(`Error: ${err.message}`);
   // Close server & exit process
-  server.close(() => {
+  if (server && typeof server.close === 'function') {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
     process.exit(1);
-  });
+  }
 });

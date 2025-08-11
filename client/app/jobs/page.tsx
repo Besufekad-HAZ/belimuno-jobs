@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Search, Filter, MapPin, Clock, DollarSign, Briefcase } from 'lucide-react';
 import { getStoredUser } from '@/lib/auth';
@@ -10,27 +10,38 @@ import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 
 const JobsPage: React.FC = () => {
-  const [jobs, setJobs] = useState<any[]>([]);
+  type JobListItem = {
+    _id: string;
+    title: string;
+    description: string;
+    category: string;
+    deadline: string | Date;
+    budget: number;
+    priority?: string;
+    requiredSkills?: string[];
+    createdAt?: string | Date;
+    workType?: string;
+    location?: string;
+    applications?: unknown[];
+  };
+  const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [regionFilter, setRegionFilter] = useState('');
   const [budgetRange, setBudgetRange] = useState({ min: '', max: '' });
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<ReturnType<typeof getStoredUser> | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const currentUser = getStoredUser();
-    setUser(currentUser);
-    fetchJobs();
-  }, []);
+  // fetchJobs defined below; initial effect will reference it
 
-  const fetchJobs = async (filters: any = {}, pageNum = 1) => {
+  type Filters = { search?: string; category?: string; region?: string; budgetMin?: number | string; budgetMax?: number | string };
+  const fetchJobs = useCallback(async (filters: Filters = {}, pageNum = 1) => {
     try {
       setLoading(true);
       // Map frontend filters to backend params
-      const params: any = {
+  const params: Record<string, unknown> = {
         status: 'posted',
         page: pageNum,
         limit: 10,
@@ -47,18 +58,39 @@ const JobsPage: React.FC = () => {
       } else {
         response = await jobsAPI.getAll(params);
       }
-      setJobs(response.data.data || []);
-      setTotalPages(response.data.pagination?.pages || 1);
+  const payload = response.data;
+  const list = (payload.data || payload.jobs || []) as unknown as Array<Record<string, unknown>>;
+      setJobs(list.map((j) => ({
+        _id: String(j._id),
+        title: String(j.title || ''),
+        description: String(j.description || ''),
+        category: String(j.category || ''),
+        deadline: (j.deadline as string | Date | undefined) || new Date().toISOString(),
+        budget: Number(j.budget || 0),
+        priority: (j.priority as string | undefined),
+        requiredSkills: (j.requiredSkills as string[] | undefined),
+        createdAt: (j.createdAt as string | Date | undefined),
+        workType: (j.workType as string | undefined),
+        location: (j.location as string | undefined),
+        applications: (j.applications as unknown[] | undefined),
+      })));
+  setTotalPages(payload.pagination?.pages || 1);
     } catch (error) {
       console.error('Failed to fetch jobs:', error);
       setJobs([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const currentUser = getStoredUser();
+    setUser(currentUser);
+    fetchJobs();
+  }, [fetchJobs]);
 
   const handleSearch = () => {
-    const filters: any = {};
+  const filters: Filters = {};
     if (searchQuery) filters.search = searchQuery;
     if (categoryFilter) filters.category = categoryFilter;
     if (regionFilter) filters.region = regionFilter;
@@ -143,32 +175,7 @@ const JobsPage: React.FC = () => {
                 value={regionFilter}
                 onChange={(e) => setRegionFilter(e.target.value)}
               />
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="flex justify-center mt-8 space-x-2">
-            <Button
-              variant="outline"
-              disabled={page === 1}
-              onClick={() => {
-                setPage(page - 1);
-                handleSearch();
-              }}
-            >
-              Previous
-            </Button>
-            <span className="px-4 py-2 text-gray-700">Page {page} of {totalPages}</span>
-            <Button
-              variant="outline"
-              disabled={page === totalPages}
-              onClick={() => {
-                setPage(page + 1);
-                handleSearch();
-              }}
-            >
-              Next
-            </Button>
-          </div>
-        )}
+
 
               <Input
                 label="Min Budget (ETB)"
@@ -258,11 +265,11 @@ const JobsPage: React.FC = () => {
                     </p>
 
                     {/* Skills */}
-                    {job.skills && job.skills.length > 0 && (
+          {(job.requiredSkills && job.requiredSkills.length > 0) && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">Required Skills:</h4>
                         <div className="flex flex-wrap gap-2">
-                          {job.skills.slice(0, 5).map((skill: string, index: number) => (
+              {job.requiredSkills.slice(0, 5).map((skill: string, index: number) => (
                             <span
                               key={index}
                               className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
@@ -270,9 +277,9 @@ const JobsPage: React.FC = () => {
                               {skill}
                             </span>
                           ))}
-                          {job.skills.length > 5 && (
+              {job.requiredSkills.length > 5 && (
                             <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                              +{job.skills.length - 5} more
+                +{job.requiredSkills.length - 5} more
                             </span>
                           )}
                         </div>
@@ -281,30 +288,24 @@ const JobsPage: React.FC = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
+                        <span>Posted {job.createdAt ? new Date(job.createdAt as string | number | Date).toLocaleDateString() : '—'}</span>
                         <span>•</span>
                         <span>{job.applications?.length || 0} applications</span>
                         <span>•</span>
                         <span className="capitalize">{job.workType}</span>
                       </div>
                       <div className="flex space-x-2">
-                        <Link href={`/jobs/${job._id}`}>
-                          <Button variant="outline" size="sm">
-                            View Details
-                          </Button>
+                        <Link href={`/jobs/${job._id}`} className="inline-block">
+                          <Button variant="outline" size="sm">View Details</Button>
                         </Link>
                         {user && user.role === 'worker' && (
-                          <Link href={`/jobs/${job._id}/apply`}>
-                            <Button size="sm">
-                              Apply Now
-                            </Button>
+                          <Link href={`/jobs/${job._id}/apply`} className="inline-block">
+                            <Button size="sm">Apply Now</Button>
                           </Link>
                         )}
                         {!user && (
-                          <Link href="/login">
-                            <Button size="sm">
-                              Login to Apply
-                            </Button>
+                          <Link href="/login" className="inline-block">
+                            <Button size="sm">Login to Apply</Button>
                           </Link>
                         )}
                       </div>
@@ -314,7 +315,7 @@ const JobsPage: React.FC = () => {
               </Card>
             ))}
           </div>
-        ) : (
+  ) : (
           <Card className="text-center py-12">
             <Briefcase className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No jobs found</h3>
@@ -325,6 +326,47 @@ const JobsPage: React.FC = () => {
               Clear All Filters
             </Button>
           </Card>
+        )}
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-8 space-x-2">
+            <Button
+              variant="outline"
+              disabled={page === 1}
+              onClick={() => {
+                const newPage = page - 1;
+                setPage(newPage);
+                fetchJobs({
+                  search: searchQuery || undefined,
+                  category: categoryFilter || undefined,
+                  region: regionFilter || undefined,
+                  budgetMin: budgetRange.min || undefined,
+                  budgetMax: budgetRange.max || undefined,
+                }, newPage);
+              }}
+            >
+              Previous
+            </Button>
+            <span className="px-4 py-2 text-gray-700">Page {page} of {totalPages}</span>
+            <Button
+              variant="outline"
+              disabled={page === totalPages}
+              onClick={() => {
+                const newPage = page + 1;
+                setPage(newPage);
+                fetchJobs({
+                  search: searchQuery || undefined,
+                  category: categoryFilter || undefined,
+                  region: regionFilter || undefined,
+                  budgetMin: budgetRange.min || undefined,
+                  budgetMax: budgetRange.max || undefined,
+                }, newPage);
+              }}
+            >
+              Next
+            </Button>
+          </div>
         )}
       </div>
     </div>

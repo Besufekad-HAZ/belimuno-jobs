@@ -52,8 +52,13 @@ export const jobsAPI = {
     api.get('/jobs', { params }),
   getById: (id: string) =>
     api.get(`/jobs/${id}`),
-  apply: (id: string, proposal: string, proposedBudget: number) =>
-    api.post(`/jobs/${id}/apply`, { proposal, proposedBudget }),
+  apply: (
+    id: string,
+    proposal: string,
+    proposedBudget: number,
+    extras?: { estimatedDuration?: string; coverLetter?: string }
+  ) =>
+    api.post(`/jobs/${id}/apply`, { proposal, proposedBudget, ...(extras || {}) }),
   getCategories: () =>
     api.get('/jobs/categories'),
   search: (query: string, params?: Record<string, unknown>) =>
