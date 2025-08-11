@@ -127,11 +127,37 @@ const ProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.profile?.avatar || null);
   const [cvPreview, setCvPreview] = useState<string | null>(user?.profile?.cv?.data || null);
+  const [cvObjectUrl, setCvObjectUrl] = useState<string | null>(null);
   const ensureDataUrl = (data: string | null | undefined, mimeType?: string): string | null => {
     if (!data) return null;
     if (data.startsWith('data:')) return data;
     const mt = mimeType || 'application/pdf';
     return `data:${mt};base64,${data}`;
+  };
+  const toBlobUrl = (data: string | null | undefined, mimeType?: string): string | null => {
+    if (!data) return null;
+    try {
+      let base64: string;
+      let mt = mimeType || 'application/pdf';
+      if (data.startsWith('data:')) {
+        const parts = data.split(',');
+        const header = parts[0];
+        const b64 = parts[1] || '';
+        const match = /data:(.*?);base64/.exec(header);
+        if (match && match[1]) mt = match[1];
+        base64 = b64;
+      } else {
+        base64 = data;
+      }
+      const binary = atob(base64);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+      const blob = new Blob([bytes], { type: mt });
+      return URL.createObjectURL(blob);
+    } catch {
+      return null;
+    }
   };
   const fileRef = useRef<HTMLInputElement | null>(null);
   const cvRef = useRef<HTMLInputElement | null>(null);
@@ -170,6 +196,19 @@ const ProfilePage = () => {
   useEffect(() => {
     setAvatarPreview(user?.profile?.avatar || null);
   }, [user?.profile?.avatar]);
+
+  // Keep CV preview normalized and in sync with user changes
+  useEffect(() => {
+    const data = user?.profile?.cv?.data;
+    const mime = user?.profile?.cv?.mimeType;
+    setCvPreview(ensureDataUrl(data, mime));
+    // Recreate object URL for reliable viewing/downloading
+    setCvObjectUrl(prev => {
+      if (prev) URL.revokeObjectURL(prev);
+      const url = toBlobUrl(data || null, mime);
+      return url;
+    });
+  }, [user?.profile?.cv?.data, user?.profile?.cv?.mimeType]);
 
   if (!user) {
     return <div className="p-8 text-center">You are not logged in.</div>;
@@ -357,8 +396,12 @@ const ProfilePage = () => {
     reader.onload = async () => {
       const base64 = reader.result as string;
       const cv = { name: file.name, mimeType: file.type, data: base64 };
-  setCvPreview(base64);
-      await saveProfile({ profile: { ...user.profile, cv } });
+    setCvPreview(ensureDataUrl(base64, file.type));
+    // Update blob URL for reliable viewing
+    setCvObjectUrl(prev => { if (prev) URL.revokeObjectURL(prev); return toBlobUrl(base64, file.type); });
+    // Optimistically update local user so UI shows a proper link and file name
+    updateLocalUser({ profile: { ...(user.profile || {}), cv } } as unknown as ExtendedUser);
+    await saveProfile({ profile: { ...user.profile, cv } });
   // Reset input to allow selecting the same file again
   if (cvRef.current) cvRef.current.value = '';
     };
@@ -368,6 +411,12 @@ const ProfilePage = () => {
   const onDeleteCV = async () => {
   // send null to explicitly delete server-side
   setCvPreview(null);
+  setCvObjectUrl(prev => { if (prev) URL.revokeObjectURL(prev); return null; });
+  // Optimistic local update to remove cv instantly
+  const np = { ...(user.profile || {}) } as Record<string, unknown>;
+  delete np['cv'];
+  const nextProfile = np as NonNullable<ExtendedUser['profile']>;
+  updateLocalUser({ profile: nextProfile } as unknown as ExtendedUser);
   await saveProfile({ profile: { ...user.profile, cv: null } });
   if (cvRef.current) cvRef.current.value = '';
   };
@@ -639,16 +688,22 @@ const ProfilePage = () => {
         <span className="text-sm text-gray-800 truncate">{cv?.name}</span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-          {(() => { const url = cvPreview || ensureDataUrl(cv?.data, cv?.mimeType); return url ? (
-                      <a
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-md text-sm"
-            href={url}
-                        target="_blank"
-            rel="noopener noreferrer"
-                      >
-            <Eye className="h-4 w-4 mr-2" /> View CV
-                      </a>
-          ) : null; })()}
+          {(() => {
+            const url = cvObjectUrl || toBlobUrl(cv?.data, cv?.mimeType) || cvPreview || ensureDataUrl(cv?.data, cv?.mimeType);
+            if (!url) return null;
+            const isPdf = (cv?.mimeType || '').toLowerCase().includes('pdf');
+            return (
+              <a
+                className="inline-flex items-center px-4 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 rounded-md text-sm"
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                download={isPdf ? undefined : (cv?.name || 'cv')}
+              >
+                <Eye className="h-4 w-4 mr-2" /> {isPdf ? 'View CV' : 'Download CV'}
+              </a>
+            );
+          })()}
                     <Button variant="outline" onClick={()=> cvRef.current?.click()}><FileUp className="h-4 w-4 mr-2"/>Update CV</Button>
                     <Button variant="danger" onClick={onDeleteCV}><Trash2 className="h-4 w-4 mr-2"/>Delete CV</Button>
                   </div>

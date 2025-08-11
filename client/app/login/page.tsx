@@ -51,10 +51,11 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // Test accounts for easy access
+  // Test accounts (seeded)
   const testAccounts = [
     { email: 'admin@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin' },
     { email: 'manager.aa@belimuno.com', password: 'Belimuno#2025!', role: 'Area Manager (AA)' },
+    { email: 'manager.oromia@belimuno.com', password: 'Belimuno#2025!', role: 'Area Manager (Oromia)' },
     { email: 'worker1@belimuno.com', password: 'Belimuno#2025!', role: 'Worker' },
     { email: 'client1@belimuno.com', password: 'Belimuno#2025!', role: 'Client' },
   ];
@@ -100,6 +101,7 @@ const LoginPage: React.FC = () => {
               label="Password"
               name="password"
               type="password"
+              showPasswordToggle
               autoComplete="current-password"
               required
               value={formData.password}
@@ -131,7 +133,7 @@ const LoginPage: React.FC = () => {
               ))}
             </div>
             <p className="mt-2 text-xs text-gray-500">
-              Click any test account to auto-fill the form (default password: Belimuno#2025!)
+              Click a test account to auto-fill the form (default password: Belimuno#2025!)
             </p>
           </div>
         </Card>

@@ -190,17 +190,27 @@ const updateProfile = async (req, res, next) => {
     // Profile: deep-merge with existing, and support explicit CV deletion when null is sent
     if (req.body.profile !== undefined) {
       const currentUser = await User.findById(req.user.id);
-      const currentProfile = (currentUser && currentUser.profile) ? currentUser.profile.toObject ? currentUser.profile.toObject() : currentUser.profile : {};
+      const currentProfile = (currentUser && currentUser.profile)
+        ? (typeof currentUser.profile.toObject === 'function' ? currentUser.profile.toObject() : currentUser.profile)
+        : {};
       const incomingProfile = req.body.profile || {};
 
-      // If client sends cv === null, remove it using $unset
+      // Track explicit CV deletion intent
+      let shouldUnsetCv = false;
       if (Object.prototype.hasOwnProperty.call(incomingProfile, 'cv') && incomingProfile.cv === null) {
         updateOps.$unset['profile.cv'] = '';
+        shouldUnsetCv = true;
         delete incomingProfile.cv; // ensure it's not included in $set merge below
       }
 
       // Merge existing with incoming (shallow merge is enough for our fields)
       const mergedProfile = { ...currentProfile, ...incomingProfile };
+
+      // If CV is being unset, ensure it does not sneak back in through $set
+      if (shouldUnsetCv && Object.prototype.hasOwnProperty.call(mergedProfile, 'cv')) {
+        delete mergedProfile.cv;
+      }
+
       updateOps.$set.profile = mergedProfile;
     }
 

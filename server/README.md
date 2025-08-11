@@ -192,15 +192,15 @@ After seeding, you can use these test accounts:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | <admin@belimuno.com> | password123 |
-| Area Manager (AA) | <manager.aa@belimuno.com> | password123 |
-| Area Manager (Oromia) | <manager.oromia@belimuno.com> | password123 |
-| Worker 1 | <worker1@belimuno.com> | password123 |
-| Worker 2 | <worker2@belimuno.com> | password123 |
-| Worker 3 | <worker3@belimuno.com> | password123 |
-| Client 1 | <client1@belimuno.com> | password123 |
-| Client 2 | <client2@belimuno.com> | password123 |
-| Client 3 | <client3@belimuno.com> | password123 |
+| Super Admin | <admin@belimuno.com> | Belimuno#2025! |
+| Area Manager (AA) | <manager.aa@belimuno.com> | Belimuno#2025! |
+| Area Manager (Oromia) | <manager.oromia@belimuno.com> | Belimuno#2025! |
+| Worker 1 | <worker1@belimuno.com> | Belimuno#2025! |
+| Worker 2 | <worker2@belimuno.com> | Belimuno#2025! |
+| Worker 3 | <worker3@belimuno.com> | Belimuno#2025! |
+| Client 1 | <client1@belimuno.com> | Belimuno#2025! |
+| Client 2 | <client2@belimuno.com> | Belimuno#2025! |
+| Client 3 | <client3@belimuno.com> | Belimuno#2025! |
 
 ## 📊 Database Models
 

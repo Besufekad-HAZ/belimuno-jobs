@@ -7,6 +7,12 @@ const connectDB = require('./config/db');
 const User = require('./models/User');
 const Region = require('./models/Region');
 const Job = require('./models/Job');
+const Application = require('./models/Application');
+const Escalation = require('./models/Escalation');
+const Notification = require('./models/Notification');
+const Payment = require('./models/Payment');
+const Report = require('./models/Report');
+const Review = require('./models/Review');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -18,10 +24,19 @@ const seedTestData = async () => {
 
     console.log('🌱 Starting to seed test data...');
 
-    // Clear existing data
-    await User.deleteMany({});
-    await Region.deleteMany({});
-    await Job.deleteMany({});
+    // Clear existing data (start from scratch)
+    await Promise.all([
+      User.deleteMany({}),
+      Region.deleteMany({}),
+      Job.deleteMany({}),
+      // Related/auxiliary collections
+      Application.deleteMany({}).catch(() => {}),
+      Escalation.deleteMany({}).catch(() => {}),
+      Notification.deleteMany({}).catch(() => {}),
+      Payment.deleteMany({}).catch(() => {}),
+      Report.deleteMany({}).catch(() => {}),
+  Review.deleteMany({}).catch(() => {}),
+    ]);
 
     console.log('🗑️  Cleared existing data');
 
