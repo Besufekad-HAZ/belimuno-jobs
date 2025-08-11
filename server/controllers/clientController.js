@@ -102,7 +102,8 @@ exports.getJobs = asyncHandler(async (req, res) => {
         status: a.status,
         appliedAt: a.appliedAt,
         worker: a.worker
-      }))
+  })),
+  workerAcceptance: j.workerAcceptance || null
     };
   });
 
@@ -333,6 +334,7 @@ exports.acceptApplication = asyncHandler(async (req, res) => {
   // Update job with assigned worker
   job.worker = application.worker._id;
   job.status = 'assigned';
+  job.workerAcceptance = 'pending';
   job.payment.totalAmount = application.proposedBudget;
   await job.save();
 

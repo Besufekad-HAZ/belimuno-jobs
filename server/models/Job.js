@@ -29,6 +29,11 @@ const JobSchema = new mongoose.Schema({
     enum: ['draft', 'posted', 'in_review', 'assigned', 'in_progress', 'submitted', 'revision_requested', 'completed', 'cancelled', 'disputed'],
     default: 'draft'
   },
+  workerAcceptance: {
+    type: String,
+    enum: ['pending', 'accepted', 'declined'],
+  default: 'pending'
+  },
   priority: {
     type: String,
     enum: ['low', 'medium', 'high', 'urgent'],

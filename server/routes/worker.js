@@ -7,7 +7,11 @@ const {
   getApplications,
   withdrawApplication,
   updateProfile,
-  getEarnings
+  getEarnings,
+  getJobMessages,
+  sendJobMessage,
+  declineAssignedJob,
+  acceptAssignedJob
 } = require('../controllers/workerController');
 const { protect } = require('../middleware/auth');
 const { requireWorker } = require('../middleware/roleCheck');
@@ -24,6 +28,10 @@ router.get('/dashboard', getDashboard);
 router.get('/jobs', getJobs);
 router.get('/jobs/:id', getJob);
 router.put('/jobs/:id/status', updateJobStatus);
+router.put('/jobs/:id/decline', declineAssignedJob);
+router.put('/jobs/:id/accept', acceptAssignedJob);
+router.get('/jobs/:id/messages', getJobMessages);
+router.post('/jobs/:id/messages', sendJobMessage);
 
 // Application management
 router.get('/applications', getApplications);

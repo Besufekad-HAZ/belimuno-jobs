@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Briefcase, DollarSign, Clock, CheckCircle, Users, Star, Eye, CreditCard, MessageSquare } from 'lucide-react';
+import { Plus, Briefcase, DollarSign, Clock, CheckCircle, Users, Star, Eye, CreditCard } from 'lucide-react';
+import Link from 'next/link';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { clientAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -21,12 +22,14 @@ interface ClientStats {
 
 const ClientDashboard: React.FC = () => {
   const [stats, setStats] = useState<ClientStats | null>(null);
-  const [jobs, setJobs] = useState<any[]>([]);
+  interface ApplicationPreview { _id: string; proposal: string; proposedBudget: number; status: string; appliedAt: string; worker: { name: string } }
+  interface EnrichedJob { _id: string; title: string; description: string; budget: number; deadline: string; status: string; applicationCount?: number; recentApplications?: ApplicationPreview[]; assignedWorker?: { name: string; _id?: string }; category?: string; requirements?: string[]; acceptedApplication?: { proposedBudget?: number }; }
+  const [jobs, setJobs] = useState<EnrichedJob[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [selectedJob, setSelectedJob] = useState<EnrichedJob | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
-  const [selectedWorker, setSelectedWorker] = useState<any>(null);
+  const [selectedWorker, setSelectedWorker] = useState<{ name: string; _id?: string } | null>(null);
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState('');
   const router = useRouter();
@@ -76,14 +79,7 @@ const ClientDashboard: React.FC = () => {
     }
   };
 
-  const handleCompleteJob = async (jobId: string) => {
-    try {
-      await clientAPI.completeJob(jobId);
-      fetchDashboardData(); // Refresh data
-    } catch (error) {
-      console.error('Failed to complete job:', error);
-    }
-  };
+  // Removed unused handleCompleteJob (handled via payment/rating flow)
 
   const handleRequestRevision = async (jobId: string) => {
     const reason = prompt('Please provide a reason for the revision request:');
@@ -97,15 +93,16 @@ const ClientDashboard: React.FC = () => {
     }
   };
 
-  const handlePaymentAndRating = (job: any) => {
-    setSelectedJob(job);
-    setSelectedWorker(job.assignedWorker);
+  const handlePaymentAndRating = (job: EnrichedJob) => {
+  setSelectedJob(job);
+  setSelectedWorker(job.assignedWorker || null);
     setShowPaymentModal(true);
   };
 
   const processPayment = async () => {
     try {
       // Mock Chapa payment integration
+      if (!selectedJob || !selectedWorker) return;
       const paymentData = {
         amount: selectedJob.acceptedApplication?.proposedBudget || selectedJob.budget,
         currency: 'ETB',
@@ -116,8 +113,7 @@ const ClientDashboard: React.FC = () => {
       // In real implementation, this would integrate with Chapa API
       console.log('Processing payment with Chapa:', paymentData);
 
-      // Complete the job
-      await clientAPI.completeJob(selectedJob._id);
+  // Defer completion until rating step (simulate escrow release)
 
       setShowPaymentModal(false);
       setShowRatingModal(true);
@@ -129,15 +125,8 @@ const ClientDashboard: React.FC = () => {
 
   const submitRating = async () => {
     try {
-      // Mock rating submission
-      const ratingData = {
-        jobId: selectedJob._id,
-        workerId: selectedWorker._id,
-        rating,
-        review,
-      };
-
-      console.log('Submitting rating:', ratingData);
+  if (!selectedJob) return;
+  await clientAPI.completeJobWithRating(selectedJob._id, rating, review);
 
       setShowRatingModal(false);
       setRating(5);
@@ -257,7 +246,7 @@ const ClientDashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <span>Due: {new Date(job.deadline).toLocaleDateString()}</span>
-                    <span>Applications: {job.applications?.length || 0}</span>
+                    <span>Applications: {job.applicationCount ?? job.recentApplications?.length ?? 0}</span>
                     {job.assignedWorker && (
                       <span>Worker: {job.assignedWorker.name}</span>
                     )}
@@ -271,6 +260,11 @@ const ClientDashboard: React.FC = () => {
                       <Eye className="h-4 w-4 mr-1" />
                       View Details
                     </Button>
+                    <Link href={`/client/jobs/${job._id}/applications`} className="inline-block">
+                      <Button size="sm" variant="outline">
+                        Applications
+                      </Button>
+                    </Link>
                     {job.status === 'awaiting_completion' && (
                       <>
                         <Button
@@ -293,11 +287,11 @@ const ClientDashboard: React.FC = () => {
                 </div>
 
                 {/* Applications for open jobs */}
-                {job.status === 'open' && job.applications && job.applications.length > 0 && (
+                {job.status === 'open' && job.recentApplications && job.recentApplications.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h5 className="font-medium text-gray-900 mb-3">Applications ({job.applications.length})</h5>
+                    <h5 className="font-medium text-gray-900 mb-3">Recent Applications ({job.applicationCount || job.recentApplications.length})</h5>
                     <div className="space-y-3">
-                      {job.applications.slice(0, 3).map((application: any) => (
+                      {job.recentApplications.slice(0, 3).map((application: ApplicationPreview) => (
                         <div key={application._id} className="flex items-center justify-between p-3 bg-white rounded border">
                           <div>
                             <p className="font-medium text-gray-900">{application.worker.name}</p>

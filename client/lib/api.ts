@@ -78,10 +78,16 @@ export const clientAPI = {
     api.put(`/client/jobs/${jobId}/applications/${applicationId}/reject`),
   completeJob: (id: string) =>
     api.put(`/client/jobs/${id}/complete`),
+  completeJobWithRating: (id: string, rating: number, review: string) =>
+    api.put(`/client/jobs/${id}/complete`, { rating, review }),
   requestRevision: (id: string, reason: string) =>
     api.put(`/client/jobs/${id}/request-revision`, { reason }),
   getPayments: () =>
     api.get('/client/payments'),
+  getJobMessages: (jobId: string) =>
+    api.get(`/client/jobs/${jobId}/messages`),
+  sendJobMessage: (jobId: string, content: string) =>
+    api.post(`/client/jobs/${jobId}/messages`, { content }),
 };
 
 // Worker API
@@ -93,7 +99,7 @@ export const workerAPI = {
   getJob: (id: string) =>
     api.get(`/worker/jobs/${id}`),
   updateJobStatus: (id: string, status: string, progress?: number) =>
-    api.put(`/worker/jobs/${id}/status`, { status, progress }),
+  api.put(`/worker/jobs/${id}/status`, { status, progressPercentage: progress }),
   getApplications: () =>
     api.get('/worker/applications'),
   withdrawApplication: (id: string) =>
@@ -102,6 +108,14 @@ export const workerAPI = {
     api.put('/worker/profile', profileData),
   getEarnings: () =>
     api.get('/worker/earnings'),
+  getJobMessages: (jobId: string) =>
+    api.get(`/worker/jobs/${jobId}/messages`),
+  sendJobMessage: (jobId: string, content: string) =>
+    api.post(`/worker/jobs/${jobId}/messages`, { content }),
+  declineAssignedJob: (jobId: string) =>
+    api.put(`/worker/jobs/${jobId}/decline`),
+  acceptAssignedJob: (jobId: string) =>
+    api.put(`/worker/jobs/${jobId}/accept`),
 };
 
 // Area Manager API

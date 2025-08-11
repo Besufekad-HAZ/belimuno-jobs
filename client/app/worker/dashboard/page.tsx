@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp } from 'lucide-react';
+import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp, MessageCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { workerAPI, jobsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -29,6 +29,7 @@ const WorkerDashboard: React.FC = () => {
   interface EarningsData { recentPayments?: { jobTitle?: string; amount?: number; date?: string }[] }
   const [availableJobs, setAvailableJobs] = useState<SimpleJob[]>([]);
   const [myJobs, setMyJobs] = useState<SimpleJob[]>([]);
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<SimpleJob | null>(null);
   const [applicationData, setApplicationData] = useState<{ proposal: string; proposedBudget: string; estimatedDuration?: string }>({ proposal: '', proposedBudget: '' });
@@ -36,6 +37,10 @@ const WorkerDashboard: React.FC = () => {
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
+  const [chatJobId, setChatJobId] = useState<string | null>(null);
+  const [chatMessages, setChatMessages] = useState<{ _id?: string; content: string; sender?: { name?: string; role?: string }; sentAt: string }[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -51,7 +56,7 @@ const WorkerDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, jobsResponse, myJobsResponse, , earningsResponse] = await Promise.all([
+      const [dashboardResponse, jobsResponse, myJobsResponse, applicationsResponse, earningsResponse] = await Promise.all([
         workerAPI.getDashboard(),
         jobsAPI.getAll({ status: 'open', limit: 10 }),
         workerAPI.getJobs(),
@@ -62,6 +67,8 @@ const WorkerDashboard: React.FC = () => {
   setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
   setAvailableJobs(jobsResponse.data.data || []);
   setMyJobs(myJobsResponse.data.data || []);
+  const apps = applicationsResponse.data.data || [];
+  setAppliedJobIds(new Set(apps.map((a: any) => a.job?._id)));
       setEarnings(earningsResponse.data);
 
       // Mock notifications for demo
@@ -95,6 +102,33 @@ const WorkerDashboard: React.FC = () => {
     } catch (error) {
       console.error('Failed to update job status:', error);
     }
+  };
+
+  const openChat = async (jobId: string) => {
+    try {
+      setChatJobId(jobId);
+      const res = await workerAPI.getJobMessages(jobId);
+      setChatMessages(res.data.data || []);
+    } catch (e) { console.error(e); }
+  };
+
+  const sendChat = async () => {
+    if (!chatJobId || !newMessage.trim()) return;
+    setSending(true);
+    try {
+      const res = await workerAPI.sendJobMessage(chatJobId, newMessage.trim());
+      setChatMessages(prev => [...prev, res.data.data]);
+      setNewMessage('');
+    } catch (e) { console.error(e); } finally { setSending(false); }
+  };
+
+  const acceptAssignment = async (jobId: string) => {
+    await workerAPI.acceptAssignedJob(jobId);
+    fetchDashboardData();
+  };
+  const declineAssignment = async (jobId: string) => {
+    await workerAPI.declineAssignedJob(jobId);
+    fetchDashboardData();
   };
 
   if (loading) {
@@ -221,10 +255,10 @@ const WorkerDashboard: React.FC = () => {
                     <div className="flex space-x-2">
                       <Button size="sm" variant="outline" onClick={() => setSelectedJob(job)}>
                         <Eye className="h-4 w-4 mr-1" />
-                        View
+                        {appliedJobIds.has(job._id) ? 'Details' : 'View'}
                       </Button>
-                      <Button size="sm" onClick={() => setSelectedJob(job)}>
-                        Apply
+                      <Button size="sm" onClick={() => setSelectedJob(job)} disabled={appliedJobIds.has(job._id)}>
+                        {appliedJobIds.has(job._id) ? 'Applied' : 'Apply'}
                       </Button>
                     </div>
                   </div>
@@ -258,13 +292,13 @@ const WorkerDashboard: React.FC = () => {
               <p className="text-sm text-gray-500">No pending applications.</p>
             )}
           </Card>
-              {myJobs.filter(job => job.status && ['in_progress', 'revision_requested'].includes(job.status)).map((job) => (
+        {myJobs.filter(job => job.status && ['assigned','in_progress', 'revision_requested'].includes(job.status)).map((job) => (
                 <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-gray-900">{job.title}</h4>
                     <span className={`px-2 py-1 text-xs rounded-full ${
-                      job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                      'bg-yellow-100 text-yellow-800'
+          job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : job.status === 'assigned' ? 'bg-purple-100 text-purple-800' :
+          'bg-yellow-100 text-yellow-800'
                     }`}>
                       {job.status ? job.status.replace('_', ' ') : ''}
                     </span>
@@ -281,6 +315,16 @@ const WorkerDashboard: React.FC = () => {
                       ETB {job.acceptedApplication?.proposedBudget?.toLocaleString()}
                     </span>
                     <div className="flex space-x-2">
+                      {job.status === 'assigned' && (
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => declineAssignment(job._id)}>
+                            <ThumbsDown className="h-4 w-4 mr-1"/>Decline
+                          </Button>
+                          <Button size="sm" onClick={() => acceptAssignment(job._id)}>
+                            <ThumbsUp className="h-4 w-4 mr-1"/>Accept
+                          </Button>
+                        </>
+                      )}
                       {job.status === 'in_progress' && (
                         <Button
                           size="sm"
@@ -298,6 +342,9 @@ const WorkerDashboard: React.FC = () => {
                           Resubmit
                         </Button>
                       )}
+                      <Button size="sm" variant="outline" onClick={() => openChat(job._id)}>
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -544,6 +591,25 @@ const WorkerDashboard: React.FC = () => {
                 </Button>
               </div>
             )}
+          </div>
+        </Modal>
+        {/* Chat Modal */}
+        <Modal isOpen={!!chatJobId} onClose={()=>setChatJobId(null)} title="Job Chat" size="lg">
+          <div className="flex flex-col h-96">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+              {chatMessages.map((m,i)=>(
+                <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='worker'?'bg-blue-50 ml-auto':'bg-gray-100'}`}>
+                  <p className="font-medium mb-1">{m.sender?.name||'You'}</p>
+                  <p className="whitespace-pre-wrap text-gray-700">{m.content}</p>
+                  <p className="mt-1 text-[10px] text-gray-400">{new Date(m.sentAt).toLocaleTimeString()}</p>
+                </div>
+              ))}
+              {chatMessages.length===0 && <div className="text-xs text-gray-400">No messages yet.</div>}
+            </div>
+            <div className="mt-3 flex gap-2">
+              <input value={newMessage} onChange={e=>setNewMessage(e.target.value)} placeholder="Type a message" className="flex-1 border rounded px-3 py-2 text-sm"/>
+              <Button disabled={sending} onClick={sendChat}>Send</Button>
+            </div>
           </div>
         </Modal>
       </div>
