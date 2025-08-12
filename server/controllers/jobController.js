@@ -97,7 +97,7 @@ exports.getJob = asyncHandler(async (req, res) => {
   if (req.user) {
     const isClient = req.user._id.toString() === job.client._id.toString();
     const isWorker = job.worker && req.user._id.toString() === job.worker._id.toString();
-    const isAdmin = ['super_admin', 'area_manager'].includes(req.user.role);
+  const isAdmin = ['super_admin', 'admin_hr', 'admin_outsource'].includes(req.user.role);
 
     if (isClient || isWorker || isAdmin) {
       // Show full job details for authorized users
@@ -194,18 +194,7 @@ exports.applyForJob = asyncHandler(async (req, res) => {
     }
   });
 
-  // Also notify area manager if exists
-  if (job.areaManager) {
-    await Notification.create({
-      recipient: job.areaManager,
-      sender: workerId,
-      title: 'New Job Application in Your Region',
-      message: `A worker has applied for "${job.title}" in your region`,
-      type: 'job_application',
-      relatedJob: jobId,
-      relatedUser: workerId
-    });
-  }
+  // Area manager removed; no extra notifications
 
   res.status(201).json({
     success: true,

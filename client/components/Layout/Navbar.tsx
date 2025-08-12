@@ -74,8 +74,10 @@ const Navbar: React.FC = () => {
     switch (role) {
       case 'super_admin':
         return 'Super Admin';
-      case 'area_manager':
-        return 'Area Manager';
+      case 'admin_hr':
+        return 'Admin - HR';
+      case 'admin_outsource':
+        return 'Admin - Outsource';
       case 'worker':
         return 'Worker';
       case 'client':
@@ -120,10 +122,28 @@ const Navbar: React.FC = () => {
                 About
               </Link>
               <Link
+                href="/services"
+                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+              >
+                Services
+              </Link>
+              <Link
+                href="/clients"
+                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+              >
+                Our Clients
+              </Link>
+              <Link
                 href="/jobs"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
                 Jobs
+              </Link>
+              <Link
+                href="/contact"
+                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+              >
+                Contact
               </Link>
             </nav>
           </div>

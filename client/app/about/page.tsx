@@ -4,22 +4,11 @@ import React from 'react';
 import { Users, Target, Eye, Heart, Award, MapPin, Phone, Mail, Globe } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
+import Link from 'next/link';
 
 const AboutPage: React.FC = () => {
-  const clients = [
-    { name: 'World Food Programme (WFP)', type: 'International NGO', service: 'Cleaning crew warehouse handling' },
-    { name: 'Norwegian Refugee Council (NRC)', type: 'International NGO', service: 'Labor and construction professionals' },
-    { name: 'FHI360', type: 'International NGO', service: 'Security crew' },
-    { name: 'JHPIEGO', type: 'International NGO', service: 'Security crew' },
-    { name: 'Addis Guzo', type: 'Local Business', service: 'Security crew and cleaning' },
-    { name: 'Children Believe', type: 'International NGO', service: 'Cleaning services' },
-    { name: 'CICO', type: 'Construction', service: 'Labor and construction professionals' },
-    { name: 'VOITH', type: 'International Company', service: 'Labor and construction professionals' },
-    { name: 'DEC', type: 'Construction', service: 'Labor and construction professionals' },
-    { name: 'ALEC FITOUT', type: 'Construction', service: 'Labor and construction professionals' },
-    { name: 'KALPATARU', type: 'Construction', service: 'Labor and construction professionals' },
-    { name: 'CGGC (China Gezuba Group)', type: 'Construction', service: 'Fleet management professionals' },
-  ];
+  // clients now come from shared data
 
   const teamMembers = [
     { name: 'Managing Director', department: 'Management', role: 'ANALYST ASSETS' },
@@ -258,21 +247,10 @@ const AboutPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {clients.map((client, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Award className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-1">{client.name}</h3>
-                    <Badge variant="secondary" size="sm" className="mb-2">{client.type}</Badge>
-                    <p className="text-sm text-gray-600">{client.service}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+          <div className="text-center">
+            <Link href="/clients">
+              <Button>View Our Clients</Button>
+            </Link>
           </div>
         </div>
       </section>

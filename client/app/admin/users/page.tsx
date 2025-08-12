@@ -15,14 +15,14 @@ interface UserItem {
   _id: string;
   name: string;
   email: string;
-  role: 'super_admin' | 'area_manager' | 'worker' | 'client';
+  role: 'super_admin' | 'admin_hr' | 'admin_outsource' | 'worker' | 'client';
   isVerified?: boolean;
   isActive?: boolean;
   createdAt?: string;
   region?: { name?: string } | string;
 }
 
-const Roles = ['super_admin','area_manager','worker','client'] as const;
+const Roles = ['super_admin','admin_hr','admin_outsource','worker','client'] as const;
 
 type Filters = {
   search: string;

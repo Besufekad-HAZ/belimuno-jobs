@@ -290,6 +290,32 @@ exports.getJobs = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Create a job (admin)
+// @route   POST /api/admin/jobs
+// @access  Private/Super Admin
+exports.createJob = asyncHandler(async (req, res) => {
+  const job = await Job.create({ ...req.body });
+  res.status(201).json({ success: true, data: job });
+});
+
+// @desc    Update a job (admin)
+// @route   PUT /api/admin/jobs/:id
+// @access  Private/Super Admin
+exports.updateJob = asyncHandler(async (req, res) => {
+  const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
+  res.status(200).json({ success: true, data: job });
+});
+
+// @desc    Delete a job (admin)
+// @route   DELETE /api/admin/jobs/:id
+// @access  Private/Super Admin
+exports.deleteJob = asyncHandler(async (req, res) => {
+  const job = await Job.findByIdAndDelete(req.params.id);
+  if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
+  res.status(200).json({ success: true, message: 'Job deleted' });
+});
+
 // @desc    Get performance metrics
 // @route   GET /api/admin/performance
 // @access  Private/Super Admin
@@ -566,6 +592,42 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
     message: 'Dispute resolved successfully',
     data: payment
   });
+});
+
+// @desc    Mark a manual payment as paid and update job payment status
+// @route   PUT /api/admin/payments/:id/mark-paid
+// @access  Private/Super Admin
+exports.markPaymentPaid = asyncHandler(async (req, res) => {
+  const payment = await Payment.findById(req.params.id).populate('job').populate('recipient');
+
+  if (!payment) {
+    return res.status(404).json({ success: false, message: 'Payment not found' });
+  }
+
+  payment.status = 'completed';
+  payment.processedAt = new Date();
+  payment.completedAt = new Date();
+  await payment.save();
+
+  if (payment.job) {
+    payment.job.payment.paymentStatus = 'paid';
+    payment.job.payment.paidAmount = payment.amount;
+    payment.job.payment.paymentHistory.push({ amount: payment.amount, type: 'manual_check', transactionId: payment.transactionId, status: 'completed' });
+    await payment.job.save();
+  }
+
+  if (payment.recipient) {
+    await Notification.create({
+      recipient: payment.recipient._id,
+      title: 'Payment Completed',
+      message: `A manual check payment of ETB ${payment.amount.toLocaleString()} has been approved.`,
+      type: 'payment',
+      relatedPayment: payment._id,
+      relatedJob: payment.job?._id,
+    });
+  }
+
+  res.status(200).json({ success: true, message: 'Payment marked as completed', data: payment });
 });
 
 // @desc    Deactivate user

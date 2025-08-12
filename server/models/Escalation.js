@@ -44,7 +44,6 @@ const EscalationSchema = new mongoose.Schema({
 
   // Assignment and Handling
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  areaManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   assignedAt: Date,
 
   // Communication and Updates

@@ -66,32 +66,17 @@ const LoginPage: React.FC = () => {
 
   // Test accounts (seeded)
   const testAccounts = [
-    {
-      email: "admin@belimuno.com",
-      password: "Belimuno#2025!",
-      role: "Super Admin",
-    },
-    {
-      email: "manager.aa@belimuno.com",
-      password: "Belimuno#2025!",
-      role: "Area Manager (AA)",
-    },
-    {
-      email: "manager.oromia@belimuno.com",
-      password: "Belimuno#2025!",
-      role: "Area Manager (Oromia)",
-    },
-    {
-      email: "worker1@belimuno.com",
-      password: "Belimuno#2025!",
-      role: "Worker",
-    },
-    {
-      email: "client1@belimuno.com",
-      password: "Belimuno#2025!",
-      role: "Client",
-    },
-  ];
+    { email: 'admin1@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 1' },
+    { email: 'admin2@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 2' },
+    { email: 'admin.hr@belimuno.com', password: 'Belimuno#2025!', role: 'Admin (HR)' },
+    { email: 'admin.outsource@belimuno.com', password: 'Belimuno#2025!', role: 'Admin (Outsource)' },
+    { email: 'worker1@belimuno.com', password: 'Belimuno#2025!', role: 'Worker 1' },
+    { email: 'worker2@belimuno.com', password: 'Belimuno#2025!', role: 'Worker 2' },
+    { email: 'worker3@belimuno.com', password: 'Belimuno#2025!', role: 'Worker 3' },
+    { email: 'client1@belimuno.com', password: 'Belimuno#2025!', role: 'Client 1' },
+    { email: 'client2@belimuno.com', password: 'Belimuno#2025!', role: 'Client 2' },
+    { email: 'client3@belimuno.com', password: 'Belimuno#2025!', role: 'Client 3' },
+  ] as const;
 
   const fillTestAccount = (email: string, password: string) => {
     setFormData({ email, password });

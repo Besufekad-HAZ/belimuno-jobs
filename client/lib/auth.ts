@@ -4,7 +4,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'super_admin' | 'area_manager' | 'worker' | 'client';
+  role: 'super_admin' | 'admin_hr' | 'admin_outsource' | 'worker' | 'client';
   // Region can be populated (object) or just an id string depending on auth response
   region?: {
     _id: string;
@@ -76,8 +76,9 @@ export const getRoleDashboardPath = (role: string): string => {
   switch (role) {
     case 'super_admin':
       return '/admin/dashboard';
-    case 'area_manager':
-      return '/area-manager/dashboard';
+    case 'admin_hr':
+    case 'admin_outsource':
+      return '/admin/dashboard';
     case 'worker':
       return '/worker/dashboard';
     case 'client':

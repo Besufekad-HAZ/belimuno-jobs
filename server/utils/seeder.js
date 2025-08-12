@@ -92,33 +92,33 @@ const users = [
     isActive: true
   },
 
-  // Area Managers
-  {
-    name: 'Abebe Kebede',
-    email: 'manager.aa@belimunojobs.com',
-    password: 'Manager123!',
-    role: 'area_manager',
-    profile: {
-      firstName: 'Abebe',
-      lastName: 'Kebede',
-      bio: 'Area Manager for Addis Ababa region'
-    },
-    isVerified: true,
-    isActive: true
-  },
-  {
-    name: 'Almaz Tadesse',
-    email: 'manager.or@belimunojobs.com',
-    password: 'Manager123!',
-    role: 'area_manager',
-    profile: {
-      firstName: 'Almaz',
-      lastName: 'Tadesse',
-      bio: 'Area Manager for Oromia region'
-    },
-    isVerified: true,
-    isActive: true
-  },
+  // Area Managers - Removed since role no longer exists
+  // {
+  //   name: 'Abebe Kebede',
+  //   email: 'manager.aa@belimunojobs.com',
+  //   password: 'Manager123!',
+  //   role: 'area_manager',
+  //   profile: {
+  //     firstName: 'Abebe',
+  //     lastName: 'Kebede',
+  //     bio: 'Area Manager for Addis Ababa region'
+  //   },
+  //   isVerified: true,
+  //   isActive: true
+  // },
+  // {
+  //   name: 'Almaz Tadesse',
+  //   email: 'manager.or@belimunojobs.com',
+  //   password: 'Manager123!',
+  //   role: 'area_manager',
+  //   profile: {
+  //     firstName: 'Almaz',
+  //     lastName: 'Tadesse',
+  //     bio: 'Area Manager for Oromia region'
+  //   },
+  //   isVerified: true,
+  //   isActive: true
+  // },
 
   // Sample Workers
   {
@@ -255,14 +255,8 @@ const importData = async () => {
     for (let i = 0; i < users.length; i++) {
       users[i].password = await bcrypt.hash(users[i].password, 12);
 
-      // Assign regions to users
-      if (users[i].role === 'area_manager') {
-        if (users[i].email.includes('manager.aa')) {
-          users[i].region = createdRegions[0]._id; // Addis Ababa
-        } else if (users[i].email.includes('manager.or')) {
-          users[i].region = createdRegions[1]._id; // Oromia
-        }
-      } else if (users[i].role === 'worker' || users[i].role === 'client') {
+      // Assign regions to users (workers and clients default to Addis Ababa)
+      if (users[i].role === 'worker' || users[i].role === 'client') {
         users[i].region = createdRegions[0]._id; // Default to Addis Ababa
       }
     }
@@ -271,22 +265,22 @@ const importData = async () => {
     const createdUsers = await User.insertMany(users);
     console.log('Users Imported...');
 
-    // Update regions with their managers
+    // Update regions with super admin as manager (since no area managers)
     await Region.findByIdAndUpdate(
       createdRegions[0]._id,
-      { manager: createdUsers[1]._id } // Abebe Kebede for Addis Ababa
+      { manager: createdUsers.find(user => user.role === 'super_admin')._id }
     );
 
     await Region.findByIdAndUpdate(
       createdRegions[1]._id,
-      { manager: createdUsers[2]._id } // Almaz Tadesse for Oromia
+      { manager: createdUsers.find(user => user.role === 'super_admin')._id }
     );
 
     // Create sample jobs
     for (let i = 0; i < sampleJobs.length; i++) {
       sampleJobs[i].client = createdUsers.find(user => user.role === 'client')._id;
       sampleJobs[i].region = createdRegions[0]._id; // Addis Ababa
-      sampleJobs[i].areaManager = createdUsers[1]._id; // Abebe Kebede
+      // Remove areaManager assignment since role no longer exists
     }
 
     await Job.insertMany(sampleJobs);
@@ -294,13 +288,16 @@ const importData = async () => {
 
     console.log('✅ Data Imported Successfully!');
     console.log('\n🔑 Login Credentials:');
-    console.log('Super Admin: admin@belimunojobs.com / Admin123!');
-    console.log('Area Manager (AA): manager.aa@belimunojobs.com / Manager123!');
-    console.log('Area Manager (OR): manager.or@belimunojobs.com / Manager123!');
-    console.log('Worker 1: daniel.worker@example.com / Worker123!');
-    console.log('Worker 2: sara.worker@example.com / Worker123!');
-    console.log('Client 1: client1@techsolutions.et / Client123!');
-    console.log('Client 2: client2@greenconstruction.et / Client123!');
+    console.log('Super Admin 1: admin1@belimuno.com / Belimuno#2025!');
+    console.log('Super Admin 2: admin2@belimuno.com / Belimuno#2025!');
+    console.log('Admin HR: admin.hr@belimuno.com / Belimuno#2025!');
+    console.log('Admin Outsource: admin.outsource@belimuno.com / Belimuno#2025!');
+    console.log('Worker 1: worker1@belimuno.com / Belimuno#2025!');
+    console.log('Worker 2: worker2@belimuno.com / Belimuno#2025!');
+    console.log('Worker 3: worker3@belimuno.com / Belimuno#2025!');
+    console.log('Client 1: client1@belimuno.com / Belimuno#2025!');
+    console.log('Client 2: client2@belimuno.com / Belimuno#2025!');
+    console.log('Client 3: client3@belimuno.com / Belimuno#2025!');
 
     process.exit();
   } catch (err) {

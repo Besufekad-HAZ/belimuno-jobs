@@ -39,11 +39,11 @@ app.use((req, res, next) => {
 // Route files
 const auth = require('./routes/auth');
 const admin = require('./routes/admin');
-const areaManager = require('./routes/areaManager');
 const worker = require('./routes/worker');
 const client = require('./routes/client');
 const job = require('./routes/job');
 const notification = require('./routes/notification');
+const contact = require('./routes/contact');
 
 // API Info route
 app.get('/api', (req, res) => {
@@ -68,13 +68,6 @@ app.get('/api', (req, res) => {
         verifyWorker: 'PUT /api/admin/verify-worker/:id',
         jobs: 'GET /api/admin/jobs',
         payments: 'GET /api/admin/payments'
-      },
-      areaManager: {
-        dashboard: 'GET /api/area-manager/dashboard',
-        workers: 'GET /api/area-manager/workers',
-        verifyWorker: 'PUT /api/area-manager/workers/:id/verify',
-        jobs: 'GET /api/area-manager/jobs',
-        performance: 'GET /api/area-manager/performance'
       },
       workers: {
         dashboard: 'GET /api/worker/dashboard',
@@ -121,11 +114,11 @@ app.get('/api/health', (req, res) => {
 // Mount routers
 app.use('/api/auth', auth);
 app.use('/api/admin', admin);
-app.use('/api/area-manager', areaManager);
 app.use('/api/worker', worker);
 app.use('/api/client', client);
 app.use('/api/jobs', job);
 app.use('/api/notifications', notification);
+app.use('/api/contact', contact);
 
 // Catch 404 routes
 app.all('*', (req, res) => {

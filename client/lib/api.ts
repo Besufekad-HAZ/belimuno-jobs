@@ -125,32 +125,6 @@ export const workerAPI = {
     api.put(`/worker/jobs/${jobId}/accept`),
 };
 
-// Area Manager API
-export const areaManagerAPI = {
-  getDashboard: () =>
-    api.get('/area-manager/dashboard'),
-  getWorkers: () =>
-    api.get('/area-manager/workers'),
-  verifyWorker: (id: string) =>
-    api.put(`/area-manager/workers/${id}/verify`),
-  rejectWorker: (id: string, reason?: string) =>
-    api.put(`/area-manager/workers/${id}/reject`, { reason }),
-  getJobs: () =>
-    api.get('/area-manager/jobs'),
-  getApplications: () =>
-    api.get('/area-manager/applications'),
-  escalateJob: (id: string, reason: string) =>
-    api.put(`/area-manager/jobs/${id}/escalate`, { reason }),
-  getJobMessages: (id: string) =>
-    api.get(`/area-manager/jobs/${id}/messages`),
-  sendJobMessage: (id: string, content: string) =>
-    api.post(`/area-manager/jobs/${id}/messages`, { content }),
-  getPerformance: () =>
-    api.get('/area-manager/performance'),
-  updateRegionSettings: (settings: Record<string, unknown>) =>
-    api.put('/area-manager/region/settings', settings),
-};
-
 // Admin API
 export const adminAPI = {
   getDashboard: () =>
@@ -169,12 +143,20 @@ export const adminAPI = {
     api.put(`/admin/verify-worker/${id}`),
   getAllJobs: () =>
     api.get('/admin/jobs'),
+  createJob: (payload: Record<string, unknown>) =>
+    api.post('/admin/jobs', payload),
+  updateJob: (id: string, payload: Record<string, unknown>) =>
+    api.put(`/admin/jobs/${id}`, payload),
+  deleteJob: (id: string) =>
+    api.delete(`/admin/jobs/${id}`),
   getPerformance: () =>
     api.get('/admin/performance'),
   getPayments: () =>
     api.get('/admin/payments'),
   handlePaymentDispute: (id: string, action: 'refund' | 'release' | 'partial', resolution: string) =>
     api.put(`/admin/payments/${id}/dispute`, { action, resolution }),
+  markPaymentPaid: (id: string) =>
+    api.put(`/admin/payments/${id}/mark-paid`),
 };
 
 // Notifications API
@@ -189,6 +171,12 @@ export const notificationsAPI = {
     api.put('/notifications/read-all'),
   delete: (id: string) =>
     api.delete(`/notifications/${id}`),
+};
+
+// Public contact API
+export const contactAPI = {
+  submit: (payload: { name: string; email: string; phone?: string; subject: string; message: string }) =>
+    api.post('/contact', payload),
 };
 
 export default api;

@@ -3,11 +3,13 @@ const colors = require('colors');
 
 // Configuration
 const BASE_URL = 'http://localhost:5000/api';
-let authTokens = {
+const authTokens = {
   superAdmin: null,
-  areaManager: null,
+  adminHr: null,
+  adminOutsource: null,
   worker: null,
-  client: null
+  client: null,
+  // areaManager: null, // Removed - role no longer exists
 };
 
 // Test data
@@ -17,12 +19,6 @@ const testUsers = {
     email: 'admin@belimuno.com',
     password: 'SuperAdmin123!',
     role: 'super_admin'
-  },
-  areaManager: {
-    name: 'Area Manager',
-    email: 'areamanager@belimuno.com',
-    password: 'AreaManager123!',
-    role: 'area_manager'
   },
   worker: {
     name: 'Test Worker',
@@ -211,31 +207,6 @@ const testWorkerWorkflow = async () => {
   logTest('Get Recommended Jobs', recommendedResult.success, recommendedResult.success ? `${recommendedResult.data.count} recommendations` : recommendedResult.error);
 };
 
-const testAreaManagerWorkflow = async () => {
-  logSection('Area Manager Workflow');
-
-  if (!authTokens.areaManager) {
-    logTest('Area Manager Auth Required', false, 'No area manager token available');
-    return;
-  }
-
-  // Test area manager dashboard
-  const dashboardResult = await makeRequest('GET', '/area-manager/dashboard', null, authTokens.areaManager);
-  logTest('Area Manager Dashboard', dashboardResult.success, dashboardResult.success ? 'Dashboard data retrieved' : dashboardResult.error);
-
-  // Test getting workers in region
-  const workersResult = await makeRequest('GET', '/area-manager/workers', null, authTokens.areaManager);
-  logTest('Get Regional Workers', workersResult.success, workersResult.success ? `${workersResult.data.count} workers` : workersResult.error);
-
-  // Test getting jobs in region
-  const jobsResult = await makeRequest('GET', '/area-manager/jobs', null, authTokens.areaManager);
-  logTest('Get Regional Jobs', jobsResult.success, jobsResult.success ? `${jobsResult.data.count} jobs` : jobsResult.error);
-
-  // Test performance metrics
-  const performanceResult = await makeRequest('GET', '/area-manager/performance', null, authTokens.areaManager);
-  logTest('Get Performance Metrics', performanceResult.success, performanceResult.success ? 'Performance data retrieved' : performanceResult.error);
-};
-
 const testAdminWorkflow = async () => {
   logSection('Super Admin Workflow');
 
@@ -293,7 +264,6 @@ const runAllTests = async () => {
     await testJobManagement();
     await testClientWorkflow();
     await testWorkerWorkflow();
-    await testAreaManagerWorkflow();
     await testAdminWorkflow();
     await testNotificationSystem();
 

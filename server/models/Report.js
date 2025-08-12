@@ -21,12 +21,11 @@ const ReportSchema = new mongoose.Schema({
   // Report Scope and Filters
   scope: {
     region: { type: mongoose.Schema.Types.ObjectId, ref: 'Region' },
-    areaManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     dateRange: {
       startDate: Date,
       endDate: Date
     },
-    userTypes: [String], // ['client', 'worker', 'area_manager']
+    userTypes: [String], // ['client', 'worker', 'admin']
     jobCategories: [String],
     statusFilters: [String]
   },

@@ -40,8 +40,8 @@ const validateRegistration = [
     .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
 
   body('role')
-    .isIn(['super_admin', 'area_manager', 'client', 'worker'])
-    .withMessage('Role must be either super_admin, area_manager, client, or worker'),
+    .isIn(['super_admin', 'admin_hr', 'admin_outsource', 'client', 'worker'])
+    .withMessage('Role must be either super_admin, admin_hr, admin_outsource, client, or worker'),
 
   body('phone')
     .optional()

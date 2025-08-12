@@ -9,12 +9,11 @@
 ### 2. Set Environment Variables
 Create a new environment in Postman with these variables:
 - `baseUrl`: `http://localhost:5000/api`
-- `adminToken`: (will be set automatically)
-- `clientToken`: (will be set automatically)
+- `superAdminToken`: (will be set automatically)
+- `adminHrToken`: (will be set automatically)
+- `adminOutsourceToken`: (will be set automatically)
 - `workerToken`: (will be set automatically)
-- `areaManagerToken`: (will be set automatically)
-- `jobId`: (will be set automatically)
-- `applicationId`: (will be set automatically)
+- `clientToken`: (will be set automatically)
 
 ### 3. Start Server
 ```bash
@@ -53,18 +52,6 @@ npm start
   "email": "admin@belimuno.com",
   "password": "SuperAdmin123!",
   "role": "super_admin"
-}
-```
-
-#### Register Area Manager
-**POST** `{{baseUrl}}/auth/register`
-```json
-{
-  "name": "Area Manager",
-  "email": "areamanager@belimuno.com",
-  "password": "AreaManager123!",
-  "role": "area_manager",
-  "region": "507f1f77bcf86cd799439011"
 }
 ```
 
@@ -422,11 +409,14 @@ npm start
 | Role | Email | Password |
 |------|--------|----------|
 | Super Admin | admin@belimuno.com | Belimuno#2025! |
-| Area Manager | manager.aa@belimuno.com | Belimuno#2025! |
+| Admin HR | admin.hr@belimuno.com | Belimuno#2025! |
+| Admin Outsource | admin.outsource@belimuno.com | Belimuno#2025! |
 | Worker 1 | worker1@belimuno.com | Belimuno#2025! |
 | Worker 2 | worker2@belimuno.com | Belimuno#2025! |
+| Worker 3 | worker3@belimuno.com | Belimuno#2025! |
 | Client 1 | client1@belimuno.com | Belimuno#2025! |
 | Client 2 | client2@belimuno.com | Belimuno#2025! |
+| Client 3 | client3@belimuno.com | Belimuno#2025! |
 
 ### Sample Region IDs:
 - Addis Ababa: `507f1f77bcf86cd799439011` (example ID)

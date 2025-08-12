@@ -44,7 +44,7 @@ const JobSchema = new mongoose.Schema({
   client: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   worker: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   region: { type: mongoose.Schema.Types.ObjectId, ref: 'Region', required: true },
-  areaManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  // areaManager: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Removed - role no longer exists
 
   // Worker Selection
   applicants: [{
@@ -113,16 +113,13 @@ const JobSchema = new mongoose.Schema({
     workerEarnings: Number,
     paymentStatus: {
       type: String,
-      enum: ['pending', 'escrowed', 'released', 'refunded', 'disputed'],
+      enum: ['pending', 'approved_for_payment', 'paid', 'refunded', 'disputed'],
       default: 'pending'
     },
-    chapaTransactionId: String,
+    // Remove gateway specific fields; keep history for auditing
     paymentHistory: [{
       amount: Number,
-      type: {
-        type: String,
-        enum: ['escrow', 'release', 'refund', 'fee']
-      },
+      type: { type: String },
       transactionId: String,
       processedAt: { type: Date, default: Date.now },
       status: String

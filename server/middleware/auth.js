@@ -40,7 +40,6 @@ const protect = async (req, res, next) => {
     }
 
     // Check if user is verified (disabled for testing - can be enabled later)
-    // For production, uncomment this block:
     /*
     if (!user.isVerified && user.role !== 'super_admin') {
       return res.status(401).json({
@@ -97,13 +96,6 @@ const authorizeOwnershipOrAdmin = (resourceOwnerField = 'user') => {
       return next();
     }
 
-    // Area managers can access resources in their region
-    if (req.user.role === 'area_manager') {
-      if (req.resource && req.resource.region && req.resource.region.toString() === req.user.region.toString()) {
-        return next();
-      }
-    }
-
     // Check ownership
     if (req.resource && req.resource[resourceOwnerField] && req.resource[resourceOwnerField].toString() === req.user._id.toString()) {
       return next();
@@ -116,7 +108,7 @@ const authorizeOwnershipOrAdmin = (resourceOwnerField = 'user') => {
   };
 };
 
-// Middleware to check if user belongs to the same region (for area managers)
+// Middleware to check if user belongs to the same region (for admin roles)
 const authorizeRegion = async (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
@@ -128,18 +120,6 @@ const authorizeRegion = async (req, res, next) => {
   // Super admin can access all regions
   if (req.user.role === 'super_admin') {
     return next();
-  }
-
-  // Area managers can only access their region
-  if (req.user.role === 'area_manager') {
-    const requestedRegion = req.params.regionId || req.body.region;
-
-    if (requestedRegion && requestedRegion !== req.user.region.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to access this region'
-      });
-    }
   }
 
   next();

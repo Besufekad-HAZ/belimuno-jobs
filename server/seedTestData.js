@@ -35,7 +35,7 @@ const seedTestData = async () => {
       Notification.deleteMany({}).catch(() => {}),
       Payment.deleteMany({}).catch(() => {}),
       Report.deleteMany({}).catch(() => {}),
-  Review.deleteMany({}).catch(() => {}),
+      Review.deleteMany({}).catch(() => {}),
     ]);
 
     console.log('🗑️  Cleared existing data');
@@ -83,32 +83,12 @@ const seedTestData = async () => {
   const hashedPassword = await bcrypt.hash(strongTestPassword, 12);
 
     const users = [
-      {
-        name: 'Super Admin',
-        email: 'admin@belimuno.com',
-        password: hashedPassword,
-        role: 'super_admin',
-        isVerified: true,
-        isActive: true
-      },
-      {
-        name: 'Area Manager AA',
-        email: 'manager.aa@belimuno.com',
-        password: hashedPassword,
-        role: 'area_manager',
-        region: createdRegions[0]._id,
-        isVerified: true,
-        isActive: true
-      },
-      {
-        name: 'Area Manager Oromia',
-        email: 'manager.oromia@belimuno.com',
-        password: hashedPassword,
-        role: 'area_manager',
-        region: createdRegions[1]._id,
-        isVerified: true,
-        isActive: true
-      },
+      // Super Admins
+      { name: 'Super Admin One', email: 'admin1@belimuno.com', password: hashedPassword, role: 'super_admin', isVerified: true, isActive: true },
+      { name: 'Super Admin Two', email: 'admin2@belimuno.com', password: hashedPassword, role: 'super_admin', isVerified: true, isActive: true },
+      // Admins
+      { name: 'Admin HR', email: 'admin.hr@belimuno.com', password: hashedPassword, role: 'admin_hr', region: createdRegions[0]._id, isVerified: true, isActive: true },
+      { name: 'Admin Outsource', email: 'admin.outsource@belimuno.com', password: hashedPassword, role: 'admin_outsource', region: createdRegions[1]._id, isVerified: true, isActive: true },
       {
         name: 'John Doe',
         email: 'worker1@belimuno.com',
@@ -215,13 +195,7 @@ const seedTestData = async () => {
     const createdUsers = await User.insertMany(users);
     console.log(`✅ Created ${createdUsers.length} users`);
 
-    // Update regions with managers
-    await Region.findByIdAndUpdate(createdRegions[0]._id, {
-      manager: createdUsers.find(u => u.email === 'manager.aa@belimuno.com')._id
-    });
-    await Region.findByIdAndUpdate(createdRegions[1]._id, {
-      manager: createdUsers.find(u => u.email === 'manager.oromia@belimuno.com')._id
-    });
+    // No area managers in the new model
 
     // Create sample jobs
     const clients = createdUsers.filter(u => u.role === 'client');
@@ -308,7 +282,7 @@ const seedTestData = async () => {
         payment: {
           totalAmount: 800,
           paidAmount: 800,
-          paymentStatus: 'released',
+          paymentStatus: 'paid',
           workerEarnings: 720 // After platform fee
         },
         review: {
@@ -331,12 +305,11 @@ const seedTestData = async () => {
     console.log(`   • ${createdJobs.length} jobs created`);
 
     console.log('\n👥 Test Users Created:');
-    console.log('   Super Admin: admin@belimuno.com');
-    console.log('   Area Manager (AA): manager.aa@belimuno.com');
-    console.log('   Area Manager (Oromia): manager.oromia@belimuno.com');
+    console.log('   Super Admins: admin1@belimuno.com, admin2@belimuno.com');
+    console.log('   Admins: admin.hr@belimuno.com (HR), admin.outsource@belimuno.com (Outsource)');
     console.log('   Workers: worker1@belimuno.com, worker2@belimuno.com, worker3@belimuno.com');
     console.log('   Clients: client1@belimuno.com, client2@belimuno.com, client3@belimuno.com');
-  console.log(`   Password for all: ${strongTestPassword}`);
+    console.log(`   Password for all: ${strongTestPassword}`);
 
     process.exit(0);
   } catch (error) {

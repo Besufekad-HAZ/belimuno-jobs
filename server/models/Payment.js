@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const PaymentSchema = new mongoose.Schema({
   // Transaction Basic Info
   transactionId: { type: String, required: true, unique: true },
+  // For legacy gateway fields (no longer used; retained for reference only)
   chapaTransactionId: String,
   chapaReferenceId: String,
 
@@ -16,15 +17,17 @@ const PaymentSchema = new mongoose.Schema({
   currency: { type: String, default: 'ETB' },
   paymentMethod: {
     type: String,
-    enum: ['chapa_card', 'chapa_mobile', 'chapa_bank', 'wallet', 'admin_adjustment'],
-    required: true
+    enum: ['manual_check', 'admin_adjustment'],
+    required: true,
+    default: 'manual_check'
   },
 
   // Payment Type and Purpose
   paymentType: {
     type: String,
-    enum: ['job_payment', 'escrow', 'release', 'refund', 'platform_fee', 'withdrawal', 'topup'],
-    required: true
+    enum: ['job_payment', 'adjustment'],
+    required: true,
+    default: 'job_payment'
   },
   description: String,
 
@@ -45,14 +48,7 @@ const PaymentSchema = new mongoose.Schema({
   },
 
   // Chapa Integration Details
-  chapaDetails: {
-    checkoutUrl: String,
-    paymentReference: String,
-    customerEmail: String,
-    customerPhone: String,
-    webhookReceived: { type: Boolean, default: false },
-    webhookData: mongoose.Schema.Types.Mixed
-  },
+  chapaDetails: {},
 
   // Timeline
   initiatedAt: { type: Date, default: Date.now },

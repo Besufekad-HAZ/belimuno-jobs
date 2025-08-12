@@ -32,12 +32,12 @@ const requireSuperAdmin = (req, res, next) => {
   next();
 };
 
-// Check if user is area manager or super admin
-const requireAreaManagerOrAdmin = (req, res, next) => {
-  if (!req.user || !['area_manager', 'super_admin'].includes(req.user.role)) {
+// Check if user is any admin (super, HR, outsource)
+const requireAnyAdmin = (req, res, next) => {
+  if (!req.user || !['super_admin', 'admin_hr', 'admin_outsource'].includes(req.user.role)) {
     return res.status(403).json({
       success: false,
-      message: 'Area manager or super admin access required'
+      message: 'Admin access required'
     });
   }
   next();
@@ -76,7 +76,7 @@ const requireOwnershipOrAdmin = (req, res, next) => {
   }
 
   const isOwner = req.resourceOwnerId && req.user._id.toString() === req.resourceOwnerId.toString();
-  const isAdmin = ['super_admin', 'area_manager'].includes(req.user.role);
+  const isAdmin = ['super_admin', 'admin_hr', 'admin_outsource'].includes(req.user.role);
 
   if (!isOwner && !isAdmin) {
     return res.status(403).json({
@@ -102,7 +102,7 @@ const requireVerified = (req, res, next) => {
 module.exports = {
   authorize,
   requireSuperAdmin,
-  requireAreaManagerOrAdmin,
+  requireAnyAdmin,
   requireWorker,
   requireClient,
   requireOwnershipOrAdmin,

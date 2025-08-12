@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
   // Role and Access
   role: {
     type: String,
-    enum: ['super_admin', 'area_manager', 'worker', 'client'],
+    enum: ['super_admin', 'admin_hr', 'admin_outsource', 'worker', 'client'],
     required: true
   },
   region: { type: mongoose.Schema.Types.ObjectId, ref: 'Region' },
@@ -82,16 +82,14 @@ const UserSchema = new mongoose.Schema({
 
   // Payment Information
   paymentInfo: {
+    // Legacy gateway customer id (no longer used)
     chapaCustomerId: String,
     bankDetails: {
       accountNumber: String,
       bankName: String,
       accountHolderName: String
     },
-    wallet: {
-      balance: { type: Number, default: 0 },
-      pendingBalance: { type: Number, default: 0 }
-    }
+    // Wallet removed; payments are handled manually via check
   },
 
   // Notifications and Preferences

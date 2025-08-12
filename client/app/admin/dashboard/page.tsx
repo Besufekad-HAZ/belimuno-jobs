@@ -38,7 +38,7 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const user = getStoredUser();
-    if (!user || !hasRole(user, ['super_admin'])) {
+    if (!user || !hasRole(user, ['super_admin', 'admin_hr', 'admin_outsource'])) {
       router.push('/login');
       return;
     }

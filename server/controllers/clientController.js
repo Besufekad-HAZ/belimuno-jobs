@@ -145,27 +145,21 @@ exports.createJob = asyncHandler(async (req, res) => {
   const job = await Job.create(jobData);
   await job.populate('region', 'name');
 
-  // Create notification for area manager
-  if (job.region) {
-    const areaManager = await User.findOne({
-      role: 'area_manager',
-      region: job.region._id
+  // Create notification for super admin instead of area manager
+  const superAdmin = await User.findOne({ role: 'super_admin' });
+  if (superAdmin) {
+    await Notification.create({
+      recipient: superAdmin._id,
+      sender: req.user._id,
+      title: 'New Job Posted',
+      message: `A new job "${job.title}" has been posted`,
+      type: 'job_posted',
+      relatedJob: job._id,
+      actionButton: {
+        text: 'View Job',
+        action: 'view_job'
+      }
     });
-
-    if (areaManager) {
-      await Notification.create({
-        recipient: areaManager._id,
-        sender: req.user._id,
-        title: 'New Job Posted',
-        message: `A new job "${job.title}" has been posted in your region`,
-        type: 'job_posted',
-        relatedJob: job._id,
-        actionButton: {
-          text: 'View Job',
-          action: 'view_job'
-        }
-      });
-    }
   }
 
   res.status(201).json({
@@ -184,8 +178,7 @@ exports.getJob = asyncHandler(async (req, res) => {
   })
     .populate('worker', 'name profile workerProfile')
     .populate('region', 'name')
-  .populate('areaManager', 'name profile')
-  .populate('messages.sender', 'name role');
+    .populate('messages.sender', 'name role');
 
   if (!job) {
     return res.status(404).json({
@@ -466,14 +459,17 @@ exports.markJobCompleted = asyncHandler(async (req, res) => {
     await worker.save();
   }
 
-  // Create payment record
+  // Create manual payment record (processed by check)
   const payment = await Payment.create({
+    transactionId: `MAN-${Date.now()}-${Math.floor(Math.random()*1000)}`,
     job: job._id,
-    client: req.user._id,
-    worker: job.worker._id,
+    payer: req.user._id,
+    recipient: job.worker._id,
     amount: job.payment.totalAmount,
     status: 'pending',
-    type: 'job_completion'
+    paymentMethod: 'manual_check',
+    paymentType: 'job_payment',
+    description: 'Manual check to worker after job completion',
   });
 
   // Create notification for worker
@@ -481,7 +477,7 @@ exports.markJobCompleted = asyncHandler(async (req, res) => {
     recipient: job.worker._id,
     sender: req.user._id,
     title: 'Job Completed',
-    message: `Your work on "${job.title}" has been approved! Payment is being processed.`,
+    message: `Your work on "${job.title}" has been approved! Payment will be processed manually by check.`,
     type: 'job_completed',
     relatedJob: job._id,
     relatedPayment: payment._id

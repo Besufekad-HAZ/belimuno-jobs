@@ -641,21 +641,6 @@ const ProfilePage = () => {
               </>
             )}
 
-            {/* Area manager block */}
-            {role === 'area_manager' && (
-              <Card>
-                <h3 className="font-semibold text-gray-900 mb-2">Region</h3>
-                <p className="text-sm text-gray-600">Region: {(() => {
-                  const r = user.region as unknown;
-                  if (r && typeof r === 'object' && 'name' in r) {
-                    const rr = r as { name?: string };
-                    return rr.name || '—';
-                  }
-                  return '—';
-                })()}</p>
-              </Card>
-            )}
-
             {/* Super admin block */}
             {role === 'super_admin' && (
               <Card>
