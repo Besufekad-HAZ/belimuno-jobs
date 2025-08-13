@@ -65,3 +65,9 @@ option {
   background-color: white !important;
   color: #1f2937 !important;
 }
+
+/* Subtle scrollbar styling for chat */
+.custom-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(30,64,175,0.25); border-radius: 9999px; }
+.custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(30,64,175,0.4); }

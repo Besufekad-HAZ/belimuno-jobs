@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp, MessageCircle, ThumbsUp, ThumbsDown, Paperclip, Smile } from 'lucide-react';
+import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp, MessageCircle, ThumbsUp, ThumbsDown, Paperclip, Smile, FileText, X } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { workerAPI, jobsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -41,7 +41,11 @@ const WorkerDashboard: React.FC = () => {
   const [chatMessages, setChatMessages] = useState<{ _id?: string; content: string; sender?: { name?: string; role?: string }; sentAt: string }[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [chatAttachments, setChatAttachments] = useState<string[]>([]);
+  type PendingAttachment = { name: string; type: string; size: number; dataUrl: string };
+  const [chatAttachments, setChatAttachments] = useState<PendingAttachment[]>([]);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const chatInputRef = React.useRef<HTMLInputElement>(null);
+  const chatScrollRef = React.useRef<HTMLDivElement>(null);
   const [showRateModal, setShowRateModal] = useState(false);
   const [rateJobId, setRateJobId] = useState<string | null>(null);
   const [clientRating, setClientRating] = useState(5);
@@ -121,7 +125,7 @@ const WorkerDashboard: React.FC = () => {
     if (!chatJobId || (!newMessage.trim() && chatAttachments.length===0)) return;
     setSending(true);
     try {
-      const res = await workerAPI.sendJobMessage(chatJobId, newMessage.trim(), chatAttachments);
+      const res = await workerAPI.sendJobMessage(chatJobId, newMessage.trim(), chatAttachments.map(a=>a.dataUrl));
       setChatMessages(prev => [...prev, res.data.data]);
       setNewMessage('');
       setChatAttachments([]);
@@ -142,11 +146,11 @@ const WorkerDashboard: React.FC = () => {
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    const el = document.getElementById('worker-chat-scroll');
+    const el = chatScrollRef.current || document.getElementById('worker-chat-scroll');
     if (el) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [chatMessages]);
+  }, [chatMessages, chatAttachments]);
 
   const acceptAssignment = async (jobId: string) => {
     await workerAPI.acceptAssignedJob(jobId);
@@ -665,34 +669,66 @@ const WorkerDashboard: React.FC = () => {
           </div>
         </Modal>
         {/* Chat Modal */}
-        <Modal isOpen={!!chatJobId} onClose={()=>setChatJobId(null)} title="Job Chat" size="lg">
-          <div className="flex flex-col h-96">
-            <div className="flex items-center justify-between mb-2 px-1">
+        <Modal isOpen={!!chatJobId} onClose={()=>setChatJobId(null)} title="Job Chat" size="xl">
+          <div className="flex flex-col h-[72vh] max-h-[80vh] w-full max-w-[900px] overflow-hidden">
+            <div className="flex items-center justify-between mb-3 px-2">
               <div className="text-sm text-gray-500">Collaborate professionally. Keep communication clear and respectful.</div>
             </div>
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2 bg-gray-50 rounded border" id="worker-chat-scroll">
+            <div ref={chatScrollRef} onDragOver={(e)=>{e.preventDefault();}} onDrop={async (e)=>{e.preventDefault(); const files = e.dataTransfer?.files; if (!files) return; const list = Array.from(files).slice(0, 5 - chatAttachments.length); const reads = await Promise.all(list.map(f=> new Promise<PendingAttachment>((res)=>{ const r = new FileReader(); r.onload=()=>res({ name:f.name, type:f.type, size:f.size, dataUrl:String(r.result)}); r.readAsDataURL(f);}))); setChatAttachments(prev=>[...prev,...reads]); }} className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 bg-gradient-to-b from-blue-50/40 to-white rounded-lg border px-4 py-3" id="worker-chat-scroll">
               {chatMessages.map((m,i)=>(
                 <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='worker'?'bg-blue-50 ml-auto border border-blue-200':'bg-gray-100 border border-gray-200'}`}>
-                  <p className="font-medium mb-1">{m.sender?.name||'You'}</p>
+                  <p className="font-medium mb-1 text-blue-700">{m.sender?.name||'You'}</p>
                   <p className="whitespace-pre-wrap text-gray-800">{m.content}</p>
                   <p className="mt-1 text-[10px] text-gray-400">{new Date(m.sentAt).toLocaleTimeString()}</p>
                 </div>
               ))}
               {chatMessages.length===0 && <div className="text-xs text-gray-400">No messages yet.</div>}
             </div>
-            <div className="mt-3 flex gap-2 items-center">
+            {chatAttachments.length>0 && (
+              <div className="mt-2 border rounded bg-white p-2">
+                <div className="text-xs text-gray-500 mb-2">Attachments ({chatAttachments.length}/5)</div>
+                <div className="grid grid-cols-5 gap-2">
+                  {chatAttachments.map((a,idx)=> (
+                    <div key={idx} className="relative group">
+                      {a.type.startsWith('image') ? (
+                        <img src={a.dataUrl} alt={a.name} className="h-20 w-full object-cover rounded"/>
+                      ) : (
+                        <div className="h-20 rounded border bg-gray-50 flex items-center justify-center text-xs text-gray-600">
+                          <FileText className="h-4 w-4 mr-1"/>{a.name.slice(0,10)}
+                        </div>
+                      )}
+                      <button className="absolute -top-2 -right-2 bg-white border rounded-full p-0.5 shadow hidden group-hover:block" onClick={()=> setChatAttachments(prev => prev.filter((_,i)=> i!==idx))}><X className="h-3 w-3"/></button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="mt-3 flex gap-2 items-center border-t pt-3 bg-white">
               <label className="inline-flex items-center gap-1 px-2 py-1 border rounded cursor-pointer text-sm text-gray-600 hover:bg-gray-50">
                 <Paperclip className="h-4 w-4"/>
                 Attach
                 <input type="file" multiple className="hidden" onChange={async (e)=>{
-                  const files = Array.from(e.target.files || []).slice(0,5);
-                  const reads = await Promise.all(files.map(f=> new Promise<string>((res)=>{ const r = new FileReader(); r.onload = ()=> res(String(r.result)); r.readAsDataURL(f); })));
-                  setChatAttachments(reads);
+                  const files = Array.from(e.target.files || []).slice(0, 5 - chatAttachments.length);
+                  const reads = await Promise.all(files.map(f=> new Promise<PendingAttachment>((res)=>{ const r = new FileReader(); r.onload = ()=> res({ name: f.name, type: f.type, size: f.size, dataUrl: String(r.result) }); r.readAsDataURL(f); })));
+                  setChatAttachments(prev => [...prev, ...reads]);
                 }} />
               </label>
               <div className="flex-1 flex items-center gap-2">
-                <input value={newMessage} onChange={e=>setNewMessage(e.target.value)} placeholder="Type a message" className="flex-1 border rounded px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"/>
-                <button type="button" className="p-2 text-gray-500 hover:text-gray-700"><Smile className="h-5 w-5"/></button>
+                <input ref={chatInputRef} value={newMessage} onChange={e=>setNewMessage(e.target.value)} onPaste={(e)=>{ const items = e.clipboardData?.items; if (!items) return; const files: File[]=[]; for(let i=0;i<items.length;i++){ const it=items[i]; if(it.kind==='file'){ const f=it.getAsFile(); if(f) files.push(f);} } if(files.length>0){ const dt = new DataTransfer(); files.forEach(f=>dt.items.add(f)); (async()=>{ const list = Array.from(dt.files).slice(0, 5 - chatAttachments.length); const reads = await Promise.all(list.map(f=> new Promise<PendingAttachment>((res)=>{ const r=new FileReader(); r.onload=()=>res({name:f.name,type:f.type,size:f.size,dataUrl:String(r.result)}); r.readAsDataURL(f);}))); setChatAttachments(prev=>[...prev,...reads]); })(); } }} placeholder="Type a message" className="flex-1 border rounded-full px-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"/>
+                <div className="relative">
+                  <button type="button" className="p-2 text-gray-500 hover:text-gray-700" onClick={()=> setShowEmoji(v=>!v)}><Smile className="h-5 w-5"/></button>
+                  {showEmoji && (
+                    <div className="absolute bottom-12 right-0 w-64 max-h-56 overflow-y-auto bg-white border rounded-xl shadow-2xl p-2 grid grid-cols-8 sm:grid-cols-10 gap-2 text-xl z-10">
+                      {['😀','😁','😂','🤣','😊','😍','😘','😇','🙂','😉','😌','😎','🤩','🫶','👍','🙏','👏','💪','🎉','🔥','✨','💡','📌','📎','📷','📝','🤝','🤔','😅','😴','😢','😤'].map(e=> (
+                        <button key={e} className="p-1 hover:bg-gray-100 rounded" onClick={()=>{
+                          const el = chatInputRef.current; const emoji = e as string; if (!el) { setNewMessage(p=>p+emoji); return; }
+                          const s = el.selectionStart || 0; const d = el.selectionEnd || 0; const next = newMessage.slice(0,s)+emoji+newMessage.slice(d);
+                          setNewMessage(next); requestAnimationFrame(()=>{ el.focus(); const c = s+emoji.length; el.setSelectionRange(c,c);});
+                        }}>{e}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <Button disabled={sending} onClick={sendChat}>Send</Button>
             </div>

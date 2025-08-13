@@ -13,9 +13,9 @@ connectDB();
 
 const app = express();
 
-// Body parser middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false }));
+// Body parser middleware (bigger limit to allow base64 attachments)
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // Cookie parser middleware
 app.use(cookieParser());
@@ -24,9 +24,12 @@ app.use(cookieParser());
 const corsOptions = {
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true,
-  optionsSuccessStatus: 200
+  methods: ['GET','POST','PUT','DELETE','OPTIONS','PATCH'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  optionsSuccessStatus: 204
 };
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Security headers
 app.use((req, res, next) => {

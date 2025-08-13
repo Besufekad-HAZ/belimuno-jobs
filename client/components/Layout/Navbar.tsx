@@ -56,8 +56,9 @@ const Navbar: React.FC = () => {
   const fetchNotifications = async () => {
     try {
       const response = await notificationsAPI.getAll();
-      const notif = response.data.notifications;
-      setUnreadCount(notif.filter((n: Notification) => !n.read).length);
+      const notif = response.data?.data || response.data?.notifications || [];
+      const count = Array.isArray(notif) ? notif.filter((n: any) => !n?.isRead && !n?.read).length : 0;
+      setUnreadCount(count);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
