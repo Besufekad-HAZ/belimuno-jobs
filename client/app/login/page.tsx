@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
@@ -8,6 +8,8 @@ import { setAuth, getRoleDashboardPath } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
+
+declare global { interface Window { google?: any } }
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,66 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const [googleReady, setGoogleReady] = useState(false);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
+  const [signupRole, setSignupRole] = useState<'worker'|'client'>('worker');
+
+  useEffect(() => {
+    const existing = document.getElementById('google-identity');
+    if (existing) { setGoogleReady(true); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.id = 'google-identity';
+    s.onload = () => setGoogleReady(true);
+    document.body.appendChild(s);
+  }, []);
+
+  // Initialize Google once script is ready and the button container is in the DOM
+  useEffect(() => {
+    if (!googleReady) return;
+    if (!window.google || !window.google.accounts?.id) return;
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+    if (!clientId) {
+      console.warn('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID');
+      return;
+    }
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: (cred: any) => onGoogleCredential(cred),
+    });
+    if (googleBtnRef.current) {
+      // Clear any previously rendered content (Hot reload or re-init)
+      googleBtnRef.current.innerHTML = '';
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        logo_alignment: 'left',
+      });
+    }
+    window.google.accounts.id.prompt();
+  }, [googleReady]);
+
+  const onGoogleCredential = async (response: any) => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await authAPI.loginWithGoogle(response.credential, signupRole);
+      const { token, user } = res.data;
+      setAuth(token, user);
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('authChanged'));
+      router.push(getRoleDashboardPath(user.role));
+    } catch (e) {
+      console.error(e);
+      setError('Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -130,6 +192,28 @@ const LoginPage: React.FC = () => {
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="px-8 py-8">
+              {/* Role selection + Google Sign-In */}
+              <div className="mb-6">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={()=>setSignupRole('worker')}
+                    className={`px-3 py-1.5 text-sm rounded-full border ${signupRole==='worker' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'}`}
+                  >
+                    I am a Worker
+                  </button>
+                  <button
+                    type="button"
+                    onClick={()=>setSignupRole('client')}
+                    className={`px-3 py-1.5 text-sm rounded-full border ${signupRole==='client' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'}`}
+                  >
+                    I am a Client
+                  </button>
+                </div>
+                <div className="flex justify-center">
+                  <div ref={googleBtnRef} />
+                </div>
+              </div>
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {error && (
                   <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r-lg">
@@ -255,6 +339,7 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* No inline callback needed; using programmatic initialize/render */}
     </div>
   );
 };

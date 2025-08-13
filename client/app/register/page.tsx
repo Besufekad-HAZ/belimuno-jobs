@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { authAPI } from '@/lib/api';
 import { setAuth, getRoleDashboardPath } from '@/lib/auth';
+import { authAPI } from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
+
+declare global { interface Window { google?: any } }
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +31,8 @@ const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const [googleReady, setGoogleReady] = useState(false);
+  const googleBtnRef = useRef<HTMLDivElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -93,7 +97,7 @@ const RegisterPage: React.FC = () => {
         registrationData.profile.website = formData.website;
       }
 
-      const response = await authAPI.register(registrationData);
+      const response = await authAPI.register(registrationData as unknown as Record<string, unknown>);
       const { token, user } = response.data;
 
       setAuth(token, user);
@@ -112,6 +116,47 @@ const RegisterPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Google Sign Up (with role)
+  useEffect(() => {
+    const existing = document.getElementById('google-identity');
+    if (existing) { setGoogleReady(true); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.id = 'google-identity';
+    s.onload = () => setGoogleReady(true);
+    document.body.appendChild(s);
+  }, []);
+
+  useEffect(() => {
+    if (!googleReady) return;
+    if (!window.google || !window.google.accounts?.id) return;
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+    if (!clientId) return;
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (resp: any) => {
+        try {
+          const res = await authAPI.loginWithGoogle(resp.credential, formData.role as 'worker'|'client');
+          const { token, user } = res.data;
+          setAuth(token, user);
+          if (typeof window !== 'undefined') window.dispatchEvent(new Event('authChanged'));
+          router.push(getRoleDashboardPath(user.role));
+        } catch (e) {
+          console.error(e);
+          setError('Google sign-up failed. If you already have an account with this email, please use Login.');
+        }
+      }
+    });
+    if (googleBtnRef.current) {
+      googleBtnRef.current.innerHTML = '';
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        type: 'standard', theme: 'outline', size: 'large', text: 'signup_with', shape: 'rectangular', logo_alignment: 'left'
+      });
+    }
+  }, [googleReady, formData.role, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -168,6 +213,11 @@ const RegisterPage: React.FC = () => {
                 <option value="worker">Worker (Freelancer)</option>
                 <option value="client">Client (Employer)</option>
               </select>
+            </div>
+
+            {/* Google Sign Up Button */}
+            <div className="flex justify-center">
+              <div ref={googleBtnRef} />
             </div>
 
             <Input

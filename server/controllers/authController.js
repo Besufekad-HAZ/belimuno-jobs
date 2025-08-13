@@ -5,6 +5,10 @@ const User = require('../models/User');
 const Region = require('../models/Region');
 const ErrorResponse = require('../utils/errorResponse');
 const { generateToken, generateShortToken } = require('../utils/jwtUtils');
+const https = require('https');
+const dns = require('dns');
+// Prefer IPv4 results first to avoid IPv6 connectivity issues in some environments (e.g., WSL)
+try { if (dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first'); } catch {}
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -484,4 +488,150 @@ module.exports = {
   resetPassword,
   verifyEmail,
   resendVerification,
+  googleAuth,
 };
+
+/**
+ * Google OAuth: verify ID token without external deps using tokeninfo endpoint
+ */
+async function verifyGoogleIdToken(idToken) {
+  const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`;
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, (res) => {
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => {
+        try {
+          const payload = JSON.parse(data);
+          if (payload.error_description || payload.error) return reject(new Error(payload.error_description || payload.error));
+          resolve(payload);
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+    req.on('timeout', () => {
+      req.destroy(new Error('ETIMEDOUT'));
+    });
+    req.on('error', async (err) => {
+      // Optional dev fallback (offline verify) when network is blocked
+      if (process.env.GOOGLE_OFFLINE_VERIFY === 'true') {
+        try {
+          const decoded = jwt.decode(idToken) || {};
+          if (!decoded || typeof decoded !== 'object') return reject(err);
+          // Minimal checks
+          const now = Math.floor(Date.now() / 1000);
+          if (decoded.exp && now > decoded.exp) return reject(new Error('Token expired'));
+          if (!decoded.aud) return reject(new Error('Missing audience'));
+          resolve({
+            aud: decoded.aud,
+            email: decoded.email,
+            email_verified: decoded.email_verified || decoded.email_verified === 'true',
+            name: decoded.name,
+            picture: decoded.picture,
+            iss: decoded.iss,
+          });
+          return;
+        } catch (e) {
+          return reject(err);
+        }
+      }
+      reject(err);
+    });
+    req.end();
+  });
+}
+
+// @desc    Google login/register
+// @route   POST /api/auth/google
+// @access  Public
+async function googleAuth(req, res) {
+  try {
+    const { credential, role } = req.body || {};
+    if (!credential) {
+      return res.status(400).json({ success: false, message: 'Missing Google credential' });
+    }
+
+    let googlePayload;
+    try {
+      googlePayload = await verifyGoogleIdToken(credential);
+    } catch (err) {
+      console.error('Google auth error:', err);
+      if (process.env.GOOGLE_OFFLINE_VERIFY === 'true') {
+        try {
+          const decoded = jwt.decode(credential) || {};
+          const now = Math.floor(Date.now() / 1000);
+          if (!decoded || typeof decoded !== 'object') throw err;
+          if (decoded.exp && now > decoded.exp) throw new Error('Token expired');
+          googlePayload = {
+            aud: decoded.aud,
+            email: decoded.email,
+            email_verified: decoded.email_verified || decoded.email_verified === 'true',
+            name: decoded.name,
+            picture: decoded.picture,
+          };
+        } catch (e) {
+          return res.status(503).json({ success: false, message: 'Unable to verify Google token (network). Enable GOOGLE_OFFLINE_VERIFY=true for local dev or check connectivity.', error: err.message });
+        }
+      } else {
+        return res.status(503).json({ success: false, message: 'Unable to verify Google token (network). Enable GOOGLE_OFFLINE_VERIFY=true for local dev or check connectivity.', error: err.message });
+      }
+    }
+    const audience = googlePayload.aud;
+    const expectedStr = (process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_IDS || '').trim();
+    const expectedList = expectedStr ? expectedStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    if (expectedList.length === 0) {
+      return res.status(500).json({ success: false, message: 'Server misconfiguration: GOOGLE_CLIENT_ID not set' });
+    }
+    if (!expectedList.includes(audience)) {
+      return res.status(401).json({ success: false, message: 'Invalid token audience', expected: expectedList, received: audience });
+    }
+    const emailVerified = googlePayload.email_verified === true || googlePayload.email_verified === 'true';
+    if (!emailVerified) {
+      return res.status(401).json({ success: false, message: 'Google email not verified' });
+    }
+
+    const email = googlePayload.email;
+    const name = googlePayload.name || email.split('@')[0];
+    const picture = googlePayload.picture;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      // If no role is provided, treat as login-only and do not auto-create
+      if (!role) {
+        return res.status(404).json({ success: false, message: 'No account found for this Google email. Please sign up first.' });
+      }
+      // Create new account (Google sign-up) with selected role
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, 12);
+      const allowedRoles = ['worker', 'client'];
+      const assignedRole = allowedRoles.includes(role) ? role : 'worker';
+
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        role: assignedRole,
+        profile: { avatar: picture },
+        isVerified: true,
+      });
+    } else {
+      if (!user.isActive) {
+        return res.status(401).json({ success: false, message: 'Account has been deactivated. Please contact support.' });
+      }
+      // Ensure avatar gets updated if empty
+      if (picture && (!user.profile || !user.profile.avatar)) {
+        user.profile = user.profile || {};
+        user.profile.avatar = picture;
+        await user.save();
+      }
+    }
+
+    const token = generateToken({ id: user._id });
+    user.password = undefined;
+    res.status(200).json({ success: true, message: 'Google login successful', token, user });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    res.status(500).json({ success: false, message: 'Error during Google authentication', error: error.message });
+  }
+}

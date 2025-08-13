@@ -77,7 +77,9 @@ const UserSchema = new mongoose.Schema({
     industry: String,
     website: String,
     totalJobsPosted: { type: Number, default: 0 },
-    totalAmountSpent: { type: Number, default: 0 }
+    totalAmountSpent: { type: Number, default: 0 },
+    rating: { type: Number, default: 0, min: 0, max: 5 },
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
   },
 
   // Payment Information
@@ -103,6 +105,11 @@ const UserSchema = new mongoose.Schema({
   lastLogin: Date,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
+});
+
+// Saved jobs for workers (and optionally clients)
+UserSchema.add({
+  savedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Job' }]
 });
 
 // Index for faster queries

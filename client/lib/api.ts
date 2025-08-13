@@ -38,6 +38,8 @@ export const authAPI = {
     api.post('/auth/login', { email, password }),
   register: (userData: Record<string, unknown>) =>
     api.post('/auth/register', userData),
+  loginWithGoogle: (credential: string, role?: 'worker'|'client') =>
+    api.post('/auth/google', { credential, role }),
   getMe: () =>
     api.get('/auth/me'),
   logout: () =>
@@ -93,8 +95,8 @@ export const clientAPI = {
     api.get('/client/payments'),
   getJobMessages: (jobId: string) =>
     api.get(`/client/jobs/${jobId}/messages`),
-  sendJobMessage: (jobId: string, content: string) =>
-    api.post(`/client/jobs/${jobId}/messages`, { content }),
+  sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
+    api.post(`/client/jobs/${jobId}/messages`, { content, attachments }),
 };
 
 // Worker API
@@ -117,12 +119,19 @@ export const workerAPI = {
     api.get('/worker/earnings'),
   getJobMessages: (jobId: string) =>
     api.get(`/worker/jobs/${jobId}/messages`),
-  sendJobMessage: (jobId: string, content: string) =>
-    api.post(`/worker/jobs/${jobId}/messages`, { content }),
+  sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
+    api.post(`/worker/jobs/${jobId}/messages`, { content, attachments }),
   declineAssignedJob: (jobId: string) =>
     api.put(`/worker/jobs/${jobId}/decline`),
   acceptAssignedJob: (jobId: string) =>
     api.put(`/worker/jobs/${jobId}/accept`),
+  // Saved jobs
+  getSavedJobs: () => api.get('/worker/saved-jobs'),
+  saveJob: (jobId: string) => api.post(`/worker/saved-jobs/${jobId}`),
+  unsaveJob: (jobId: string) => api.delete(`/worker/saved-jobs/${jobId}`),
+  // Reviews
+  reviewClient: (jobId: string, payload: { rating: number; comment: string; title?: string }) =>
+    api.post(`/worker/jobs/${jobId}/review`, payload),
 };
 
 // Admin API
@@ -157,6 +166,11 @@ export const adminAPI = {
     api.put(`/admin/payments/${id}/dispute`, { action, resolution }),
   markPaymentPaid: (id: string) =>
     api.put(`/admin/payments/${id}/mark-paid`),
+  // Reviews moderation
+  getReviews: (params?: Record<string, unknown>) =>
+    api.get('/admin/reviews', { params }),
+  moderateReview: (id: string, payload: { moderationStatus?: 'pending'|'approved'|'rejected'; status?: 'draft'|'published'|'hidden'; isPublic?: boolean }) =>
+    api.put(`/admin/reviews/${id}`, payload),
 };
 
 // Notifications API

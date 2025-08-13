@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, Search, Filter, UserX, Shield, Mail, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Search, Filter, UserX, Shield, Mail, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight, RefreshCcw } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 // import Input from '@/components/ui/Input';
@@ -49,6 +49,7 @@ const AdminUsersPage: React.FC = () => {
   const [verifyModal, setVerifyModal] = useState<{ open: boolean; user?: UserItem }>( { open: false } );
   const [deactivateModal, setDeactivateModal] = useState<{ open: boolean; user?: UserItem; reason?: string }>( { open: false } );
   const [reactivatingId, setReactivatingId] = useState<string | null>(null);
+  const [editRole, setEditRole] = useState<{ open: boolean; user?: UserItem; newRole?: UserItem['role'] }>({ open: false });
 
   useEffect(() => {
     const u = getStoredUser();
@@ -204,6 +205,9 @@ const AdminUsersPage: React.FC = () => {
                       <CheckCircle2 className="h-4 w-4 mr-1" /> Verify
                     </Button>
                   )}
+                  <Button size="sm" variant="outline" onClick={()=> setEditRole({ open: true, user, newRole: user.role })}>
+                    <Shield className="h-4 w-4 mr-1"/> Change Role
+                  </Button>
                   {user.isActive === false ? (
                     <Button size="sm" onClick={() => reactivate(user._id)} disabled={reactivatingId === user._id}>
                       {reactivatingId === user._id ? 'Reactivating…' : 'Reactivate'}
@@ -261,6 +265,31 @@ const AdminUsersPage: React.FC = () => {
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={() => setDeactivateModal({ open: false })}>Cancel</Button>
             <Button variant="danger" onClick={() => deactivate(deactivateModal.user!._id)}>Deactivate</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Change Role Modal */}
+      <Modal isOpen={editRole.open} onClose={() => setEditRole({ open: false })} title="Change User Role">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">Select a new role for <strong>{editRole.user?.name}</strong>.</p>
+          <select
+            value={editRole.newRole}
+            onChange={(e)=> setEditRole(m=>({ ...m, newRole: e.target.value as UserItem['role'] }))}
+            className="w-full border rounded px-3 py-2 bg-white"
+          >
+            {Roles.map(r => <option key={r} value={r}>{r.replace('_',' ')}</option>)}
+          </select>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setEditRole({ open: false })}>Cancel</Button>
+            <Button onClick={async ()=>{
+              if (!editRole.user || !editRole.newRole) return;
+              await adminAPI.updateUser(editRole.user._id, { role: editRole.newRole });
+              setEditRole({ open: false });
+              load();
+            }}>
+              <RefreshCcw className="h-4 w-4 mr-1"/> Update Role
+            </Button>
           </div>
         </div>
       </Modal>

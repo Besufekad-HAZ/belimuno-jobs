@@ -4,6 +4,7 @@ const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const Payment = require('../models/Payment');
 const asyncHandler = require('../utils/asyncHandler');
+const Review = require('../models/Review');
 
 // @desc    Get client dashboard data
 // @route   GET /api/client/dashboard
@@ -219,9 +220,9 @@ exports.getJobMessages = asyncHandler(async (req, res) => {
 // @route   POST /api/client/jobs/:id/messages
 // @access  Private/Client
 exports.sendJobMessage = asyncHandler(async (req, res) => {
-  const { content } = req.body;
-  if (!content || !content.trim()) {
-    return res.status(400).json({ success: false, message: 'Message content required' });
+  const { content, attachments } = req.body || {};
+  if (!content && (!attachments || !attachments.length)) {
+    return res.status(400).json({ success: false, message: 'Message content or attachments required' });
   }
 
   const job = await Job.findOne({ _id: req.params.id, client: req.user._id });
@@ -229,11 +230,12 @@ exports.sendJobMessage = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Job not found' });
   }
 
+  const safeAttachments = Array.isArray(attachments) ? attachments.slice(0, 5) : [];
   const message = {
     sender: req.user._id,
-    content: content.trim(),
+    content: (content || '').trim(),
     sentAt: new Date(),
-    attachments: []
+    attachments: safeAttachments
   };
   job.messages.push(message);
   await job.save();
@@ -457,6 +459,18 @@ exports.markJobCompleted = asyncHandler(async (req, res) => {
     worker.workerProfile.rating = totalRating / worker.workerProfile.completedJobs;
 
     await worker.save();
+  }
+
+  // Persist review document
+  if (job.worker && rating) {
+    await Review.create({
+      job: job._id,
+      reviewer: req.user._id,
+      reviewee: job.worker._id,
+      reviewType: 'client_to_worker',
+      rating,
+      comment: review,
+    });
   }
 
   // Create manual payment record (processed by check)

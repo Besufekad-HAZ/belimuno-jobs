@@ -6,6 +6,7 @@ const Region = require('../models/Region');
 const Notification = require('../models/Notification');
 const Report = require('../models/Report');
 const asyncHandler = require('../utils/asyncHandler');
+const Review = require('../models/Review');
 
 // @desc    Get admin dashboard
 // @route   GET /api/admin/dashboard
@@ -704,4 +705,56 @@ exports.activateUser = asyncHandler(async (req, res) => {
     message: 'User activated successfully',
     data: user
   });
+});
+
+// @desc    List reviews with filtering and moderation status
+// @route   GET /api/admin/reviews
+// @access  Private/Any Admin
+exports.getReviews = asyncHandler(async (req, res) => {
+  const { status, moderationStatus, reviewer, reviewee, page = 1, limit = 20 } = req.query;
+  const query = {};
+  if (status) query.status = status;
+  if (moderationStatus) query.moderationStatus = moderationStatus;
+  if (reviewer) query.reviewer = reviewer;
+  if (reviewee) query.reviewee = reviewee;
+
+  const reviews = await Review.find(query)
+    .populate('job', 'title')
+    .populate('reviewer', 'name role')
+    .populate('reviewee', 'name role')
+    .sort({ createdAt: -1 })
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
+
+  const total = await Review.countDocuments(query);
+  res.status(200).json({
+    success: true,
+    count: reviews.length,
+    total,
+    pagination: { page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / limit) },
+    data: reviews,
+  });
+});
+
+// @desc    Moderate a review (approve/reject/hide)
+// @route   PUT /api/admin/reviews/:id
+// @access  Private/Any Admin
+exports.moderateReview = asyncHandler(async (req, res) => {
+  const { moderationStatus, status, isPublic } = req.body;
+  const allowedModeration = ['pending', 'approved', 'rejected'];
+  const allowedStatus = ['draft', 'published', 'hidden'];
+
+  const update = {};
+  if (moderationStatus && allowedModeration.includes(moderationStatus)) update.moderationStatus = moderationStatus;
+  if (status && allowedStatus.includes(status)) update.status = status;
+  if (typeof isPublic === 'boolean') update.isPublic = isPublic;
+
+  const review = await Review.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true })
+    .populate('job', 'title')
+    .populate('reviewer', 'name role')
+    .populate('reviewee', 'name role');
+
+  if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+
+  res.status(200).json({ success: true, data: review });
 });

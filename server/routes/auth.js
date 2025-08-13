@@ -13,6 +13,7 @@ const {
   resetPassword,
   verifyEmail,
   resendVerification,
+  googleAuth,
 } = require('../controllers/authController');
 
 // Import middleware
@@ -28,6 +29,7 @@ const {
 // Public routes
 router.post('/register', validateRegistration, register);
 router.post('/login', validateLogin, login);
+router.post('/google', googleAuth);
 router.post('/forgot-password', validatePasswordReset, forgotPassword);
 router.post('/reset-password/:token', validateNewPassword, resetPassword);
 router.get('/verify-email/:token', verifyEmail);

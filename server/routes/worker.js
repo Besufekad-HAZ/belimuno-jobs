@@ -11,7 +11,11 @@ const {
   getJobMessages,
   sendJobMessage,
   declineAssignedJob,
-  acceptAssignedJob
+  acceptAssignedJob,
+  saveJob,
+  unsaveJob,
+  getSavedJobs,
+  reviewClient
 } = require('../controllers/workerController');
 const { protect } = require('../middleware/auth');
 const { requireWorker } = require('../middleware/roleCheck');
@@ -32,6 +36,14 @@ router.put('/jobs/:id/decline', declineAssignedJob);
 router.put('/jobs/:id/accept', acceptAssignedJob);
 router.get('/jobs/:id/messages', getJobMessages);
 router.post('/jobs/:id/messages', sendJobMessage);
+
+// Saved jobs
+router.get('/saved-jobs', getSavedJobs);
+router.post('/saved-jobs/:jobId', saveJob);
+router.delete('/saved-jobs/:jobId', unsaveJob);
+
+// Reviews
+router.post('/jobs/:id/review', reviewClient);
 
 // Application management
 router.get('/applications', getApplications);

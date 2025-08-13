@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Bell, User as UserIcon, LogOut } from 'lucide-react';
+import { Bell, User as UserIcon, LogOut, Menu, X } from 'lucide-react';
 import { getStoredUser, clearAuth, getRoleDashboardPath } from '@/lib/auth';
 import { notificationsAPI } from '@/lib/api';
 import type { User } from '@/lib/auth';
@@ -20,6 +20,7 @@ const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -91,9 +92,9 @@ const Navbar: React.FC = () => {
     <nav className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 via-cyan-700 to-cyan-500 shadow-md border-b border-cyan-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-4 lg:space-x-8">
             <Link href="/" className="flex-shrink-0 flex items-center gap-2">
-              <div className="relative h-12 w-12 mix-blend-luminosity border border-cyan-200 rounded-full bg-amber-50">
+              <div className="relative h-10 w-10 sm:h-12 sm:w-12 mix-blend-luminosity border border-cyan-200 rounded-full bg-amber-50">
                 <Image
                   src="/belimuno.png"
                   alt="Belimuno Logo"
@@ -102,13 +103,13 @@ const Navbar: React.FC = () => {
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
+              <h1 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
                 Belimuno Jobs
               </h1>
             </Link>
 
-            {/* Navigation Links */}
-            <nav className="hidden md:flex space-x-6">
+            {/* Navigation Links (desktop) */}
+            <nav className="hidden lg:flex space-x-6">
               <Link
                 href="/"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
@@ -150,6 +151,14 @@ const Navbar: React.FC = () => {
 
           {user ? (
             <div className="flex items-center space-x-4">
+              {/* Mobile menu toggle */}
+              <button
+                className="hidden max-[900px]:inline-flex p-2 text-cyan-100 hover:text-white"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="h-7 w-7"/> : <Menu className="h-7 w-7"/>}
+              </button>
               {/* Notifications */}
               <button className="relative p-2 text-cyan-100 hover:text-white">
                 <Bell className="h-6 w-6" />
@@ -202,6 +211,14 @@ const Navbar: React.FC = () => {
             </div>
           ) : (
             <div className="flex items-center space-x-4">
+              {/* Mobile menu toggle */}
+              <button
+                className="hidden max-[900px]:inline-flex p-2 text-cyan-100 hover:text-white"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="h-7 w-7"/> : <Menu className="h-7 w-7"/>}
+              </button>
               <Link
                 href="/login"
                 className="text-cyan-100 hover:text-white px-3 py-2 text-sm font-medium border border-cyan-300 rounded-md"
@@ -218,6 +235,19 @@ const Navbar: React.FC = () => {
           )}
         </div>
       </div>
+      {/* Mobile menu (<= 900px) */}
+      {mobileOpen && (
+        <div className="hidden max-[900px]:block border-t border-cyan-300/40 bg-gradient-to-b from-cyan-700 to-cyan-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1">
+            <Link href="/" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Home</Link>
+            <Link href="/about" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">About</Link>
+            <Link href="/services" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Services</Link>
+            <Link href="/clients" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Our Clients</Link>
+            <Link href="/jobs" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Jobs</Link>
+            <Link href="/contact" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Contact</Link>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

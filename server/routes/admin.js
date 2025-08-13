@@ -14,7 +14,9 @@ const {
   handlePaymentDispute,
   markPaymentPaid,
   deactivateUser,
-  activateUser
+  activateUser,
+  getReviews,
+  moderateReview
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/auth');
 const { requireSuperAdmin, requireAnyAdmin } = require('../middleware/roleCheck');
@@ -48,5 +50,9 @@ router.delete('/jobs/:id', deleteJob);
 router.get('/payments', getPayments);
 router.put('/payments/:id/dispute', requireSuperAdmin, handlePaymentDispute);
 router.put('/payments/:id/mark-paid', markPaymentPaid);
+
+// Reviews moderation
+router.get('/reviews', getReviews);
+router.put('/reviews/:id', moderateReview);
 
 module.exports = router;

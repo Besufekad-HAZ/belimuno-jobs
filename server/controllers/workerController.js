@@ -4,6 +4,7 @@ const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const Payment = require('../models/Payment');
 const asyncHandler = require('../utils/asyncHandler');
+const Review = require('../models/Review');
 
 // @desc    Get worker dashboard
 // @route   GET /api/worker/dashboard
@@ -387,6 +388,81 @@ exports.getEarnings = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Save a job (bookmark) for later
+// @route   POST /api/worker/saved-jobs/:jobId
+// @access  Private/Worker
+exports.saveJob = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  const job = await Job.findById(jobId).select('_id status isPublic');
+  if (!job || (!job.isPublic && String(job.worker) !== String(req.user._id))) {
+    return res.status(404).json({ success: false, message: 'Job not found' });
+  }
+  await User.findByIdAndUpdate(req.user._id, { $addToSet: { savedJobs: job._id } });
+  res.status(200).json({ success: true, message: 'Job saved' });
+});
+
+// @desc    Remove saved job (unbookmark)
+// @route   DELETE /api/worker/saved-jobs/:jobId
+// @access  Private/Worker
+exports.unsaveJob = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  await User.findByIdAndUpdate(req.user._id, { $pull: { savedJobs: jobId } });
+  res.status(200).json({ success: true, message: 'Job removed from saved list' });
+});
+
+// @desc    List saved jobs
+// @route   GET /api/worker/saved-jobs
+// @access  Private/Worker
+exports.getSavedJobs = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).populate({ path: 'savedJobs', select: 'title budget deadline category region status isPublic createdAt', populate: { path: 'region', select: 'name' } });
+  res.status(200).json({ success: true, count: user.savedJobs?.length || 0, data: user.savedJobs || [] });
+});
+
+// @desc    Submit review from worker to client
+// @route   POST /api/worker/jobs/:id/review
+// @access  Private/Worker
+exports.reviewClient = asyncHandler(async (req, res) => {
+  const { rating, comment, title, detailedRatings } = req.body;
+  if (!rating || rating < 1 || rating > 5) return res.status(400).json({ success: false, message: 'Rating 1-5 required' });
+
+  const job = await Job.findOne({ _id: req.params.id, worker: req.user._id });
+  if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
+  if (job.status !== 'completed') return res.status(400).json({ success: false, message: 'Can only review after completion' });
+  if (job.review?.workerReview?.rating) {
+    return res.status(200).json({ success: true, message: 'Already reviewed', data: job.review.workerReview });
+  }
+
+  // Persist to Review collection
+  const review = await Review.create({
+    job: job._id,
+    reviewer: req.user._id,
+    reviewee: job.client,
+    reviewType: 'worker_to_client',
+    rating,
+    title,
+    comment,
+    detailedRatings,
+  });
+
+  // Also store summary on Job
+  job.review = job.review || {};
+  job.review.workerReview = { rating, comment, reviewedAt: new Date() };
+  await job.save();
+
+  // Update client's aggregated rating
+  const client = await User.findById(job.client);
+  client.clientProfile = client.clientProfile || {};
+  const currentRating = client.clientProfile.rating || 0;
+  const reviewsCount = Array.isArray(client.clientProfile.reviews) ? client.clientProfile.reviews.length : 0;
+  const newAverage = ((currentRating * reviewsCount) + rating) / (reviewsCount + 1);
+  client.clientProfile.rating = newAverage;
+  client.clientProfile.reviews = client.clientProfile.reviews || [];
+  client.clientProfile.reviews.push(review._id);
+  await client.save();
+
+  res.status(201).json({ success: true, data: review });
+});
+
 // @desc    Get messages for an assigned job (worker side)
 // @route   GET /api/worker/jobs/:id/messages
 // @access  Private/Worker
@@ -403,15 +479,16 @@ exports.getJobMessages = asyncHandler(async (req, res) => {
 // @route   POST /api/worker/jobs/:id/messages
 // @access  Private/Worker
 exports.sendJobMessage = asyncHandler(async (req, res) => {
-  const { content } = req.body;
-  if (!content || !content.trim()) {
-    return res.status(400).json({ success: false, message: 'Message content required' });
+  const { content, attachments } = req.body || {};
+  if (!content && (!attachments || !attachments.length)) {
+    return res.status(400).json({ success: false, message: 'Message content or attachments required' });
   }
   const job = await Job.findOne({ _id: req.params.id, worker: req.user._id });
   if (!job) {
     return res.status(404).json({ success: false, message: 'Job not found or not assigned to you' });
   }
-  const message = { sender: req.user._id, content: content.trim(), sentAt: new Date(), attachments: [] };
+  const safeAttachments = Array.isArray(attachments) ? attachments.slice(0, 5) : [];
+  const message = { sender: req.user._id, content: (content || '').trim(), sentAt: new Date(), attachments: safeAttachments };
   job.messages.push(message);
   await job.save();
   await job.populate('messages.sender', 'name role');

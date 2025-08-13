@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Filter, MapPin, Clock, DollarSign, Briefcase } from 'lucide-react';
+import { Search, Filter, MapPin, Clock, DollarSign, Briefcase, Bookmark, Share2 } from 'lucide-react';
 import { getStoredUser } from '@/lib/auth';
-import { jobsAPI } from '@/lib/api';
+import { jobsAPI, workerAPI } from '@/lib/api';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
@@ -33,6 +33,8 @@ const JobsPage: React.FC = () => {
   const [user, setUser] = useState<ReturnType<typeof getStoredUser> | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [savingJobId, setSavingJobId] = useState<string | null>(null);
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
 
   // fetchJobs defined below; initial effect will reference it
 
@@ -87,6 +89,15 @@ const JobsPage: React.FC = () => {
     const currentUser = getStoredUser();
     setUser(currentUser);
     fetchJobs();
+    (async () => {
+      try {
+        if (currentUser?.role === 'worker') {
+          const res = await workerAPI.getSavedJobs();
+          const ids = new Set((res.data?.data || []).map((j: any) => String(j._id)));
+          setSavedJobIds(ids);
+        }
+      } catch {}
+    })();
   }, [fetchJobs]);
 
   const handleSearch = () => {
@@ -303,6 +314,47 @@ const JobsPage: React.FC = () => {
                             <Button size="sm">Apply Now</Button>
                           </Link>
                         )}
+                        <Button
+                          variant={savedJobIds.has(job._id) ? 'outline' : 'ghost'}
+                          size="sm"
+                          onClick={async () => {
+                            if (user?.role !== 'worker') return;
+                            setSavingJobId(job._id);
+                            try {
+                              if (savedJobIds.has(job._id)) {
+                                await workerAPI.unsaveJob(job._id);
+                                const copy = new Set(savedJobIds);
+                                copy.delete(job._id);
+                                setSavedJobIds(copy);
+                              } else {
+                                await workerAPI.saveJob(job._id);
+                                const copy = new Set(savedJobIds);
+                                copy.add(job._id);
+                                setSavedJobIds(copy);
+                              }
+                            } catch (e) { console.error(e); }
+                            finally { setSavingJobId(null); }
+                          }}
+                        >
+                          <Bookmark className="h-4 w-4 mr-1" /> {savedJobIds.has(job._id) ? 'Saved' : 'Save'}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            const url = `${window.location.origin}/jobs/${job._id}`;
+                            try {
+                              if ((navigator as any).share) {
+                                await (navigator as any).share({ title: `Belimuno Job: ${job.title}`, url });
+                              } else if (navigator.clipboard) {
+                                await navigator.clipboard.writeText(url);
+                                alert('Link copied to clipboard');
+                              }
+                            } catch (e) { console.error(e); }
+                          }}
+                        >
+                          <Share2 className="h-4 w-4 mr-1" /> Share
+                        </Button>
                         {!user && (
                           <Link href="/login" className="inline-block">
                             <Button size="sm">Login to Apply</Button>
