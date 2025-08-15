@@ -3,6 +3,7 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const Payment = require('../models/Payment');
+const NotificationService = require('../utils/notificationService');
 const asyncHandler = require('../utils/asyncHandler');
 const Review = require('../models/Review');
 

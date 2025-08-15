@@ -4,9 +4,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Bell, User as UserIcon, LogOut, Menu, X } from 'lucide-react';
+import { User as UserIcon, LogOut, Menu, X } from 'lucide-react';
 import { getStoredUser, clearAuth, getRoleDashboardPath } from '@/lib/auth';
 import { notificationsAPI } from '@/lib/api';
+import NotificationDropdown from '@/components/ui/NotificationDropdown';
 import type { User } from '@/lib/auth';
 
 type Notification = {
@@ -161,14 +162,10 @@ const Navbar: React.FC = () => {
                 {mobileOpen ? <X className="h-7 w-7"/> : <Menu className="h-7 w-7"/>}
               </button>
               {/* Notifications */}
-              <button className="relative p-2 text-cyan-100 hover:text-white">
-                <Bell className="h-6 w-6" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
+              <NotificationDropdown
+                unreadCount={unreadCount}
+                onNotificationUpdate={fetchNotifications}
+              />
 
               {/* User Menu */}
               <div className="relative" ref={menuRef}>

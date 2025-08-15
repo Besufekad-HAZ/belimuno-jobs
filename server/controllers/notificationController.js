@@ -134,3 +134,121 @@ exports.getNotificationStats = asyncHandler(async (req, res) => {
     }
   });
 });
+
+// @desc    Create notification (for system use)
+// @route   POST /api/notifications/create
+// @access  Private/Admin
+exports.createNotification = asyncHandler(async (req, res) => {
+  const {
+    recipients,
+    title,
+    message,
+    type = 'general',
+    priority = 'medium',
+    relatedJob,
+    relatedUser,
+    relatedPayment,
+    actionButton,
+    channels = { inApp: true },
+    expiresAt
+  } = req.body;
+
+  if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Recipients array is required'
+    });
+  }
+
+  if (!title || !message) {
+    return res.status(400).json({
+      success: false,
+      message: 'Title and message are required'
+    });
+  }
+
+  // Create notifications for all recipients
+  const notifications = await Promise.all(
+    recipients.map(recipientId =>
+      Notification.create({
+        recipient: recipientId,
+        sender: req.user._id,
+        title,
+        message,
+        type,
+        priority,
+        relatedJob,
+        relatedUser,
+        relatedPayment,
+        actionButton,
+        channels,
+        expiresAt
+      })
+    )
+  );
+
+  res.status(201).json({
+    success: true,
+    message: `Created ${notifications.length} notifications`,
+    data: notifications
+  });
+});
+
+// @desc    Send system announcement
+// @route   POST /api/notifications/announcement
+// @access  Private/SuperAdmin
+exports.sendSystemAnnouncement = asyncHandler(async (req, res) => {
+  const {
+    title,
+    message,
+    targetRoles = ['worker', 'client'],
+    priority = 'medium',
+    expiresAt
+  } = req.body;
+
+  if (!title || !message) {
+    return res.status(400).json({
+      success: false,
+      message: 'Title and message are required'
+    });
+  }
+
+  // Get all users with target roles
+  const User = require('../models/User');
+  const targetUsers = await User.find({
+    role: { $in: targetRoles },
+    isActive: true
+  }).select('_id');
+
+  if (targetUsers.length === 0) {
+    return res.status(404).json({
+      success: false,
+      message: 'No active users found with target roles'
+    });
+  }
+
+  // Create notifications for all target users
+  const notifications = await Promise.all(
+    targetUsers.map(user =>
+      Notification.create({
+        recipient: user._id,
+        sender: req.user._id,
+        title,
+        message,
+        type: 'system_announcement',
+        priority,
+        channels: { inApp: true, email: true },
+        expiresAt
+      })
+    )
+  );
+
+  res.status(201).json({
+    success: true,
+    message: `System announcement sent to ${notifications.length} users`,
+    data: {
+      recipientCount: notifications.length,
+      targetRoles
+    }
+  });
+});

@@ -77,8 +77,9 @@ export const getRoleDashboardPath = (role: string): string => {
     case 'super_admin':
       return '/admin/dashboard';
     case 'admin_hr':
+      return '/admin/hr/dashboard';
     case 'admin_outsource':
-      return '/admin/dashboard';
+      return '/admin/outsource/dashboard';
     case 'worker':
       return '/worker/dashboard';
     case 'client':

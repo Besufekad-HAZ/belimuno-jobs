@@ -185,6 +185,26 @@ export const notificationsAPI = {
     api.put('/notifications/read-all'),
   delete: (id: string) =>
     api.delete(`/notifications/${id}`),
+  create: (payload: {
+    recipients: string[];
+    title: string;
+    message: string;
+    type?: string;
+    priority?: string;
+    relatedJob?: string;
+    relatedUser?: string;
+    actionButton?: { text: string; url: string; action: string };
+    expiresAt?: string;
+  }) =>
+    api.post('/notifications/create', payload),
+  sendAnnouncement: (payload: {
+    title: string;
+    message: string;
+    targetRoles?: string[];
+    priority?: string;
+    expiresAt?: string;
+  }) =>
+    api.post('/notifications/announcement', payload),
 };
 
 // Public contact API

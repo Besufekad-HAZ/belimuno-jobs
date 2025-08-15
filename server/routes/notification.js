@@ -4,9 +4,12 @@ const {
   markAsRead,
   markAllAsRead,
   deleteNotification,
-  getNotificationStats
+  getNotificationStats,
+  createNotification,
+  sendSystemAnnouncement
 } = require('../controllers/notificationController');
 const { protect } = require('../middleware/auth');
+const { requireAnyAdmin, requireSuperAdmin } = require('../middleware/roleCheck');
 
 const router = express.Router();
 
@@ -23,5 +26,9 @@ router.put('/:id/read', markAsRead);
 
 // Delete notification
 router.delete('/:id', deleteNotification);
+
+// Admin routes
+router.post('/create', requireAnyAdmin, createNotification);
+router.post('/announcement', requireSuperAdmin, sendSystemAnnouncement);
 
 module.exports = router;

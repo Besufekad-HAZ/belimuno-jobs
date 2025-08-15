@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Users, Target, Eye, Heart, Award, MapPin, Phone, Mail, Globe } from 'lucide-react';
+import { Users, Target, Eye, Heart, Award } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -255,61 +255,78 @@ const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Contact Information */}
-      <section className="py-16 bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Contact Us</h2>
-            <div className="w-24 h-1 bg-white/30 mx-auto"></div>
-          </div>
+      {/* Call to Action */}
+<section className="py-20 bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-600 text-white relative overflow-hidden">
+  {/* Background Pattern */}
+  <div className="absolute inset-0 opacity-10">
+    <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
+    <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-300 rounded-full translate-x-48 translate-y-48"></div>
+  </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
-              <MapPin className="h-12 w-12 text-cyan-300 mx-auto mb-4" />
-              <h3 className="font-bold mb-2">Address</h3>
-              <p className="text-blue-100">
-                Bole Medhaniyalem to Hayahulet Road<br />
-                In front of new Stadium<br />
-                ANAT Commercial Center<br />
-                4th floor office No 402
-              </p>
-            </div>
+  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+    <h2 className="text-4xl font-bold mb-6 leading-tight">Ready to Work with Us?</h2>
+    <p className="text-xl text-cyan-100 font-medium mb-10 leading-relaxed max-w-3xl mx-auto">
+      "The only way to do great work is to love what you do. And we Love what we do! That's why we say come to Us."
+    </p>
 
-            <div className="text-center">
-              <Phone className="h-12 w-12 text-cyan-300 mx-auto mb-4" />
-              <h3 className="font-bold mb-2">Phone</h3>
-              <div className="text-blue-100 space-y-1">
-                <p>+251 930 014 332</p>
-                <p>+251 978 009 084</p>
-                <p>+251 935 402 673</p>
-                <p>+251 913 064 948</p>
-              </div>
-            </div>
+    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+        <Link href="/contact">
+  <Button className="bg-white text-blue-800 hover:bg-cyan-50 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20 !text-black">
+    📞 Get In Touch
+  </Button>
+      </Link>
+      <Link href="/jobs">
+        <Button className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-800 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
+          💼 View Job Opportunities
+        </Button>
+      </Link>
+    </div>
 
-            <div className="text-center">
-              <Mail className="h-12 w-12 text-cyan-300 mx-auto mb-4" />
-              <h3 className="font-bold mb-2">Email & P.O.Box</h3>
-              <div className="text-blue-100 space-y-1">
-                <p>info@belimunojobs.com</p>
-                <p>P.o.box. 100144</p>
-                <p>Addis Ababa</p>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <Globe className="h-12 w-12 text-cyan-300 mx-auto mb-4" />
-              <h3 className="font-bold mb-2">Website</h3>
-              <p className="text-blue-100">www.belimunojobs.com</p>
-            </div>
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-xl text-cyan-200 font-semibold">
-              "The only way to do great work is to love what you do. And we Love what we do! That's why we say come to Us."
-            </p>
-          </div>
+    {/* Contact Options */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+      <a
+        href="mailto:info@belimunojobs.com"
+        className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 group"
+      >
+        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          📧
         </div>
-      </section>
+        <div className="text-left">
+          <p className="font-semibold text-white">Email Us</p>
+          <p className="text-cyan-200 text-sm">info@belimunojobs.com</p>
+        </div>
+      </a>
+
+      <a
+        href="https://t.me/belimunojobs"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 group"
+      >
+        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          📱
+        </div>
+        <div className="text-left">
+          <p className="font-semibold text-white">Telegram</p>
+          <p className="text-cyan-200 text-sm">@belimunojobs</p>
+        </div>
+      </a>
+
+      <a
+        href="tel:+251118697880"
+        className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 group"
+      >
+        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          📞
+        </div>
+        <div className="text-left">
+          <p className="font-semibold text-white">Call Us</p>
+          <p className="text-cyan-200 text-sm">+251 118 69 78 80</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
     </div>
   );
 };

@@ -30,12 +30,12 @@ router.use(protect, requireAnyAdmin);
 router.get('/dashboard', getDashboard);
 router.get('/performance', getPerformanceMetrics);
 
-// User management (super admin only)
-router.get('/users', requireSuperAdmin, getUsers);
-router.get('/users/:id', requireSuperAdmin, getUser);
-router.put('/users/:id', requireSuperAdmin, updateUser);
-router.put('/users/:id/deactivate', requireSuperAdmin, deactivateUser);
-router.put('/users/:id/activate', requireSuperAdmin, activateUser);
+// User management
+router.get('/users', getUsers); // HR admins need access to view workers
+router.get('/users/:id', getUser); // HR admins need access to view worker details
+router.put('/users/:id', requireSuperAdmin, updateUser); // Only super admin can edit user data
+router.put('/users/:id/deactivate', deactivateUser); // HR admins can deactivate workers
+router.put('/users/:id/activate', activateUser); // HR admins can activate workers
 
 // Worker verification (any admin)
 router.put('/verify-worker/:id', verifyWorker);
