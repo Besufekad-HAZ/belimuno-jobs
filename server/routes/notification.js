@@ -29,6 +29,7 @@ router.delete('/:id', deleteNotification);
 
 // Admin routes
 router.post('/create', requireAnyAdmin, createNotification);
-router.post('/announcement', requireSuperAdmin, sendSystemAnnouncement);
+// Allow any admin (super, HR, outsource) to send system announcements
+router.post('/announcement', requireAnyAdmin, sendSystemAnnouncement);
 
 module.exports = router;

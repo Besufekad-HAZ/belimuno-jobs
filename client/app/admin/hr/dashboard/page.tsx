@@ -503,7 +503,7 @@ const HRAdminDashboard: React.FC = () => {
                   <Users className="h-8 w-8 text-gray-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold">{selectedWorker.name}</h3>
+                  <h3 className="text-xl font-semibold text-gray-700">{selectedWorker.name}</h3>
                   <p className="text-gray-600">{selectedWorker.email}</p>
                   {getWorkerStatusBadge(selectedWorker)}
                 </div>
@@ -511,8 +511,8 @@ const HRAdminDashboard: React.FC = () => {
 
               {selectedWorker.workerProfile && (
                 <div>
-                  <h4 className="font-medium mb-2">Worker Profile</h4>
-                  <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                  <h4 className="font-medium mb-2 text-gray-700">Worker Profile</h4>
+                  <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-gray-700">
                     <p><strong>Experience:</strong> {selectedWorker.workerProfile.experience}</p>
                     <p><strong>Rating:</strong> {selectedWorker.workerProfile.rating}/5</p>
                     <p><strong>Jobs Completed:</strong> {selectedWorker.workerProfile.completedJobs}/{selectedWorker.workerProfile.totalJobs}</p>
@@ -572,8 +572,8 @@ const HRAdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <h4 className="font-medium mb-2">Parties Involved</h4>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2 text-gray-700">Parties Involved</h4>
+                <div className="bg-gray-50 p-4 rounded-lg text-gray-700">
                   <p><strong>Worker:</strong> {selectedDispute.worker.name}</p>
                   <p><strong>Client:</strong> {selectedDispute.client.name}</p>
                   {selectedDispute.job && (
@@ -583,7 +583,7 @@ const HRAdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <h4 className="font-medium mb-2">Description</h4>
+                <h4 className="font-medium mb-2 text-gray-700">Description</h4>
                 <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
                   {selectedDispute.description}
                 </p>

@@ -2,7 +2,9 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 // Resolve API base URL: prefer env, otherwise try localhost ports (helpful in dev when server auto-binds next free port)
-const envBase = typeof process !== 'undefined' ? (process as any).env?.NEXT_PUBLIC_API_BASE_URL : undefined;
+const envBase = typeof process !== 'undefined'
+  ? (process as unknown as { env?: { NEXT_PUBLIC_API_BASE_URL?: string } }).env?.NEXT_PUBLIC_API_BASE_URL
+  : undefined;
 const DEFAULT_BASES = ['http://localhost:5000/api','http://localhost:5001/api','http://localhost:5002/api','http://localhost:5003/api','http://localhost:5004/api','http://localhost:5005/api'];
 const BASES = envBase ? [envBase] : DEFAULT_BASES;
 let currentBaseIndex = 0;
@@ -219,7 +221,13 @@ export const notificationsAPI = {
     priority?: string;
     expiresAt?: string;
   }) =>
-    api.post('/notifications/announcement', payload),
+    api.post('/notifications/announcement', {
+      ...payload,
+      // Normalize the UI value 'both' to explicit roles for backward compatibility
+      targetRoles: Array.isArray(payload.targetRoles)
+        ? (payload.targetRoles.includes('both') ? ['worker', 'client'] : payload.targetRoles)
+        : payload.targetRoles,
+    }),
 };
 
 // Public contact API

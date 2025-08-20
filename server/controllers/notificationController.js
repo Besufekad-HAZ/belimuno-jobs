@@ -201,7 +201,7 @@ exports.sendSystemAnnouncement = asyncHandler(async (req, res) => {
   const {
     title,
     message,
-    targetRoles = ['worker', 'client'],
+  targetRoles = ['worker', 'client'],
     priority = 'medium',
     expiresAt
   } = req.body;
@@ -213,10 +213,15 @@ exports.sendSystemAnnouncement = asyncHandler(async (req, res) => {
     });
   }
 
+  // Normalize target roles (support UI option 'both')
+  const normalizedRoles = Array.isArray(targetRoles)
+    ? (targetRoles.includes('both') ? ['worker', 'client'] : targetRoles)
+    : (targetRoles === 'both' ? ['worker', 'client'] : [targetRoles]);
+
   // Get all users with target roles
   const User = require('../models/User');
   const targetUsers = await User.find({
-    role: { $in: targetRoles },
+    role: { $in: normalizedRoles },
     isActive: true
   }).select('_id');
 
@@ -248,7 +253,7 @@ exports.sendSystemAnnouncement = asyncHandler(async (req, res) => {
     message: `System announcement sent to ${notifications.length} users`,
     data: {
       recipientCount: notifications.length,
-      targetRoles
+      targetRoles: normalizedRoles
     }
   });
 });
