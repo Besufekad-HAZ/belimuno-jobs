@@ -78,17 +78,17 @@ const seedTestData = async () => {
     const createdRegions = await Region.insertMany(regions);
     console.log(`✅ Created ${createdRegions.length} regions`);
 
-    // Create users
-  const strongTestPassword = 'Belimuno#2025!';
-  const hashedPassword = await bcrypt.hash(strongTestPassword, 12);
+    // Create users aligned with client login test accounts
+    const strongTestPassword = 'Belimuno#2025!';
+    const hashedPassword = await bcrypt.hash(strongTestPassword, 12);
 
     const users = [
       // Super Admins
       { name: 'Super Admin One', email: 'admin1@belimuno.com', password: hashedPassword, role: 'super_admin', isVerified: true, isActive: true },
       { name: 'Super Admin Two', email: 'admin2@belimuno.com', password: hashedPassword, role: 'super_admin', isVerified: true, isActive: true },
       // Admins
-      { name: 'Admin HR', email: 'admin.hr@belimuno.com', password: hashedPassword, role: 'admin_hr', region: createdRegions[0]._id, isVerified: true, isActive: true },
-      { name: 'Admin Outsource', email: 'admin.outsource@belimuno.com', password: hashedPassword, role: 'admin_outsource', region: createdRegions[1]._id, isVerified: true, isActive: true },
+      { name: 'Admin HR', email: 'admin.hr@belimuno.com', password: hashedPassword, role: 'admin_hr', isVerified: true, isActive: true },
+      { name: 'Admin Outsource', email: 'admin.outsource@belimuno.com', password: hashedPassword, role: 'admin_outsource', isVerified: true, isActive: true },
       {
         name: 'John Doe',
         email: 'worker1@belimuno.com',
@@ -192,10 +192,15 @@ const seedTestData = async () => {
       }
     ];
 
-    const createdUsers = await User.insertMany(users);
-    console.log(`✅ Created ${createdUsers.length} users`);
+  const createdUsers = await User.insertMany(users);
+  console.log(`✅ Created ${createdUsers.length} users`);
 
-    // No area managers in the new model
+  // Update regions with super admin as manager (no area manager role)
+  const superAdmin = createdUsers.find(u => u.role === 'super_admin');
+  if (superAdmin) {
+    await Region.findByIdAndUpdate(createdRegions[0]._id, { manager: superAdmin._id });
+    await Region.findByIdAndUpdate(createdRegions[1]._id, { manager: superAdmin._id });
+  }
 
     // Create sample jobs
     const clients = createdUsers.filter(u => u.role === 'client');
@@ -304,11 +309,11 @@ const seedTestData = async () => {
     console.log(`   • ${createdUsers.length} users created`);
     console.log(`   • ${createdJobs.length} jobs created`);
 
-    console.log('\n👥 Test Users Created:');
-    console.log('   Super Admins: admin1@belimuno.com, admin2@belimuno.com');
-    console.log('   Admins: admin.hr@belimuno.com (HR), admin.outsource@belimuno.com (Outsource)');
-    console.log('   Workers: worker1@belimuno.com, worker2@belimuno.com, worker3@belimuno.com');
-    console.log('   Clients: client1@belimuno.com, client2@belimuno.com, client3@belimuno.com');
+  console.log('\n👥 Test Users Created:');
+  console.log('   Super Admins: admin1@belimuno.com, admin2@belimuno.com');
+  console.log('   Admins: admin.hr@belimuno.com (HR), admin.outsource@belimuno.com (Outsource)');
+  console.log('   Workers: worker1@belimuno.com, worker2@belimuno.com, worker3@belimuno.com');
+  console.log('   Clients: client1@belimuno.com, client2@belimuno.com, client3@belimuno.com');
     console.log(`   Password for all: ${strongTestPassword}`);
 
     process.exit(0);

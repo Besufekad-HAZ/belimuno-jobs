@@ -1,15 +1,22 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import { setAuth, getRoleDashboardPath } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Card from "@/components/ui/Card";
 
-declare global { interface Window { google?: any } }
+type GoogleIdentity = {
+  accounts?: {
+    id?: {
+      initialize: (options: { client_id: string; callback: (resp: { credential: string }) => void }) => void;
+      renderButton: (parent: HTMLElement, options?: Record<string, unknown>) => void;
+    }
+  }
+};
+declare global { interface Window { google?: GoogleIdentity } }
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -21,78 +28,6 @@ const LoginPage: React.FC = () => {
   const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const existing = document.getElementById('google-identity');
-    if (existing) { setGoogleReady(true); return; }
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
-    s.async = true;
-    s.defer = true;
-    s.id = 'google-identity';
-    s.onload = () => setGoogleReady(true);
-    document.body.appendChild(s);
-  }, []);
-
-  // Initialize Google once script is ready and the button container is in the DOM
-  useEffect(() => {
-    if (!googleReady) return;
-    if (!window.google || !window.google.accounts?.id) return;
-
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
-    if (!clientId) {
-      console.warn('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID - Google Sign-In disabled');
-      // Hide Google button if no client ID
-      if (googleBtnRef.current) {
-        googleBtnRef.current.innerHTML = '<div class="text-sm text-gray-500 p-2">Google Sign-In not configured</div>';
-      }
-      return;
-    }
-
-    try {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: (cred: any) => onGoogleCredential(cred),
-      });
-
-      if (googleBtnRef.current) {
-        // Clear any previously rendered content (Hot reload or re-init)
-        googleBtnRef.current.innerHTML = '';
-        window.google.accounts.id.renderButton(googleBtnRef.current, {
-          type: 'standard',
-          theme: 'outline',
-          size: 'large',
-          text: 'signin_with',
-          shape: 'rectangular',
-          logo_alignment: 'left',
-        });
-      }
-      window.google.accounts.id.prompt();
-    } catch (error) {
-      console.error('Failed to initialize Google Sign-In:', error);
-      if (googleBtnRef.current) {
-        googleBtnRef.current.innerHTML = '<div class="text-sm text-red-500 p-2">Google Sign-In failed to load</div>';
-      }
-    }
-  }, [googleReady]);
-
-  const onGoogleCredential = async (response: any) => {
-    try {
-      setLoading(true);
-      setError("");
-      // Google Sign-In will determine the user's role from their account
-      const res = await authAPI.loginWithGoogle(response.credential);
-      const { token, user } = res.data;
-      setAuth(token, user);
-      if (typeof window !== 'undefined') window.dispatchEvent(new Event('authChanged'));
-      router.push(getRoleDashboardPath(user.role));
-    } catch (e) {
-      console.error(e);
-      setError('Google sign-in failed');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -140,18 +75,56 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // Test accounts (seeded) - these should match exactly with the server seed data
+  // Load Google Identity script once
+  useEffect(() => {
+    const existing = document.getElementById('google-identity');
+    if (existing) { setGoogleReady(true); return; }
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.id = 'google-identity';
+    s.onload = () => setGoogleReady(true);
+    document.body.appendChild(s);
+  }, []);
+
+  // Initialize and render Google Sign-In button
+  useEffect(() => {
+    if (!googleReady) return;
+    if (!window.google || !window.google.accounts?.id) return;
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+    if (!clientId) return;
+    window.google.accounts.id!.initialize({
+      client_id: clientId,
+      callback: async (resp: { credential: string }) => {
+        try {
+          const res = await authAPI.loginWithGoogle(resp.credential);
+          const { token, user } = res.data;
+          setAuth(token, user);
+          if (typeof window !== 'undefined') window.dispatchEvent(new Event('authChanged'));
+          router.push(getRoleDashboardPath(user.role));
+        } catch (e) {
+          console.error(e);
+          setError('Google sign-in failed. If you are new, please use Sign up.');
+        }
+      }
+    });
+    if (googleBtnRef.current) {
+      googleBtnRef.current.innerHTML = '';
+      window.google.accounts.id!.renderButton(googleBtnRef.current, {
+        type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', logo_alignment: 'left'
+      });
+    }
+  }, [googleReady, router]);
+
+  // Test accounts (seeded) - aligned with server/seedTestData.js
   const testAccounts = [
     { email: 'admin1@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 1' },
     { email: 'admin2@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 2' },
     { email: 'admin.hr@belimuno.com', password: 'Belimuno#2025!', role: 'Admin (HR)' },
     { email: 'admin.outsource@belimuno.com', password: 'Belimuno#2025!', role: 'Admin (Outsource)' },
-    { email: 'worker1@belimuno.com', password: 'Belimuno#2025!', role: 'Worker 1' },
-    { email: 'worker2@belimuno.com', password: 'Belimuno#2025!', role: 'Worker 2' },
-    { email: 'worker3@belimuno.com', password: 'Belimuno#2025!', role: 'Worker 3' },
-    { email: 'client1@belimuno.com', password: 'Belimuno#2025!', role: 'Client 1' },
-    { email: 'client2@belimuno.com', password: 'Belimuno#2025!', role: 'Client 2' },
-    { email: 'client3@belimuno.com', password: 'Belimuno#2025!', role: 'Client 3' },
+    { email: 'worker1@belimuno.com', password: 'Belimuno#2025!', role: 'Worker' },
+    { email: 'client1@belimuno.com', password: 'Belimuno#2025!', role: 'Client' },
   ] as const;
 
   const fillTestAccount = (email: string, password: string) => {
@@ -202,25 +175,23 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
 
+        {/* Auth Tabs */}
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex">
+            <Link href="/login" className="flex-1">
+              <div className="text-center py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">Login</div>
+            </Link>
+            <Link href="/register" className="flex-1">
+              <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">Sign up</div>
+            </Link>
+          </div>
+        </div>
+
         {/* Main Form Card */}
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="px-8 py-8">
-              {/* Google Sign-In */}
-              <div className="mb-6">
-                <div className="flex justify-center">
-                  <div ref={googleBtnRef} />
-                </div>
-              </div>
-
-              <div className="relative mb-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with email</span>
-                </div>
-              </div>
+              {/* Email/Password Sign-In */}
 
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {error && (
@@ -274,6 +245,21 @@ const LoginPage: React.FC = () => {
                 >
                   {loading ? "Signing in..." : "Sign in to your account"}
                 </Button>
+
+                {/* OR Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div className="w-full border-t border-gray-200" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  </div>
+                </div>
+
+                {/* Google Sign-In */}
+                <div className="flex justify-center">
+                  <div ref={googleBtnRef} />
+                </div>
               </form>
             </div>
 

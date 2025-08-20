@@ -9,7 +9,15 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Card from '@/components/ui/Card';
 
-declare global { interface Window { google?: any } }
+type GoogleIdentity = {
+  accounts?: {
+    id?: {
+      initialize: (options: { client_id: string; callback: (resp: { credential: string }) => void }) => void;
+      renderButton: (parent: HTMLElement, options?: Record<string, unknown>) => void;
+    }
+  }
+};
+declare global { interface Window { google?: GoogleIdentity } }
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -135,9 +143,9 @@ const RegisterPage: React.FC = () => {
     if (!window.google || !window.google.accounts?.id) return;
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
     if (!clientId) return;
-    window.google.accounts.id.initialize({
+    window.google.accounts.id!.initialize({
       client_id: clientId,
-      callback: async (resp: any) => {
+      callback: async (resp: { credential: string }) => {
         try {
           const res = await authAPI.loginWithGoogle(resp.credential, formData.role as 'worker'|'client');
           const { token, user } = res.data;
@@ -152,7 +160,7 @@ const RegisterPage: React.FC = () => {
     });
     if (googleBtnRef.current) {
       googleBtnRef.current.innerHTML = '';
-      window.google.accounts.id.renderButton(googleBtnRef.current, {
+      window.google.accounts.id!.renderButton(googleBtnRef.current, {
         type: 'standard', theme: 'outline', size: 'large', text: 'signup_with', shape: 'rectangular', logo_alignment: 'left'
       });
     }
@@ -161,14 +169,18 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
+        <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex mt-2">
+          <Link href="/login" className="flex-1">
+            <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">Login</div>
+          </Link>
+          <Link href="/register" className="flex-1">
+            <div className="text-center py-2 rounded-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">Sign up</div>
+          </Link>
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
-          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            sign in to your existing account
-          </Link>
+          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">sign in to your existing account</Link>
         </p>
       </div>
 

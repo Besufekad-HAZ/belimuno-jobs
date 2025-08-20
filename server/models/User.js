@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
   // Role and Access
   role: {
     type: String,
-    enum: ['super_admin', 'admin_hr', 'admin_outsource', 'worker', 'client'],
+  enum: ['super_admin', 'admin_hr', 'admin_outsource', 'worker', 'client'],
     required: true
   },
   region: { type: mongoose.Schema.Types.ObjectId, ref: 'Region' },

@@ -3,19 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { User as UserIcon, LogOut, Menu, X } from 'lucide-react';
 import { getStoredUser, clearAuth, getRoleDashboardPath } from '@/lib/auth';
 import { notificationsAPI } from '@/lib/api';
 import NotificationDropdown from '@/components/ui/NotificationDropdown';
 import type { User } from '@/lib/auth';
-
-type Notification = {
-  id: string;
-  message: string;
-  read: boolean;
-  // Add other fields as needed based on your API response
-};
 
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -23,6 +16,7 @@ const Navbar: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
 
 
@@ -57,8 +51,13 @@ const Navbar: React.FC = () => {
   const fetchNotifications = async () => {
     try {
       const response = await notificationsAPI.getAll();
-      const notif = response.data?.data || response.data?.notifications || [];
-      const count = Array.isArray(notif) ? notif.filter((n: any) => !n?.isRead && !n?.read).length : 0;
+      const notif = response.data?.data || response.data?.notifications || [] as unknown[];
+      const count = Array.isArray(notif)
+        ? notif.filter((n: unknown) => {
+            const x = n as { isRead?: boolean; read?: boolean };
+            return !x?.isRead && !x?.read;
+          }).length
+        : 0;
       setUnreadCount(count);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
@@ -217,18 +216,18 @@ const Navbar: React.FC = () => {
               >
                 {mobileOpen ? <X className="h-7 w-7"/> : <Menu className="h-7 w-7"/>}
               </button>
-              <Link
-                href="/login"
-                className="text-cyan-100 hover:text-white px-3 py-2 text-sm font-medium border border-cyan-300 rounded-md"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="bg-gradient-to-r from-cyan-600 to-blue-900 hover:from-cyan-700 hover:to-blue-950 text-white px-4 py-2 rounded-md text-sm font-semibold shadow-md border border-cyan-300"
-              >
-                Register
-              </Link>
+              <div className="flex items-center gap-2 rounded-lg p-1 bg-cyan-800/40 border border-cyan-300/60">
+                <Link href="/login" className="relative">
+                  <span className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname==='/login' ? 'bg-white text-cyan-900 shadow-sm' : 'text-cyan-100 hover:text-white'}`}>
+                    Login
+                  </span>
+                </Link>
+                <Link href="/register" className="relative">
+                  <span className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname==='/register' ? 'bg-white text-cyan-900 shadow-sm' : 'text-cyan-100 hover:text-white'}`}>
+                    Sign up
+                  </span>
+                </Link>
+              </div>
             </div>
           )}
         </div>

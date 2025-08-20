@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const https = require('https');
 const User = require('../models/User');
 const Region = require('../models/Region');
 const ErrorResponse = require('../utils/errorResponse');
 const { generateToken, generateShortToken } = require('../utils/jwtUtils');
-const https = require('https');
 const dns = require('dns');
 // Prefer IPv4 results first to avoid IPv6 connectivity issues in some environments (e.g., WSL)
 try { if (dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first'); } catch {}
@@ -547,7 +547,7 @@ async function verifyGoogleIdToken(idToken) {
 // @access  Public
 async function googleAuth(req, res) {
   try {
-    const { credential } = req.body || {};
+  const { credential, role } = req.body || {};
     if (!credential) {
       return res.status(400).json({ success: false, message: 'Missing Google credential' });
     }
@@ -597,11 +597,26 @@ async function googleAuth(req, res) {
 
     let user = await User.findOne({ email });
     if (!user) {
-      // Only allow login for existing users, not auto-create new accounts
-      return res.status(404).json({
-        success: false,
-        message: 'No account found for this Google email. Please sign up first using email/password registration.'
-      });
+      // If role provided and allowed, create a new account (Google sign-up)
+      const allowedSignupRoles = ['worker', 'client'];
+      if (role && allowedSignupRoles.includes(role)) {
+        const randomPassword = crypto.randomBytes(16).toString('hex');
+        const hashedPassword = await bcrypt.hash(randomPassword, 12);
+        const profile = { avatar: picture };
+        user = await User.create({
+          name,
+          email,
+          password: hashedPassword,
+          role,
+          profile,
+          isVerified: true,
+        });
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: 'No account found for this Google email. Please sign up first or select a role to create an account.'
+        });
+      }
     } else {
       if (!user.isActive) {
         return res.status(401).json({ success: false, message: 'Account has been deactivated. Please contact support.' });

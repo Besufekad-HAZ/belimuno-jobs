@@ -7,7 +7,7 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 ### Multi-Role System
 
 - **Super Admin**: Complete system oversight, user management, analytics
-- **Area Manager**: Regional management, worker verification, dispute resolution
+
 - **Worker**: Job applications, progress tracking, earnings management
 - **Client**: Job posting, worker selection, payment processing
 
@@ -63,16 +63,7 @@ A comprehensive HR outsourcing and job management platform API built with Node.j
 - `PUT /api/worker/profile` - Update worker profile
 - `GET /api/worker/earnings` - Get earnings history
 
-### Area Manager Portal
-
-- `GET /api/area-manager/dashboard` - Area manager dashboard
-- `GET /api/area-manager/workers` - Get regional workers
-- `PUT /api/area-manager/workers/:id/verify` - Verify worker
-- `GET /api/area-manager/jobs` - Get regional jobs
-- `GET /api/area-manager/applications` - Get regional applications
-- `PUT /api/area-manager/jobs/:id/escalate` - Handle escalations
-- `GET /api/area-manager/performance` - Regional performance metrics
-- `PUT /api/area-manager/region/settings` - Update regional settings
+<!-- Area Manager role removed -->
 
 ### Super Admin Portal
 
@@ -193,8 +184,10 @@ After seeding, you can use these test accounts:
 | Role | Email | Password |
 |------|-------|----------|
 | Super Admin | <admin@belimuno.com> | Belimuno#2025! |
-| Area Manager (AA) | <manager.aa@belimuno.com> | Belimuno#2025! |
-| Area Manager (Oromia) | <manager.oromia@belimuno.com> | Belimuno#2025! |
+| Super Admin 1 | <admin1@belimuno.com> | Belimuno#2025! |
+| Super Admin 2 | <admin2@belimuno.com> | Belimuno#2025! |
+| Admin - HR | <admin.hr@belimuno.com> | Belimuno#2025! |
+| Admin - Outsource | <admin.outsource@belimuno.com> | Belimuno#2025! |
 | Worker 1 | <worker1@belimuno.com> | Belimuno#2025! |
 | Worker 2 | <worker2@belimuno.com> | Belimuno#2025! |
 | Worker 3 | <worker3@belimuno.com> | Belimuno#2025! |

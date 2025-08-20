@@ -77,48 +77,40 @@ const regions = [
 ];
 
 const users = [
-  // Super Admin
+  // Super Admins
   {
-    name: 'Besufekad Alemu',
-    email: 'admin@belimunojobs.com',
-    password: 'Admin123!',
+    name: 'Super Admin One',
+    email: 'admin1@belimuno.com',
+    password: 'Belimuno#2025!',
     role: 'super_admin',
-    profile: {
-      firstName: 'Besufekad',
-      lastName: 'Alemu',
-      bio: 'Platform Administrator and Full-Stack Developer'
-    },
     isVerified: true,
     isActive: true
   },
-
-  // Area Managers - Removed since role no longer exists
-  // {
-  //   name: 'Abebe Kebede',
-  //   email: 'manager.aa@belimunojobs.com',
-  //   password: 'Manager123!',
-  //   role: 'area_manager',
-  //   profile: {
-  //     firstName: 'Abebe',
-  //     lastName: 'Kebede',
-  //     bio: 'Area Manager for Addis Ababa region'
-  //   },
-  //   isVerified: true,
-  //   isActive: true
-  // },
-  // {
-  //   name: 'Almaz Tadesse',
-  //   email: 'manager.or@belimunojobs.com',
-  //   password: 'Manager123!',
-  //   role: 'area_manager',
-  //   profile: {
-  //     firstName: 'Almaz',
-  //     lastName: 'Tadesse',
-  //     bio: 'Area Manager for Oromia region'
-  //   },
-  //   isVerified: true,
-  //   isActive: true
-  // },
+  {
+    name: 'Super Admin Two',
+    email: 'admin2@belimuno.com',
+    password: 'Belimuno#2025!',
+    role: 'super_admin',
+    isVerified: true,
+    isActive: true
+  },
+  // Admins
+  {
+    name: 'Admin HR',
+    email: 'admin.hr@belimuno.com',
+    password: 'Belimuno#2025!',
+    role: 'admin_hr',
+    isVerified: true,
+    isActive: true
+  },
+  {
+    name: 'Admin Outsource',
+    email: 'admin.outsource@belimuno.com',
+    password: 'Belimuno#2025!',
+    role: 'admin_outsource',
+    isVerified: true,
+    isActive: true
+  },
 
   // Sample Workers
   {
@@ -286,18 +278,18 @@ const importData = async () => {
     await Job.insertMany(sampleJobs);
     console.log('Sample Jobs Imported...');
 
-    console.log('✅ Data Imported Successfully!');
-    console.log('\n🔑 Login Credentials:');
-    console.log('Super Admin 1: admin1@belimuno.com / Belimuno#2025!');
-    console.log('Super Admin 2: admin2@belimuno.com / Belimuno#2025!');
-    console.log('Admin HR: admin.hr@belimuno.com / Belimuno#2025!');
-    console.log('Admin Outsource: admin.outsource@belimuno.com / Belimuno#2025!');
-    console.log('Worker 1: worker1@belimuno.com / Belimuno#2025!');
-    console.log('Worker 2: worker2@belimuno.com / Belimuno#2025!');
-    console.log('Worker 3: worker3@belimuno.com / Belimuno#2025!');
-    console.log('Client 1: client1@belimuno.com / Belimuno#2025!');
-    console.log('Client 2: client2@belimuno.com / Belimuno#2025!');
-    console.log('Client 3: client3@belimuno.com / Belimuno#2025!');
+  console.log('✅ Data Imported Successfully!');
+  console.log('\n🔑 Login Credentials:');
+  console.log('Super Admin 1: admin1@belimuno.com / Belimuno#2025!');
+  console.log('Super Admin 2: admin2@belimuno.com / Belimuno#2025!');
+  console.log('Admin HR: admin.hr@belimuno.com / Belimuno#2025!');
+  console.log('Admin Outsource: admin.outsource@belimuno.com / Belimuno#2025!');
+  console.log('Worker 1: worker1@belimuno.com / Belimuno#2025!');
+  console.log('Worker 2: worker2@belimuno.com / Belimuno#2025!');
+  console.log('Worker 3: worker3@belimuno.com / Belimuno#2025!');
+  console.log('Client 1: client1@belimuno.com / Belimuno#2025!');
+  console.log('Client 2: client2@belimuno.com / Belimuno#2025!');
+  console.log('Client 3: client3@belimuno.com / Belimuno#2025!');
 
     process.exit();
   } catch (err) {

@@ -1,10 +1,14 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Resolve API base URL: prefer env, otherwise try localhost ports (helpful in dev when server auto-binds next free port)
+const envBase = typeof process !== 'undefined' ? (process as any).env?.NEXT_PUBLIC_API_BASE_URL : undefined;
+const DEFAULT_BASES = ['http://localhost:5000/api','http://localhost:5001/api','http://localhost:5002/api','http://localhost:5003/api','http://localhost:5004/api','http://localhost:5005/api'];
+const BASES = envBase ? [envBase] : DEFAULT_BASES;
+let currentBaseIndex = 0;
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: BASES[currentBaseIndex],
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,10 +27,21 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // If unauthorized, clear auth and redirect
     if (error.response?.status === 401) {
       Cookies.remove('token');
       Cookies.remove('user');
       window.location.href = '/login';
+    }
+
+    // If network error (no response), try next fallback base URL (dev convenience)
+    if (!error.response && BASES.length > 1 && currentBaseIndex < BASES.length - 1) {
+      currentBaseIndex += 1;
+      const nextBase = BASES[currentBaseIndex];
+      api.defaults.baseURL = nextBase;
+      const originalRequest = error.config;
+      // retry original request with new base
+      return api({ ...originalRequest, baseURL: nextBase });
     }
     return Promise.reject(error);
   }
@@ -38,8 +53,8 @@ export const authAPI = {
     api.post('/auth/login', { email, password }),
   register: (userData: Record<string, unknown>) =>
     api.post('/auth/register', userData),
-  loginWithGoogle: (credential: string) =>
-    api.post('/auth/google', { credential }),
+  loginWithGoogle: (credential: string, role?: 'worker' | 'client') =>
+    api.post('/auth/google', role ? { credential, role } : { credential }),
   getMe: () =>
     api.get('/auth/me'),
   logout: () =>
