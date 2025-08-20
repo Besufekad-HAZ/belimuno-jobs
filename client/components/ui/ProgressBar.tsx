@@ -15,7 +15,10 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   color = 'blue',
   showPercentage = true,
 }) => {
-  const clampedProgress = Math.min(Math.max(progress, 0), 100);
+  // Normalize and clamp the progress to avoid NaN/invalid values
+  const numeric = typeof progress === 'number' ? progress : Number(progress);
+  const safeProgress = Number.isFinite(numeric) ? numeric : 0;
+  const clampedProgress = Math.min(Math.max(safeProgress, 0), 100);
 
   const sizes = {
     sm: 'h-2',
@@ -36,7 +39,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       {showPercentage && (
         <div className="flex items-center justify-between mb-1">
           <span className="text-sm font-medium text-gray-700">Progress</span>
-          <span className="text-sm font-medium text-gray-700">{clampedProgress}%</span>
+          <span className="text-sm font-medium text-gray-700">{Math.round(clampedProgress)}%</span>
         </div>
       )}
       <div className={`w-full bg-gray-200 rounded-full ${sizes[size]}`}>

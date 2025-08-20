@@ -83,6 +83,7 @@ const WorkerDashboard: React.FC = () => {
   const [clientRating, setClientRating] = useState(5);
   const [clientReview, setClientReview] = useState('');
   const router = useRouter();
+  const PROPOSAL_MAX = 1200;
 
   useEffect(() => {
     const user = getStoredUser();
@@ -568,11 +569,11 @@ const WorkerDashboard: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <label className="block text-sm font-medium text-gray-700">Proposal</label>
-                      <span className={`text-xs ${applicationData.proposal.length > 1000 ? 'text-red-500' : 'text-gray-400'}`}>{applicationData.proposal.length}/1000</span>
+                      <span className={`text-xs ${applicationData.proposal.length > PROPOSAL_MAX ? 'text-red-500' : 'text-gray-400'}`}>{applicationData.proposal.length}/{PROPOSAL_MAX}</span>
                     </div>
                     <textarea
                       rows={5}
-                      maxLength={1200}
+                      maxLength={PROPOSAL_MAX}
                       required
                       value={applicationData.proposal}
                       onChange={(e) => setApplicationData({ ...applicationData, proposal: e.target.value })}
