@@ -547,7 +547,7 @@ async function verifyGoogleIdToken(idToken) {
 // @access  Public
 async function googleAuth(req, res) {
   try {
-    const { credential, role } = req.body || {};
+    const { credential } = req.body || {};
     if (!credential) {
       return res.status(400).json({ success: false, message: 'Missing Google credential' });
     }
@@ -597,23 +597,10 @@ async function googleAuth(req, res) {
 
     let user = await User.findOne({ email });
     if (!user) {
-      // If no role is provided, treat as login-only and do not auto-create
-      if (!role) {
-        return res.status(404).json({ success: false, message: 'No account found for this Google email. Please sign up first.' });
-      }
-      // Create new account (Google sign-up) with selected role
-      const randomPassword = crypto.randomBytes(16).toString('hex');
-      const hashedPassword = await bcrypt.hash(randomPassword, 12);
-      const allowedRoles = ['worker', 'client'];
-      const assignedRole = allowedRoles.includes(role) ? role : 'worker';
-
-      user = await User.create({
-        name,
-        email,
-        password: hashedPassword,
-        role: assignedRole,
-        profile: { avatar: picture },
-        isVerified: true,
+      // Only allow login for existing users, not auto-create new accounts
+      return res.status(404).json({
+        success: false,
+        message: 'No account found for this Google email. Please sign up first using email/password registration.'
       });
     } else {
       if (!user.isActive) {

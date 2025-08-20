@@ -21,7 +21,6 @@ const LoginPage: React.FC = () => {
   const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
-  const [signupRole, setSignupRole] = useState<'worker'|'client'>('worker');
 
   useEffect(() => {
     const existing = document.getElementById('google-identity');
@@ -39,35 +38,50 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (!googleReady) return;
     if (!window.google || !window.google.accounts?.id) return;
+
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
     if (!clientId) {
-      console.warn('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID');
+      console.warn('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID - Google Sign-In disabled');
+      // Hide Google button if no client ID
+      if (googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = '<div class="text-sm text-gray-500 p-2">Google Sign-In not configured</div>';
+      }
       return;
     }
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: (cred: any) => onGoogleCredential(cred),
-    });
-    if (googleBtnRef.current) {
-      // Clear any previously rendered content (Hot reload or re-init)
-      googleBtnRef.current.innerHTML = '';
-      window.google.accounts.id.renderButton(googleBtnRef.current, {
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        text: 'signin_with',
-        shape: 'rectangular',
-        logo_alignment: 'left',
+
+    try {
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: (cred: any) => onGoogleCredential(cred),
       });
+
+      if (googleBtnRef.current) {
+        // Clear any previously rendered content (Hot reload or re-init)
+        googleBtnRef.current.innerHTML = '';
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'signin_with',
+          shape: 'rectangular',
+          logo_alignment: 'left',
+        });
+      }
+      window.google.accounts.id.prompt();
+    } catch (error) {
+      console.error('Failed to initialize Google Sign-In:', error);
+      if (googleBtnRef.current) {
+        googleBtnRef.current.innerHTML = '<div class="text-sm text-red-500 p-2">Google Sign-In failed to load</div>';
+      }
     }
-    window.google.accounts.id.prompt();
   }, [googleReady]);
 
   const onGoogleCredential = async (response: any) => {
     try {
       setLoading(true);
       setError("");
-      const res = await authAPI.loginWithGoogle(response.credential, signupRole);
+      // Google Sign-In will determine the user's role from their account
+      const res = await authAPI.loginWithGoogle(response.credential);
       const { token, user } = res.data;
       setAuth(token, user);
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('authChanged'));
@@ -126,7 +140,7 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // Test accounts (seeded)
+  // Test accounts (seeded) - these should match exactly with the server seed data
   const testAccounts = [
     { email: 'admin1@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 1' },
     { email: 'admin2@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 2' },
@@ -192,28 +206,22 @@ const LoginPage: React.FC = () => {
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="px-8 py-8">
-              {/* Role selection + Google Sign-In */}
+              {/* Google Sign-In */}
               <div className="mb-6">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <button
-                    type="button"
-                    onClick={()=>setSignupRole('worker')}
-                    className={`px-3 py-1.5 text-sm rounded-full border ${signupRole==='worker' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'}`}
-                  >
-                    I am a Worker
-                  </button>
-                  <button
-                    type="button"
-                    onClick={()=>setSignupRole('client')}
-                    className={`px-3 py-1.5 text-sm rounded-full border ${signupRole==='client' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'}`}
-                  >
-                    I am a Client
-                  </button>
-                </div>
                 <div className="flex justify-center">
                   <div ref={googleBtnRef} />
                 </div>
               </div>
+
+              <div className="relative mb-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+                </div>
+              </div>
+
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {error && (
                   <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r-lg">
@@ -331,7 +339,7 @@ const LoginPage: React.FC = () => {
                   <p className="text-xs text-blue-700">
                     <span className="font-medium">Quick Login:</span> Click any
                     test account above to auto-fill the form with demo
-                    credentials.
+                    credentials. Make sure to run <code className="bg-blue-100 px-1 rounded">node seedTestData.js</code> in the server directory first.
                   </p>
                 </div>
               </div>
@@ -339,7 +347,6 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* No inline callback needed; using programmatic initialize/render */}
     </div>
   );
 };

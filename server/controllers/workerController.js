@@ -183,7 +183,7 @@ exports.updateJobStatus = asyncHandler(async (req, res) => {
 
   await job.save();
 
-  // Create notification for client
+  // Create notification for client based on status change
   let notificationMessage = '';
   let notificationType = 'general';
 
@@ -199,18 +199,24 @@ exports.updateJobStatus = asyncHandler(async (req, res) => {
   }
 
   if (notificationMessage) {
-    await Notification.create({
-      recipient: job.client._id,
-      sender: req.user._id,
-      title: 'Job Status Update',
-      message: notificationMessage,
-      type: notificationType,
-      relatedJob: job._id,
-      actionButton: {
-        text: 'View Job',
-        action: 'view_job'
-      }
-    });
+    try {
+      await NotificationService.createNotification({
+        recipients: [job.client._id],
+        sender: req.user._id,
+        title: 'Job Status Update',
+        message: notificationMessage,
+        type: notificationType,
+        relatedJob: job._id,
+        actionButton: {
+          text: 'View Job',
+          url: `/client/jobs/${job._id}`,
+          action: 'view_job'
+        }
+      });
+    } catch (error) {
+      console.error('Failed to create job status update notification:', error);
+      // Don't fail the status update if notification fails
+    }
   }
 
   res.status(200).json({

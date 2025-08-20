@@ -7,6 +7,7 @@ const Notification = require('../models/Notification');
 const Report = require('../models/Report');
 const asyncHandler = require('../utils/asyncHandler');
 const Review = require('../models/Review');
+const NotificationService = require('../utils/notificationService');
 
 // @desc    Get admin dashboard
 // @route   GET /api/admin/dashboard
@@ -242,13 +243,13 @@ exports.verifyWorker = asyncHandler(async (req, res) => {
     });
   }
 
-  // Create notification for worker
-  await Notification.create({
-    recipient: worker._id,
-    title: 'Profile Verified',
-    message: 'Congratulations! Your worker profile has been verified. You can now apply for jobs.',
-    type: 'profile_verified'
-  });
+  // Create notification for worker using NotificationService
+  try {
+    await NotificationService.notifyWorkerVerified(worker._id);
+  } catch (error) {
+    console.error('Failed to create worker verification notification:', error);
+    // Don't fail the verification if notification fails
+  }
 
   res.status(200).json({
     success: true,

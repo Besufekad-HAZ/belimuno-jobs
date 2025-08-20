@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp, MessageCircle, ThumbsUp, ThumbsDown, Paperclip, Smile, FileText, X } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
-import { workerAPI, jobsAPI } from '@/lib/api';
+import { workerAPI, jobsAPI, notificationsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import ProgressBar from '@/components/ui/ProgressBar';
+import { formatDistanceToNow } from 'date-fns';
 
 interface WorkerStats {
   totalApplications: number;
@@ -22,10 +23,40 @@ interface WorkerStats {
   pendingApplicationsList?: { _id: string; job?: { title?: string }; appliedAt: string }[];
 }
 
+interface RealNotification {
+  _id: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  readAt?: string;
+  createdAt: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  actionButton?: {
+    text: string;
+    url: string;
+    action: string;
+  };
+  sender?: {
+    _id: string;
+    name: string;
+    profile?: {
+      avatar?: string;
+    };
+  };
+  relatedJob?: {
+    _id: string;
+    title: string;
+  };
+  relatedUser?: {
+    _id: string;
+    name: string;
+  };
+}
+
 const WorkerDashboard: React.FC = () => {
   const [stats, setStats] = useState<WorkerStats | null>(null);
   interface SimpleJob { _id: string; title: string; description: string; budget: number; deadline: string; category?: string; region?: { name?: string }; status?: string; progress?: number; acceptedApplication?: { proposedBudget?: number }; applicationCount?: number; }
-  interface NotificationItem { id: number|string; type: string; message: string; time: string; read: boolean; }
   interface EarningsData { recentPayments?: { jobTitle?: string; amount?: number; date?: string }[] }
   const [availableJobs, setAvailableJobs] = useState<SimpleJob[]>([]);
   const [myJobs, setMyJobs] = useState<SimpleJob[]>([]);
@@ -35,7 +66,8 @@ const WorkerDashboard: React.FC = () => {
   const [applicationData, setApplicationData] = useState<{ proposal: string; proposedBudget: string; estimatedDuration?: string }>({ proposal: '', proposedBudget: '' });
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<RealNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [chatJobId, setChatJobId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<{ _id?: string; content: string; sender?: { name?: string; role?: string }; sentAt: string }[]>([]);
@@ -60,7 +92,17 @@ const WorkerDashboard: React.FC = () => {
     }
 
     fetchDashboardData();
+    fetchNotifications();
   }, [router]);
+
+  // Poll for new notifications every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
@@ -73,23 +115,109 @@ const WorkerDashboard: React.FC = () => {
         workerAPI.getEarnings(),
       ]);
 
-  setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
-  setAvailableJobs(jobsResponse.data.data || []);
-  setMyJobs(myJobsResponse.data.data || []);
-  const apps: { job?: { _id: string } }[] = applicationsResponse.data.data || [];
-  setAppliedJobIds(new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]));
+      setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
+      setAvailableJobs(jobsResponse.data.data || []);
+      setMyJobs(myJobsResponse.data.data || []);
+      const apps: { job?: { _id: string } }[] = applicationsResponse.data.data || [];
+      setAppliedJobIds(new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]));
       setEarnings(earningsResponse.data);
-
-      // Mock notifications for demo
-      setNotifications([
-        { id: 1, type: 'job_accepted', message: 'Your application for "Website Development" has been accepted!', time: '2 hours ago', read: false },
-        { id: 2, type: 'payment', message: 'Payment of ETB 5,000 has been processed', time: '1 day ago', read: false },
-        { id: 3, type: 'job_completed', message: 'Job "Mobile App Design" marked as completed', time: '3 days ago', read: true },
-      ]);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await notificationsAPI.getAll();
+      const fetchedNotifications = response.data?.data || [];
+      setNotifications(fetchedNotifications);
+      setUnreadCount(fetchedNotifications.filter((n: RealNotification) => !n.isRead).length);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      await notificationsAPI.markAsRead(notificationId);
+      setNotifications(prev =>
+        prev.map(n => n._id === notificationId ? { ...n, isRead: true, readAt: new Date().toISOString() } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationsAPI.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true, readAt: new Date().toISOString() })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'job_posted':
+        return <Briefcase className="h-4 w-4" />;
+      case 'job_application':
+        return <FileText className="h-4 w-4" />;
+      case 'job_assigned':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'job_completed':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'payment_received':
+      case 'payment_processed':
+        return <DollarSign className="h-4 w-4" />;
+      case 'review_received':
+        return <Star className="h-4 w-4" />;
+      case 'profile_verified':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'system_announcement':
+        return <Bell className="h-4 w-4" />;
+      case 'deadline_reminder':
+        return <Clock className="h-4 w-4" />;
+      default:
+        return <Bell className="h-4 w-4" />;
+    }
+  };
+
+  const getNotificationBadgeVariant = (type: string) => {
+    switch (type) {
+      case 'payment_received':
+      case 'payment_processed':
+        return 'success';
+      case 'job_assigned':
+      case 'profile_verified':
+        return 'primary';
+      case 'job_completed':
+        return 'success';
+      case 'system_announcement':
+        return 'warning';
+      case 'deadline_reminder':
+        return 'danger';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'urgent':
+        return 'bg-red-100 text-red-600';
+      case 'high':
+        return 'bg-orange-100 text-orange-600';
+      case 'medium':
+        return 'bg-blue-100 text-blue-600';
+      case 'low':
+        return 'bg-gray-100 text-gray-600';
+      default:
+        return 'bg-blue-100 text-blue-600';
     }
   };
 
@@ -187,9 +315,9 @@ const WorkerDashboard: React.FC = () => {
               >
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
-                {notifications.filter(n => !n.read).length > 0 && (
+                {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {notifications.filter(n => !n.read).length}
+                    {unreadCount}
                   </span>
                 )}
               </Button>
@@ -621,30 +749,47 @@ const WorkerDashboard: React.FC = () => {
         >
           <div className="space-y-4">
             {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <Card key={notification.id} className={`p-4 ${!notification.read ? 'bg-blue-50 border-blue-200' : ''}`}>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <Bell className={`h-4 w-4 ${!notification.read ? 'text-blue-600' : 'text-gray-400'}`} />
-                        <Badge
-                          variant={
-                            notification.type === 'payment' ? 'success' :
-                            notification.type === 'job_accepted' ? 'primary' :
-                            'secondary'
-                          }
-                          size="sm"
-                        >
-                          {notification.type.replace('_', ' ')}
-                        </Badge>
-                        {!notification.read && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {notifications.map((notification) => (
+                  <Card key={notification._id} className={`p-4 ${!notification.isRead ? 'bg-blue-50 border-blue-200' : ''}`}>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          {getNotificationIcon(notification.type)}
+                          <Badge
+                            variant={getNotificationBadgeVariant(notification.type)}
+                            size="sm"
+                          >
+                            {notification.title}
+                          </Badge>
+                          {!notification.isRead && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                        </div>
+                        <p className="text-gray-900 mb-1">{notification.message}</p>
+                        <p className="text-sm text-gray-500">
+                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                        </p>
+                        {notification.actionButton && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(notification.actionButton.url, '_blank')}
+                            className="mt-2"
+                          >
+                            {notification.actionButton.text}
+                          </Button>
+                        )}
                       </div>
-                      <p className="text-gray-900 mb-1">{notification.message}</p>
-                      <p className="text-sm text-gray-500">{notification.time}</p>
+                      <button
+                        onClick={() => handleMarkAsRead(notification._id)}
+                        className="text-gray-500 hover:text-gray-700"
+                        aria-label="Mark as read"
+                      >
+                        ✓
+                      </button>
                     </div>
-                  </div>
-                </Card>
-              ))
+                  </Card>
+                ))}
+              </div>
             ) : (
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -653,14 +798,12 @@ const WorkerDashboard: React.FC = () => {
               </div>
             )}
 
-            {notifications.filter(n => !n.read).length > 0 && (
+            {unreadCount > 0 && (
               <div className="pt-4 border-t border-gray-200">
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => {
-                    setNotifications(notifications.map(n => ({ ...n, read: true })));
-                  }}
+                  onClick={handleMarkAllAsRead}
                 >
                   Mark All as Read
                 </Button>

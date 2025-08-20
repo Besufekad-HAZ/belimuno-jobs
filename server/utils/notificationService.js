@@ -175,6 +175,35 @@ class NotificationService {
     ]);
   }
 
+  static async notifyRevisionRequested(jobId, workerId, clientId, reason) {
+    const Job = require('../models/Job');
+    const User = require('../models/User');
+
+    const [job, client] = await Promise.all([
+      Job.findById(jobId),
+      User.findById(clientId)
+    ]);
+
+    if (!job || !client) return;
+
+    // Notify worker about revision request
+    await this.createNotification({
+      recipients: [workerId],
+      sender: clientId,
+      title: 'Revision Requested 🔄',
+      message: `The client has requested revisions for "${job.title}". Reason: ${reason}`,
+      type: 'revision_requested',
+      priority: 'high',
+      relatedJob: jobId,
+      relatedUser: clientId,
+      actionButton: {
+        text: 'View Job Details',
+        url: `/worker/jobs/${jobId}`,
+        action: 'view_job_details'
+      }
+    });
+  }
+
   /**
    * Payment-related notifications
    */

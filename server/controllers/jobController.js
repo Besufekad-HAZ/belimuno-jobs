@@ -2,6 +2,7 @@ const Job = require('../models/Job');
 const User = require('../models/User');
 const Application = require('../models/Application');
 const Notification = require('../models/Notification');
+const NotificationService = require('../utils/notificationService');
 const asyncHandler = require('../utils/asyncHandler');
 
 // @desc    Get all jobs (public/filtered)
@@ -179,22 +180,13 @@ exports.applyForJob = asyncHandler(async (req, res) => {
   // Populate application with worker details
   await application.populate('worker', 'name profile.avatar workerProfile.rating workerProfile.skills');
 
-  // Create notification for client
-  await Notification.create({
-    recipient: job.client,
-    sender: workerId,
-    title: 'New Job Application',
-    message: `${req.user.name} has applied for your job "${job.title}"`,
-    type: 'job_application',
-    relatedJob: jobId,
-    relatedUser: workerId,
-    actionButton: {
-      text: 'Review Application',
-      action: 'view_application'
-    }
-  });
-
-  // Area manager removed; no extra notifications
+  // Use NotificationService to create notification for client
+  try {
+    await NotificationService.notifyJobApplication(jobId, workerId, job.client);
+  } catch (error) {
+    console.error('Failed to create job application notification:', error);
+    // Don't fail the application if notification fails
+  }
 
   res.status(201).json({
     success: true,

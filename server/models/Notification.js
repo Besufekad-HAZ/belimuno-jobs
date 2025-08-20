@@ -14,7 +14,7 @@ const NotificationSchema = new mongoose.Schema({
       'job_posted', 'job_application', 'job_assigned', 'job_completed',
       'payment_received', 'payment_processed', 'review_received',
       'dispute_raised', 'dispute_resolved', 'profile_verified',
-      'system_announcement', 'deadline_reminder', 'general'
+      'system_announcement', 'deadline_reminder', 'revision_requested', 'general'
     ],
     required: true
   },

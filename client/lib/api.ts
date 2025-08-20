@@ -38,8 +38,8 @@ export const authAPI = {
     api.post('/auth/login', { email, password }),
   register: (userData: Record<string, unknown>) =>
     api.post('/auth/register', userData),
-  loginWithGoogle: (credential: string, role?: 'worker'|'client') =>
-    api.post('/auth/google', { credential, role }),
+  loginWithGoogle: (credential: string) =>
+    api.post('/auth/google', { credential }),
   getMe: () =>
     api.get('/auth/me'),
   logout: () =>

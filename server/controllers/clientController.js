@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Application = require('../models/Application');
 const Notification = require('../models/Notification');
 const Payment = require('../models/Payment');
+const NotificationService = require('../utils/notificationService');
 const asyncHandler = require('../utils/asyncHandler');
 const Review = require('../models/Review');
 
@@ -123,7 +124,7 @@ exports.getJobs = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Create new job
+// @desc    Create a new job
 // @route   POST /api/client/jobs
 // @access  Private/Client
 exports.createJob = asyncHandler(async (req, res) => {
@@ -146,7 +147,28 @@ exports.createJob = asyncHandler(async (req, res) => {
   const job = await Job.create(jobData);
   await job.populate('region', 'name');
 
-  // Create notification for super admin instead of area manager
+  // Find workers in the same region to notify them about the new job
+  const workersInRegion = await User.find({
+    role: 'worker',
+    isVerified: true,
+    isActive: true,
+    region: job.region._id
+  }).select('_id');
+
+  // Notify workers in the region about the new job
+  if (workersInRegion.length > 0) {
+    try {
+      await NotificationService.notifyJobPosted(job._id, req.user._id, workersInRegion.map(w => w._id));
+      console.log(`Notified ${workersInRegion.length} workers in region ${job.region.name} about new job`);
+    } catch (error) {
+      console.error('Failed to send job notifications:', error);
+      // Don't fail the job creation if notifications fail
+    }
+  } else {
+    console.log(`No verified workers found in region ${job.region.name} for job notification`);
+  }
+
+  // Create notification for super admin
   const superAdmin = await User.findOne({ role: 'super_admin' });
   if (superAdmin) {
     await Notification.create({
@@ -339,19 +361,13 @@ exports.acceptApplication = asyncHandler(async (req, res) => {
     { status: 'rejected', reviewedAt: new Date(), reviewedBy: req.user._id }
   );
 
-  // Create notification for accepted worker
-  await Notification.create({
-    recipient: application.worker._id,
-    sender: req.user._id,
-    title: 'Application Accepted',
-    message: `Your application for "${job.title}" has been accepted!`,
-    type: 'job_assigned',
-    relatedJob: job._id,
-    actionButton: {
-      text: 'View Job',
-      action: 'view_job'
-    }
-  });
+  // Use NotificationService to notify accepted worker
+  try {
+    await NotificationService.notifyJobAssigned(job._id, application.worker._id, req.user._id);
+  } catch (error) {
+    console.error('Failed to create job assignment notification:', error);
+    // Don't fail the acceptance if notification fails
+  }
 
   res.status(200).json({
     success: true,
@@ -486,16 +502,13 @@ exports.markJobCompleted = asyncHandler(async (req, res) => {
     description: 'Manual check to worker after job completion',
   });
 
-  // Create notification for worker
-  await Notification.create({
-    recipient: job.worker._id,
-    sender: req.user._id,
-    title: 'Job Completed',
-    message: `Your work on "${job.title}" has been approved! Payment will be processed manually by check.`,
-    type: 'job_completed',
-    relatedJob: job._id,
-    relatedPayment: payment._id
-  });
+  // Use NotificationService to notify worker about job completion
+  try {
+    await NotificationService.notifyJobCompleted(job._id, job.worker._id, req.user._id);
+  } catch (error) {
+    console.error('Failed to create job completion notification:', error);
+    // Don't fail the completion if notification fails
+  }
 
   res.status(200).json({
     success: true,
@@ -539,19 +552,13 @@ exports.requestRevision = asyncHandler(async (req, res) => {
 
   await job.save();
 
-  // Create notification for worker
-  await Notification.create({
-    recipient: job.worker._id,
-    sender: req.user._id,
-    title: 'Revision Requested',
-    message: `The client has requested revisions for "${job.title}"`,
-    type: 'job_application',
-    relatedJob: job._id,
-    actionButton: {
-      text: 'View Details',
-      action: 'view_job'
-    }
-  });
+  // Use NotificationService to notify worker about revision request
+  try {
+    await NotificationService.notifyRevisionRequested(job._id, job.worker._id, req.user._id, reason);
+  } catch (error) {
+    console.error('Failed to create revision request notification:', error);
+    // Don't fail the revision request if notification fails
+  }
 
   res.status(200).json({
     success: true,
