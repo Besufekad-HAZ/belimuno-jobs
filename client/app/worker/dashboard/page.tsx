@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp, MessageCircle, ThumbsUp, ThumbsDown, Paperclip, Smile, FileText, X } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { workerAPI, jobsAPI, notificationsAPI } from '@/lib/api';
@@ -773,7 +774,7 @@ const WorkerDashboard: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(notification.actionButton.url, '_blank')}
+                            onClick={() => window.open(notification.actionButton?.url, '_blank')}
                             className="mt-2"
                           >
                             {notification.actionButton.text}
@@ -813,12 +814,12 @@ const WorkerDashboard: React.FC = () => {
           </div>
         </Modal>
         {/* Chat Modal */}
-        <Modal isOpen={!!chatJobId} onClose={()=>setChatJobId(null)} title="Job Chat" size="xl">
-          <div className="flex flex-col h-[72vh] max-h-[80vh] w-full max-w-[900px] overflow-hidden">
+  <Modal isOpen={!!chatJobId} onClose={()=>setChatJobId(null)} title="Job Chat" size="xl" scrollContent={false}>
+          <div className="flex flex-col h-[70vh] w-full max-w-[900px]">
             <div className="flex items-center justify-between mb-3 px-2">
               <div className="text-sm text-gray-500">Collaborate professionally. Keep communication clear and respectful.</div>
             </div>
-            <div ref={chatScrollRef} onDragOver={(e)=>{e.preventDefault();}} onDrop={async (e)=>{e.preventDefault(); const files = e.dataTransfer?.files; if (!files) return; const list = Array.from(files).slice(0, 5 - chatAttachments.length); const reads = await Promise.all(list.map(f=> new Promise<PendingAttachment>((res)=>{ const r = new FileReader(); r.onload=()=>res({ name:f.name, type:f.type, size:f.size, dataUrl:String(r.result)}); r.readAsDataURL(f);}))); setChatAttachments(prev=>[...prev,...reads]); }} className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 bg-gradient-to-b from-blue-50/40 to-white rounded-lg border px-4 py-3" id="worker-chat-scroll">
+            <div ref={chatScrollRef} onDragOver={(e)=>{e.preventDefault();}} onDrop={async (e)=>{e.preventDefault(); const files = e.dataTransfer?.files; if (!files) return; const list = Array.from(files).slice(0, 5 - chatAttachments.length); const reads = await Promise.all(list.map(f=> new Promise<PendingAttachment>((res)=>{ const r = new FileReader(); r.onload=()=>res({ name:f.name, type:f.type, size:f.size, dataUrl:String(r.result)}); r.readAsDataURL(f);}))); setChatAttachments(prev=>[...prev,...reads]); }} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-3 bg-gradient-to-b from-blue-50/40 to-white rounded-lg border px-4 py-3" id="worker-chat-scroll">
               {chatMessages.map((m,i)=>(
                 <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='worker'?'bg-blue-50 ml-auto border border-blue-200':'bg-gray-100 border border-gray-200'}`}>
                   <p className="font-medium mb-1 text-blue-700">{m.sender?.name||'You'}</p>
@@ -835,7 +836,15 @@ const WorkerDashboard: React.FC = () => {
                   {chatAttachments.map((a,idx)=> (
                     <div key={idx} className="relative group">
                       {a.type.startsWith('image') ? (
-                        <img src={a.dataUrl} alt={a.name} className="h-20 w-full object-cover rounded"/>
+                        <Image
+                          src={a.dataUrl}
+                          alt={a.name}
+                          width={80}
+                          height={80}
+                          className="h-20 w-full object-cover rounded"
+                          style={{ objectFit: 'cover', borderRadius: '0.5rem' }}
+                          unoptimized
+                        />
                       ) : (
                         <div className="h-20 rounded border bg-gray-50 flex items-center justify-center text-xs text-gray-600">
                           <FileText className="h-4 w-4 mr-1"/>{a.name.slice(0,10)}
