@@ -255,7 +255,7 @@ const WorkerDashboard: React.FC = () => {
       try {
         const res = await workerAPI.getJobMessages(chatJobId);
         setChatMessages(res.data.data || []);
-      } catch (e) { /* ignore */ }
+      } catch { /* ignore */ }
     }, 4000);
     return () => clearInterval(interval);
   }, [chatJobId]);
