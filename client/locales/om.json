@@ -1,0 +1,52 @@
+{
+    "Home": {
+      "hero": {
+        "title": {
+          "part1": "Qophiiwwan",
+          "part2": "Carraawwan waliin hidhu"
+        },
+        "description": "Belimuno Jobs platformaa hiree HRaa Itoophiyaa keessatti kan caaltuudha, hojjettoota qophaa'aan qaban waliin daldaltoota magaalaa hunda keessatti hidha. Kumoota hojjettoota mijataa hojii isaanii ijaaruu keessatti walitti qabanii.",
+        "getStarted": "Jalqabi",
+        "goToDashboard": "Daashboorotti deemi",
+        "browseJobs": "Hojiiwwan ilaali"
+      },
+      "stats": {
+        "title": "Lakkoofsa Platformaa",
+        "subtitle": "Dhiibbaa nuti Itoophiyaa hunda keessatti barbaachisu argadhu",
+        "activeUsers": "Fayyadamtoota Hojii Irra Jiran",
+        "jobsPosted": "Hojiiwwan Maxxanfaman",
+        "jobsCompleted": "Hojiiwwan Xumuran",
+        "successRate": "Sadarkaa Milkaa'inaa"
+      },
+      "featuredJobs": {
+        "title": "Hojiiwwan Agarsiifaman",
+        "subtitle": "Carraawwan gammachuudhaan hiriyoota hojii ol'aantota irraa argadhu",
+        "applyNow": "Amma Applii godhadhu",
+        "loginToApply": "Applii godhuuf seenu",
+        "viewAllJobs": "Hojiiwwan Hunda Ilaali",
+        "due": "Yeroo Xumuraa"
+      },
+      "howItWorks": {
+        "title": "Akkamiin Hojjechuu Danda'u",
+        "subtitle": "Tarkaanfilee salphaa jalqabaa",
+        "step1": {
+          "title": "Akkaawuntii Uumu",
+          "description": "Hojii barbaachuuf hojjettootaaf yoo ta'ee proojektii maxxansuuf maamilaa ta'een galmaa'i"
+        },
+        "step2": {
+          "title": "Waliin Hojji & Hojjechisu",
+          "description": "Carraawwan ilaali, piroopoosaalaa kenni, fi proojektii sirrii ta'een walitti makamadhu"
+        },
+        "step3": {
+          "title": "Kaffaltiidhaan Argadhu",
+          "description": "Proojektota xumuri fi kaffaltii nagaa platformaa keenya irraa argadhu"
+        }
+      },
+      "cta": {
+        "title": "Imalaa Keessan Jalqabuu Ready Ta'anii?",
+        "subtitle": "Kumoota hojjettoota mijataa career isaanii fudhachuuf Belimuno Jobs fayyadamuu keessatti walitti qabanii.",
+        "findWorkers": "Hojjettoota Barbaadi",
+        "findWork": "Hojii Barbaadi"
+      }
+    }
+  }
