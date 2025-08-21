@@ -4,6 +4,8 @@ import "./globals.css";
 import "./fonts.css";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,19 +22,25 @@ export const metadata: Metadata = {
   description: "HR outsourcing and job management platform for Ethiopia",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params: { locale },
 }: Readonly<{
   children: React.ReactNode;
+  params: { locale: string };
 }>) {
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
-        <Footer />
+        <NextIntlClientProvider messages={messages}>
+          <Navbar />    
+            {children}
+          <Footer />
+        </NextIntlClientProvider>
       </body>
     </html>
   );
