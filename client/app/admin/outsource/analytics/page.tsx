@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  BarChart3, TrendingUp, DollarSign, Users, Briefcase, Calendar,
+  BarChart3, DollarSign, Users, Briefcase,
   PieChart, LineChart, Target, Award, Clock, Download, Filter,
   ArrowUp, ArrowDown, Activity, Zap, Star
 } from 'lucide-react';
@@ -61,12 +61,24 @@ interface TopPerformer {
   metric: string;
 }
 
+// Minimal shapes from API we rely on (avoid any)
+type TimeRange = '7d' | '30d' | '90d' | '1y';
+interface ApiUser {
+  role?: string;
+  isActive?: boolean;
+  workerProfile?: { rating?: number };
+}
+interface ApiJob {
+  status?: 'posted' | 'assigned' | 'in_progress' | 'completed' | 'cancelled' | string;
+  budget?: number;
+}
+
 const BusinessAnalytics: React.FC = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [topPerformers, setTopPerformers] = useState<TopPerformer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [timeRange, setTimeRange] = useState<TimeRange>('30d');
   const router = useRouter();
 
   useEffect(() => {
@@ -84,23 +96,22 @@ const BusinessAnalytics: React.FC = () => {
       setLoading(true);
 
       // Fetch real data from APIs
-      const [usersResponse, jobsResponse, dashboardResponse] = await Promise.all([
+  const [usersResponse, jobsResponse] = await Promise.all([
         adminAPI.getUsers({ limit: 100 }),
         adminAPI.getAllJobs(),
-        adminAPI.getDashboard(),
       ]);
 
-      const users = usersResponse.data?.data || [];
-      const jobs = jobsResponse.data?.data || [];
+  const users = (usersResponse.data?.data || []) as ApiUser[];
+  const jobs = (jobsResponse.data?.data || []) as ApiJob[];
 
-      const clients = users.filter((u: any) => u.role === 'client');
-      const workers = users.filter((u: any) => u.role === 'worker');
-      const completedJobs = jobs.filter((j: any) => j.status === 'completed');
-      const activeJobs = jobs.filter((j: any) => ['assigned', 'in_progress'].includes(j.status));
+  const clients = users.filter((u) => u.role === 'client');
+  const workers = users.filter((u) => u.role === 'worker');
+  const completedJobs = jobs.filter((j) => j.status === 'completed');
+  const activeJobs = jobs.filter((j) => j.status === 'assigned' || j.status === 'in_progress');
 
       // Calculate analytics based on real data
-      const totalRevenue = completedJobs.reduce((sum: number, job: any) =>
-        sum + (job.budget || Math.random() * 5000 + 1000), 0);
+      const totalRevenue = completedJobs.reduce((sum, job) =>
+        sum + (job.budget ?? (Math.random() * 5000 + 1000)), 0);
 
       const analyticsData: AnalyticsData = {
         revenue: {
@@ -117,15 +128,15 @@ const BusinessAnalytics: React.FC = () => {
         },
         clients: {
           total: clients.length,
-          active: clients.filter((c: any) => c.isActive).length,
+          active: clients.filter((c) => c.isActive === true).length,
           retention: 87.5, // Mock retention rate
           satisfaction: 4.3 // Mock satisfaction score
         },
         workers: {
           total: workers.length,
-          active: workers.filter((w: any) => w.isActive).length,
-          averageRating: workers.reduce((sum: number, w: any) =>
-            sum + (w.workerProfile?.rating || 0), 0) / Math.max(workers.length, 1),
+          active: workers.filter((w) => w.isActive === true).length,
+          averageRating: workers.reduce((sum, w) =>
+            sum + (w.workerProfile?.rating ?? 0), 0) / Math.max(workers.length, 1),
           utilization: 78.2 // Mock utilization rate
         },
         performance: {
@@ -200,7 +211,7 @@ const BusinessAnalytics: React.FC = () => {
               <Filter className="h-4 w-4 text-gray-500" />
               <select
                 value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTimeRange(e.target.value as TimeRange)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               >
                 <option value="7d">Last 7 days</option>
@@ -289,7 +300,7 @@ const BusinessAnalytics: React.FC = () => {
               <BarChart3 className="h-5 w-5 text-gray-500" />
             </div>
             <div className="space-y-4">
-              {chartData.map((data, idx) => (
+              {chartData.map((data) => (
                 <div key={data.month} className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600 w-12">{data.month}</span>
                   <div className="flex-1 mx-4">
@@ -315,7 +326,7 @@ const BusinessAnalytics: React.FC = () => {
               <LineChart className="h-5 w-5 text-gray-500" />
             </div>
             <div className="space-y-4">
-              {chartData.map((data, idx) => (
+              {chartData.map((data) => (
                 <div key={data.month} className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600 w-12">{data.month}</span>
                   <div className="flex-1 mx-4">

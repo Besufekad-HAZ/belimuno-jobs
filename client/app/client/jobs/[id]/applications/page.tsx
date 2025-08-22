@@ -7,7 +7,8 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
-import { Search, Filter, User, Check, X, MessageCircle, Paperclip, Smile, Image as ImageIcon, FileText } from 'lucide-react';
+import { Search, Filter, User, Check, X, MessageCircle, Paperclip, Smile, FileText } from 'lucide-react';
+import Image from 'next/image';
 
 interface WorkerInfo { _id: string; name: string; profile?: { avatar?: string }; workerProfile?: { rating?: number; skills?: string[] } }
 interface Application { _id: string; proposal: string; proposedBudget: number; status: string; appliedAt: string; worker: WorkerInfo }
@@ -94,7 +95,7 @@ const ApplicationsPage: React.FC = () => {
     el.scrollTop = el.scrollHeight;
   };
   useEffect(() => { if (messageModal) scrollToBottom(); }, [messageModal]);
-  useEffect(() => { if (messageModal) scrollToBottom(); }, [chatMessages, attachments]);
+  useEffect(() => { if (messageModal) scrollToBottom(); }, [chatMessages, attachments, messageModal]);
 
   // Poll chat while modal open
   useEffect(() => {
@@ -103,7 +104,7 @@ const ApplicationsPage: React.FC = () => {
       try {
         const res = await clientAPI.getJobMessages(jobId);
         setChatMessages(res.data.data || []);
-      } catch (e) { /* ignore */ }
+  } catch { /* ignore */ }
     }, 4000);
     return () => clearInterval(interval);
   }, [messageModal, jobId]);
@@ -205,7 +206,7 @@ const ApplicationsPage: React.FC = () => {
       </Modal>
 
       {/* Messaging modal */}
-      <Modal isOpen={messageModal} onClose={()=>setMessageModal(false)} title="Job Messages" size="xl">
+  <Modal isOpen={messageModal} onClose={()=>setMessageModal(false)} title="Job Messages" size="xl">
         <div className="flex flex-col h-[72vh] max-h-[80vh] w-full max-w-[900px] overflow-hidden">
           <div className="flex items-center justify-between mb-3 px-2">
             <div className="text-sm text-gray-500">Only the client and assigned worker can view this conversation.</div>
@@ -215,11 +216,11 @@ const ApplicationsPage: React.FC = () => {
               <div key={i} className={`p-3 rounded-2xl text-sm break-words shadow-sm ${m.sender?.role==='client'?'bg-blue-50/80 ml-auto border border-blue-200':'bg-white border'} max-w-[65%]` }>
                 <p className="font-medium mb-1 text-blue-600">{m.sender?.name||'You'}</p>
                 <p className="whitespace-pre-wrap text-gray-800">{m.content}</p>
-                {Array.isArray((m as any).attachments) && (m as any).attachments.length>0 && (
+                {'attachments' in m && Array.isArray((m as { attachments?: string[] }).attachments) && (m as { attachments?: string[] }).attachments!.length>0 && (
                   <div className="mt-2 grid grid-cols-3 gap-2">
-                    {(m as any).attachments.map((att:string, idx:number)=> (
+                    {(m as { attachments: string[] }).attachments.map((att:string, idx:number)=> (
                       att.startsWith('data:image') ? (
-                        <a key={idx} href={att} target="_blank" rel="noreferrer"><img src={att} alt="attachment" className="h-24 w-full object-cover rounded-lg border"/></a>
+                        <a key={idx} href={att} target="_blank" rel="noreferrer"><Image src={att} alt="attachment" width={200} height={200} className="h-24 w-full object-cover rounded-lg border"/></a>
                       ) : (
                         <a key={idx} href={att} download className="flex items-center gap-2 px-2 py-1 bg-white border rounded text-xs text-gray-700"><FileText className="h-4 w-4"/> Download</a>
                       )
@@ -235,10 +236,10 @@ const ApplicationsPage: React.FC = () => {
             <div className="mt-2 border rounded-lg bg-white p-2 shadow-sm">
               <div className="text-xs text-gray-500 mb-2">Attachments ({attachments.length}/5)</div>
               <div className="grid grid-cols-5 gap-2">
-                {attachments.map((a,idx)=> (
+        {attachments.map((a,idx)=> (
                   <div key={idx} className="relative group">
                     {a.type.startsWith('image') ? (
-                      <img src={a.dataUrl} alt={a.name} className="h-20 w-full object-cover rounded-lg border"/>
+                      <Image src={a.dataUrl} alt={a.name} width={200} height={200} className="h-20 w-full object-cover rounded-lg border"/>
                     ) : (
                       <div className="h-20 rounded border bg-gray-50 flex items-center justify-center text-xs text-gray-600">
                         <FileText className="h-4 w-4 mr-1"/>{a.name.slice(0,10)}

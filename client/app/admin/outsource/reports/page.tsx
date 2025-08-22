@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  FileText, Download, Calendar, DollarSign, TrendingUp, Filter,
-  BarChart3, PieChart, Eye, Search, RefreshCw, ExternalLink,
-  CreditCard, Receipt, Wallet, Building, Users, Clock
-} from 'lucide-react';
+  FileText, Download, Calendar, DollarSign, TrendingUp,
+  Eye, Search, RefreshCw,
+  Receipt, Wallet, Users} from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -49,6 +48,18 @@ interface Report {
   size: string;
 }
 
+type DateRange = '7d' | '30d' | '90d' | '1y';
+type TypeFilter = 'all' | Transaction['type'];
+type StatusFilter = 'all' | Transaction['status'];
+
+// Minimal API job shape for typing local computations
+interface ApiJob {
+  status?: string;
+  budget?: number;
+  title?: string;
+  client?: { name?: string } | null;
+}
+
 const FinancialReports: React.FC = () => {
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -56,45 +67,44 @@ const FinancialReports: React.FC = () => {
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [dateRange, setDateRange] = useState<DateRange>('30d');
   const router = useRouter();
 
-  useEffect(() => {
-    const user = getStoredUser();
-    if (!user || !hasRole(user, ['admin_outsource'])) {
-      router.push('/login');
-      return;
-    }
-
-    fetchFinancialData();
-  }, [router, dateRange]);
-
-  useEffect(() => {
-    filterTransactions();
-  }, [transactions, searchQuery, typeFilter, statusFilter]);
-
-  const fetchFinancialData = async () => {
+  const fetchFinancialData = useCallback(async () => {
     try {
       setLoading(true);
 
       // Fetch real data from APIs
-      const [usersResponse, jobsResponse] = await Promise.all([
+      const [, jobsResponse] = await Promise.all([
         adminAPI.getUsers({ role: 'client', limit: 100 }),
         adminAPI.getAllJobs(),
       ]);
 
-      const clients = usersResponse.data?.data || [];
-      const jobs = jobsResponse.data?.data || [];
-      const completedJobs = jobs.filter((j: any) => j.status === 'completed');
+      // Safely extract jobs from API response without using any
+      const maybeJobs: unknown = (jobsResponse as { data?: { data?: unknown } } | undefined)?.data?.data;
+
+      const toApiJob = (u: unknown): ApiJob => {
+        const o = (typeof u === 'object' && u !== null) ? (u as Record<string, unknown>) : {};
+        const clientRaw = (typeof o['client'] === 'object' && o['client'] !== null) ? (o['client'] as Record<string, unknown>) : undefined;
+        return {
+          status: typeof o['status'] === 'string' ? (o['status'] as string) : undefined,
+          budget: typeof o['budget'] === 'number' ? (o['budget'] as number) : undefined,
+          title: typeof o['title'] === 'string' ? (o['title'] as string) : undefined,
+          client: clientRaw ? { name: typeof clientRaw['name'] === 'string' ? (clientRaw['name'] as string) : undefined } : null,
+        };
+      };
+
+      const jobs: ApiJob[] = Array.isArray(maybeJobs) ? (maybeJobs as unknown[]).map(toApiJob) : [];
+      const completedJobs = jobs.filter((j: ApiJob) => j.status === 'completed');
 
       // Calculate financial metrics
-      const totalRevenue = completedJobs.reduce((sum: number, job: any) =>
-        sum + (job.budget || Math.random() * 5000 + 1000), 0);
+      const totalRevenue = completedJobs.reduce((sum: number, job: ApiJob) =>
+        sum + (job.budget ?? Math.random() * 5000 + 1000), 0);
 
       const financialMetrics: FinancialData = {
         totalRevenue,
@@ -110,17 +120,18 @@ const FinancialReports: React.FC = () => {
       setFinancialData(financialMetrics);
 
       // Generate mock transactions
+      const statuses: Transaction['status'][] = ['completed', 'pending', 'failed'];
       const mockTransactions: Transaction[] = [
-        ...completedJobs.slice(0, 10).map((job: any, idx: number) => ({
+        ...completedJobs.slice(0, 10).map((job: ApiJob, idx: number) => ({
           id: `income-${idx}`,
           type: 'income' as const,
-          amount: job.budget || Math.random() * 5000 + 1000,
-          description: `Payment for project: ${job.title}`,
+          amount: job.budget ?? Math.random() * 5000 + 1000,
+          description: `Payment for project: ${job.title ?? 'Untitled Project'}`,
           category: 'Project Revenue',
           date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-          status: ['completed', 'pending', 'failed'][Math.floor(Math.random() * 3)] as any,
+          status: statuses[Math.floor(Math.random() * statuses.length)],
           client: job.client?.name || 'Unknown Client',
-          project: job.title,
+          project: job.title ?? 'Unknown Project',
           invoiceNumber: `INV-${String(idx + 1).padStart(4, '0')}`
         })),
         // Add some expense transactions
@@ -202,17 +213,18 @@ const FinancialReports: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filterTransactions = () => {
+  const filterTransactions = useCallback(() => {
     let filtered = [...transactions];
 
     if (searchQuery) {
+      const q = searchQuery.toLowerCase();
       filtered = filtered.filter(transaction =>
-        transaction.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.client?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        transaction.project?.toLowerCase().includes(searchQuery.toLowerCase())
+        transaction.description.toLowerCase().includes(q) ||
+        transaction.category.toLowerCase().includes(q) ||
+        transaction.client?.toLowerCase().includes(q) ||
+        transaction.project?.toLowerCase().includes(q)
       );
     }
 
@@ -225,7 +237,22 @@ const FinancialReports: React.FC = () => {
     }
 
     setFilteredTransactions(filtered);
-  };
+  }, [transactions, searchQuery, typeFilter, statusFilter]);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (!user || !hasRole(user, ['admin_outsource'])) {
+      router.push('/login');
+      return;
+    }
+
+    fetchFinancialData();
+  }, [router, dateRange, fetchFinancialData]);
+
+  useEffect(() => {
+    filterTransactions();
+  }, [filterTransactions]);
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -295,7 +322,7 @@ const FinancialReports: React.FC = () => {
               <Calendar className="h-4 w-4 text-gray-500" />
               <select
                 value={dateRange}
-                onChange={(e) => setDateRange(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDateRange(e.target.value as DateRange)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               >
                 <option value="7d">Last 7 days</option>
@@ -449,7 +476,7 @@ const FinancialReports: React.FC = () => {
               </div>
               <select
                 value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTypeFilter(e.target.value as TypeFilter)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="all">All Types</option>
@@ -458,7 +485,7 @@ const FinancialReports: React.FC = () => {
               </select>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as StatusFilter)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="all">All Status</option>

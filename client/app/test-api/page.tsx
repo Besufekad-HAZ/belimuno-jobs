@@ -3,10 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { jobsAPI } from '@/lib/api';
 
+interface Job {
+  title: string;
+}
+
+interface JobsApiResult {
+  success: boolean;
+  count: number;
+  total: number;
+  data: Job[];
+}
+
 const TestAPIPage: React.FC = () => {
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<JobsApiResult | null>(null);
 
   const testAPI = async () => {
     setLoading(true);
@@ -15,10 +26,10 @@ const TestAPIPage: React.FC = () => {
       console.log('Testing API connection...');
       const response = await jobsAPI.getAll({ status: 'posted' });
       console.log('API Response:', response);
-      setResult(response.data);
-    } catch (err: any) {
+      setResult(response.data as JobsApiResult);
+    } catch (err: unknown) {
       console.error('API Error:', err);
-      setError(err.message || 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -36,9 +47,7 @@ const TestAPIPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Test Results</h2>
 
-          {loading && (
-            <div className="text-blue-600">Loading...</div>
-          )}
+          {loading && <div className="text-blue-600">Loading...</div>}
 
           {error && (
             <div className="text-red-600 mb-4">
@@ -55,9 +64,6 @@ const TestAPIPage: React.FC = () => {
                 <strong>Count:</strong> {result.count}
               </div>
               <div>
-                <strong>Total:</strong> {result.total}
-              </div>
-              <div>
                 <strong>Jobs Found:</strong> {result.data?.length || 0}
               </div>
 
@@ -65,7 +71,7 @@ const TestAPIPage: React.FC = () => {
                 <div>
                   <strong>Job Titles:</strong>
                   <ul className="list-disc list-inside mt-2">
-                    {result.data.map((job: any, index: number) => (
+                    {result.data.map((job: Job, index: number) => (
                       <li key={index}>{job.title}</li>
                     ))}
                   </ul>

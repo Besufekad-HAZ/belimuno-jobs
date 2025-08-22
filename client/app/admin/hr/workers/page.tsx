@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Users, Search, Filter, Eye, CheckCircle, XCircle, Mail, Phone,
-  MapPin, Calendar, Star, Briefcase, Download, UserPlus, MoreVertical,
-  Edit, Trash2, MessageSquare, Award, Clock, AlertTriangle
+  Star, Download, MessageSquare, Award, Clock
 } from 'lucide-react';
+import Image from 'next/image';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI, notificationsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -74,7 +74,9 @@ const WorkerManagement: React.FC = () => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'verified' | 'pending' | 'inactive'>('all');
+  const statuses = ['all', 'verified', 'pending', 'inactive'] as const;
+  type Status = typeof statuses[number];
+  const [statusFilter, setStatusFilter] = useState<Status>('all');
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
   const [showWorkerModal, setShowWorkerModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
@@ -94,24 +96,7 @@ const WorkerManagement: React.FC = () => {
     fetchWorkers();
   }, [router]);
 
-  useEffect(() => {
-    filterWorkers();
-  }, [workers, searchQuery, statusFilter]);
-
-  const fetchWorkers = async () => {
-    try {
-      setLoading(true);
-      const response = await adminAPI.getUsers({ role: 'worker', limit: 100 });
-      const workersData = response.data?.data || response.data?.users || response.data || [];
-      setWorkers(workersData);
-    } catch (error) {
-      console.error('Failed to fetch workers:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterWorkers = () => {
+  const filterWorkers = useCallback(() => {
     let filtered = [...workers];
 
     // Apply search filter
@@ -139,7 +124,26 @@ const WorkerManagement: React.FC = () => {
     }
 
     setFilteredWorkers(filtered);
+  }, [workers, searchQuery, statusFilter]);
+
+  useEffect(() => {
+    filterWorkers();
+  }, [filterWorkers]);
+
+  const fetchWorkers = async () => {
+    try {
+      setLoading(true);
+      const response = await adminAPI.getUsers({ role: 'worker', limit: 100 });
+      const workersData = response.data?.data || response.data?.users || response.data || [];
+      setWorkers(workersData);
+    } catch (error) {
+      console.error('Failed to fetch workers:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // filterWorkers moved into useCallback above
 
   const handleWorkerVerification = async (workerId: string, action: 'verify' | 'reject', reason?: string) => {
     try {
@@ -218,9 +222,9 @@ const WorkerManagement: React.FC = () => {
   };
 
   const getWorkerStatusBadge = (worker: Worker) => {
-    if (!worker.isActive) return <Badge variant="red">Inactive</Badge>;
-    if (!worker.isVerified && !worker.profile?.verified) return <Badge variant="orange">Pending Verification</Badge>;
-    return <Badge variant="green">Verified</Badge>;
+    if (!worker.isActive) return <Badge variant="danger">Inactive</Badge>;
+    if (!worker.isVerified && !worker.profile?.verified) return <Badge variant="warning">Pending Verification</Badge>;
+    return <Badge variant="success">Verified</Badge>;
   };
 
   const calculateWorkerScore = (worker: Worker) => {
@@ -331,10 +335,10 @@ const WorkerManagement: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
               </div>
 
-              {['all', 'verified', 'pending', 'inactive'].map((status) => (
+        {statuses.map((status) => (
                 <button
                   key={status}
-                  onClick={() => setStatusFilter(status as any)}
+          onClick={() => setStatusFilter(status)}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                     statusFilter === status
                       ? 'bg-blue-500 text-white'
@@ -366,9 +370,11 @@ const WorkerManagement: React.FC = () => {
                     {/* Avatar */}
                     <div className="h-16 w-16 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                       {worker.profile?.avatar ? (
-                        <img
+                        <Image
                           src={worker.profile.avatar}
                           alt={worker.name}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded-full object-cover"
                         />
                       ) : (
@@ -439,10 +445,10 @@ const WorkerManagement: React.FC = () => {
                           <p className="text-sm font-medium text-gray-700 mb-2">Skills:</p>
                           <div className="flex flex-wrap gap-1">
                             {worker.workerProfile.skills.slice(0, 6).map((skill, idx) => (
-                              <Badge key={idx} variant="blue" size="sm">{skill}</Badge>
+                              <Badge key={idx} variant="info" size="sm">{skill}</Badge>
                             ))}
                             {worker.workerProfile.skills.length > 6 && (
-                              <Badge variant="gray" size="sm">+{worker.workerProfile.skills.length - 6} more</Badge>
+                              <Badge variant="secondary" size="sm">+{worker.workerProfile.skills.length - 6} more</Badge>
                             )}
                           </div>
                         </div>
@@ -543,9 +549,11 @@ const WorkerManagement: React.FC = () => {
               <div className="flex items-start space-x-4">
                 <div className="h-20 w-20 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                   {selectedWorker.profile?.avatar ? (
-                    <img
+                    <Image
                       src={selectedWorker.profile.avatar}
                       alt={selectedWorker.name}
+                      width={80}
+                      height={80}
                       className="h-20 w-20 rounded-full object-cover"
                     />
                   ) : (
@@ -616,7 +624,7 @@ const WorkerManagement: React.FC = () => {
                         <strong>Skills:</strong>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {selectedWorker.workerProfile.skills.map((skill, idx) => (
-                            <Badge key={idx} variant="blue" size="sm">{skill}</Badge>
+                            <Badge key={idx} variant="info" size="sm">{skill}</Badge>
                           ))}
                         </div>
                       </div>
@@ -627,7 +635,7 @@ const WorkerManagement: React.FC = () => {
                         <strong>Languages:</strong>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {selectedWorker.workerProfile.languages.map((lang, idx) => (
-                            <Badge key={idx} variant="green" size="sm">{lang}</Badge>
+                            <Badge key={idx} variant="success" size="sm">{lang}</Badge>
                           ))}
                         </div>
                       </div>

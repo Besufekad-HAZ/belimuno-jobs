@@ -33,7 +33,7 @@ const JobsPage: React.FC = () => {
   const [user, setUser] = useState<ReturnType<typeof getStoredUser> | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [savingJobId, setSavingJobId] = useState<string | null>(null);
+  // Removed unused saving state to satisfy eslint
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
 
   // fetchJobs defined below; initial effect will reference it
@@ -93,7 +93,10 @@ const JobsPage: React.FC = () => {
       try {
         if (currentUser?.role === 'worker') {
           const res = await workerAPI.getSavedJobs();
-          const ids = new Set((res.data?.data || []).map((j: any) => String(j._id)));
+          const arr: unknown = res.data?.data || [];
+          const ids = new Set(
+            (Array.isArray(arr) ? arr : []).map((j) => String((j as { _id?: unknown })._id))
+          );
           setSavedJobIds(ids);
         }
       } catch {}
@@ -319,7 +322,7 @@ const JobsPage: React.FC = () => {
                           size="sm"
                           onClick={async () => {
                             if (user?.role !== 'worker') return;
-                            setSavingJobId(job._id);
+                            // Optimistically update saved jobs set
                             try {
                               if (savedJobIds.has(job._id)) {
                                 await workerAPI.unsaveJob(job._id);
@@ -333,7 +336,6 @@ const JobsPage: React.FC = () => {
                                 setSavedJobIds(copy);
                               }
                             } catch (e) { console.error(e); }
-                            finally { setSavingJobId(null); }
                           }}
                         >
                           <Bookmark className="h-4 w-4 mr-1" /> {savedJobIds.has(job._id) ? 'Saved' : 'Save'}
@@ -344,8 +346,9 @@ const JobsPage: React.FC = () => {
                           onClick={async () => {
                             const url = `${window.location.origin}/jobs/${job._id}`;
                             try {
-                              if ((navigator as any).share) {
-                                await (navigator as any).share({ title: `Belimuno Job: ${job.title}`, url });
+                              const shareData: ShareData = { title: `Belimuno Job: ${job.title}`, url };
+                              if ('share' in navigator && typeof navigator.share === 'function') {
+                                await navigator.share(shareData);
                               } else if (navigator.clipboard) {
                                 await navigator.clipboard.writeText(url);
                                 alert('Link copied to clipboard');

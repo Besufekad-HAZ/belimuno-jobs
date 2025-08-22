@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, CheckCircle, Clock, Trash2, Filter, Search, User, Briefcase, DollarSign, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { Bell, CheckCircle, Clock, Trash2, Filter, Search, User, Briefcase, DollarSign, AlertTriangle, Eye } from 'lucide-react';
 import { getStoredUser } from '@/lib/auth';
 import { notificationsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -50,17 +50,7 @@ const NotificationsPage: React.FC = () => {
   const [stats, setStats] = useState({ total: 0, unread: 0 });
   const router = useRouter();
 
-  useEffect(() => {
-    const user = getStoredUser();
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    fetchNotifications();
-    fetchStats();
-  }, [router, filter, typeFilter]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await notificationsAPI.getAll();
@@ -90,16 +80,26 @@ const NotificationsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, typeFilter, searchQuery]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await notificationsAPI.getStats();
       setStats(response.data?.data || { total: 0, unread: 0 });
     } catch (error) {
       console.error('Failed to fetch notification stats:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    fetchNotifications();
+    fetchStats();
+  }, [router, fetchNotifications, fetchStats]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -195,10 +195,10 @@ const NotificationsPage: React.FC = () => {
 
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Badge variant="blue" className="px-3 py-1">
+              <Badge variant="info" className="px-3 py-1">
                 Total: {stats.total}
               </Badge>
-              <Badge variant="red" className="px-3 py-1">
+              <Badge variant="danger" className="px-3 py-1">
                 Unread: {stats.unread}
               </Badge>
             </div>
@@ -240,10 +240,10 @@ const NotificationsPage: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
               </div>
 
-              {['all', 'unread', 'read'].map((status) => (
+              {(['all', 'unread', 'read'] as const).map((status) => (
                 <button
                   key={status}
-                  onClick={() => setFilter(status as any)}
+                  onClick={() => setFilter(status)}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                     filter === status
                       ? 'bg-blue-500 text-white'
@@ -311,12 +311,12 @@ const NotificationsPage: React.FC = () => {
                             {notification.title}
                           </h3>
                           <Badge
-                            variant={notification.priority === 'urgent' ? 'red' : notification.priority === 'high' ? 'orange' : 'blue'}
+                            variant={notification.priority === 'urgent' ? 'danger' : notification.priority === 'high' ? 'warning' : 'info'}
                             size="sm"
                           >
                             {notification.priority}
                           </Badge>
-                          <Badge variant="gray" size="sm">
+                          <Badge variant="secondary" size="sm">
                             {getTypeDisplayName(notification.type)}
                           </Badge>
                         </div>

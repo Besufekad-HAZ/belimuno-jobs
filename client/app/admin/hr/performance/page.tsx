@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Award, Star, TrendingUp, TrendingDown, Eye, Edit, Plus, Search, Filter,
-  Calendar, Clock, User, Briefcase, Target, CheckCircle, AlertCircle,
-  BarChart3, PieChart, FileText, Download
-} from 'lucide-react';
+  Clock, CheckCircle
+  } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI, notificationsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -85,7 +84,6 @@ const PerformanceReviews: React.FC = () => {
   const [selectedReview, setSelectedReview] = useState<PerformanceReview | null>(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedWorkerForReview, setSelectedWorkerForReview] = useState<string>('');
   const [newReview, setNewReview] = useState({
     workerId: '',
     periodType: 'quarterly' as 'monthly' | 'quarterly' | 'annual',
@@ -118,9 +116,30 @@ const PerformanceReviews: React.FC = () => {
     fetchWorkerStats();
   }, [router]);
 
+  const filterReviews = useCallback(() => {
+    let filtered = [...reviews];
+
+    if (searchQuery) {
+      filtered = filtered.filter(review =>
+        review.worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        review.worker.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(review => review.status === statusFilter);
+    }
+
+    if (periodFilter !== 'all') {
+      filtered = filtered.filter(review => review.period.type === periodFilter);
+    }
+
+    setFilteredReviews(filtered);
+  }, [reviews, searchQuery, statusFilter, periodFilter]);
+
   useEffect(() => {
     filterReviews();
-  }, [reviews, searchQuery, statusFilter, periodFilter]);
+  }, [filterReviews]);
 
   const fetchReviews = async () => {
     try {
@@ -257,7 +276,7 @@ const PerformanceReviews: React.FC = () => {
       const workers = response.data.data || [];
 
       // Mock worker stats
-      const mockStats: WorkerStats[] = workers.map((worker: any) => ({
+      const mockStats: WorkerStats[] = workers.map((worker: { _id: string; name: string; workerProfile?: { rating?: number; completedJobs?: number } }) => ({
         _id: worker._id,
         name: worker.name,
         averageRating: worker.workerProfile?.rating || 0,
@@ -266,7 +285,7 @@ const PerformanceReviews: React.FC = () => {
         clientFeedbackCount: Math.floor(Math.random() * 20) + 5,
         lastReviewDate: Math.random() > 0.5 ? new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString() : undefined,
         nextReviewDue: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-        performanceTrend: ['improving', 'stable', 'declining'][Math.floor(Math.random() * 3)] as any
+        performanceTrend: (['improving', 'stable', 'declining'] as const)[Math.floor(Math.random() * 3)] as WorkerStats['performanceTrend']
       }));
 
       setWorkerStats(mockStats);
@@ -275,26 +294,7 @@ const PerformanceReviews: React.FC = () => {
     }
   };
 
-  const filterReviews = () => {
-    let filtered = [...reviews];
-
-    if (searchQuery) {
-      filtered = filtered.filter(review =>
-        review.worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        review.worker.email.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(review => review.status === statusFilter);
-    }
-
-    if (periodFilter !== 'all') {
-      filtered = filtered.filter(review => review.period.type === periodFilter);
-    }
-
-    setFilteredReviews(filtered);
-  };
+  // filterReviews memoized above
 
   const calculateOverallRating = (metrics: typeof newReview.metrics) => {
     const values = Object.values(metrics);
@@ -307,9 +307,29 @@ const PerformanceReviews: React.FC = () => {
       const overallRating = calculateOverallRating(newReview.metrics);
 
       // In real implementation, call API to create review
+      const workerData = workerStats.find(w => w._id === newReview.workerId);
+      const workerObj = workerData
+        ? {
+            _id: workerData._id,
+            name: workerData.name,
+            email: '',
+            workerProfile: {
+              rating: workerData.averageRating,
+              completedJobs: workerData.jobsCompleted,
+              totalJobs: 0,
+              skills: []
+            }
+          }
+        : {
+            _id: newReview.workerId,
+            name: 'Unknown',
+            email: '',
+            workerProfile: { rating: 0, completedJobs: 0, totalJobs: 0, skills: [] }
+          };
+
       const createdReview: PerformanceReview = {
         _id: Date.now().toString(),
-        worker: workerStats.find(w => w._id === newReview.workerId)! as any,
+        worker: workerObj,
         reviewer: {
           _id: 'current_hr',
           name: 'Current HR Admin',
@@ -374,15 +394,15 @@ const PerformanceReviews: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft':
-        return <Badge variant="gray">Draft</Badge>;
+        return <Badge variant="secondary">Draft</Badge>;
       case 'pending_approval':
-        return <Badge variant="orange">Pending Approval</Badge>;
+        return <Badge variant="warning">Pending Approval</Badge>;
       case 'completed':
-        return <Badge variant="green">Completed</Badge>;
+        return <Badge variant="success">Completed</Badge>;
       case 'acknowledged':
-        return <Badge variant="blue">Acknowledged</Badge>;
+        return <Badge variant="info">Acknowledged</Badge>;
       default:
-        return <Badge variant="gray">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
@@ -514,7 +534,6 @@ const PerformanceReviews: React.FC = () => {
                 </div>
                 <Button
                   onClick={() => {
-                    setSelectedWorkerForReview(worker._id);
                     setNewReview(prev => ({ ...prev, workerId: worker._id }));
                     setShowCreateModal(true);
                   }}
@@ -551,7 +570,7 @@ const PerformanceReviews: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'pending_approval' | 'completed')}
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
@@ -565,7 +584,7 @@ const PerformanceReviews: React.FC = () => {
                 <span className="text-sm text-gray-600">Period:</span>
                 <select
                   value={periodFilter}
-                  onChange={(e) => setPeriodFilter(e.target.value as any)}
+                  onChange={(e) => setPeriodFilter(e.target.value as 'all' | 'monthly' | 'quarterly' | 'annual')}
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
@@ -596,7 +615,7 @@ const PerformanceReviews: React.FC = () => {
                     <div className="flex items-center space-x-3 mb-4">
                       <h3 className="text-lg font-semibold text-gray-900">{review.worker.name}</h3>
                       {getStatusBadge(review.status)}
-                      <Badge variant="blue" size="sm">{review.period.type}</Badge>
+                      <Badge variant="info" size="sm">{review.period.type}</Badge>
                       <div className="flex items-center space-x-1">
                         {getRatingStars(review.overallRating)}
                         <span className="text-sm font-medium text-gray-600 ml-1">
@@ -630,10 +649,10 @@ const PerformanceReviews: React.FC = () => {
                         <p className="text-sm font-medium text-gray-700">Strengths:</p>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {review.strengths.slice(0, 3).map((strength, idx) => (
-                            <Badge key={idx} variant="green" size="sm">{strength}</Badge>
+                            <Badge key={idx} variant="success" size="sm">{strength}</Badge>
                           ))}
                           {review.strengths.length > 3 && (
-                            <Badge variant="gray" size="sm">+{review.strengths.length - 3} more</Badge>
+                            <Badge variant="secondary" size="sm">+{review.strengths.length - 3} more</Badge>
                           )}
                         </div>
                       </div>
@@ -770,7 +789,7 @@ const PerformanceReviews: React.FC = () => {
                         <div className="flex items-center justify-between mb-1">
                           <p className="font-medium text-gray-900">{goal.description}</p>
                           <Badge
-                            variant={goal.status === 'completed' ? 'green' : goal.status === 'in_progress' ? 'blue' : 'gray'}
+                            variant={goal.status === 'completed' ? 'success' : goal.status === 'in_progress' ? 'info' : 'secondary'}
                             size="sm"
                           >
                             {goal.status.replace('_', ' ')}
@@ -817,7 +836,6 @@ const PerformanceReviews: React.FC = () => {
           isOpen={showCreateModal}
           onClose={() => {
             setShowCreateModal(false);
-            setSelectedWorkerForReview('');
             setNewReview({
               workerId: '',
               periodType: 'quarterly',
@@ -860,7 +878,7 @@ const PerformanceReviews: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Review Period</label>
                 <select
                   value={newReview.periodType}
-                  onChange={(e) => setNewReview(prev => ({ ...prev, periodType: e.target.value as any }))}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, periodType: e.target.value as 'monthly' | 'quarterly' | 'annual' }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="monthly">Monthly</option>

@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Users, UserCheck, UserX, Clock, TrendingUp, AlertTriangle,
-  FileText, MessageSquare, Award, Calendar,
-  CheckCircle, XCircle, Eye, Download, UserPlus, Bell
+  Users, UserCheck, Clock, AlertTriangle,
+  Award,
+  CheckCircle, XCircle, Eye, Bell
 } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI, notificationsAPI } from '@/lib/api';
@@ -95,6 +95,7 @@ const HRAdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [usersResponse, dashboardResponse] = await Promise.all([
         adminAPI.getUsers({ role: 'worker', limit: 100 }),
         adminAPI.getDashboard(),

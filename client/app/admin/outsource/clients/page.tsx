@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
-  Building, Search, Filter, Eye, Edit, Mail, Phone, MapPin,
-  Calendar, Star, Briefcase, DollarSign, TrendingUp, Users,
-  CheckCircle, AlertCircle, MoreVertical, MessageSquare, FileText
-} from 'lucide-react';
+  Building, Search, Filter, Eye, Mail, Phone,
+  Calendar, Star, Briefcase, DollarSign, TrendingUp,
+  CheckCircle, MessageSquare} from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI, notificationsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
@@ -61,18 +61,23 @@ interface ClientStats {
   clientRetentionRate: number;
 }
 
+type StatusFilter = 'all' | 'active' | 'inactive';
+interface MessageContent { title: string; message: string }
+type ApiClient = Partial<Client> & { _id: string; name: string; email: string; createdAt: string; isActive?: boolean };
+type BadgeVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
+
 const ClientManagement: React.FC = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [stats, setStats] = useState<ClientStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [industryFilter, setIndustryFilter] = useState<string>('all');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showClientModal, setShowClientModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageContent, setMessageContent] = useState({ title: '', message: '' });
+  const [messageContent, setMessageContent] = useState<MessageContent>({ title: '', message: '' });
   const router = useRouter();
 
   useEffect(() => {
@@ -85,19 +90,52 @@ const ClientManagement: React.FC = () => {
     fetchClients();
   }, [router]);
 
+  const filterClients = useCallback(() => {
+    let filtered = [...clients];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(client =>
+        client.name.toLowerCase().includes(q) ||
+        client.email.toLowerCase().includes(q) ||
+        (client.clientProfile?.company?.toLowerCase().includes(q) ?? false) ||
+        (client.clientProfile?.industry?.toLowerCase().includes(q) ?? false)
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(client =>
+        statusFilter === 'active' ? client.isActive : !client.isActive
+      );
+    }
+
+    if (industryFilter !== 'all') {
+      filtered = filtered.filter(client =>
+        client.clientProfile?.industry === industryFilter
+      );
+    }
+
+    setFilteredClients(filtered);
+  }, [clients, searchQuery, statusFilter, industryFilter]);
+
   useEffect(() => {
     filterClients();
-  }, [clients, searchQuery, statusFilter, industryFilter]);
+  }, [filterClients]);
 
   const fetchClients = async () => {
     try {
       setLoading(true);
       const response = await adminAPI.getUsers({ role: 'client', limit: 100 });
-      const clientsData = response.data?.data || response.data?.users || response.data || [];
+  const clientsData = (response.data?.data || response.data?.users || response.data || []) as ApiClient[];
 
       // Enhance client data with mock business metrics
-      const enhancedClients: Client[] = clientsData.map((client: any) => ({
-        ...client,
+      const enhancedClients: Client[] = clientsData.map((client) => ({
+        _id: client._id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        isActive: client.isActive ?? true,
+        createdAt: client.createdAt,
         clientProfile: {
           ...client.clientProfile,
           company: client.clientProfile?.company || `${client.name} Corp`,
@@ -107,9 +145,10 @@ const ClientManagement: React.FC = () => {
           totalSpent: client.clientProfile?.totalSpent || Math.floor(Math.random() * 50000) + 5000,
           projectsCompleted: client.clientProfile?.projectsCompleted || Math.floor(Math.random() * 20) + 1,
           totalProjects: client.clientProfile?.totalProjects || Math.floor(Math.random() * 25) + 1,
-          averageRating: client.clientProfile?.averageRating || (Math.random() * 1.5 + 3.5).toFixed(1),
+          averageRating: client.clientProfile?.averageRating ?? parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
           lastProjectDate: client.clientProfile?.lastProjectDate || new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-        }
+        },
+        profile: client.profile,
       }));
 
       setClients(enhancedClients);
@@ -137,32 +176,7 @@ const ClientManagement: React.FC = () => {
     }
   };
 
-  const filterClients = () => {
-    let filtered = [...clients];
-
-    if (searchQuery) {
-      filtered = filtered.filter(client =>
-        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.clientProfile?.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.clientProfile?.industry?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(client =>
-        statusFilter === 'active' ? client.isActive : !client.isActive
-      );
-    }
-
-    if (industryFilter !== 'all') {
-      filtered = filtered.filter(client =>
-        client.clientProfile?.industry === industryFilter
-      );
-    }
-
-    setFilteredClients(filtered);
-  };
+  // Filtering logic moved into useCallback above
 
   const handleSendMessage = async () => {
     if (!selectedClient || !messageContent.title || !messageContent.message) return;
@@ -194,7 +208,7 @@ const ClientManagement: React.FC = () => {
     }).format(amount);
   };
 
-  const getIndustryColor = (industry: string) => {
+  const getIndustryColor = (industry: string): BadgeVariant => {
     const colors = {
       Technology: 'info',
       Healthcare: 'success',
@@ -202,7 +216,7 @@ const ClientManagement: React.FC = () => {
       Education: 'primary',
       Retail: 'secondary'
     };
-    return colors[industry as keyof typeof colors] || 'secondary';
+    return (colors[industry as keyof typeof colors] || 'secondary') as BadgeVariant;
   };
 
   const getClientScore = (client: Client) => {
@@ -217,7 +231,13 @@ const ClientManagement: React.FC = () => {
     return Math.min(Math.round(score), 100);
   };
 
-  const uniqueIndustries = Array.from(new Set(clients.map(c => c.clientProfile?.industry).filter(Boolean)));
+  const uniqueIndustries = Array.from(
+    new Set(
+      clients
+        .map(c => c.clientProfile?.industry)
+        .filter((i): i is string => Boolean(i))
+    )
+  );
 
   if (loading) {
     return (
@@ -315,8 +335,7 @@ const ClientManagement: React.FC = () => {
                   placeholder="Search clients by name, email, company, or industry..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
               </div>
             </div>
 
@@ -326,7 +345,7 @@ const ClientManagement: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as StatusFilter)}
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
@@ -363,246 +382,243 @@ const ClientManagement: React.FC = () => {
               </p>
             </Card>
           ) : (
-            filteredClients.map((client) => (
+            filteredClients.map((client) => {
+              return (
               <Card key={client._id} className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Avatar */}
-                    <div className="h-16 w-16 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                      {client.profile?.avatar ? (
-                        <img
-                          src={client.profile.avatar}
-                          alt={client.name}
-                          className="h-16 w-16 rounded-full object-cover"
-                        />
-                      ) : (
-                        <Building className="h-8 w-8 text-gray-600" />
-                      )}
+                    {client.profile?.avatar ? (
+                      <Image
+                        src={client.profile.avatar}
+                        alt={client.name}
+                        width={64}
+                        height={64}
+                        className="h-16 w-16 rounded-full object-cover" />
+                    ) : (
+                      <Building className="h-8 w-8 text-gray-600" />
+                    )}
+                  </div>
+
+                  {/* Client Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900">{client.name}</h3>
+                      <Badge variant={client.isActive ? 'success' : 'danger'}>
+                        {client.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                      <div className="flex items-center space-x-1">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {client.clientProfile?.averageRating || 0}/5
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Client Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900">{client.name}</h3>
-                        <Badge variant={client.isActive ? 'success' : 'danger'}>
-                          {client.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {client.clientProfile?.averageRating || 0}/5
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <Mail className="h-4 w-4 mr-1" />
+                          {client.email}
+                        </p>
+                        {client.phone && (
+                          <p className="text-sm text-gray-600 flex items-center mt-1">
+                            <Phone className="h-4 w-4 mr-1" />
+                            {client.phone}
+                          </p>
+                        )}
+                        {client.clientProfile?.company && (
+                          <p className="text-sm text-gray-600 flex items-center mt-1">
+                            <Building className="h-4 w-4 mr-1" />
+                            {client.clientProfile.company}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-600">
+                          <strong>Total Spent:</strong> {formatCurrency(client.clientProfile?.totalSpent || 0)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>Projects:</strong> {client.clientProfile?.projectsCompleted || 0}/{client.clientProfile?.totalProjects || 0}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          <strong>Company Size:</strong> {client.clientProfile?.companySize || 'Not specified'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-600">
+                          <strong>Joined:</strong> {formatDistanceToNow(new Date(client.createdAt), { addSuffix: true })}
+                        </p>
+                        {client.clientProfile?.lastProjectDate && (
+                          <p className="text-sm text-gray-600">
+                            <strong>Last Project:</strong> {formatDistanceToNow(new Date(client.clientProfile.lastProjectDate), { addSuffix: true })}
+                          </p>
+                        )}
+                        <div className="flex items-center space-x-1 mt-1">
+                          <TrendingUp className="h-4 w-4 text-blue-500" />
+                          <span className="text-sm font-medium text-blue-600">
+                            Score: {getClientScore(client)}/100
                           </span>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-gray-600 flex items-center">
-                            <Mail className="h-4 w-4 mr-1" />
-                            {client.email}
-                          </p>
-                          {client.phone && (
-                            <p className="text-sm text-gray-600 flex items-center mt-1">
-                              <Phone className="h-4 w-4 mr-1" />
-                              {client.phone}
-                            </p>
-                          )}
-                          {client.clientProfile?.company && (
-                            <p className="text-sm text-gray-600 flex items-center mt-1">
-                              <Building className="h-4 w-4 mr-1" />
-                              {client.clientProfile.company}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <p className="text-sm text-gray-600">
-                            <strong>Total Spent:</strong> {formatCurrency(client.clientProfile?.totalSpent || 0)}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <strong>Projects:</strong> {client.clientProfile?.projectsCompleted || 0}/{client.clientProfile?.totalProjects || 0}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            <strong>Company Size:</strong> {client.clientProfile?.companySize || 'Not specified'}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-sm text-gray-600">
-                            <strong>Joined:</strong> {formatDistanceToNow(new Date(client.createdAt), { addSuffix: true })}
-                          </p>
-                          {client.clientProfile?.lastProjectDate && (
-                            <p className="text-sm text-gray-600">
-                              <strong>Last Project:</strong> {formatDistanceToNow(new Date(client.clientProfile.lastProjectDate), { addSuffix: true })}
-                            </p>
-                          )}
-                          <div className="flex items-center space-x-1 mt-1">
-                            <TrendingUp className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm font-medium text-blue-600">
-                              Score: {getClientScore(client)}/100
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Industry & Website */}
-                      <div className="flex items-center space-x-4 mb-2">
-                        {client.clientProfile?.industry && (
-                          <Badge variant={getIndustryColor(client.clientProfile.industry) as any} size="sm">
-                            {client.clientProfile.industry}
-                          </Badge>
-                        )}
-                        {client.clientProfile?.website && (
-                          <a
-                            href={client.clientProfile.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                          >
-                            {client.clientProfile.website}
-                          </a>
-                        )}
-                      </div>
+                    {/* Industry & Website */}
+                    <div className="flex items-center space-x-4 mb-2">
+                      {client.clientProfile?.industry && (
+                        <Badge variant={getIndustryColor(client.clientProfile.industry)} size="sm">
+                          {client.clientProfile.industry}
+                        </Badge>
+                      )}
+                      {client.clientProfile?.website && (
+                        <a
+                          href={client.clientProfile.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          {client.clientProfile.website}
+                        </a>
+                      )}
                     </div>
                   </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-col space-y-2 ml-4">
-                    <Button
-                      onClick={() => {
-                        setSelectedClient(client);
-                        setShowClientModal(true);
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center space-x-2"
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span>View Details</span>
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        setSelectedClient(client);
-                        setShowMessageModal(true);
-                      }}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center space-x-2"
-                    >
-                      <MessageSquare className="h-4 w-4" />
-                      <span>Contact</span>
-                    </Button>
-
-                    <Button
-                      onClick={() => router.push(`/admin/outsource/clients/${client._id}/projects`)}
-                      variant="primary"
-                      size="sm"
-                      className="flex items-center space-x-2"
-                    >
-                      <Briefcase className="h-4 w-4" />
-                      <span>Projects</span>
-                    </Button>
-                  </div>
                 </div>
-              </Card>
-            ))
-          )}
+
+                {/* Actions */}
+                <div className="flex flex-col space-y-2 ml-4">
+                  <Button
+                    onClick={() => {
+                      setSelectedClient(client);
+                      setShowClientModal(true);
+                    } }
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    <span>View Details</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setSelectedClient(client);
+                      setShowMessageModal(true);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Message</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => router.push(`/admin/outsource/clients/${client._id}/projects`)}
+                    variant="primary"
+                    size="sm"
+                    className="flex items-center space-x-2"
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    <span>Projects</span>
+                  </Button>
+                </div>
+            </Card>
+              );
+            }))}
         </div>
 
         {/* Client Details Modal */}
         <Modal
           isOpen={showClientModal}
-          onClose={() => {
-            setShowClientModal(false);
-            setSelectedClient(null);
-          }}
-          title="Client Details"
-          size="xl"
-        >
-          {selectedClient && (
-            <div className="space-y-6 max-h-96 overflow-y-auto">
-              <div className="flex items-start space-x-4">
-                <div className="h-20 w-20 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                  {selectedClient.profile?.avatar ? (
-                    <img
-                      src={selectedClient.profile.avatar}
-                      alt={selectedClient.name}
-                      className="h-20 w-20 rounded-full object-cover"
-                    />
-                  ) : (
-                    <Building className="h-10 w-10 text-gray-600" />
+        onClose={() => {
+          setShowClientModal(false);
+          setSelectedClient(null);
+        }}
+        title="Client Details"
+        size="xl"
+      >
+        {selectedClient && (
+          <div className="space-y-6">
+            <div className="flex items-start space-x-4">
+              {selectedClient.profile?.avatar ? (
+                <Image
+                  src={selectedClient.profile.avatar}
+                  alt={selectedClient.name}
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 rounded-full object-cover"
+                />
+              ) : (
+                <Building className="h-10 w-10 text-gray-600" />
+              )}
+              <div className="flex-1">
+                <h3 className="text-2xl font-semibold">{selectedClient.name}</h3>
+                <p className="text-gray-600">{selectedClient.email}</p>
+                <Badge variant={selectedClient.isActive ? 'success' : 'danger'}>
+                  {selectedClient.isActive ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            </div>
+
+            {selectedClient.clientProfile && (
+              <div>
+                <h4 className="font-semibold mb-3">Company Information</h4>
+                <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
+                  <p><strong>Company:</strong> {selectedClient.clientProfile.company}</p>
+                  <p><strong>Industry:</strong> {selectedClient.clientProfile.industry}</p>
+                  <p><strong>Size:</strong> {selectedClient.clientProfile.companySize}</p>
+                  <p><strong>Website:</strong>
+                    <a href={selectedClient.clientProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 ml-1">
+                      {selectedClient.clientProfile.website}
+                    </a>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <h4 className="font-semibold mb-3">Business Metrics</h4>
+              <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
+                <p><strong>Total Spent:</strong> {formatCurrency(selectedClient.clientProfile?.totalSpent || 0)}</p>
+                <p><strong>Average Rating:</strong> {selectedClient.clientProfile?.averageRating}/5 ⭐</p>
+                <p><strong>Projects Completed:</strong> {selectedClient.clientProfile?.projectsCompleted}</p>
+                <p><strong>Total Projects:</strong> {selectedClient.clientProfile?.totalProjects}</p>
+                <p><strong>Client Score:</strong> {getClientScore(selectedClient)}/100</p>
+                <p><strong>Member Since:</strong> {new Date(selectedClient.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+
+            {selectedClient.profile && (
+              <div>
+                <h4 className="font-semibold mb-3">Contact Information</h4>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  {selectedClient.phone && <p><strong>Phone:</strong> {selectedClient.phone}</p>}
+                  {selectedClient.profile.address && (
+                    <div>
+                      <strong>Address:</strong>
+                      <p className="text-sm text-gray-600">
+                        {[
+                          selectedClient.profile.address.street,
+                          selectedClient.profile.address.city,
+                          selectedClient.profile.address.region,
+                          selectedClient.profile.address.country
+                        ].filter(Boolean).join(', ')}
+                      </p>
+                    </div>
+                  )}
+                  {selectedClient.profile.bio && (
+                    <div className="mt-3">
+                      <strong>Bio:</strong>
+                      <p className="text-sm text-gray-600 mt-1">{selectedClient.profile.bio}</p>
+                    </div>
                   )}
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-semibold">{selectedClient.name}</h3>
-                  <p className="text-gray-600">{selectedClient.email}</p>
-                  <Badge variant={selectedClient.isActive ? 'success' : 'danger'}>
-                    {selectedClient.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </div>
               </div>
-
-              {/* Company Information */}
-              {selectedClient.clientProfile && (
-                <div>
-                  <h4 className="font-semibold mb-3">Company Information</h4>
-                  <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
-                    <p><strong>Company:</strong> {selectedClient.clientProfile.company}</p>
-                    <p><strong>Industry:</strong> {selectedClient.clientProfile.industry}</p>
-                    <p><strong>Size:</strong> {selectedClient.clientProfile.companySize}</p>
-                    <p><strong>Website:</strong>
-                      <a href={selectedClient.clientProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 ml-1">
-                        {selectedClient.clientProfile.website}
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Business Metrics */}
-              <div>
-                <h4 className="font-semibold mb-3">Business Metrics</h4>
-                <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
-                  <p><strong>Total Spent:</strong> {formatCurrency(selectedClient.clientProfile?.totalSpent || 0)}</p>
-                  <p><strong>Average Rating:</strong> {selectedClient.clientProfile?.averageRating}/5 ⭐</p>
-                  <p><strong>Projects Completed:</strong> {selectedClient.clientProfile?.projectsCompleted}</p>
-                  <p><strong>Total Projects:</strong> {selectedClient.clientProfile?.totalProjects}</p>
-                  <p><strong>Client Score:</strong> {getClientScore(selectedClient)}/100</p>
-                  <p><strong>Member Since:</strong> {new Date(selectedClient.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              {selectedClient.profile && (
-                <div>
-                  <h4 className="font-semibold mb-3">Contact Information</h4>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    {selectedClient.phone && <p><strong>Phone:</strong> {selectedClient.phone}</p>}
-                    {selectedClient.profile.address && (
-                      <div>
-                        <strong>Address:</strong>
-                        <p className="text-sm text-gray-600">
-                          {[
-                            selectedClient.profile.address.street,
-                            selectedClient.profile.address.city,
-                            selectedClient.profile.address.region,
-                            selectedClient.profile.address.country
-                          ].filter(Boolean).join(', ')}
-                        </p>
-                      </div>
-                    )}
-                    {selectedClient.profile.bio && (
-                      <div className="mt-3">
-                        <strong>Bio:</strong>
-                        <p className="text-sm text-gray-600 mt-1">{selectedClient.profile.bio}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
+        )}
         </Modal>
 
         {/* Message Modal */}

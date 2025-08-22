@@ -57,7 +57,7 @@ interface RealNotification {
 
 const WorkerDashboard: React.FC = () => {
   const [stats, setStats] = useState<WorkerStats | null>(null);
-  interface SimpleJob { _id: string; title: string; description: string; budget: number; deadline: string; category?: string; region?: { name?: string }; status?: string; progress?: number; acceptedApplication?: { proposedBudget?: number }; applicationCount?: number; }
+  interface SimpleJob { _id: string; title: string; description: string; budget: number; deadline: string; category?: string; region?: { name?: string }; status?: string; progress?: number; acceptedApplication?: { proposedBudget?: number }; applicationCount?: number; review?: { workerReview?: { rating?: number } } }
   interface EarningsData { recentPayments?: { jobTitle?: string; amount?: number; date?: string }[] }
   const [availableJobs, setAvailableJobs] = useState<SimpleJob[]>([]);
   const [myJobs, setMyJobs] = useState<SimpleJob[]>([]);
@@ -491,7 +491,7 @@ const WorkerDashboard: React.FC = () => {
                       <Button size="sm" variant="outline" onClick={() => openChat(job._id)}>
                         <MessageCircle className="h-4 w-4" />
                       </Button>
-                      {job.status === 'completed' && !(job as any).review?.workerReview?.rating && (
+                      {job.status === 'completed' && !job.review?.workerReview?.rating && (
                         <Button size="sm" onClick={() => { setRateJobId(job._id); setShowRateModal(true); }}>
                           <Star className="h-4 w-4 mr-1" /> Rate Client
                         </Button>

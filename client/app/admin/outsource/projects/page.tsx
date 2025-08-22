@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Briefcase, Search, Filter, Eye, Edit, Calendar, DollarSign,
-  Users, Clock, CheckCircle, AlertCircle, TrendingUp, Target,
-  BarChart3, FileText, MessageSquare, Flag, Download
+  Briefcase, Search, Filter, Eye, Edit,
+  Clock, CheckCircle, AlertCircle
 } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI } from '@/lib/api';
@@ -59,14 +58,33 @@ interface ProjectStats {
   onTimeDelivery: number;
 }
 
+// Minimal job shape from API we rely on
+type JobApi = {
+  _id: string;
+  title: string;
+  description?: string;
+  status: string;
+  budget?: number;
+  deadline?: string;
+  client?: { _id?: string; name?: string; email?: string; clientProfile?: { company?: string } };
+  worker?: { _id: string; name: string; email: string; workerProfile?: { rating?: number } };
+  createdAt: string;
+  updatedAt?: string;
+  startDate?: string;
+  tags?: string[];
+};
+
+type StatusFilter = 'all' | 'posted' | 'assigned' | 'in_progress' | 'completed' | 'overdue';
+type PriorityFilter = 'all' | 'urgent' | 'high' | 'medium' | 'low';
+
 const ProjectOversight: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [stats, setStats] = useState<ProjectStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'posted' | 'assigned' | 'in_progress' | 'completed' | 'overdue'>('all');
-  const [priorityFilter, setPriorityFilter] = useState<'all' | 'urgent' | 'high' | 'medium' | 'low'>('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const router = useRouter();
@@ -81,31 +99,34 @@ const ProjectOversight: React.FC = () => {
     fetchProjects();
   }, [router]);
 
-  useEffect(() => {
-    filterProjects();
-  }, [projects, searchQuery, statusFilter, priorityFilter]);
 
   const fetchProjects = async () => {
     try {
       setLoading(true);
-      const response = await adminAPI.getAllJobs();
-      const jobsData = response.data?.data || response.data?.jobs || response.data || [];
+  const response = await adminAPI.getAllJobs();
+  const jobsData: JobApi[] = response.data?.data || response.data?.jobs || response.data || [];
 
       // Transform jobs to projects with enhanced data
-      const projectsData: Project[] = jobsData.map((job: any) => {
-        const isOverdue = new Date(job.deadline || Date.now()) < new Date() && job.status !== 'completed';
+      const projectsData: Project[] = jobsData.map((job: JobApi) => {
+        const knownStatuses = ['posted', 'assigned', 'in_progress', 'completed', 'cancelled'] as const;
+        const status: Project['status'] = (knownStatuses as readonly string[]).includes(job.status)
+          ? (job.status as Project['status'])
+          : 'posted';
+        const isOverdue = new Date(job.deadline || Date.now()) < new Date() && status !== 'completed';
+        const nonUrgent = ['low', 'medium', 'high'] as const;
+        const computedPriority: Project['priority'] = isOverdue ? 'urgent' : nonUrgent[Math.floor(Math.random() * nonUrgent.length)];
 
         return {
           _id: job._id,
           title: job.title,
           description: job.description,
-          status: job.status,
+          status,
           budget: job.budget || Math.floor(Math.random() * 10000) + 1000,
           progress: job.status === 'completed' ? 100 :
                    job.status === 'in_progress' ? Math.floor(Math.random() * 80) + 10 :
                    job.status === 'assigned' ? Math.floor(Math.random() * 30) : 0,
           deadline: job.deadline || new Date(Date.now() + Math.random() * 60 * 24 * 60 * 60 * 1000).toISOString(),
-          priority: isOverdue ? 'urgent' : ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as any,
+          priority: computedPriority,
           client: {
             _id: job.client?._id || 'unknown',
             name: job.client?.name || 'Unknown Client',
@@ -155,7 +176,7 @@ const ProjectOversight: React.FC = () => {
     }
   };
 
-  const filterProjects = () => {
+  const filterProjects = useCallback(() => {
     let filtered = [...projects];
 
     if (searchQuery) {
@@ -182,7 +203,12 @@ const ProjectOversight: React.FC = () => {
     }
 
     setFilteredProjects(filtered);
-  };
+  }, [projects, searchQuery, statusFilter, priorityFilter]);
+
+  // Apply filters whenever dependencies change
+  useEffect(() => {
+    filterProjects();
+  }, [filterProjects]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -359,7 +385,7 @@ const ProjectOversight: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as StatusFilter)}
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
@@ -375,7 +401,7 @@ const ProjectOversight: React.FC = () => {
                 <span className="text-sm text-gray-600">Priority:</span>
                 <select
                   value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPriorityFilter(e.target.value as PriorityFilter)}
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>

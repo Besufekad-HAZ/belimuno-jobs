@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   AlertTriangle, Search, Filter, Eye, MessageSquare, Clock, CheckCircle,
-  XCircle, User, Briefcase, DollarSign, Calendar, FileText, Phone, Mail,
-  ArrowRight, MoreVertical, Flag, Award
+  Briefcase, DollarSign, FileText,
+  Flag, Award
 } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
-import { adminAPI, notificationsAPI } from '@/lib/api';
+import { notificationsAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -87,9 +87,33 @@ const DisputeResolution: React.FC = () => {
     fetchDisputes();
   }, [router]);
 
+  const filterDisputes = useCallback(() => {
+    let filtered = [...disputes];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(dispute =>
+        dispute.title.toLowerCase().includes(q) ||
+        dispute.description.toLowerCase().includes(q) ||
+        dispute.worker.name.toLowerCase().includes(q) ||
+        dispute.client.name.toLowerCase().includes(q) ||
+        (dispute.job?.title?.toLowerCase().includes(q) ?? false)
+      );
+    }
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(d => d.status === statusFilter);
+    }
+    if (priorityFilter !== 'all') {
+      filtered = filtered.filter(d => d.priority === priorityFilter);
+    }
+
+    setFilteredDisputes(filtered);
+  }, [disputes, searchQuery, statusFilter, priorityFilter]);
+
   useEffect(() => {
     filterDisputes();
-  }, [disputes, searchQuery, statusFilter, priorityFilter]);
+  }, [filterDisputes]);
 
   const fetchDisputes = async () => {
     try {
@@ -219,35 +243,11 @@ const DisputeResolution: React.FC = () => {
       ];
 
       setDisputes(mockDisputes);
-    } catch (error) {
-      console.error('Failed to fetch disputes:', error);
-    } finally {
+  } finally {
       setLoading(false);
     }
   };
 
-  const filterDisputes = () => {
-    let filtered = [...disputes];
-
-    if (searchQuery) {
-      filtered = filtered.filter(dispute =>
-        dispute.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dispute.worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dispute.client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dispute.job?.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(dispute => dispute.status === statusFilter);
-    }
-
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(dispute => dispute.priority === priorityFilter);
-    }
-
-    setFilteredDisputes(filtered);
-  };
 
   const handleResolveDispute = async () => {
     if (!selectedDispute || !resolutionData.resolution) return;
@@ -286,30 +286,30 @@ const DisputeResolution: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'open':
-        return <Badge variant="red">Open</Badge>;
+        return <Badge variant="danger">Open</Badge>;
       case 'investigating':
-        return <Badge variant="orange">Investigating</Badge>;
+        return <Badge variant="warning">Investigating</Badge>;
       case 'resolved':
-        return <Badge variant="green">Resolved</Badge>;
+        return <Badge variant="success">Resolved</Badge>;
       case 'closed':
-        return <Badge variant="gray">Closed</Badge>;
+        return <Badge variant="secondary">Closed</Badge>;
       default:
-        return <Badge variant="gray">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return <Badge variant="red">Urgent</Badge>;
+        return <Badge variant="danger">Urgent</Badge>;
       case 'high':
-        return <Badge variant="orange">High</Badge>;
+        return <Badge variant="warning">High</Badge>;
       case 'medium':
-        return <Badge variant="blue">Medium</Badge>;
+        return <Badge variant="info">Medium</Badge>;
       case 'low':
-        return <Badge variant="gray">Low</Badge>;
+        return <Badge variant="secondary">Low</Badge>;
       default:
-        return <Badge variant="gray">{priority}</Badge>;
+        return <Badge variant="secondary">{priority}</Badge>;
     }
   };
 
@@ -427,6 +427,7 @@ const DisputeResolution: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
                 <select
                   value={statusFilter}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onChange={(e) => setStatusFilter(e.target.value as any)}
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
@@ -441,6 +442,7 @@ const DisputeResolution: React.FC = () => {
                 <span className="text-sm text-gray-600">Priority:</span>
                 <select
                   value={priorityFilter}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onChange={(e) => setPriorityFilter(e.target.value as any)}
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
@@ -479,7 +481,7 @@ const DisputeResolution: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900">{dispute.title}</h3>
                         {getStatusBadge(dispute.status)}
                         {getPriorityBadge(dispute.priority)}
-                        <Badge variant="gray" size="sm">{dispute.type}</Badge>
+                        <Badge variant="secondary" size="sm">{dispute.type}</Badge>
                       </div>
 
                       <p className="text-gray-600 mb-4 line-clamp-2">{dispute.description}</p>
@@ -714,6 +716,7 @@ const DisputeResolution: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
                   value={resolutionData.status}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onChange={(e) => setResolutionData(prev => ({ ...prev, status: e.target.value as any }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >

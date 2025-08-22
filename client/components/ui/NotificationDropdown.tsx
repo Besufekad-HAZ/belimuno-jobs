@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Bell, X, Check, Trash2, Clock, User, Briefcase, DollarSign, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Bell, X, Check, Trash2, Clock, User, Briefcase, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
 import { notificationsAPI } from '@/lib/api';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -62,13 +62,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchNotifications();
-    }
-  }, [isOpen, filter]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await notificationsAPI.getAll();
@@ -84,7 +78,13 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }, [isOpen, fetchNotifications]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {

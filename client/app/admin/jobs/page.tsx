@@ -6,7 +6,6 @@ import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI } from '@/lib/api';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
 import Modal from '@/components/ui/Modal';
 import { Search, Filter, RefreshCw, Eye, Briefcase, Download, Plus, Trash2, Pencil, X, Calendar } from 'lucide-react';
 
@@ -71,9 +70,9 @@ const ManageJobsPage: React.FC = () => {
 
   const upsertJob = async (form: Partial<AdminJob>) => {
     if (editing) {
-      await adminAPI.updateJob(editing._id, form as any);
+      await adminAPI.updateJob(editing._id, form);
     } else {
-      await adminAPI.createJob(form as any);
+      await adminAPI.createJob(form);
     }
     setShowCreate(false);
     setEditing(null);
@@ -167,7 +166,7 @@ const ManageJobsPage: React.FC = () => {
                 <Calendar className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
                 <select
                   value={range}
-                  onChange={(e) => setRange(e.target.value as any)}
+                  onChange={(e) => setRange(e.target.value as '30d' | '90d' | 'all')}
                   className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                 >
                   <option value="30d">Last 30 days</option>
@@ -300,7 +299,7 @@ const JobForm: React.FC<JobFormProps> = ({ initial, onCancel, onSave }) => {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        await onSave({ title, category, budget, status, deadline: deadline ? new Date(deadline).toISOString() : undefined } as any);
+        await onSave({ title, category, budget, status, deadline: deadline ? new Date(deadline).toISOString() : undefined });
       }}
       className="grid grid-cols-1 md:grid-cols-2 gap-4"
     >
@@ -318,7 +317,7 @@ const JobForm: React.FC<JobFormProps> = ({ initial, onCancel, onSave }) => {
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-        <select value={status} onChange={(e)=>setStatus(e.target.value as any)} className="w-full px-3 py-2 border rounded-md bg-white text-gray-900">
+        <select value={status} onChange={(e)=>setStatus(e.target.value as AdminJob['status'])} className="w-full px-3 py-2 border rounded-md bg-white text-gray-900">
           <option value="draft">Draft</option>
           <option value="posted">Posted</option>
           <option value="in_progress">In progress</option>

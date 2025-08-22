@@ -10,10 +10,25 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
+type StoredUser = { role: string } | null;
+type Stats = {
+  totalUsers?: number;
+  totalJobs?: number;
+  completedJobs?: number;
+} | null;
+type FeaturedJob = {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  deadline?: string;
+  budget?: number;
+};
+
 export default function Home() {
-  const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState<any>(null);
-  const [featuredJobs, setFeaturedJobs] = useState<any[]>([]);
+  const [user, setUser] = useState<StoredUser>(null);
+  const [stats, setStats] = useState<Stats>(null);
+  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -56,7 +71,7 @@ export default function Home() {
               <span className="bg-gradient-to-r from-blue-800 to-cyan-600 bg-clip-text text-transparent"> Opportunities</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers
+              Belimuno Jobs is Ethiopia&apos;s premier HR outsourcing platform, connecting skilled workers
               with businesses across the country. Join thousands of professionals building their careers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -87,7 +102,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900">Platform Statistics</h2>
-              <p className="text-gray-600 mt-4">See the impact we're making across Ethiopia</p>
+              <p className="text-gray-600 mt-4">See the impact we&apos;re making across Ethiopia</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <Card className="text-center bg-blue-50 border-blue-200">
@@ -135,9 +150,11 @@ export default function Home() {
                     <Badge variant="primary" size="sm">
                       {job.category}
                     </Badge>
-                    <span className="text-xs text-gray-500">
-                      Due: {new Date(job.deadline).toLocaleDateString()}
-                    </span>
+                    {job.deadline && (
+                      <span className="text-xs text-gray-500">
+                        Due: {new Date(job.deadline).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
                   <Link href={user ? `/jobs/${job._id}` : '/login'}>
                     <Button size="sm" className="shadow-sm">

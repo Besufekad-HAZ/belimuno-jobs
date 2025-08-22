@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { adminAPI } from '@/lib/api';
@@ -24,7 +24,7 @@ const AdminReviewsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<{ moderationStatus?: string; status?: string }>({ moderationStatus: 'pending' });
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const res = await adminAPI.getReviews(filter);
@@ -35,9 +35,9 @@ const AdminReviewsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
 
-  useEffect(() => { load(); }, [filter]);
+  useEffect(() => { load(); }, [load]);
 
   const moderate = async (id: string, moderationStatus: 'approved'|'rejected') => {
     await adminAPI.moderateReview(id, { moderationStatus, status: moderationStatus==='approved' ? 'published' : 'hidden' });

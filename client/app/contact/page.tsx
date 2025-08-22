@@ -25,7 +25,7 @@ const ContactPage: React.FC = () => {
       setPhone('');
       setSubject('');
       setMessage('');
-    } catch (err) {
+  } catch {
       setStatus('error');
     }
   };

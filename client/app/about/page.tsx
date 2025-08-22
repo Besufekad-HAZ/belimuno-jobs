@@ -75,7 +75,7 @@ const AboutPage: React.FC = () => {
             </p>
             <div className="mt-8">
               <Badge variant="secondary" className="bg-white/20 text-white border-white/30 text-lg px-6 py-2">
-                "Work Smarter Not Harder!"
+                &quot;Work Smarter Not Harder!&quot;
               </Badge>
             </div>
           </div>
@@ -266,12 +266,12 @@ const AboutPage: React.FC = () => {
   <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
     <h2 className="text-4xl font-bold mb-6 leading-tight">Ready to Work with Us?</h2>
     <p className="text-xl text-cyan-100 font-medium mb-10 leading-relaxed max-w-3xl mx-auto">
-      "The only way to do great work is to love what you do. And we Love what we do! That's why we say come to Us."
+      &quot;The only way to do great work is to love what you do. And we Love what we do! That&apos;s why we say come to Us.&quot;
     </p>
 
     <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
         <Link href="/contact">
-  <Button className="bg-white text-blue-800 hover:bg-cyan-50 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20 !text-black">
+  <Button className="bg-white text-blue-800 hover:bg-cyan-50 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
     📞 Get In Touch
   </Button>
       </Link>

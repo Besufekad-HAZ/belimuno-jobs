@@ -52,8 +52,8 @@ const JobDetailPage: React.FC = () => {
       if (user?.role !== 'worker' || !id) return;
       try {
         const res = await workerAPI.getSavedJobs();
-        const list = res.data?.data || [];
-        setIsSaved(list.some((j: any) => String(j._id) === String(id)));
+  const list: { _id: string }[] = res.data?.data || [];
+  setIsSaved(list.some((j) => String(j._id) === String(id)));
       } catch {}
     })();
   }, [id, user?.role]);
@@ -78,16 +78,17 @@ const JobDetailPage: React.FC = () => {
 
   const shareJob = async () => {
     if (!job) return;
-    const shareData = {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData: ShareData = {
       title: `Belimuno Job: ${job.title}`,
       text: `${job.title} — ETB ${job.budget}.` ,
-      url: typeof window !== 'undefined' ? window.location.href : ''
-    } as any;
+      url
+    };
     try {
       if (navigator.share) {
-        await (navigator as any).share(shareData);
+        await navigator.share(shareData);
       } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareData.url);
+        await navigator.clipboard.writeText(url);
         alert('Link copied to clipboard');
       }
     } catch (e) { console.error(e); }

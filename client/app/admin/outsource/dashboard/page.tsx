@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Briefcase, DollarSign, TrendingUp, Users, Building, Target,
-  Clock, CheckCircle, AlertCircle, BarChart3, PieChart,
-  Calendar, FileText, MessageSquare, Download, Eye
+  Briefcase, DollarSign, TrendingUp, Building,
+  CheckCircle, BarChart3, FileText, Eye
 } from 'lucide-react';
 import { getStoredUser, hasRole } from '@/lib/auth';
 import { adminAPI } from '@/lib/api';
@@ -71,9 +70,9 @@ const OutsourceAdminDashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showClientModal, setShowClientModal] = useState(false);
+  // const [showClientModal, setShowClientModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  // const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const router = useRouter();
 
@@ -90,10 +89,9 @@ const OutsourceAdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [usersResponse, jobsResponse, dashboardResponse] = await Promise.all([
+  const [usersResponse, jobsResponse] = await Promise.all([
         adminAPI.getUsers({ role: 'client', limit: 100 }),
         adminAPI.getAllJobs(),
-        adminAPI.getDashboard(),
       ]);
 
       // Handle different API response structures
@@ -103,7 +101,10 @@ const OutsourceAdminDashboard: React.FC = () => {
       setClients(clientsData);
 
       // Transform jobs to projects with mock data
-      const projectsData: Project[] = jobsData.slice(0, 20).map((job: any) => ({
+      const projectsData: Project[] = jobsData.slice(0, 20).map((job: {
+        _id: string; title: string; status: string; budget?: number; deadline?: string;
+        client?: { _id: string; name: string }; worker?: { _id: string; name: string }; createdAt?: string;
+      }) => ({
         _id: job._id,
         title: job.title,
         status: job.status,
@@ -161,15 +162,15 @@ const OutsourceAdminDashboard: React.FC = () => {
   const getProjectStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="green">Completed</Badge>;
+        return <Badge variant="success">Completed</Badge>;
       case 'in_progress':
-        return <Badge variant="blue">In Progress</Badge>;
+        return <Badge variant="primary">In Progress</Badge>;
       case 'assigned':
-        return <Badge variant="orange">Assigned</Badge>;
+        return <Badge variant="warning">Assigned</Badge>;
       case 'posted':
-        return <Badge variant="gray">Posted</Badge>;
+        return <Badge variant="secondary">Posted</Badge>;
       default:
-        return <Badge variant="gray">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
@@ -310,7 +311,7 @@ const OutsourceAdminDashboard: React.FC = () => {
           <Card className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Revenue Growth</h2>
             <div className="space-y-2">
-              {revenueData.slice(-3).map((data, idx) => (
+              {revenueData.slice(-3).map((data) => (
                 <div key={data.month} className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">{data.month}</span>
                   <span className="font-medium text-gray-900">{formatCurrency(data.revenue)}</span>
@@ -394,7 +395,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                       <p className="font-medium text-gray-900">{client.name}</p>
                       <p className="text-sm text-gray-600">{client.email}</p>
                       {client.clientProfile?.industry && (
-                        <Badge variant="blue" size="sm">{client.clientProfile.industry}</Badge>
+                        <Badge variant="primary" size="sm">{client.clientProfile.industry}</Badge>
                       )}
                     </div>
                   </div>
@@ -482,11 +483,11 @@ const OutsourceAdminDashboard: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">Project "E-commerce Platform" completed</span>
+                <span className="text-sm text-gray-600">Project &quot;E-commerce Platform&quot; completed</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">New client "TechCorp Inc" onboarded</span>
+                <span className="text-sm text-gray-600">New client &quot;TechCorp Inc&quot; onboarded</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
