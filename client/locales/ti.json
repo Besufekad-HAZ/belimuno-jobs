@@ -354,5 +354,142 @@
         "website": "ወብሳይት"
       }
     }
+  },
+  "WorkerDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ሰራሕተኛ",
+      "subtitle": "ስራሓትካ ኣስተድሕን ከምኡውን እታኻ ኣሰልጣን"
+    },
+    "buttons": {
+      "notifications": "መንበርሂ",
+      "wallet": "ዋሌት",
+      "viewAll": "ኩሉ ርኢ",
+      "cancel": "ኣትርፍ",
+      "submit": "ኣመልካቺ ኣረክብ",
+      "withdrawFunds": "ገንዘብ ኣውጽእ",
+      "markAllRead": "ኩሉ ከም እተንበበ ምልክት ግበር",
+      "send": "ላክ"
+    },
+    "stats": {
+      "activeJobs": {
+        "title": "ንቑሓት ስራሓት",
+        "label": "ንቑሓት ስራሓት"
+      },
+      "completedJobs": {
+        "title": "ዝተፈጸመ",
+        "label": "ዝተፈጸመ"
+      },
+      "earnings": {
+        "title": "ጠቕላላ እታኻ",
+        "label": "ጠቕላላ እታኻ"
+      },
+      "rating": {
+        "title": "ደረጃ",
+        "label": "ደረጃ"
+      },
+      "applications": {
+        "title": "ኣመልካቺታት",
+        "label": "ኣመልካቺታት"
+      },
+      "pending": {
+        "title": "ጸግማት",
+        "label": "ጸግማት"
+      }
+    },
+    "sections": {
+      "availableJobs": {
+        "title": "ተግባራት ተዳልዩ",
+        "applications": "መተግበርታት",
+        "due": "ዕለት መዛግብቲ",
+        "details": "ዝርዝራት",
+        "view": "ርኢ",
+        "applied": "ተመደበ",
+        "apply": "ኣመልክት"
+      },
+      "activeJobs": {
+        "title": "ንቑሓት ስራሓተይ",
+        "pendingApplications": {
+          "title": "ጸግማት ኣመልካቺታት",
+          "empty": "ጸግማት ኣመልካቺታት የለን።",
+          "applied": "ተመደበ",
+          "status": "ጸግማት"
+        },
+        "actions": {
+          "decline": "ኣትርፍ",
+          "accept": "ተቐበል",
+          "markComplete": "ከም ዝተፈጸመ ምልክት ግበር",
+          "resubmit": "ዳግም ኣረክብ",
+          "rateClient": "ደንበኛ ደረጃ ሃብ"
+        }
+      }
+    },
+    "modals": {
+      "application": {
+        "title": "ናብ ስራሕ ኣመልክት",
+        "applyTo": "ናብ ስራሕ ኣመልክት",
+        "fields": {
+          "budget": "በጀት",
+          "deadline": "ዕለት መዛግብቲ",
+          "category": "መደብ",
+          "region": "ክልል",
+          "proposal": {
+            "label": "እትዋ",
+            "placeholder": "ኣገባብካ፡ ኣገዳስነት ተመክሮካ፡ እትወጽእ ነገራትን ግዜ መወዳእታን ግለጽ...",
+            "hint": "ንጹር፡ ቅሩጻ እትዋ ኣጋጣሚ ተቐባልነት የዕብይ።"
+          },
+          "proposedBudget": {
+            "label": "ዝተመክረ በጀት (ብር)",
+            "placeholder": "ንኣብነት 4500",
+            "hint": "በጀት ደንበኛ፡ ብር"
+          },
+          "duration": {
+            "label": "ዝተገመተ ቆጸራ",
+            "placeholder": "ንኣብነት 5 መዓልታት",
+            "hint": "ኣማራጺ - ንደንበኛ ግዜ መወዳእታ ንምግምጋም ይሕግዝ።"
+          }
+        }
+      },
+      "wallet": {
+        "title": "ዋሌት ሰራሕተኛ",
+        "balance": {
+          "title": "ዘሎ ሚዛን",
+          "label": "ዘሎ ሚዛን"
+        },
+        "recentEarnings": {
+          "title": "ቀረባ እታኻ",
+          "jobPayment": "ክፍሊት ስራሕ",
+          "recently": "ቀረባ ግዜ",
+          "status": "ዝተፈጸመ"
+        },
+        "withdrawalFeature": "ባህሪ ስርዓት ገንዘብ ኣውጽእ ቀሪቡ ይመጽእ!"
+      },
+      "rating": {
+        "title": "ደንበኛ ደረጃ ሃብ",
+        "subtitle": "ደንበኛ ከመይ እዩ ነይሩ?",
+        "description": "ነዚ ስራሕ ምስ ወድእካ ተመክሮኻ ደረጃ ሃብ።",
+        "outOf": "ካብ 5",
+        "feedback": {
+          "label": "ርኢቶ (ኣማራጺ)",
+          "placeholder": "ዉልቃዉ ርክብ፡ ቅኑዕነት፡ ከምኡውን ፕሮፌሽናልነት ዝምልከት ዝርዝራት ኣካፍል።"
+        }
+      },
+      "notifications": {
+        "title": "መንበርሂ",
+        "empty": {
+          "title": "መንበርሂ የለን",
+          "message": "ኩሉ ኣጋጢምካ ኣለኻ!"
+        }
+      },
+      "chat": {
+        "title": "ውይይት ስራሕ",
+        "guidance": "ብፕሮፌሽናላዊ መንገዲ ተባርኽ። ርክብ ግልጽን ኣኽብሮትን ዘለዎ ድርጉም ግበር።",
+        "empty": "ገና መልእኽቲ የለን።",
+        "attachments": {
+          "title": "ተቆራኛታት",
+          "button": "ኣጣቅቕ",
+          "placeholder": "መልእኽቲ ጽሓፍ"
+        }
+      }
+    }
   }
 }

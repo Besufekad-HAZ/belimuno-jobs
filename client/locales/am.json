@@ -354,5 +354,142 @@
         "website": "ዌብሳይት"
       }
     }
+  },
+  "WorkerDashboard": {
+    "header": {
+      "title": "የሰራተኛ ዳሽቦርድ",
+      "subtitle": "ስራዎችዎን ያስተዳድሩ እና ገቢዎችዎን ይከታተሉ"
+    },
+    "buttons": {
+      "notifications": "ማስታወቂያዎች",
+      "wallet": "ክፍያ",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "cancel": "ይቅር",
+      "submit": "ደረጃ አስረክብ",
+      "withdrawFunds": "ገንዘብ ማውጣት",
+      "markAllRead": "ሁሉንም እንደተነበቡ ምልክት ያድርጉ",
+      "send": "ላክ"
+    },
+    "stats": {
+      "activeJobs": {
+        "title": "ክፍት ስራዎች",
+        "label": "ክፍት ስራዎች"
+      },
+      "completedJobs": {
+        "title": "የተጠናቀቁ",
+        "label": "የተጠናቀቁ"
+      },
+      "earnings": {
+        "title": "ጠቅላላ ገቢ",
+        "label": "ጠቅላላ ገቢ"
+      },
+      "rating": {
+        "title": "ደረጃ",
+        "label": "ደረጃ"
+      },
+      "applications": {
+        "title": "ማመልከቻዎች",
+        "label": "ማመልከቻዎች"
+      },
+      "pending": {
+        "title": "በጥበቃ ላይ",
+        "label": "በጥበቃ ላይ"
+      }
+    },
+    "sections": {
+      "availableJobs": {
+        "title": "ክፍት ስራዎች",
+        "applications": "መተግበሪያዎች",
+        "due": "የሚዘጋበት ቀን",
+        "details": "ዝርዝሮች",
+        "view": "ይመልከቱ",
+        "applied": "ተመዝግቧል",
+        "apply": "ያመልክቱ"
+      },
+      "activeJobs": {
+        "title": "ያመለከትኳቸው ስራዎች",
+        "pendingApplications": {
+          "title": "በጥበቃ ላይ ያሉ ማመልከቻዎች",
+          "empty": "ምንም በጥበቃ ላይ ያሉ ማመልከቻዎች የሉም።",
+          "applied": "ተመዝግቧል",
+          "status": "በጥበቃ ላይ"
+        },
+        "actions": {
+          "decline": "ውደቅ አርግ",
+          "accept": "ተቀበል",
+          "markComplete": "እንደተጠናቀቀ ምልክት ያድርጉ",
+          "resubmit": "እንደገና አስገባ",
+          "rateClient": "ደንበኛን ደረጃ ይስጡ"
+        }
+      }
+    },
+    "modals": {
+      "application": {
+        "title": "ለስራ ያመልክቱ",
+        "applyTo": "ለስራ ያመልክቱ",
+        "fields": {
+          "budget": "በጀት",
+          "deadline": "የመዝጋት ቀን",
+          "category": "ምድብ",
+          "region": "ክልል",
+          "proposal": {
+            "label": "አቀራረብ",
+            "placeholder": "የእርስዎን አቀራረብ፣ ተዛማጅ ልምድ፣ የሚያቀርቡት እና የጊዜ መርሃ ግብር ያብራሩ...",
+            "hint": "ግልጽ እና አጭር አቀራረብ የመቀበል ዕድልን ይጨምራል።"
+          },
+          "proposedBudget": {
+            "label": "የታቀደ በጀት (ብር)",
+            "placeholder": "ለምሳሌ 4500",
+            "hint": "የደንበኛ በጀት፡ ብር"
+          },
+          "duration": {
+            "label": "የተገመተ ቆይታ",
+            "placeholder": "ለምሳሌ 5 ቀናት",
+            "hint": "አማራጭ - ደንበኛውን የጊዜ መርሃ ግብር እንዲገመግም ይረዳል።"
+          }
+        }
+      },
+      "wallet": {
+        "title": "የሰራተኛ ክፍያ",
+        "balance": {
+          "title": "ቀሪ ሂሳብ",
+          "label": "ቀሪ ሂሳብ"
+        },
+        "recentEarnings": {
+          "title": "የቅርብ ጊዜ ገቢዎች",
+          "jobPayment": "የስራ ክፍያ",
+          "recently": "በቅርብ ጊዜ",
+          "status": "ተጠናቅቋል"
+        },
+        "withdrawalFeature": "የገንዘብ ማውጣት ባህሪ በቅርብ ጊዜ ይመጣል!"
+      },
+      "rating": {
+        "title": "ደንበኛን ደረጃ ይስጡ",
+        "subtitle": "ደንበኛው እንዴት ነበር?",
+        "description": "ይህንን ስራ ካጠናቀቁ በኋላ ልምድዎን ደረጃ ይስጡ።",
+        "outOf": "ከ5",
+        "feedback": {
+          "label": "ግብረመልስ (አማራጭ)",
+          "placeholder": "ስለ ግንኙነት፣ ግልጽነት እና ሙያዊነት ዝርዝሮችን ያጋሩ።"
+        }
+      },
+      "notifications": {
+        "title": "ማስታወቂያዎች",
+        "empty": {
+          "title": "ምንም ማስታወቂያዎች የሉም",
+          "message": "ሁሉንም አዝነብዎታል!"
+        }
+      },
+      "chat": {
+        "title": "የስራ ውይይት",
+        "guidance": "በሙያዊ ሁኔታ ይተባበሩ። ግንኙነትን ግልጽ እና አክብሮት ያለው ያድርጉት።",
+        "empty": "እስካሁን ምንም መልእክቶች የሉም።",
+        "attachments": {
+          "title": "ተቀላጫጮች",
+          "button": "ያያይዙ",
+          "placeholder": "መልእክት ይፃፉ"
+        }
+      }
+    }
   }
 }

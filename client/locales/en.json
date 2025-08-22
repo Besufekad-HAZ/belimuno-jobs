@@ -354,5 +354,142 @@
         "website": "Website"
       }
     }
+  },
+  "WorkerDashboard": {
+    "header": {
+      "title": "Worker Dashboard",
+      "subtitle": "Manage your jobs and track your earnings"
+    },
+    "buttons": {
+      "notifications": "Notifications",
+      "wallet": "Wallet",
+      "viewAll": "View All",
+      "cancel": "Cancel",
+      "submit": "Submit Application",
+      "withdrawFunds": "Withdraw Funds",
+      "markAllRead": "Mark All as Read",
+      "send": "Send"
+    },
+    "stats": {
+      "activeJobs": {
+        "title": "Active Jobs",
+        "label": "Active Jobs"
+      },
+      "completedJobs": {
+        "title": "Completed",
+        "label": "Completed"
+      },
+      "earnings": {
+        "title": "Total Earnings",
+        "label": "Total Earnings"
+      },
+      "rating": {
+        "title": "Rating",
+        "label": "Rating"
+      },
+      "applications": {
+        "title": "Applications",
+        "label": "Applications"
+      },
+      "pending": {
+        "title": "Pending",
+        "label": "Pending"
+      }
+    },
+    "sections": {
+      "availableJobs": {
+        "title": "Available Jobs",
+        "applications": "apps",
+        "due": "Due",
+        "details": "Details",
+        "view": "View",
+        "applied": "Applied",
+        "apply": "Apply"
+      },
+      "activeJobs": {
+        "title": "My Active Jobs",
+        "pendingApplications": {
+          "title": "Pending Applications",
+          "empty": "No pending applications.",
+          "applied": "Applied",
+          "status": "Pending"
+        },
+        "actions": {
+          "decline": "Decline",
+          "accept": "Accept",
+          "markComplete": "Mark Complete",
+          "resubmit": "Resubmit",
+          "rateClient": "Rate Client"
+        }
+      }
+    },
+    "modals": {
+      "application": {
+        "title": "Apply to Job",
+        "applyTo": "Apply to Job",
+        "fields": {
+          "budget": "Budget",
+          "deadline": "Deadline",
+          "category": "Category",
+          "region": "Region",
+          "proposal": {
+            "label": "Proposal",
+            "placeholder": "Explain your approach, relevant experience, deliverables and timeline...",
+            "hint": "A clear, concise proposal improves acceptance chances."
+          },
+          "proposedBudget": {
+            "label": "Proposed Budget (ETB)",
+            "placeholder": "e.g. 4500",
+            "hint": "Client budget: ETB"
+          },
+          "duration": {
+            "label": "Estimated Duration",
+            "placeholder": "e.g. 5 days",
+            "hint": "Optional – helps the client assess timeline."
+          }
+        }
+      },
+      "wallet": {
+        "title": "Worker Wallet",
+        "balance": {
+          "title": "Available Balance",
+          "label": "Available Balance"
+        },
+        "recentEarnings": {
+          "title": "Recent Earnings",
+          "jobPayment": "Job Payment",
+          "recently": "Recently",
+          "status": "Completed"
+        },
+        "withdrawalFeature": "Withdrawal feature coming soon!"
+      },
+      "rating": {
+        "title": "Rate Client",
+        "subtitle": "How was the client?",
+        "description": "Rate your experience after completing this job.",
+        "outOf": "out of 5",
+        "feedback": {
+          "label": "Feedback (optional)",
+          "placeholder": "Share details about communication, clarity, and professionalism."
+        }
+      },
+      "notifications": {
+        "title": "Notifications",
+        "empty": {
+          "title": "No notifications",
+          "message": "You're all caught up!"
+        }
+      },
+      "chat": {
+        "title": "Job Chat",
+        "guidance": "Collaborate professionally. Keep communication clear and respectful.",
+        "empty": "No messages yet.",
+        "attachments": {
+          "title": "Attachments",
+          "button": "Attach",
+          "placeholder": "Type a message"
+        }
+      }
+    }
   }
 }

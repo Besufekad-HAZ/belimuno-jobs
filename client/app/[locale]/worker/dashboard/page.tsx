@@ -1,17 +1,36 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Briefcase, DollarSign, Clock, Star, CheckCircle, Eye, Send, Bell, Wallet, TrendingUp, MessageCircle, ThumbsUp, ThumbsDown, Paperclip, Smile, FileText, X } from 'lucide-react';
-import { getStoredUser, hasRole } from '@/lib/auth';
-import { workerAPI, jobsAPI, notificationsAPI } from '@/lib/api';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import Modal from '@/components/ui/Modal';
-import ProgressBar from '@/components/ui/ProgressBar';
-import { formatDistanceToNow } from 'date-fns';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  Briefcase,
+  DollarSign,
+  Clock,
+  Star,
+  CheckCircle,
+  Eye,
+  Send,
+  Bell,
+  Wallet,
+  TrendingUp,
+  MessageCircle,
+  ThumbsUp,
+  ThumbsDown,
+  Paperclip,
+  Smile,
+  FileText,
+  X,
+} from "lucide-react";
+import { getStoredUser, hasRole } from "@/lib/auth";
+import { workerAPI, jobsAPI, notificationsAPI } from "@/lib/api";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import Modal from "@/components/ui/Modal";
+import ProgressBar from "@/components/ui/ProgressBar";
+import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
 
 interface WorkerStats {
   totalApplications: number;
@@ -21,7 +40,11 @@ interface WorkerStats {
   averageRating: number;
   pendingApplications: number;
   name?: string;
-  pendingApplicationsList?: { _id: string; job?: { title?: string }; appliedAt: string }[];
+  pendingApplicationsList?: {
+    _id: string;
+    job?: { title?: string };
+    appliedAt: string;
+  }[];
 }
 
 interface RealNotification {
@@ -32,7 +55,7 @@ interface RealNotification {
   isRead: boolean;
   readAt?: string;
   createdAt: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: "low" | "medium" | "high" | "urgent";
   actionButton?: {
     text: string;
     url: string;
@@ -57,39 +80,72 @@ interface RealNotification {
 
 const WorkerDashboard: React.FC = () => {
   const [stats, setStats] = useState<WorkerStats | null>(null);
-  interface SimpleJob { _id: string; title: string; description: string; budget: number; deadline: string; category?: string; region?: { name?: string }; status?: string; progress?: number; acceptedApplication?: { proposedBudget?: number }; applicationCount?: number; }
-  interface EarningsData { recentPayments?: { jobTitle?: string; amount?: number; date?: string }[] }
+  interface SimpleJob {
+    _id: string;
+    title: string;
+    description: string;
+    budget: number;
+    deadline: string;
+    category?: string;
+    region?: { name?: string };
+    status?: string;
+    progress?: number;
+    acceptedApplication?: { proposedBudget?: number };
+    applicationCount?: number;
+  }
+  interface EarningsData {
+    recentPayments?: { jobTitle?: string; amount?: number; date?: string }[];
+  }
   const [availableJobs, setAvailableJobs] = useState<SimpleJob[]>([]);
   const [myJobs, setMyJobs] = useState<SimpleJob[]>([]);
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<SimpleJob | null>(null);
-  const [applicationData, setApplicationData] = useState<{ proposal: string; proposedBudget: string; estimatedDuration?: string }>({ proposal: '', proposedBudget: '' });
+  const [applicationData, setApplicationData] = useState<{
+    proposal: string;
+    proposedBudget: string;
+    estimatedDuration?: string;
+  }>({ proposal: "", proposedBudget: "" });
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [notifications, setNotifications] = useState<RealNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [chatJobId, setChatJobId] = useState<string | null>(null);
-  const [chatMessages, setChatMessages] = useState<{ _id?: string; content: string; sender?: { name?: string; role?: string }; sentAt: string }[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [chatMessages, setChatMessages] = useState<
+    {
+      _id?: string;
+      content: string;
+      sender?: { name?: string; role?: string };
+      sentAt: string;
+    }[]
+  >([]);
+  const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
-  type PendingAttachment = { name: string; type: string; size: number; dataUrl: string };
-  const [chatAttachments, setChatAttachments] = useState<PendingAttachment[]>([]);
+  type PendingAttachment = {
+    name: string;
+    type: string;
+    size: number;
+    dataUrl: string;
+  };
+  const [chatAttachments, setChatAttachments] = useState<PendingAttachment[]>(
+    []
+  );
   const [showEmoji, setShowEmoji] = useState(false);
   const chatInputRef = React.useRef<HTMLInputElement>(null);
   const chatScrollRef = React.useRef<HTMLDivElement>(null);
   const [showRateModal, setShowRateModal] = useState(false);
   const [rateJobId, setRateJobId] = useState<string | null>(null);
   const [clientRating, setClientRating] = useState(5);
-  const [clientReview, setClientReview] = useState('');
+  const [clientReview, setClientReview] = useState("");
   const router = useRouter();
   const PROPOSAL_MAX = 1200;
+  const t = useTranslations("WorkerDashboard");
 
   useEffect(() => {
     const user = getStoredUser();
-    if (!user || !hasRole(user, ['worker'])) {
-      router.push('/login');
+    if (!user || !hasRole(user, ["worker"])) {
+      router.push("/login");
       return;
     }
 
@@ -109,9 +165,15 @@ const WorkerDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, jobsResponse, myJobsResponse, applicationsResponse, earningsResponse] = await Promise.all([
+      const [
+        dashboardResponse,
+        jobsResponse,
+        myJobsResponse,
+        applicationsResponse,
+        earningsResponse,
+      ] = await Promise.all([
         workerAPI.getDashboard(),
-        jobsAPI.getAll({ status: 'open', limit: 10 }),
+        jobsAPI.getAll({ status: "open", limit: 10 }),
         workerAPI.getJobs(),
         workerAPI.getApplications(),
         workerAPI.getEarnings(),
@@ -120,11 +182,14 @@ const WorkerDashboard: React.FC = () => {
       setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
       setAvailableJobs(jobsResponse.data.data || []);
       setMyJobs(myJobsResponse.data.data || []);
-      const apps: { job?: { _id: string } }[] = applicationsResponse.data.data || [];
-      setAppliedJobIds(new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]));
+      const apps: { job?: { _id: string } }[] =
+        applicationsResponse.data.data || [];
+      setAppliedJobIds(
+        new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[])
+      );
       setEarnings(earningsResponse.data);
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error("Failed to fetch dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -135,54 +200,66 @@ const WorkerDashboard: React.FC = () => {
       const response = await notificationsAPI.getAll();
       const fetchedNotifications = response.data?.data || [];
       setNotifications(fetchedNotifications);
-      setUnreadCount(fetchedNotifications.filter((n: RealNotification) => !n.isRead).length);
+      setUnreadCount(
+        fetchedNotifications.filter((n: RealNotification) => !n.isRead).length
+      );
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error("Failed to fetch notifications:", error);
     }
   };
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await notificationsAPI.markAsRead(notificationId);
-      setNotifications(prev =>
-        prev.map(n => n._id === notificationId ? { ...n, isRead: true, readAt: new Date().toISOString() } : n)
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === notificationId
+            ? { ...n, isRead: true, readAt: new Date().toISOString() }
+            : n
+        )
       );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await notificationsAPI.markAllAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true, readAt: new Date().toISOString() })));
+      setNotifications((prev) =>
+        prev.map((n) => ({
+          ...n,
+          isRead: true,
+          readAt: new Date().toISOString(),
+        }))
+      );
       setUnreadCount(0);
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'job_posted':
+      case "job_posted":
         return <Briefcase className="h-4 w-4" />;
-      case 'job_application':
+      case "job_application":
         return <FileText className="h-4 w-4" />;
-      case 'job_assigned':
+      case "job_assigned":
         return <CheckCircle className="h-4 w-4" />;
-      case 'job_completed':
+      case "job_completed":
         return <CheckCircle className="h-4 w-4" />;
-      case 'payment_received':
-      case 'payment_processed':
+      case "payment_received":
+      case "payment_processed":
         return <DollarSign className="h-4 w-4" />;
-      case 'review_received':
+      case "review_received":
         return <Star className="h-4 w-4" />;
-      case 'profile_verified':
+      case "profile_verified":
         return <CheckCircle className="h-4 w-4" />;
-      case 'system_announcement':
+      case "system_announcement":
         return <Bell className="h-4 w-4" />;
-      case 'deadline_reminder':
+      case "deadline_reminder":
         return <Clock className="h-4 w-4" />;
       default:
         return <Bell className="h-4 w-4" />;
@@ -191,41 +268,48 @@ const WorkerDashboard: React.FC = () => {
 
   const getNotificationBadgeVariant = (type: string) => {
     switch (type) {
-      case 'payment_received':
-      case 'payment_processed':
-        return 'success';
-      case 'job_assigned':
-      case 'profile_verified':
-        return 'primary';
-      case 'job_completed':
-        return 'success';
-      case 'system_announcement':
-        return 'warning';
-      case 'deadline_reminder':
-        return 'danger';
+      case "payment_received":
+      case "payment_processed":
+        return "success";
+      case "job_assigned":
+      case "profile_verified":
+        return "primary";
+      case "job_completed":
+        return "success";
+      case "system_announcement":
+        return "warning";
+      case "deadline_reminder":
+        return "danger";
       default:
-        return 'secondary';
+        return "secondary";
     }
   };
-
 
   const handleApplyToJob = async (jobId: string) => {
     try {
-      await jobsAPI.apply(jobId, applicationData.proposal, parseFloat(applicationData.proposedBudget));
+      await jobsAPI.apply(
+        jobId,
+        applicationData.proposal,
+        parseFloat(applicationData.proposedBudget)
+      );
       setSelectedJob(null);
-      setApplicationData({ proposal: '', proposedBudget: '' });
+      setApplicationData({ proposal: "", proposedBudget: "" });
       fetchDashboardData(); // Refresh data
     } catch (error) {
-      console.error('Failed to apply to job:', error);
+      console.error("Failed to apply to job:", error);
     }
   };
 
-  const handleUpdateJobStatus = async (jobId: string, status: string, progress?: number) => {
+  const handleUpdateJobStatus = async (
+    jobId: string,
+    status: string,
+    progress?: number
+  ) => {
     try {
       await workerAPI.updateJobStatus(jobId, status, progress);
       fetchDashboardData(); // Refresh data
     } catch (error) {
-      console.error('Failed to update job status:', error);
+      console.error("Failed to update job status:", error);
     }
   };
 
@@ -234,18 +318,29 @@ const WorkerDashboard: React.FC = () => {
       setChatJobId(jobId);
       const res = await workerAPI.getJobMessages(jobId);
       setChatMessages(res.data.data || []);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const sendChat = async () => {
-    if (!chatJobId || (!newMessage.trim() && chatAttachments.length===0)) return;
+    if (!chatJobId || (!newMessage.trim() && chatAttachments.length === 0))
+      return;
     setSending(true);
     try {
-      const res = await workerAPI.sendJobMessage(chatJobId, newMessage.trim(), chatAttachments.map(a=>a.dataUrl));
-      setChatMessages(prev => [...prev, res.data.data]);
-      setNewMessage('');
+      const res = await workerAPI.sendJobMessage(
+        chatJobId,
+        newMessage.trim(),
+        chatAttachments.map((a) => a.dataUrl)
+      );
+      setChatMessages((prev) => [...prev, res.data.data]);
+      setNewMessage("");
       setChatAttachments([]);
-    } catch (e) { console.error(e); } finally { setSending(false); }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSending(false);
+    }
   };
 
   // Poll chat while modal open
@@ -255,14 +350,17 @@ const WorkerDashboard: React.FC = () => {
       try {
         const res = await workerAPI.getJobMessages(chatJobId);
         setChatMessages(res.data.data || []);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }, 4000);
     return () => clearInterval(interval);
   }, [chatJobId]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
-    const el = chatScrollRef.current || document.getElementById('worker-chat-scroll');
+    const el =
+      chatScrollRef.current || document.getElementById("worker-chat-scroll");
     if (el) {
       el.scrollTop = el.scrollHeight;
     }
@@ -292,8 +390,10 @@ const WorkerDashboard: React.FC = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Worker Dashboard</h1>
-              <p className="text-gray-600 mt-2">Manage your jobs and track your earnings</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {t("header.title")}
+              </h1>
+              <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
             </div>
             <div className="flex space-x-3">
               <Button
@@ -302,16 +402,19 @@ const WorkerDashboard: React.FC = () => {
                 className="relative"
               >
                 <Bell className="h-4 w-4 mr-2" />
-                Notifications
+                {t("buttons.notifications")}
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     {unreadCount}
                   </span>
                 )}
               </Button>
-              <Button variant="outline" onClick={() => setShowWalletModal(true)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowWalletModal(true)}
+              >
                 <Wallet className="h-4 w-4 mr-2" />
-                Wallet
+                {t("buttons.wallet")}
               </Button>
             </div>
           </div>
@@ -322,48 +425,74 @@ const WorkerDashboard: React.FC = () => {
           <Card className="bg-blue-50 border-blue-200">
             <div className="text-center">
               <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-blue-600">Active Jobs</p>
-              <p className="text-2xl font-bold text-blue-900">{stats?.activeJobs ?? 0}</p>
+              <p className="text-sm font-medium text-blue-600">
+                {t("stats.activeJobs.label")}
+              </p>
+              <p className="text-2xl font-bold text-blue-900">
+                {stats?.activeJobs ?? 0}
+              </p>
             </div>
           </Card>
 
           <Card className="bg-green-50 border-green-200">
             <div className="text-center">
               <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-green-600">Completed</p>
-              <p className="text-2xl font-bold text-green-900">{stats?.completedJobs ?? 0}</p>
+              <p className="text-sm font-medium text-green-600">
+                {t("stats.completedJobs.label")}
+              </p>
+              <p className="text-2xl font-bold text-green-900">
+                {stats?.completedJobs ?? 0}
+              </p>
             </div>
           </Card>
 
           <Card className="bg-yellow-50 border-yellow-200">
             <div className="text-center">
               <DollarSign className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-yellow-600">Total Earnings</p>
-              <p className="text-xl font-bold text-yellow-900">ETB {(stats?.totalEarnings || 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-yellow-600">
+                {t("stats.earnings.label")}
+              </p>
+              <p className="text-xl font-bold text-yellow-900">
+                ETB {(stats?.totalEarnings || 0).toLocaleString()}
+              </p>
             </div>
           </Card>
 
           <Card className="bg-purple-50 border-purple-200">
             <div className="text-center">
               <Star className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-purple-600">Rating</p>
-              <p className="text-2xl font-bold text-purple-900">{stats?.averageRating !== undefined ? stats.averageRating.toFixed(1) : 'N/A'}</p>
+              <p className="text-sm font-medium text-purple-600">
+                {t("stats.rating.label")}
+              </p>
+              <p className="text-2xl font-bold text-purple-900">
+                {stats?.averageRating !== undefined
+                  ? stats.averageRating.toFixed(1)
+                  : "N/A"}
+              </p>
             </div>
           </Card>
 
           <Card className="bg-indigo-50 border-indigo-200">
             <div className="text-center">
               <Send className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-indigo-600">Applications</p>
-              <p className="text-2xl font-bold text-indigo-900">{stats?.totalApplications ?? 0}</p>
+              <p className="text-sm font-medium text-indigo-600">
+                {t("stats.applications.label")}
+              </p>
+              <p className="text-2xl font-bold text-indigo-900">
+                {stats?.totalApplications ?? 0}
+              </p>
             </div>
           </Card>
 
           <Card className="bg-orange-50 border-orange-200">
             <div className="text-center">
               <Clock className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-orange-600">Pending</p>
-              <p className="text-2xl font-bold text-orange-900">{stats?.pendingApplications ?? 0}</p>
+              <p className="text-sm font-medium text-orange-600">
+                {t("stats.pending.label")}
+              </p>
+              <p className="text-2xl font-bold text-orange-900">
+                {stats?.pendingApplications ?? 0}
+              </p>
             </div>
           </Card>
         </div>
@@ -372,9 +501,15 @@ const WorkerDashboard: React.FC = () => {
           {/* Available Jobs */}
           <Card>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Available Jobs</h3>
-              <Button variant="outline" size="sm" onClick={() => router.push('/jobs')}>
-                View All
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t("sections.availableJobs.title")}
+              </h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/jobs")}
+              >
+                {t("buttons.viewAll")}
               </Button>
             </div>
             <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -382,29 +517,49 @@ const WorkerDashboard: React.FC = () => {
                 <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-gray-900">{job.title}</h4>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-green-600 block">
-                          ETB {job.budget?.toLocaleString()}
+                    <div className="text-right">
+                      <span className="text-sm font-semibold text-green-600 block">
+                        ETB {job.budget?.toLocaleString()}
+                      </span>
+                      {job.applicationCount !== undefined && (
+                        <span className="text-[11px] text-gray-500">
+                          {job.applicationCount}{" "}
+                          {t("sections.availableJobs.applications")}
                         </span>
-                        { job.applicationCount !== undefined && (
-                          <span className="text-[11px] text-gray-500">{job.applicationCount} apps</span>
-                        )}
-                      </div>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{job.description}</p>
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {job.description}
+                  </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-xs text-gray-500">
-                      <span>Due: {new Date(job.deadline).toLocaleDateString()}</span>
+                      <span>
+                        {t("sections.availableJobs.due")}:{" "}
+                        {new Date(job.deadline).toLocaleDateString()}
+                      </span>
                       <span>•</span>
                       <span>{job.category}</span>
                     </div>
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => setSelectedJob(job)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedJob(job)}
+                      >
                         <Eye className="h-4 w-4 mr-1" />
-                        {appliedJobIds.has(job._id) ? 'Details' : 'View'}
+                        {appliedJobIds.has(job._id)
+                          ? t("sections.availableJobs.details")
+                          : t("sections.availableJobs.view")}
                       </Button>
-                      <Button size="sm" onClick={() => setSelectedJob(job)} disabled={appliedJobIds.has(job._id)}>
-                        {appliedJobIds.has(job._id) ? 'Applied' : 'Apply'}
+                      <Button
+                        size="sm"
+                        onClick={() => setSelectedJob(job)}
+                        disabled={appliedJobIds.has(job._id)}
+                      >
+                        {appliedJobIds.has(job._id)
+                          ? t("sections.availableJobs.applied")
+                          : t("sections.availableJobs.apply")}
                       </Button>
                     </div>
                   </div>
@@ -416,90 +571,156 @@ const WorkerDashboard: React.FC = () => {
           {/* My Active Jobs */}
           <Card>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">My Active Jobs</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t("sections.activeJobs.title")}
+              </h3>
             </div>
             <div className="space-y-4 max-h-96 overflow-y-auto">
-          {/* Pending Applications Snapshot */}
-          <Card className="mt-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Pending Applications</h3>
-            {stats?.pendingApplicationsList?.length ? (
-              <div className="space-y-3 max-h-64 overflow-y-auto">
-                {stats.pendingApplicationsList.map((app) => (
-                  <div key={app._id} className="p-3 bg-gray-50 rounded border flex items-center justify-between">
-                    <div className="mr-4">
-                      <p className="text-sm font-medium text-gray-900 line-clamp-1">{app.job?.title || 'Job'}</p>
-                      <p className="text-xs text-gray-500">Applied {new Date(app.appliedAt).toLocaleDateString()}</p>
+              {/* Pending Applications Snapshot */}
+              <Card className="mt-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  {t("sections.activeJobs.pendingApplications.title")}
+                </h3>
+                {stats?.pendingApplicationsList?.length ? (
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {stats.pendingApplicationsList.map((app) => (
+                      <div
+                        key={app._id}
+                        className="p-3 bg-gray-50 rounded border flex items-center justify-between"
+                      >
+                        <div className="mr-4">
+                          <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                            {app.job?.title || "Job"}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {t(
+                              "sections.activeJobs.pendingApplications.applied"
+                            )}{" "}
+                            {new Date(app.appliedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                          {t("sections.activeJobs.pendingApplications.status")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    {t("sections.activeJobs.pendingApplications.empty")}
+                  </p>
+                )}
+              </Card>
+              {myJobs
+                .filter(
+                  (job) =>
+                    job.status &&
+                    [
+                      "assigned",
+                      "in_progress",
+                      "revision_requested",
+                      "completed",
+                    ].includes(job.status)
+                )
+                .map((job) => (
+                  <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-medium text-gray-900">{job.title}</h4>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          job.status === "in_progress"
+                            ? "bg-blue-100 text-blue-800"
+                            : job.status === "assigned"
+                            ? "bg-purple-100 text-purple-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {job.status ? job.status.replace("_", " ") : ""}
+                      </span>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">Pending</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">No pending applications.</p>
-            )}
-          </Card>
-        {myJobs.filter(job => job.status && ['assigned','in_progress','revision_requested','completed'].includes(job.status)).map((job) => (
-                <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{job.title}</h4>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-          job.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : job.status === 'assigned' ? 'bg-purple-100 text-purple-800' :
-          'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {job.status ? job.status.replace('_', ' ') : ''}
-                    </span>
-                  </div>
-                                      <div className="mb-3">
+                    <div className="mb-3">
                       <ProgressBar
                         progress={job.progress || 0}
                         size="md"
-                        color={(job.progress || 0) >= 100 ? 'green' : (job.progress || 0) >= 50 ? 'blue' : 'yellow'}
+                        color={
+                          (job.progress || 0) >= 100
+                            ? "green"
+                            : (job.progress || 0) >= 50
+                            ? "blue"
+                            : "yellow"
+                        }
                       />
                     </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                      ETB {job.acceptedApplication?.proposedBudget?.toLocaleString()}
-                    </span>
-                    <div className="flex space-x-2">
-                      {job.status === 'assigned' && (
-                        <>
-                          <Button size="sm" variant="outline" onClick={() => declineAssignment(job._id)}>
-                            <ThumbsDown className="h-4 w-4 mr-1"/>Decline
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        ETB{" "}
+                        {job.acceptedApplication?.proposedBudget?.toLocaleString()}
+                      </span>
+                      <div className="flex space-x-2">
+                        {job.status === "assigned" && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => declineAssignment(job._id)}
+                            >
+                              <ThumbsDown className="h-4 w-4 mr-1" />
+                              {t("sections.activeJobs.actions.decline")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => acceptAssignment(job._id)}
+                            >
+                              <ThumbsUp className="h-4 w-4 mr-1" />
+                              {t("sections.activeJobs.actions.accept")}
+                            </Button>
+                          </>
+                        )}
+                        {job.status === "in_progress" && (
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleUpdateJobStatus(job._id, "completed")
+                            }
+                          >
+                            {t("sections.activeJobs.actions.markComplete")}
                           </Button>
-                          <Button size="sm" onClick={() => acceptAssignment(job._id)}>
-                            <ThumbsUp className="h-4 w-4 mr-1"/>Accept
+                        )}
+                        {job.status === "revision_requested" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              handleUpdateJobStatus(job._id, "in_progress")
+                            }
+                          >
+                            {t("sections.activeJobs.actions.resubmit")}
                           </Button>
-                        </>
-                      )}
-                      {job.status === 'in_progress' && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleUpdateJobStatus(job._id, 'completed')}
-                        >
-                          Mark Complete
-                        </Button>
-                      )}
-                      {job.status === 'revision_requested' && (
+                        )}
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleUpdateJobStatus(job._id, 'in_progress')}
+                          onClick={() => openChat(job._id)}
                         >
-                          Resubmit
+                          <MessageCircle className="h-4 w-4" />
                         </Button>
-                      )}
-                      <Button size="sm" variant="outline" onClick={() => openChat(job._id)}>
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                      {job.status === 'completed' && !(job as any).review?.workerReview?.rating && (
-                        <Button size="sm" onClick={() => { setRateJobId(job._id); setShowRateModal(true); }}>
-                          <Star className="h-4 w-4 mr-1" /> Rate Client
-                        </Button>
-                      )}
+                        {job.status === "completed" &&
+                          !(job as any).review?.workerReview?.rating && (
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                setRateJobId(job._id);
+                                setShowRateModal(true);
+                              }}
+                            >
+                              <Star className="h-4 w-4 mr-1" />{" "}
+                              {t("sections.activeJobs.actions.rateClient")}
+                            </Button>
+                          )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </Card>
         </div>
@@ -507,14 +728,21 @@ const WorkerDashboard: React.FC = () => {
         {/* Enhanced Application Modal */}
         {selectedJob && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedJob(null)} />
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setSelectedJob(null)}
+            />
             <div className="relative w-full max-w-lg animate-[fadeIn_0.25s_ease]">
               <Card className="p-0 overflow-hidden shadow-2xl border border-gray-200">
                 {/* Header */}
                 <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex items-start justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-wide opacity-80 mb-1">Apply to Job</p>
-                    <h3 className="text-lg font-semibold leading-snug line-clamp-2 pr-4">{selectedJob.title}</h3>
+                    <p className="text-xs uppercase tracking-wide opacity-80 mb-1">
+                      Apply to Job
+                    </p>
+                    <h3 className="text-lg font-semibold leading-snug line-clamp-2 pr-4">
+                      {selectedJob.title}
+                    </h3>
                   </div>
                   <button
                     onClick={() => setSelectedJob(null)}
@@ -529,19 +757,27 @@ const WorkerDashboard: React.FC = () => {
                 <div className="px-6 pt-5 pb-4 bg-gray-50 grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Budget</p>
-                    <p className="font-medium text-gray-900">ETB {selectedJob.budget?.toLocaleString()}</p>
+                    <p className="font-medium text-gray-900">
+                      ETB {selectedJob.budget?.toLocaleString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-500">Deadline</p>
-                    <p className="font-medium text-gray-900">{new Date(selectedJob.deadline).toLocaleDateString()}</p>
+                    <p className="font-medium text-gray-900">
+                      {new Date(selectedJob.deadline).toLocaleDateString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-500">Category</p>
-                    <p className="font-medium text-gray-900">{selectedJob.category}</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedJob.category}
+                    </p>
                   </div>
                   <div>
                     <p className="text-gray-500">Region</p>
-                    <p className="font-medium text-gray-900">{selectedJob.region?.name || '—'}</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedJob.region?.name || "—"}
+                    </p>
                   </div>
                 </div>
 
@@ -555,46 +791,82 @@ const WorkerDashboard: React.FC = () => {
                   {/* Proposal */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-sm font-medium text-gray-700">Proposal</label>
-                      <span className={`text-xs ${applicationData.proposal.length > PROPOSAL_MAX ? 'text-red-500' : 'text-gray-400'}`}>{applicationData.proposal.length}/{PROPOSAL_MAX}</span>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Proposal
+                      </label>
+                      <span
+                        className={`text-xs ${
+                          applicationData.proposal.length > PROPOSAL_MAX
+                            ? "text-red-500"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {applicationData.proposal.length}/{PROPOSAL_MAX}
+                      </span>
                     </div>
                     <textarea
                       rows={5}
                       maxLength={PROPOSAL_MAX}
                       required
                       value={applicationData.proposal}
-                      onChange={(e) => setApplicationData({ ...applicationData, proposal: e.target.value })}
+                      onChange={(e) =>
+                        setApplicationData({
+                          ...applicationData,
+                          proposal: e.target.value,
+                        })
+                      }
                       className="w-full resize-none rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="Explain your approach, relevant experience, deliverables and timeline..."
                     />
-                    <p className="mt-1 text-xs text-gray-500">A clear, concise proposal improves acceptance chances.</p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      A clear, concise proposal improves acceptance chances.
+                    </p>
                   </div>
 
                   {/* Budget & Duration */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Proposed Budget (ETB)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Proposed Budget (ETB)
+                      </label>
                       <input
                         type="number"
                         min={1}
                         required
                         value={applicationData.proposedBudget}
-                        onChange={(e) => setApplicationData({ ...applicationData, proposedBudget: e.target.value })}
+                        onChange={(e) =>
+                          setApplicationData({
+                            ...applicationData,
+                            proposedBudget: e.target.value,
+                          })
+                        }
                         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="e.g. 4500"
                       />
-                      <p className="mt-1 text-xs text-gray-500">Client budget: ETB {selectedJob.budget?.toLocaleString()}</p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Client budget: ETB{" "}
+                        {selectedJob.budget?.toLocaleString()}
+                      </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Duration</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Estimated Duration
+                      </label>
                       <input
                         type="text"
-                        value={applicationData.estimatedDuration || ''}
-                        onChange={(e) => setApplicationData({ ...applicationData, estimatedDuration: e.target.value })}
+                        value={applicationData.estimatedDuration || ""}
+                        onChange={(e) =>
+                          setApplicationData({
+                            ...applicationData,
+                            estimatedDuration: e.target.value,
+                          })
+                        }
                         className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="e.g. 5 days"
                       />
-                      <p className="mt-1 text-xs text-gray-500">Optional – helps the client assess timeline.</p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Optional – helps the client assess timeline.
+                      </p>
                     </div>
                   </div>
 
@@ -605,14 +877,20 @@ const WorkerDashboard: React.FC = () => {
                       variant="outline"
                       onClick={() => {
                         setSelectedJob(null);
-                        setApplicationData({ proposal: '', proposedBudget: '' });
+                        setApplicationData({
+                          proposal: "",
+                          proposedBudget: "",
+                        });
                       }}
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
-                      disabled={!applicationData.proposal || !applicationData.proposedBudget}
+                      disabled={
+                        !applicationData.proposal ||
+                        !applicationData.proposedBudget
+                      }
                       className="min-w-[160px]"
                     >
                       Submit Application
@@ -628,7 +906,7 @@ const WorkerDashboard: React.FC = () => {
         <Modal
           isOpen={showWalletModal}
           onClose={() => setShowWalletModal(false)}
-          title="Worker Wallet"
+          title={t("modals.wallet.title")}
           size="md"
         >
           <div className="space-y-6">
@@ -637,93 +915,188 @@ const WorkerDashboard: React.FC = () => {
               <div className="text-center">
                 <Wallet className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  ETB {stats?.totalEarnings?.toLocaleString() || '0'}
+                  ETB {stats?.totalEarnings?.toLocaleString() || "0"}
                 </h3>
-                <p className="text-green-600 font-medium">Available Balance</p>
+                <p className="text-green-600 font-medium">
+                  {t("modals.wallet.balance.label")}
+                </p>
               </div>
             </Card>
 
             {/* Recent Earnings */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">Recent Earnings</h4>
+              <h4 className="font-medium text-gray-900 mb-3">
+                {t("modals.wallet.recentEarnings.title")}
+              </h4>
               <div className="space-y-3">
-                {earnings?.recentPayments?.slice(0, 5).map((payment: { jobTitle?: string; amount?: number; date?: string }, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-900">{payment.jobTitle || 'Job Payment'}</p>
-                      <p className="text-sm text-gray-500">{payment.date || 'Recently'}</p>
+                {earnings?.recentPayments?.slice(0, 5).map(
+                  (
+                    payment: {
+                      jobTitle?: string;
+                      amount?: number;
+                      date?: string;
+                    },
+                    index: number
+                  ) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {payment.jobTitle ||
+                            t("modals.wallet.recentEarnings.jobPayment")}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {payment.date ||
+                            t("modals.wallet.recentEarnings.recently")}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600">
+                          +ETB {payment.amount?.toLocaleString() || "1,000"}
+                        </p>
+                        <Badge variant="success" size="sm">
+                          {t("modals.wallet.recentEarnings.status")}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-green-600">+ETB {payment.amount?.toLocaleString() || '1,000'}</p>
-                      <Badge variant="success" size="sm">Completed</Badge>
+                  )
+                ) ||
+                  [
+                    // Mock data for demo
+                    {
+                      jobTitle: "Website Development",
+                      amount: 5000,
+                      date: "2 days ago",
+                    },
+                    {
+                      jobTitle: "Logo Design",
+                      amount: 1500,
+                      date: "1 week ago",
+                    },
+                    {
+                      jobTitle: "Data Entry",
+                      amount: 800,
+                      date: "2 weeks ago",
+                    },
+                  ].map((payment, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {payment.jobTitle}
+                        </p>
+                        <p className="text-sm text-gray-500">{payment.date}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600">
+                          +ETB {payment.amount.toLocaleString()}
+                        </p>
+                        <Badge variant="success" size="sm">
+                          {t("modals.wallet.recentEarnings.status")}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-                )) || [
-                  // Mock data for demo
-                  { jobTitle: 'Website Development', amount: 5000, date: '2 days ago' },
-                  { jobTitle: 'Logo Design', amount: 1500, date: '1 week ago' },
-                  { jobTitle: 'Data Entry', amount: 800, date: '2 weeks ago' },
-                ].map((payment, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-900">{payment.jobTitle}</p>
-                      <p className="text-sm text-gray-500">{payment.date}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-green-600">+ETB {payment.amount.toLocaleString()}</p>
-                      <Badge variant="success" size="sm">Completed</Badge>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
 
             {/* Withdrawal Button */}
             <div className="pt-4 border-t border-gray-200">
-              <Button className="w-full" onClick={() => alert('Withdrawal feature coming soon!')}>
+              <Button
+                className="w-full"
+                onClick={() => alert(t("modals.wallet.withdrawalFeature"))}
+              >
                 <TrendingUp className="h-4 w-4 mr-2" />
-                Withdraw Funds
+                {t("buttons.withdrawFunds")}
               </Button>
             </div>
           </div>
         </Modal>
         {/* Rate Client Modal */}
-        <Modal isOpen={showRateModal} onClose={() => setShowRateModal(false)} title="Rate Client" size="md">
+        <Modal
+          isOpen={showRateModal}
+          onClose={() => setShowRateModal(false)}
+          title={t("modals.rating.title")}
+          size="md"
+        >
           <div className="space-y-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="h-8 w-8 text-purple-600" />
               </div>
-              <h4 className="font-medium text-gray-900">How was the client?</h4>
-              <p className="text-sm text-gray-500">Rate your experience after completing this job.</p>
+              <h4 className="font-medium text-gray-900">
+                {t("modals.rating.subtitle")}
+              </h4>
+              <p className="text-sm text-gray-500">
+                {t("modals.rating.description")}
+              </p>
             </div>
             <div className="text-center">
               <div className="flex justify-center space-x-1">
-                {[1,2,3,4,5].map(star => (
-                  <button key={star} onClick={() => setClientRating(star)} className={`p-1 ${star <= clientRating ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400`}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setClientRating(star)}
+                    className={`p-1 ${
+                      star <= clientRating ? "text-yellow-400" : "text-gray-300"
+                    } hover:text-yellow-400`}
+                  >
                     <Star className="h-8 w-8 fill-current" />
                   </button>
                 ))}
               </div>
-              <p className="text-sm text-gray-500 mt-2">{clientRating} out of 5</p>
+              <p className="text-sm text-gray-500 mt-2">
+                {clientRating} {t("modals.rating.outOf")}
+              </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Feedback (optional)</label>
-              <textarea rows={4} value={clientReview} onChange={e=>setClientReview(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Share details about communication, clarity, and professionalism." />
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("modals.rating.feedback.label")}
+              </label>
+              <textarea
+                rows={4}
+                value={clientReview}
+                onChange={(e) => setClientReview(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={t("modals.rating.feedback.placeholder")}
+              />
             </div>
             <div className="flex space-x-3">
-              <Button variant="outline" onClick={()=>{ setShowRateModal(false); setClientRating(5); setClientReview(''); }}>Cancel</Button>
-              <Button className="flex-1" onClick={async ()=>{
-                if (!rateJobId) return;
-                try {
-                  await workerAPI.reviewClient(rateJobId, { rating: clientRating, comment: clientReview });
+              <Button
+                variant="outline"
+                onClick={() => {
                   setShowRateModal(false);
                   setClientRating(5);
-                  setClientReview('');
-                  setRateJobId(null);
-                  fetchDashboardData();
-                } catch (e) { console.error(e); }
-              }}>Submit Rating</Button>
+                  setClientReview("");
+                }}
+              >
+                {t("buttons.cancel")}
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={async () => {
+                  if (!rateJobId) return;
+                  try {
+                    await workerAPI.reviewClient(rateJobId, {
+                      rating: clientRating,
+                      comment: clientReview,
+                    });
+                    setShowRateModal(false);
+                    setClientRating(5);
+                    setClientReview("");
+                    setRateJobId(null);
+                    fetchDashboardData();
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+              >
+                {t("buttons.submit")}
+              </Button>
             </div>
           </div>
         </Modal>
@@ -732,35 +1105,54 @@ const WorkerDashboard: React.FC = () => {
         <Modal
           isOpen={showNotificationsModal}
           onClose={() => setShowNotificationsModal(false)}
-          title="Notifications"
+          title={t("modals.notifications.title")}
           size="md"
         >
           <div className="space-y-4">
             {notifications.length > 0 ? (
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {notifications.map((notification) => (
-                  <Card key={notification._id} className={`p-4 ${!notification.isRead ? 'bg-blue-50 border-blue-200' : ''}`}>
+                  <Card
+                    key={notification._id}
+                    className={`p-4 ${
+                      !notification.isRead ? "bg-blue-50 border-blue-200" : ""
+                    }`}
+                  >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           {getNotificationIcon(notification.type)}
                           <Badge
-                            variant={getNotificationBadgeVariant(notification.type)}
+                            variant={getNotificationBadgeVariant(
+                              notification.type
+                            )}
                             size="sm"
                           >
                             {notification.title}
                           </Badge>
-                          {!notification.isRead && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
+                          {!notification.isRead && (
+                            <div className="w-2 h-2 bg-blue-600 rounded-full" />
+                          )}
                         </div>
-                        <p className="text-gray-900 mb-1">{notification.message}</p>
+                        <p className="text-gray-900 mb-1">
+                          {notification.message}
+                        </p>
                         <p className="text-sm text-gray-500">
-                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                          {formatDistanceToNow(
+                            new Date(notification.createdAt),
+                            { addSuffix: true }
+                          )}
                         </p>
                         {notification.actionButton && (
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(notification.actionButton?.url, '_blank')}
+                            onClick={() =>
+                              window.open(
+                                notification.actionButton?.url,
+                                "_blank"
+                              )
+                            }
                             className="mt-2"
                           >
                             {notification.actionButton.text}
@@ -781,8 +1173,12 @@ const WorkerDashboard: React.FC = () => {
             ) : (
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
-                <p className="text-gray-600">You&apos;re all caught up!</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {t("modals.notifications.empty.title")}
+                </h3>
+                <p className="text-gray-600">
+                  {t("modals.notifications.empty.message")}
+                </p>
               </div>
             )}
 
@@ -793,50 +1189,121 @@ const WorkerDashboard: React.FC = () => {
                   className="w-full"
                   onClick={handleMarkAllAsRead}
                 >
-                  Mark All as Read
+                  {t("buttons.markAllRead")}
                 </Button>
               </div>
             )}
           </div>
         </Modal>
         {/* Chat Modal */}
-  <Modal isOpen={!!chatJobId} onClose={()=>setChatJobId(null)} title="Job Chat" size="xl" scrollContent={false}>
+        <Modal
+          isOpen={!!chatJobId}
+          onClose={() => setChatJobId(null)}
+          title={t("modals.chat.title")}
+          size="xl"
+          scrollContent={false}
+        >
           <div className="flex flex-col h-[70vh] w-full max-w-[900px]">
             <div className="flex items-center justify-between mb-3 px-2">
-              <div className="text-sm text-gray-500">Collaborate professionally. Keep communication clear and respectful.</div>
+              <div className="text-sm text-gray-500">
+                {t("modals.chat.guidance")}
+              </div>
             </div>
-            <div ref={chatScrollRef} onDragOver={(e)=>{e.preventDefault();}} onDrop={async (e)=>{e.preventDefault(); const files = e.dataTransfer?.files; if (!files) return; const list = Array.from(files).slice(0, 5 - chatAttachments.length); const reads = await Promise.all(list.map(f=> new Promise<PendingAttachment>((res)=>{ const r = new FileReader(); r.onload=()=>res({ name:f.name, type:f.type, size:f.size, dataUrl:String(r.result)}); r.readAsDataURL(f);}))); setChatAttachments(prev=>[...prev,...reads]); }} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-3 bg-gradient-to-b from-blue-50/40 to-white rounded-lg border px-4 py-3" id="worker-chat-scroll">
-              {chatMessages.map((m,i)=>(
-                <div key={i} className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role==='worker'?'bg-blue-50 ml-auto border border-blue-200':'bg-gray-100 border border-gray-200'}`}>
-                  <p className="font-medium mb-1 text-blue-700">{m.sender?.name||'You'}</p>
-                  <p className="whitespace-pre-wrap text-gray-800">{m.content}</p>
-                  <p className="mt-1 text-[10px] text-gray-400">{new Date(m.sentAt).toLocaleTimeString()}</p>
+            <div
+              ref={chatScrollRef}
+              onDragOver={(e) => {
+                e.preventDefault();
+              }}
+              onDrop={async (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer?.files;
+                if (!files) return;
+                const list = Array.from(files).slice(
+                  0,
+                  5 - chatAttachments.length
+                );
+                const reads = await Promise.all(
+                  list.map(
+                    (f) =>
+                      new Promise<PendingAttachment>((res) => {
+                        const r = new FileReader();
+                        r.onload = () =>
+                          res({
+                            name: f.name,
+                            type: f.type,
+                            size: f.size,
+                            dataUrl: String(r.result),
+                          });
+                        r.readAsDataURL(f);
+                      })
+                  )
+                );
+                setChatAttachments((prev) => [...prev, ...reads]);
+              }}
+              className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-3 bg-gradient-to-b from-blue-50/40 to-white rounded-lg border px-4 py-3"
+              id="worker-chat-scroll"
+            >
+              {chatMessages.map((m, i) => (
+                <div
+                  key={i}
+                  className={`p-3 rounded-lg text-sm max-w-md ${
+                    m.sender?.role === "worker"
+                      ? "bg-blue-50 ml-auto border border-blue-200"
+                      : "bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  <p className="font-medium mb-1 text-blue-700">
+                    {m.sender?.name || "You"}
+                  </p>
+                  <p className="whitespace-pre-wrap text-gray-800">
+                    {m.content}
+                  </p>
+                  <p className="mt-1 text-[10px] text-gray-400">
+                    {new Date(m.sentAt).toLocaleTimeString()}
+                  </p>
                 </div>
               ))}
-              {chatMessages.length===0 && <div className="text-xs text-gray-400">No messages yet.</div>}
+              {chatMessages.length === 0 && (
+                <div className="text-xs text-gray-400">
+                  {t("modals.chat.empty")}
+                </div>
+              )}
             </div>
-            {chatAttachments.length>0 && (
+            {chatAttachments.length > 0 && (
               <div className="mt-2 border rounded bg-white p-2">
-                <div className="text-xs text-gray-500 mb-2">Attachments ({chatAttachments.length}/5)</div>
+                <div className="text-xs text-gray-500 mb-2">
+                  {t("modals.chat.attachments.title")} ({chatAttachments.length}
+                  /5)
+                </div>
                 <div className="grid grid-cols-5 gap-2">
-                  {chatAttachments.map((a,idx)=> (
+                  {chatAttachments.map((a, idx) => (
                     <div key={idx} className="relative group">
-                      {a.type.startsWith('image') ? (
+                      {a.type.startsWith("image") ? (
                         <Image
                           src={a.dataUrl}
                           alt={a.name}
                           width={80}
                           height={80}
                           className="h-20 w-full object-cover rounded"
-                          style={{ objectFit: 'cover', borderRadius: '0.5rem' }}
+                          style={{ objectFit: "cover", borderRadius: "0.5rem" }}
                           unoptimized
                         />
                       ) : (
                         <div className="h-20 rounded border bg-gray-50 flex items-center justify-center text-xs text-gray-600">
-                          <FileText className="h-4 w-4 mr-1"/>{a.name.slice(0,10)}
+                          <FileText className="h-4 w-4 mr-1" />
+                          {a.name.slice(0, 10)}
                         </div>
                       )}
-                      <button className="absolute -top-2 -right-2 bg-white border rounded-full p-0.5 shadow hidden group-hover:block" onClick={()=> setChatAttachments(prev => prev.filter((_,i)=> i!==idx))}><X className="h-3 w-3"/></button>
+                      <button
+                        className="absolute -top-2 -right-2 bg-white border rounded-full p-0.5 shadow hidden group-hover:block"
+                        onClick={() =>
+                          setChatAttachments((prev) =>
+                            prev.filter((_, i) => i !== idx)
+                          )
+                        }
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -844,32 +1311,162 @@ const WorkerDashboard: React.FC = () => {
             )}
             <div className="mt-3 flex gap-2 items-center border-t pt-3 bg-white">
               <label className="inline-flex items-center gap-1 px-2 py-1 border rounded cursor-pointer text-sm text-gray-600 hover:bg-gray-50">
-                <Paperclip className="h-4 w-4"/>
-                Attach
-                <input type="file" multiple className="hidden" onChange={async (e)=>{
-                  const files = Array.from(e.target.files || []).slice(0, 5 - chatAttachments.length);
-                  const reads = await Promise.all(files.map(f=> new Promise<PendingAttachment>((res)=>{ const r = new FileReader(); r.onload = ()=> res({ name: f.name, type: f.type, size: f.size, dataUrl: String(r.result) }); r.readAsDataURL(f); })));
-                  setChatAttachments(prev => [...prev, ...reads]);
-                }} />
+                <Paperclip className="h-4 w-4" />
+                {t("modals.chat.attachments.button")}
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []).slice(
+                      0,
+                      5 - chatAttachments.length
+                    );
+                    const reads = await Promise.all(
+                      files.map(
+                        (f) =>
+                          new Promise<PendingAttachment>((res) => {
+                            const r = new FileReader();
+                            r.onload = () =>
+                              res({
+                                name: f.name,
+                                type: f.type,
+                                size: f.size,
+                                dataUrl: String(r.result),
+                              });
+                            r.readAsDataURL(f);
+                          })
+                      )
+                    );
+                    setChatAttachments((prev) => [...prev, ...reads]);
+                  }}
+                />
               </label>
               <div className="flex-1 flex items-center gap-2">
-                <input ref={chatInputRef} value={newMessage} onChange={e=>setNewMessage(e.target.value)} onPaste={(e)=>{ const items = e.clipboardData?.items; if (!items) return; const files: File[]=[]; for(let i=0;i<items.length;i++){ const it=items[i]; if(it.kind==='file'){ const f=it.getAsFile(); if(f) files.push(f);} } if(files.length>0){ const dt = new DataTransfer(); files.forEach(f=>dt.items.add(f)); (async()=>{ const list = Array.from(dt.files).slice(0, 5 - chatAttachments.length); const reads = await Promise.all(list.map(f=> new Promise<PendingAttachment>((res)=>{ const r=new FileReader(); r.onload=()=>res({name:f.name,type:f.type,size:f.size,dataUrl:String(r.result)}); r.readAsDataURL(f);}))); setChatAttachments(prev=>[...prev,...reads]); })(); } }} placeholder="Type a message" className="flex-1 border rounded-full px-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"/>
+                <input
+                  ref={chatInputRef}
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onPaste={(e) => {
+                    const items = e.clipboardData?.items;
+                    if (!items) return;
+                    const files: File[] = [];
+                    for (let i = 0; i < items.length; i++) {
+                      const it = items[i];
+                      if (it.kind === "file") {
+                        const f = it.getAsFile();
+                        if (f) files.push(f);
+                      }
+                    }
+                    if (files.length > 0) {
+                      const dt = new DataTransfer();
+                      files.forEach((f) => dt.items.add(f));
+                      (async () => {
+                        const list = Array.from(dt.files).slice(
+                          0,
+                          5 - chatAttachments.length
+                        );
+                        const reads = await Promise.all(
+                          list.map(
+                            (f) =>
+                              new Promise<PendingAttachment>((res) => {
+                                const r = new FileReader();
+                                r.onload = () =>
+                                  res({
+                                    name: f.name,
+                                    type: f.type,
+                                    size: f.size,
+                                    dataUrl: String(r.result),
+                                  });
+                                r.readAsDataURL(f);
+                              })
+                          )
+                        );
+                        setChatAttachments((prev) => [...prev, ...reads]);
+                      })();
+                    }
+                  }}
+                  placeholder={t("modals.chat.attachments.placeholder")}
+                  className="flex-1 border rounded-full px-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
+                />
                 <div className="relative">
-                  <button type="button" className="p-2 text-gray-500 hover:text-gray-700" onClick={()=> setShowEmoji(v=>!v)}><Smile className="h-5 w-5"/></button>
+                  <button
+                    type="button"
+                    className="p-2 text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowEmoji((v) => !v)}
+                  >
+                    <Smile className="h-5 w-5" />
+                  </button>
                   {showEmoji && (
                     <div className="absolute bottom-12 right-0 w-64 max-h-56 overflow-y-auto bg-white border rounded-xl shadow-2xl p-2 grid grid-cols-8 sm:grid-cols-10 gap-2 text-xl z-10">
-                      {['😀','😁','😂','🤣','😊','😍','😘','😇','🙂','😉','😌','😎','🤩','🫶','👍','🙏','👏','💪','🎉','🔥','✨','💡','📌','📎','📷','📝','🤝','🤔','😅','😴','😢','😤'].map(e=> (
-                        <button key={e} className="p-1 hover:bg-gray-100 rounded" onClick={()=>{
-                          const el = chatInputRef.current; const emoji = e as string; if (!el) { setNewMessage(p=>p+emoji); return; }
-                          const s = el.selectionStart || 0; const d = el.selectionEnd || 0; const next = newMessage.slice(0,s)+emoji+newMessage.slice(d);
-                          setNewMessage(next); requestAnimationFrame(()=>{ el.focus(); const c = s+emoji.length; el.setSelectionRange(c,c);});
-                        }}>{e}</button>
+                      {[
+                        "😀",
+                        "😁",
+                        "😂",
+                        "🤣",
+                        "😊",
+                        "😍",
+                        "😘",
+                        "😇",
+                        "🙂",
+                        "😉",
+                        "😌",
+                        "😎",
+                        "🤩",
+                        "🫶",
+                        "👍",
+                        "🙏",
+                        "👏",
+                        "💪",
+                        "🎉",
+                        "🔥",
+                        "✨",
+                        "💡",
+                        "📌",
+                        "📎",
+                        "📷",
+                        "📝",
+                        "🤝",
+                        "🤔",
+                        "😅",
+                        "😴",
+                        "😢",
+                        "😤",
+                      ].map((e) => (
+                        <button
+                          key={e}
+                          className="p-1 hover:bg-gray-100 rounded"
+                          onClick={() => {
+                            const el = chatInputRef.current;
+                            const emoji = e as string;
+                            if (!el) {
+                              setNewMessage((p) => p + emoji);
+                              return;
+                            }
+                            const s = el.selectionStart || 0;
+                            const d = el.selectionEnd || 0;
+                            const next =
+                              newMessage.slice(0, s) +
+                              emoji +
+                              newMessage.slice(d);
+                            setNewMessage(next);
+                            requestAnimationFrame(() => {
+                              el.focus();
+                              const c = s + emoji.length;
+                              el.setSelectionRange(c, c);
+                            });
+                          }}
+                        >
+                          {e}
+                        </button>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-              <Button disabled={sending} onClick={sendChat}>Send</Button>
+              <Button disabled={sending} onClick={sendChat}>
+                {t("buttons.send")}
+              </Button>
             </div>
           </div>
         </Modal>

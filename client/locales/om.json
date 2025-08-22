@@ -354,5 +354,142 @@
         "website": "Website"
       }
     }
+  },
+  "WorkerDashboard": {
+    "header": {
+      "title": "Daashbooraa Hojjettootaa",
+      "subtitle": "Hojiiwwan kee bulchiifi argattee kee hordofi"
+    },
+    "buttons": {
+      "notifications": "Beekumsa",
+      "wallet": "Walleetti",
+      "viewAll": "Hunda Ilali",
+      "cancel": "Dhiisi",
+      "submit": "Applii Ergame",
+      "withdrawFunds": "Qarshii Baafadhu",
+      "markAllRead": "Hunda Akka Dubbifame Maarki",
+      "send": "Ergamuu"
+    },
+    "stats": {
+      "activeJobs": {
+        "title": "Hojiiwwan Hojii Irra Jiran",
+        "label": "Hojiiwwan Hojii Irra Jiran"
+      },
+      "completedJobs": {
+        "title": "Xumurame",
+        "label": "Xumurame"
+      },
+      "earnings": {
+        "title": "Argatta Waliigalaa",
+        "label": "Argatta Waliigalaa"
+      },
+      "rating": {
+        "title": "Sadarkaa",
+        "label": "Sadarkaa"
+      },
+      "applications": {
+        "title": "Appliiwwan",
+        "label": "Appliiwwan"
+      },
+      "pending": {
+        "title": "Eegamaa",
+        "label": "Eegamaa"
+      }
+    },
+    "sections": {
+      "availableJobs": {
+        "title": "Hojiiwwan Barbaachisoo",
+        "applications": "appliiwwan",
+        "due": "Yeroo Xumuraa",
+        "details": "Faallaawwan",
+        "view": "Ilali",
+        "applied": "Applii Godhame",
+        "apply": "Applii Godhaa"
+      },
+      "activeJobs": {
+        "title": "Hojiiwwan Koo Hojii Irra Jiran",
+        "pendingApplications": {
+          "title": "Appliiwwan Eegamaa",
+          "empty": "Appliiwwan eegamaa hin jiru.",
+          "applied": "Applii Godhame",
+          "status": "Eegamaa"
+        },
+        "actions": {
+          "decline": "Dhiisi",
+          "accept": "Qeebali",
+          "markComplete": "Xumuramte Maarki",
+          "resubmit": "Irra Deebi'ii Ergame",
+          "rateClient": "Maamilaa Sadarka'i"
+        }
+      }
+    },
+    "modals": {
+      "application": {
+        "title": "Hojirratti Applii Godhaa",
+        "applyTo": "Hojirratti Applii Godhaa",
+        "fields": {
+          "budget": "Baajeta",
+          "deadline": "Yeroo Xumuraa",
+          "category": "Gosa",
+          "region": "Naannoo",
+          "proposal": {
+            "label": "Ibsaa",
+            "placeholder": "Karaa kee, beekumsa barbaachisaa, kennameefi sirna yeroo ibsi...",
+            "hint": "Ibsaa ifaa, gabaabaa filannoo qe'ee dabalata."
+          },
+          "proposedBudget": {
+            "label": "Baajeta Fedhii (ETB)",
+            "placeholder": "fak. 4500",
+            "hint": "Baajeta maamilaa: ETB"
+          },
+          "duration": {
+            "label": "Yeroo Qiyaamaa",
+            "placeholder": "fak. guyyoota 5",
+            "hint": "Filannoo – maamilaa yeroo madaaluuf gargaara."
+          }
+        }
+      },
+      "wallet": {
+        "title": "Walleetti Hojjettootaa",
+        "balance": {
+          "title": "Baalaa Barbaachisoo",
+          "label": "Baalaa Barbaachisoo"
+        },
+        "recentEarnings": {
+          "title": "Argatte Duraanii",
+          "jobPayment": "Kaffaltii Hojii",
+          "recently": "Duraanii",
+          "status": "Xumurame"
+        },
+        "withdrawalFeature": "Fuunsha baafannaa qarshii baga dhufu!"
+      },
+      "rating": {
+        "title": "Maamilaa Sadarka'i",
+        "subtitle": "Maamilaan akkam ture?",
+        "description": "Hojii kana xumuruu kee booda beekumsa kee sadarka'i.",
+        "outOf": "irraa 5",
+        "feedback": {
+          "label": "Deebii (filannoo)",
+          "placeholder": "Waa'ee dubbii, ifaa, fi ogummaa faallaawwan qoodaa."
+        }
+      },
+      "notifications": {
+        "title": "Beekumsa",
+        "empty": {
+          "title": "Beekumsa hin jiru",
+          "message": "Hunda hordoftee jirta!"
+        }
+      },
+      "chat": {
+        "title": "Chat Hojii",
+        "guidance": "Ogummaan waliin hojjedhaa. Dubbii ifaa fi kabajaa qabu taasisaa.",
+        "empty": "Ergaa hin jiru.",
+        "attachments": {
+          "title": "Fiillee",
+          "button": "Makkalaa'i",
+          "placeholder": "Ergaa barreessi"
+        }
+      }
+    }
   }
 }
