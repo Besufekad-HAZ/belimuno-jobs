@@ -320,5 +320,39 @@
       "9": "Consulting",
       "10": "Other"
     }
+  },
+  "ContactPage": {
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "We would love to hear from you. Send us a message and we will respond promptly."
+    },
+    "form": {
+      "title": "Send a message",
+      "fields": {
+        "name": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "subject": "Subject",
+        "message": "Message"
+      },
+      "button": {
+        "sending": "Sending…",
+        "send": "Send message"
+      },
+      "status": {
+        "success": "Message sent. Thank you!",
+        "error": "Failed to send. Try again."
+      }
+    },
+    "office": {
+      "title": "Office",
+      "address": "Bole Medhaniyalem to Hayahulet Road, in front of New Stadium, ANAT Commercial Center, 4th floor Office No. 402",
+      "contact": {
+        "email": "Email",
+        "phone": "Phone",
+        "pobox": "P.O.Box",
+        "website": "Website"
+      }
+    }
   }
 }

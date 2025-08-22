@@ -320,5 +320,39 @@
       "9": "Gorsaa",
       "10": "Kan Biroo"
     }
+  },
+  "ContactPage": {
+    "hero": {
+      "title": "Nu Qunnamaa",
+      "subtitle": "Nuuf ergaa ergaa nu gammachiisa. Nuuf ergaa ergaa nuuf ergaa nuuf deebi'ina."
+    },
+    "form": {
+      "title": "Ergaa Ergaa",
+      "fields": {
+        "name": "Maqaa Guutuu",
+        "email": "Imeelii",
+        "phone": "Bilbila",
+        "subject": "Gaaffii",
+        "message": "Ergaa"
+      },
+      "button": {
+        "sending": "Ergamuu...",
+        "send": "Ergaa Ergamuu"
+      },
+      "status": {
+        "success": "Ergaa ergame. Galatoomaa!",
+        "error": "Ergamuu hin dandeenye. Irra deebi'i."
+      }
+    },
+    "office": {
+      "title": "Biroo",
+      "address": "Karaa Bole Medhaniyalem irraa gara Hayahulet Road, stadium haaraa dura, ANAT Commercial Center, sadarkaa 4ffaa Biroo Lakkoofsa 402",
+      "contact": {
+        "email": "Imeelii",
+        "phone": "Bilbila",
+        "pobox": "P.O.Box",
+        "website": "Website"
+      }
+    }
   }
 }
