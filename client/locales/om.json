@@ -246,5 +246,79 @@
       "title": "Maamilota Keenya",
       "subtitle": "2011 irraa kaasee NGOwwan addunyaa fi kaampaanota ijaarsaa gurguddoon nu amananiiru."
     }
+  },
+  "JobsPage": {
+    "header": {
+      "title": "Hojiiwwan Ilalaa",
+      "subtitle": "Carraa gaarii dandeettii keetii argadhu"
+    },
+    "search": {
+      "placeholder": "Hojiiwwan maqaa, ibsaa, ykn dandeettii waliin barbaadi...",
+      "button": "Barbaadi",
+      "filters": {
+        "category": {
+          "label": "Gosa",
+          "placeholder": "Gosa Hunda"
+        },
+        "region": {
+          "label": "Naannoo",
+          "placeholder": "Naannoo galchi"
+        },
+        "budget": {
+          "min": {
+            "label": "Baajeta Xiqqaa (ETB)",
+            "placeholder": "0"
+          },
+          "max": {
+            "label": "Baajeta Guddaa (ETB)",
+            "placeholder": "100000"
+          }
+        },
+        "apply": "Fiiltara Gochuu",
+        "clear": "Fiiltara Harcaasuu",
+        "results": {
+          "single": "hojiin argame",
+          "multiple": "hojiiwwan argaman"
+        }
+      }
+    },
+    "job": {
+      "priority": "dur-sammuu",
+      "requiredSkills": "Dandeettii Barbaachisaa:",
+      "moreSkills": "dabalataa",
+      "posted": "Maxxanfame",
+      "applications": "applii",
+      "actions": {
+        "viewDetails": "Faallaawwan Ilalaa",
+        "applyNow": "Amma Applii Godhaa",
+        "save": "Qusadhu",
+        "saved": "Qusatame",
+        "share": "Qoodaa",
+        "loginToApply": "Applii Godhuuf Seenuu"
+      }
+    },
+    "noResults": {
+      "title": "Hojii Hinargamne",
+      "description": "Haala barbaachisaa kee jijjiiruu ykn carraa haaraa argachuuf booda deebi'i.",
+      "button": "Fiiltara Hunda Harcaasuu"
+    },
+    "pagination": {
+      "previous": "Duraa",
+      "page": "Fuula",
+      "of": "irraa",
+      "next": "Itti Aanu"
+    },
+    "categories": {
+      "1": "Fooyya'insa Weebsaayitii",
+      "2": "Fooyya'insa Mobiila",
+      "3": "Ijaarsa",
+      "4": "Barreessuu",
+      "5": "Gabaasaa",
+      "6": "Galmeessuu Daataa",
+      "7": "Tajaajila Maamilaa",
+      "8": "Gatii-gurguurtaa",
+      "9": "Gorsaa",
+      "10": "Kan Biroo"
+    }
   }
 }

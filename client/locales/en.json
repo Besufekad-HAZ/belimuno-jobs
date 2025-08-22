@@ -246,5 +246,79 @@
       "title": "Our Clients",
       "subtitle": "We have been trusted by international NGOs and leading construction companies since 2011."
     }
+  },
+  "JobsPage": {
+    "header": {
+      "title": "Browse Jobs",
+      "subtitle": "Find the perfect opportunity for your skills"
+    },
+    "search": {
+      "placeholder": "Search jobs by title, description, or skills...",
+      "button": "Search",
+      "filters": {
+        "category": {
+          "label": "Category",
+          "placeholder": "All Categories"
+        },
+        "region": {
+          "label": "Region",
+          "placeholder": "Enter region"
+        },
+        "budget": {
+          "min": {
+            "label": "Min Budget (ETB)",
+            "placeholder": "0"
+          },
+          "max": {
+            "label": "Max Budget (ETB)",
+            "placeholder": "100000"
+          }
+        },
+        "apply": "Apply Filters",
+        "clear": "Clear Filters",
+        "results": {
+          "single": "job found",
+          "multiple": "jobs found"
+        }
+      }
+    },
+    "job": {
+      "priority": "priority",
+      "requiredSkills": "Required Skills:",
+      "moreSkills": "more",
+      "posted": "Posted",
+      "applications": "applications",
+      "actions": {
+        "viewDetails": "View Details",
+        "applyNow": "Apply Now",
+        "save": "Save",
+        "saved": "Saved",
+        "share": "Share",
+        "loginToApply": "Login to Apply"
+      }
+    },
+    "noResults": {
+      "title": "No jobs found",
+      "description": "Try adjusting your search criteria or check back later for new opportunities.",
+      "button": "Clear All Filters"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "page": "Page",
+      "of": "of",
+      "next": "Next"
+    },
+    "categories": {
+      "1": "Web Development",
+      "2": "Mobile Development",
+      "3": "Design",
+      "4": "Writing",
+      "5": "Marketing",
+      "6": "Data Entry",
+      "7": "Customer Service",
+      "8": "Sales",
+      "9": "Consulting",
+      "10": "Other"
+    }
   }
 }

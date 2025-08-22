@@ -1,13 +1,23 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { Search, Filter, MapPin, Clock, DollarSign, Briefcase, Bookmark, Share2 } from 'lucide-react';
-import { getStoredUser } from '@/lib/auth';
-import { jobsAPI, workerAPI } from '@/lib/api';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import {
+  Search,
+  Filter,
+  MapPin,
+  Clock,
+  DollarSign,
+  Briefcase,
+  Bookmark,
+  Share2,
+} from "lucide-react";
+import { getStoredUser } from "@/lib/auth";
+import { jobsAPI, workerAPI } from "@/lib/api";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Card from "@/components/ui/Card";
+import { useTranslations } from "next-intl";
 
 const JobsPage: React.FC = () => {
   type JobListItem = {
@@ -26,25 +36,34 @@ const JobsPage: React.FC = () => {
   };
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
-  const [regionFilter, setRegionFilter] = useState('');
-  const [budgetRange, setBudgetRange] = useState({ min: '', max: '' });
-  const [user, setUser] = useState<ReturnType<typeof getStoredUser> | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [regionFilter, setRegionFilter] = useState("");
+  const [budgetRange, setBudgetRange] = useState({ min: "", max: "" });
+  const [user, setUser] = useState<ReturnType<typeof getStoredUser> | null>(
+    null
+  );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [savingJobId, setSavingJobId] = useState<string | null>(null);
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+  const t = useTranslations("JobsPage");
 
   // fetchJobs defined below; initial effect will reference it
 
-  type Filters = { search?: string; category?: string; region?: string; budgetMin?: number | string; budgetMax?: number | string };
+  type Filters = {
+    search?: string;
+    category?: string;
+    region?: string;
+    budgetMin?: number | string;
+    budgetMax?: number | string;
+  };
   const fetchJobs = useCallback(async (filters: Filters = {}, pageNum = 1) => {
     try {
       setLoading(true);
       // Map frontend filters to backend params
-  const params: Record<string, unknown> = {
-        status: 'posted',
+      const params: Record<string, unknown> = {
+        status: "posted",
         page: pageNum,
         limit: 10,
       };
@@ -60,25 +79,31 @@ const JobsPage: React.FC = () => {
       } else {
         response = await jobsAPI.getAll(params);
       }
-  const payload = response.data;
-  const list = (payload.data || payload.jobs || []) as unknown as Array<Record<string, unknown>>;
-      setJobs(list.map((j) => ({
-        _id: String(j._id),
-        title: String(j.title || ''),
-        description: String(j.description || ''),
-        category: String(j.category || ''),
-        deadline: (j.deadline as string | Date | undefined) || new Date().toISOString(),
-        budget: Number(j.budget || 0),
-        priority: (j.priority as string | undefined),
-        requiredSkills: (j.requiredSkills as string[] | undefined),
-        createdAt: (j.createdAt as string | Date | undefined),
-        workType: (j.workType as string | undefined),
-        location: (j.location as string | undefined),
-        applications: (j.applications as unknown[] | undefined),
-      })));
-  setTotalPages(payload.pagination?.pages || 1);
+      const payload = response.data;
+      const list = (payload.data || payload.jobs || []) as unknown as Array<
+        Record<string, unknown>
+      >;
+      setJobs(
+        list.map((j) => ({
+          _id: String(j._id),
+          title: String(j.title || ""),
+          description: String(j.description || ""),
+          category: String(j.category || ""),
+          deadline:
+            (j.deadline as string | Date | undefined) ||
+            new Date().toISOString(),
+          budget: Number(j.budget || 0),
+          priority: j.priority as string | undefined,
+          requiredSkills: j.requiredSkills as string[] | undefined,
+          createdAt: j.createdAt as string | Date | undefined,
+          workType: j.workType as string | undefined,
+          location: j.location as string | undefined,
+          applications: j.applications as unknown[] | undefined,
+        }))
+      );
+      setTotalPages(payload.pagination?.pages || 1);
     } catch (error) {
-      console.error('Failed to fetch jobs:', error);
+      console.error("Failed to fetch jobs:", error);
       setJobs([]);
     } finally {
       setLoading(false);
@@ -91,9 +116,11 @@ const JobsPage: React.FC = () => {
     fetchJobs();
     (async () => {
       try {
-        if (currentUser?.role === 'worker') {
+        if (currentUser?.role === "worker") {
           const res = await workerAPI.getSavedJobs();
-          const ids = new Set((res.data?.data || []).map((j: any) => String(j._id)));
+          const ids = new Set(
+            (res.data?.data || []).map((j: any) => String(j._id))
+          ) as Set<string>;
           setSavedJobIds(ids);
         }
       } catch {}
@@ -101,7 +128,7 @@ const JobsPage: React.FC = () => {
   }, [fetchJobs]);
 
   const handleSearch = () => {
-  const filters: Filters = {};
+    const filters: Filters = {};
     if (searchQuery) filters.search = searchQuery;
     if (categoryFilter) filters.category = categoryFilter;
     if (regionFilter) filters.region = regionFilter;
@@ -112,34 +139,25 @@ const JobsPage: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setSearchQuery('');
-    setCategoryFilter('');
-    setRegionFilter('');
-    setBudgetRange({ min: '', max: '' });
+    setSearchQuery("");
+    setCategoryFilter("");
+    setRegionFilter("");
+    setBudgetRange({ min: "", max: "" });
     setPage(1);
     fetchJobs({}, 1);
   };
 
-  const categories = [
-    'Web Development',
-    'Mobile Development',
-    'Design',
-    'Writing',
-    'Marketing',
-    'Data Entry',
-    'Customer Service',
-    'Sales',
-    'Consulting',
-    'Other'
-  ];
+  // Categories are now defined in translations
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Browse Jobs</h1>
-          <p className="text-gray-600 mt-2">Find the perfect opportunity for your skills</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("header.title")}
+          </h1>
+          <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
         </div>
 
         {/* Search and Filters */}
@@ -149,14 +167,14 @@ const JobsPage: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="flex-1">
                 <Input
-                  placeholder="Search jobs by title, description, or skills..."
+                  placeholder={t("search.placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Button onClick={handleSearch}>
                 <Search className="h-4 w-4 mr-2" />
-                Search
+                {t("search.button")}
               </Button>
             </div>
 
@@ -164,44 +182,49 @@ const JobsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
+                  {t("search.filters.category.label")}
                 </label>
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  <option value="">
+                    {t("search.filters.category.placeholder")}
+                  </option>
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                    <option key={num} value={t(`categories.${num}`)}>
+                      {t(`categories.${num}`)}
                     </option>
                   ))}
                 </select>
               </div>
 
               <Input
-                label="Region"
-                placeholder="Enter region"
+                label={t("search.filters.region.label")}
+                placeholder={t("search.filters.region.placeholder")}
                 value={regionFilter}
                 onChange={(e) => setRegionFilter(e.target.value)}
               />
 
-
               <Input
-                label="Min Budget (ETB)"
+                label={t("search.filters.budget.min.label")}
                 type="number"
-                placeholder="0"
+                placeholder={t("search.filters.budget.min.placeholder")}
                 value={budgetRange.min}
-                onChange={(e) => setBudgetRange({ ...budgetRange, min: e.target.value })}
+                onChange={(e) =>
+                  setBudgetRange({ ...budgetRange, min: e.target.value })
+                }
               />
 
               <Input
-                label="Max Budget (ETB)"
+                label={t("search.filters.budget.max.label")}
                 type="number"
-                placeholder="100000"
+                placeholder={t("search.filters.budget.max.placeholder")}
                 value={budgetRange.max}
-                onChange={(e) => setBudgetRange({ ...budgetRange, max: e.target.value })}
+                onChange={(e) =>
+                  setBudgetRange({ ...budgetRange, max: e.target.value })
+                }
               />
             </div>
 
@@ -209,14 +232,19 @@ const JobsPage: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <Button variant="outline" onClick={handleSearch}>
                   <Filter className="h-4 w-4 mr-2" />
-                  Apply Filters
+                  {t("search.filters.apply")}
                 </Button>
                 <Button variant="ghost" onClick={clearFilters}>
-                  Clear Filters
+                  {t("search.filters.clear")}
                 </Button>
               </div>
               <p className="text-sm text-gray-500">
-                {jobs.length} job{jobs.length !== 1 ? 's' : ''} found
+                {jobs.length}{" "}
+                {t(
+                  jobs.length === 1
+                    ? "search.filters.results.single"
+                    : "search.filters.results.multiple"
+                )}
               </p>
             </div>
           </div>
@@ -260,12 +288,17 @@ const JobsPage: React.FC = () => {
                           <DollarSign className="h-5 w-5" />
                           ETB {job.budget?.toLocaleString()}
                         </div>
-                        <span className={`px-3 py-1 text-sm rounded-full ${
-                          job.priority === 'urgent' ? 'bg-red-100 text-red-800' :
-                          job.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                          job.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span
+                          className={`px-3 py-1 text-sm rounded-full ${
+                            job.priority === "urgent"
+                              ? "bg-red-100 text-red-800"
+                              : job.priority === "high"
+                              ? "bg-orange-100 text-orange-800"
+                              : job.priority === "medium"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
                           {job.priority} priority
                         </span>
                       </div>
@@ -276,21 +309,26 @@ const JobsPage: React.FC = () => {
                     </p>
 
                     {/* Skills */}
-          {(job.requiredSkills && job.requiredSkills.length > 0) && (
+                    {job.requiredSkills && job.requiredSkills.length > 0 && (
                       <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Required Skills:</h4>
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">
+                          {t("job.requiredSkills")}
+                        </h4>
                         <div className="flex flex-wrap gap-2">
-              {job.requiredSkills.slice(0, 5).map((skill: string, index: number) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-              {job.requiredSkills.length > 5 && (
+                          {job.requiredSkills
+                            .slice(0, 5)
+                            .map((skill: string, index: number) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          {job.requiredSkills.length > 5 && (
                             <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                +{job.requiredSkills.length - 5} more
+                              +{job.requiredSkills.length - 5}{" "}
+                              {t("job.moreSkills")}
                             </span>
                           )}
                         </div>
@@ -299,26 +337,48 @@ const JobsPage: React.FC = () => {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>Posted {job.createdAt ? new Date(job.createdAt as string | number | Date).toLocaleDateString() : '—'}</span>
+                        <span>
+                          {t("job.posted")}{" "}
+                          {job.createdAt
+                            ? new Date(
+                                job.createdAt as string | number | Date
+                              ).toLocaleDateString()
+                            : "—"}
+                        </span>
                         <span>•</span>
-                        <span>{job.applications?.length || 0} applications</span>
+                        <span>
+                          {job.applications?.length || 0}{" "}
+                          {t("job.applications")}
+                        </span>
                         <span>•</span>
                         <span className="capitalize">{job.workType}</span>
                       </div>
                       <div className="flex space-x-2">
-                        <Link href={`/jobs/${job._id}`} className="inline-block">
-                          <Button variant="outline" size="sm">View Details</Button>
+                        <Link
+                          href={`/jobs/${job._id}`}
+                          className="inline-block"
+                        >
+                          <Button variant="outline" size="sm">
+                            {t("job.actions.viewDetails")}
+                          </Button>
                         </Link>
-                        {user && user.role === 'worker' && (
-                          <Link href={`/jobs/${job._id}/apply`} className="inline-block">
-                            <Button size="sm">Apply Now</Button>
+                        {user && user.role === "worker" && (
+                          <Link
+                            href={`/jobs/${job._id}/apply`}
+                            className="inline-block"
+                          >
+                            <Button size="sm">
+                              {t("job.actions.applyNow")}
+                            </Button>
                           </Link>
                         )}
                         <Button
-                          variant={savedJobIds.has(job._id) ? 'outline' : 'ghost'}
+                          variant={
+                            savedJobIds.has(job._id) ? "outline" : "ghost"
+                          }
                           size="sm"
                           onClick={async () => {
-                            if (user?.role !== 'worker') return;
+                            if (user?.role !== "worker") return;
                             setSavingJobId(job._id);
                             try {
                               if (savedJobIds.has(job._id)) {
@@ -332,11 +392,17 @@ const JobsPage: React.FC = () => {
                                 copy.add(job._id);
                                 setSavedJobIds(copy);
                               }
-                            } catch (e) { console.error(e); }
-                            finally { setSavingJobId(null); }
+                            } catch (e) {
+                              console.error(e);
+                            } finally {
+                              setSavingJobId(null);
+                            }
                           }}
                         >
-                          <Bookmark className="h-4 w-4 mr-1" /> {savedJobIds.has(job._id) ? 'Saved' : 'Save'}
+                          <Bookmark className="h-4 w-4 mr-1" />{" "}
+                          {savedJobIds.has(job._id)
+                            ? t("job.actions.saved")
+                            : t("job.actions.save")}
                         </Button>
                         <Button
                           variant="ghost"
@@ -345,19 +411,27 @@ const JobsPage: React.FC = () => {
                             const url = `${window.location.origin}/jobs/${job._id}`;
                             try {
                               if ((navigator as any).share) {
-                                await (navigator as any).share({ title: `Belimuno Job: ${job.title}`, url });
+                                await (navigator as any).share({
+                                  title: `Belimuno Job: ${job.title}`,
+                                  url,
+                                });
                               } else if (navigator.clipboard) {
                                 await navigator.clipboard.writeText(url);
-                                alert('Link copied to clipboard');
+                                alert("Link copied to clipboard");
                               }
-                            } catch (e) { console.error(e); }
+                            } catch (e) {
+                              console.error(e);
+                            }
                           }}
                         >
-                          <Share2 className="h-4 w-4 mr-1" /> Share
+                          <Share2 className="h-4 w-4 mr-1" />{" "}
+                          {t("job.actions.share")}
                         </Button>
                         {!user && (
                           <Link href="/login" className="inline-block">
-                            <Button size="sm">Login to Apply</Button>
+                            <Button size="sm">
+                              {t("job.actions.loginToApply")}
+                            </Button>
                           </Link>
                         )}
                       </div>
@@ -367,15 +441,15 @@ const JobsPage: React.FC = () => {
               </Card>
             ))}
           </div>
-  ) : (
+        ) : (
           <Card className="text-center py-12">
             <Briefcase className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No jobs found</h3>
-            <p className="text-gray-600 mb-4">
-              Try adjusting your search criteria or check back later for new opportunities.
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {t("noResults.title")}
+            </h3>
+            <p className="text-gray-600 mb-4">{t("noResults.description")}</p>
             <Button variant="outline" onClick={clearFilters}>
-              Clear All Filters
+              {t("noResults.button")}
             </Button>
           </Card>
         )}
@@ -389,34 +463,42 @@ const JobsPage: React.FC = () => {
               onClick={() => {
                 const newPage = page - 1;
                 setPage(newPage);
-                fetchJobs({
-                  search: searchQuery || undefined,
-                  category: categoryFilter || undefined,
-                  region: regionFilter || undefined,
-                  budgetMin: budgetRange.min || undefined,
-                  budgetMax: budgetRange.max || undefined,
-                }, newPage);
+                fetchJobs(
+                  {
+                    search: searchQuery || undefined,
+                    category: categoryFilter || undefined,
+                    region: regionFilter || undefined,
+                    budgetMin: budgetRange.min || undefined,
+                    budgetMax: budgetRange.max || undefined,
+                  },
+                  newPage
+                );
               }}
             >
-              Previous
+              {t("pagination.previous")}
             </Button>
-            <span className="px-4 py-2 text-gray-700">Page {page} of {totalPages}</span>
+            <span className="px-4 py-2 text-gray-700">
+              {t("pagination.page")} {page} {t("pagination.of")} {totalPages}
+            </span>
             <Button
               variant="outline"
               disabled={page === totalPages}
               onClick={() => {
                 const newPage = page + 1;
                 setPage(newPage);
-                fetchJobs({
-                  search: searchQuery || undefined,
-                  category: categoryFilter || undefined,
-                  region: regionFilter || undefined,
-                  budgetMin: budgetRange.min || undefined,
-                  budgetMax: budgetRange.max || undefined,
-                }, newPage);
+                fetchJobs(
+                  {
+                    search: searchQuery || undefined,
+                    category: categoryFilter || undefined,
+                    region: regionFilter || undefined,
+                    budgetMin: budgetRange.min || undefined,
+                    budgetMax: budgetRange.max || undefined,
+                  },
+                  newPage
+                );
               }}
             >
-              Next
+              {t("pagination.next")}
             </Button>
           </div>
         )}
