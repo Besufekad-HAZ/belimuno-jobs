@@ -1,4 +1,29 @@
 {
+  "Navbar": {
+    "brand": "ቤሊሙኖ ዮብስ",
+    "navigation": {
+      "home": "መነሻ",
+      "about": "ብዛዕባ",
+      "services": "ኣገልግሎታት",
+      "clients": "ክሊኦትና",
+      "jobs": "ስራሓት",
+      "contact": "ርኸብና"
+    },
+    "auth": {
+      "login": "እምነት ኣእትው",
+      "signup": "ተመዝገብ",
+      "dashboard": "ዳሽቦርድ",
+      "profile": "ፕሮፋይል",
+      "logout": "ውጻእ"
+    },
+    "roles": {
+      "super_admin": "ልዑል ኣስተዳድሪ",
+      "admin_hr": "ኣስተዳድሪ - ሰብኣዊ ሃብቲ",
+      "admin_outsource": "ኣስተዳድሪ - ወጻኢ ኣገልግሎት",
+      "worker": "ሰራሕተኛ",
+      "client": "ክሊኦት"
+    }
+  },
   "Home": {
     "hero": {
       "title": {
@@ -47,6 +72,31 @@
       "description": "ሞግсаጽቶም ንምምዕባል ቤሊሙኖ ዮብስ ዝጥቀሙ ሽዱሽተ ሚልዮን ሞግсаጽቲ ሞግсаጽቶም ከጥፍኡ።",
       "findWorkers": "ሰራሕተኛታት ረክብ",
       "findWork": "ስራሕ ረክብ"
+    }
+  },
+  "Footer": {
+    "brand": {
+      "name": "ቤሊሙኖ ዮብስ",
+      "description": "ካብ 2011 ናብ ሕጂ ክንይት ምስ ኣጋጣምታት ኣብ መላእ ኢትዮጵያ ዘተኣሳስር HR ኣውትሶርሲንግን ሪክሩቲንግ ኣጋርን። ንንግድታት ብተንቀሳቓስን ልዑል ጥራይን ዝኾኑ ውጥንታት ሰራሕተኛታት ብምጥቃም ክዕቀቡ ንሕግዞም።"
+    },
+    "sections": {
+      "company": "ኩባንያ",
+      "contact": "ርኸብ",
+      "followUs": "ተኸታተልና"
+    },
+    "links": {
+      "about": "ብዛዕባ",
+      "services": "ኣገልግሎታት",
+      "jobs": "ስራሓት",
+      "contact": "ርኸብ"
+    },
+    "contact": {
+      "address": "ኣዲስ ኣበባ፣ ኢትዮጵያ"
+    },
+    "social": {
+      "facebook": "ፌስቡክ",
+      "linkedin": "ሊንክድኢን",
+      "twitter": "ትዊተር"
     }
   }
 }

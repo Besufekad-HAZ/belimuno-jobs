@@ -1,4 +1,29 @@
 {
+  "Navbar": {
+    "brand": "Belimuno Jobs",
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "services": "Services",
+      "clients": "Our Clients",
+      "jobs": "Jobs",
+      "contact": "Contact"
+    },
+    "auth": {
+      "login": "Login",
+      "signup": "Sign up",
+      "dashboard": "Dashboard",
+      "profile": "Profile",
+      "logout": "Logout"
+    },
+    "roles": {
+      "super_admin": "Super Admin",
+      "admin_hr": "Admin - HR",
+      "admin_outsource": "Admin - Outsource",
+      "worker": "Worker",
+      "client": "Client"
+    }
+  },
   "Home": {
     "hero": {
       "title": {
@@ -47,6 +72,31 @@
       "subtitle": "Join thousands of professionals already using Belimuno Jobs to advance their careers",
       "findWorkers": "Find Workers",
       "findWork": "Find Work"
+    }
+  },
+  "Footer": {
+    "brand": {
+      "name": "Belimuno Jobs",
+      "description": "HR outsourcing and recruiting partner connecting talent with opportunities across Ethiopia since 2011. We help businesses scale with flexible, high-quality workforce solutions."
+    },
+    "sections": {
+      "company": "Company",
+      "contact": "Contact",
+      "followUs": "Follow Us"
+    },
+    "links": {
+      "about": "About",
+      "services": "Services",
+      "jobs": "Jobs",
+      "contact": "Contact"
+    },
+    "contact": {
+      "address": "Addis Ababa, Ethiopia"
+    },
+    "social": {
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter"
     }
   }
 }

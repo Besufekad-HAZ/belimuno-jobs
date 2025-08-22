@@ -10,6 +10,7 @@ import { notificationsAPI } from "@/lib/api";
 import NotificationDropdown from "@/components/ui/NotificationDropdown";
 import type { User } from "@/lib/auth";
 import LanguageSelector from "../clients/LanguageSelector";
+import { useTranslations } from "next-intl";
 
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -19,6 +20,7 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("Navbar");
 
   // Listen for login/logout events across tabs and on auth changes
   useEffect(() => {
@@ -82,15 +84,15 @@ const Navbar: React.FC = () => {
   const getRoleDisplayName = (role: string) => {
     switch (role) {
       case "super_admin":
-        return "Super Admin";
+        return t("roles.super_admin");
       case "admin_hr":
-        return "Admin - HR";
+        return t("roles.admin_hr");
       case "admin_outsource":
-        return "Admin - Outsource";
+        return t("roles.admin_outsource");
       case "worker":
-        return "Worker";
+        return t("roles.worker");
       case "client":
-        return "Client";
+        return t("roles.client");
       default:
         return role;
     }
@@ -112,7 +114,7 @@ const Navbar: React.FC = () => {
                 />
               </div>
               <h1 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
-                Belimuno Jobs
+                {t("brand")}
               </h1>
             </Link>
 
@@ -122,37 +124,37 @@ const Navbar: React.FC = () => {
                 href="/"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
-                Home
+                {t("navigation.home")}
               </Link>
               <Link
                 href="/about"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
-                About
+                {t("navigation.about")}
               </Link>
               <Link
                 href="/services"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
-                Services
+                {t("navigation.services")}
               </Link>
               <Link
                 href="/clients"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
-                Our Clients
+                {t("navigation.clients")}
               </Link>
               <Link
                 href="/jobs"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
-                Jobs
+                {t("navigation.jobs")}
               </Link>
               <Link
                 href="/contact"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
-                Contact
+                {t("navigation.contact")}
               </Link>
             </nav>
           </div>
@@ -199,21 +201,21 @@ const Navbar: React.FC = () => {
                       className="block px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Dashboard
+                      {t("auth.dashboard")}
                     </Link>
                     <Link
                       href="/profile"
                       className="block px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Profile
+                      {t("auth.profile")}
                     </Link>
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
                     >
                       <LogOut className="inline h-4 w-4 mr-2" />
-                      Logout
+                      {t("auth.logout")}
                     </button>
                   </div>
                 )}
@@ -243,7 +245,7 @@ const Navbar: React.FC = () => {
                         : "text-cyan-100 hover:text-white"
                     }`}
                   >
-                    Login
+                    {t("auth.login")}
                   </span>
                 </Link>
                 <Link href="/register" className="relative">
@@ -254,7 +256,7 @@ const Navbar: React.FC = () => {
                         : "text-cyan-100 hover:text-white"
                     }`}
                   >
-                    Sign up
+                    {t("auth.signup")}
                   </span>
                 </Link>
               </div>
@@ -272,42 +274,42 @@ const Navbar: React.FC = () => {
               onClick={() => setMobileOpen(false)}
               className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
             >
-              Home
+              {t("navigation.home")}
             </Link>
             <Link
               href="/about"
               onClick={() => setMobileOpen(false)}
               className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
             >
-              About
+              {t("navigation.about")}
             </Link>
             <Link
               href="/services"
               onClick={() => setMobileOpen(false)}
               className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
             >
-              Services
+              {t("navigation.services")}
             </Link>
             <Link
               href="/clients"
               onClick={() => setMobileOpen(false)}
               className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
             >
-              Our Clients
+              {t("navigation.clients")}
             </Link>
             <Link
               href="/jobs"
               onClick={() => setMobileOpen(false)}
               className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
             >
-              Jobs
+              {t("navigation.jobs")}
             </Link>
             <Link
               href="/contact"
               onClick={() => setMobileOpen(false)}
               className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
             >
-              Contact
+              {t("navigation.contact")}
             </Link>
           </div>
         </div>

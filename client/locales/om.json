@@ -1,4 +1,29 @@
 {
+  "Navbar": {
+    "brand": "Belimuno Jobs",
+    "navigation": {
+      "home": "Mana",
+      "about": "Waa'ee",
+      "services": "Tajaajila",
+      "clients": "Maamiloota keenya",
+      "jobs": "Hojiiwwan",
+      "contact": "Bilbila"
+    },
+    "auth": {
+      "login": "Seenu",
+      "signup": "Galmaa'i",
+      "dashboard": "Daashbooraa",
+      "profile": "Profaayilii",
+      "logout": "Ba'i"
+    },
+    "roles": {
+      "super_admin": "Manguddoo Ol'aanaa",
+      "admin_hr": "Manguddoo - Humna Nama",
+      "admin_outsource": "Manguddoo - Ala Tajaajilaa",
+      "worker": "Hojjettoota",
+      "client": "Maamilaa"
+    }
+  },
   "Home": {
     "hero": {
       "title": {
@@ -47,6 +72,31 @@
       "subtitle": "Kumoota hojjettoota mijataa career isaanii fudhachuuf Belimuno Jobs fayyadamuu keessatti walitti qabanii.",
       "findWorkers": "Hojjettoota Barbaadi",
       "findWork": "Hojii Barbaadi"
+    }
+  },
+  "Footer": {
+    "brand": {
+      "name": "Belimuno Jobs",
+      "description": "Hiree HRaa fi hirmaachisaa hiree qophaa'aa qabaachuudhaan qophiiwwan carraawwan waliin Itoophiyaa guutuutti 2011 irraa waliin hidhu. Daldaltoota tajaajila hojii dandeettii sirrii fi guddaa qaban tajaajiluun guddisuuf isaan gargaarna."
+    },
+    "sections": {
+      "company": "Kaampaanii",
+      "contact": "Bilbila",
+      "followUs": "Nu Hordofaa"
+    },
+    "links": {
+      "about": "Waa'ee",
+      "services": "Tajaajila",
+      "jobs": "Hojiiwwan",
+      "contact": "Bilbila"
+    },
+    "contact": {
+      "address": "Finfinnee, Itoophiyaa"
+    },
+    "social": {
+      "facebook": "Feysibuukii",
+      "linkedin": "Linkediinii",
+      "twitter": "Tiwiterii"
     }
   }
 }

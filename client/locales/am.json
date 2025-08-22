@@ -1,4 +1,29 @@
 {
+  "Navbar": {
+    "brand": "ቤሊሙኖ ስራዎች",
+    "navigation": {
+      "home": "መነሻ",
+      "about": "ስለ እኛ",
+      "services": "አገልግሎቶች",
+      "clients": "ደንበኞቻችን",
+      "jobs": "ስራዎች",
+      "contact": "አግኙን"
+    },
+    "auth": {
+      "login": "ግባ",
+      "signup": "ይመዝገቡ",
+      "dashboard": "ዳሽቦርድ",
+      "profile": "መገለጫ",
+      "logout": "ውጣ"
+    },
+    "roles": {
+      "super_admin": "ከፍተኛ አስተዳዳሪ",
+      "admin_hr": "አስተዳዳሪ - ሰው ሀብት",
+      "admin_outsource": "አስተዳዳሪ - ውጭ አገልግሎት",
+      "worker": "ሰራተኛ",
+      "client": "ደንበኛ"
+    }
+  },
   "Home": {
     "hero": {
       "title": {
@@ -47,6 +72,31 @@
       "subtitle": "ሥራዎቻቸውን ለማሳደግ ቤሊሙኖ ስራዎችን በሚጠቀሙ ከሚገኙ በሺዎች የሚቆጠሩ ባለሙያዎች ጋር ይቀላቀሉ",
       "findWorkers": "ሰራተኞችን ያግኙ",
       "findWork": "ስራ ያግኙ"
+    }
+  },
+  "Footer": {
+    "brand": {
+      "name": "ቤሊሙኖ ስራዎች",
+      "description": "ከ 2011 ጀምሮ ብቃት ከእድሎች ጋር በሙሉ ኢትዮጵያ የሚያገናኝ HR አውታረመረብ እና ምልመላ አጋር። ንግዶች ተለዋዋጥ እና ከፍተኛ ጥራት ያላቸውን የሰው ኃይል መፍትሄዎች በመጠቀም እንዲያድጉ እንረዳለን።"
+    },
+    "sections": {
+      "company": "ኩባንያ",
+      "contact": "አግኙን",
+      "followUs": "ይከተሉን"
+    },
+    "links": {
+      "about": "ስለ እኛ",
+      "services": "አገልግሎቶች",
+      "jobs": "ስራዎች",
+      "contact": "አግኙን"
+    },
+    "contact": {
+      "address": "አዲስ አበባ፣ ኢትዮጵያ"
+    },
+    "social": {
+      "facebook": "ፌስቡክ",
+      "linkedin": "ሊንክድኢን",
+      "twitter": "ትዊተር"
     }
   }
 }
