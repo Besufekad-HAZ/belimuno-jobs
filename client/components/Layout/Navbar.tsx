@@ -1,14 +1,15 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { User as UserIcon, LogOut, Menu, X } from 'lucide-react';
-import { getStoredUser, clearAuth, getRoleDashboardPath } from '@/lib/auth';
-import { notificationsAPI } from '@/lib/api';
-import NotificationDropdown from '@/components/ui/NotificationDropdown';
-import type { User } from '@/lib/auth';
+import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { User as UserIcon, LogOut, Menu, X } from "lucide-react";
+import { getStoredUser, clearAuth, getRoleDashboardPath } from "@/lib/auth";
+import { notificationsAPI } from "@/lib/api";
+import NotificationDropdown from "@/components/ui/NotificationDropdown";
+import type { User } from "@/lib/auth";
+import LanguageSelector from "../clients/LanguageSelector";
 
 const Navbar: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -18,7 +19,6 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
-
 
   // Listen for login/logout events across tabs and on auth changes
   useEffect(() => {
@@ -30,28 +30,35 @@ const Navbar: React.FC = () => {
       }
     };
     updateUser();
-    window.addEventListener('authChanged', updateUser);
-    window.addEventListener('storage', updateUser);
+    window.addEventListener("authChanged", updateUser);
+    window.addEventListener("storage", updateUser);
     return () => {
-      window.removeEventListener('authChanged', updateUser);
-      window.removeEventListener('storage', updateUser);
+      window.removeEventListener("authChanged", updateUser);
+      window.removeEventListener("storage", updateUser);
     };
   }, []);
   // Close user menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (
+        isMenuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
         setIsMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
 
   const fetchNotifications = async () => {
     try {
       const response = await notificationsAPI.getAll();
-      const notif = response.data?.data || response.data?.notifications || [] as unknown[];
+      const notif =
+        response.data?.data ||
+        response.data?.notifications ||
+        ([] as unknown[]);
       const count = Array.isArray(notif)
         ? notif.filter((n: unknown) => {
             const x = n as { isRead?: boolean; read?: boolean };
@@ -60,7 +67,7 @@ const Navbar: React.FC = () => {
         : 0;
       setUnreadCount(count);
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error("Failed to fetch notifications:", error);
     }
   };
 
@@ -68,22 +75,22 @@ const Navbar: React.FC = () => {
     clearAuth();
     setUser(null);
     // Notify all tabs
-    window.dispatchEvent(new Event('authChanged'));
-    router.push('/login');
+    window.dispatchEvent(new Event("authChanged"));
+    router.push("/login");
   };
 
   const getRoleDisplayName = (role: string) => {
     switch (role) {
-      case 'super_admin':
-        return 'Super Admin';
-      case 'admin_hr':
-        return 'Admin - HR';
-      case 'admin_outsource':
-        return 'Admin - Outsource';
-      case 'worker':
-        return 'Worker';
-      case 'client':
-        return 'Client';
+      case "super_admin":
+        return "Super Admin";
+      case "admin_hr":
+        return "Admin - HR";
+      case "admin_outsource":
+        return "Admin - Outsource";
+      case "worker":
+        return "Worker";
+      case "client":
+        return "Client";
       default:
         return role;
     }
@@ -158,7 +165,11 @@ const Navbar: React.FC = () => {
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
               >
-                {mobileOpen ? <X className="h-7 w-7"/> : <Menu className="h-7 w-7"/>}
+                {mobileOpen ? (
+                  <X className="h-7 w-7" />
+                ) : (
+                  <Menu className="h-7 w-7" />
+                )}
               </button>
               {/* Notifications */}
               <NotificationDropdown
@@ -173,7 +184,9 @@ const Navbar: React.FC = () => {
                   className="flex items-center space-x-2 p-2 text-cyan-100 hover:text-white"
                 >
                   <UserIcon className="h-6 w-6" />
-                  <span className="hidden md:block font-semibold">{user.name}</span>
+                  <span className="hidden md:block font-semibold">
+                    {user.name}
+                  </span>
                   <span className="hidden md:block text-xs text-cyan-200">
                     ({getRoleDisplayName(user.role)})
                   </span>
@@ -205,6 +218,7 @@ const Navbar: React.FC = () => {
                   </div>
                 )}
               </div>
+              <LanguageSelector />
             </div>
           ) : (
             <div className="flex items-center space-x-4">
@@ -214,20 +228,37 @@ const Navbar: React.FC = () => {
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
               >
-                {mobileOpen ? <X className="h-7 w-7"/> : <Menu className="h-7 w-7"/>}
+                {mobileOpen ? (
+                  <X className="h-7 w-7" />
+                ) : (
+                  <Menu className="h-7 w-7" />
+                )}
               </button>
               <div className="flex items-center gap-2 rounded-lg p-1 bg-cyan-800/40 border border-cyan-300/60">
                 <Link href="/login" className="relative">
-                  <span className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname==='/login' ? 'bg-white text-cyan-900 shadow-sm' : 'text-cyan-100 hover:text-white'}`}>
+                  <span
+                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${
+                      pathname === "/login"
+                        ? "bg-white text-cyan-900 shadow-sm"
+                        : "text-cyan-100 hover:text-white"
+                    }`}
+                  >
                     Login
                   </span>
                 </Link>
                 <Link href="/register" className="relative">
-                  <span className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname==='/register' ? 'bg-white text-cyan-900 shadow-sm' : 'text-cyan-100 hover:text-white'}`}>
+                  <span
+                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${
+                      pathname === "/register"
+                        ? "bg-white text-cyan-900 shadow-sm"
+                        : "text-cyan-100 hover:text-white"
+                    }`}
+                  >
                     Sign up
                   </span>
                 </Link>
               </div>
+              <LanguageSelector />
             </div>
           )}
         </div>
@@ -236,12 +267,48 @@ const Navbar: React.FC = () => {
       {mobileOpen && (
         <div className="hidden max-[900px]:block border-t border-cyan-300/40 bg-gradient-to-b from-cyan-700 to-cyan-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1">
-            <Link href="/" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Home</Link>
-            <Link href="/about" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">About</Link>
-            <Link href="/services" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Services</Link>
-            <Link href="/clients" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Our Clients</Link>
-            <Link href="/jobs" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Jobs</Link>
-            <Link href="/contact" onClick={()=>setMobileOpen(false)} className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30">Contact</Link>
+            <Link
+              href="/"
+              onClick={() => setMobileOpen(false)}
+              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+            >
+              Home
+            </Link>
+            <Link
+              href="/about"
+              onClick={() => setMobileOpen(false)}
+              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+            >
+              About
+            </Link>
+            <Link
+              href="/services"
+              onClick={() => setMobileOpen(false)}
+              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+            >
+              Services
+            </Link>
+            <Link
+              href="/clients"
+              onClick={() => setMobileOpen(false)}
+              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+            >
+              Our Clients
+            </Link>
+            <Link
+              href="/jobs"
+              onClick={() => setMobileOpen(false)}
+              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+            >
+              Jobs
+            </Link>
+            <Link
+              href="/contact"
+              onClick={() => setMobileOpen(false)}
+              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+            >
+              Contact
+            </Link>
           </div>
         </div>
       )}

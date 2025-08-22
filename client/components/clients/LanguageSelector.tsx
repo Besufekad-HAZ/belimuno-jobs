@@ -1,22 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 
-const LanguageSelector: React.FC = () => {
+const LanguageSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const locale = useLocale();
   const router = useRouter();
 
-  // Map language codes to their full names
   const languages = {
     en: "English",
-    am: "Amharic",
-    om: "Oromo",
-    ti: "Tigrinya",
+    am: "አማርኛ",
+    om: "Oromoo",
+    ti: "ትግሪኛ",
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const toggleDropdown = () => {
     setIsOpen((prev) => !prev);
@@ -28,9 +44,9 @@ const LanguageSelector: React.FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <div
-        className="flex items-center bg-[#fff] text-[#6B6B6B] px-2 py-1 rounded-lg cursor-pointer"
+        className="flex items-center bg-white text-cyan-700 px-2 py-1 rounded-lg cursor-pointer"
         onClick={toggleDropdown}
       >
         <span>{languages[locale as keyof typeof languages]}</span>
@@ -51,11 +67,11 @@ const LanguageSelector: React.FC = () => {
       </div>
 
       {isOpen && (
-        <ul className="absolute mt-2 w-[100px] bg-gray-800 text-white rounded-lg shadow-lg">
+        <ul className="absolute mt-2 bg-cyan-700 text-white rounded-lg shadow-lg">
           {Object.entries(languages).map(([code, name]) => (
             <li
               key={code}
-              className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
+              className="px-4 py-2 hover:bg-cyan-800 cursor-pointer border-b border-cyan-800 last:border-b-0"
               onClick={() => handleLanguageChange(code)}
             >
               {name}
