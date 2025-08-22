@@ -98,5 +98,109 @@
       "linkedin": "LinkedIn",
       "twitter": "Twitter"
     }
+  },
+  "AboutPage": {
+    "hero": {
+      "title": "About Belimuno",
+      "subtitle": "HR Outsourcing Solution - Connecting talent with opportunities across Ethiopia since 2011",
+      "motto": "Work Smarter Not Harder!"
+    },
+    "executiveSummary": {
+      "title": "Executive Summary",
+      "content": {
+        "part1": "Belimuno HR outsourcing solution was established in 2011 as Belimuno recruiting service to provide manpower outsourcing services. Since then it has been outsourcing security guards, cleaners and construction workers for various renowned organizations. During its course of operation, Belimuno expanded its services to include professional manpower supply, consultancy and HR training services which in turn made it improve its name to Belimuno HR outsourcing solution.",
+        "part2": "The company currently has an annual turnover of about 200 million birr and is one of the fast growing firms in the sector. Its clients include international NGOs like WFP, NRS and FHI; International construction firms like China Genzuba group, Dong Fang electrics, Kalpataru group and Alec fitout engineering. Belimuno is currently managing over 3000 employees for 36 organizations."
+      }
+    },
+    "visionMissionValues": {
+      "vision": {
+        "title": "Vision",
+        "content": "To be the most reliable human resource outsourcing service providers and trusted partners through staffing a tailored to fit manpower to our clients."
+      },
+      "mission": {
+        "title": "Mission",
+        "content": "Searching, refining and staffing professional and non-professional manpower where they best fit and consult our clients with ideas leading them to success."
+      },
+      "values": {
+        "title": "Values",
+        "content": "Built on integrity, reliability, and innovation - we deliver excellence through our core values that guide every decision and action.",
+        "sectionTitle": "Our Core Values",
+        "1": {
+          "title": "Adhocracy",
+          "description": "Our flexible management system enables us hire tailored to fit workforce"
+        },
+        "2": {
+          "title": "Reliability",
+          "description": "We always strive to keep what we promised"
+        },
+        "3": {
+          "title": "Trustworthy",
+          "description": "We are devoted to be your trusted partners"
+        },
+        "4": {
+          "title": "Integrity",
+          "description": "We promise only what we deliver and we can deliver on every promise"
+        },
+        "5": {
+          "title": "Specialty",
+          "description": "We are seasoned professionals continuously educating ourselves, ready for future challenges"
+        },
+        "6": {
+          "title": "Technicality",
+          "description": "We believe every challenge has unique solution and technically deal with each accordingly"
+        },
+        "7": {
+          "title": "Incorruptibility",
+          "description": "Never involved and will never in fraudulent acts"
+        },
+        "8": {
+          "title": "Creativity",
+          "description": "We are always looking for new ways to enhance our customers' satisfaction"
+        }
+      }
+    },
+    "services": {
+      "title": "Our Services",
+      "1": {
+        "title": "Manpower Supply",
+        "description": "Professional manpower supply with a well-developed database and experienced HR professionals who can recruit the best talent for our clients."
+      },
+      "2": {
+        "title": "Manpower Outsourcing",
+        "description": "Comprehensive outsourcing services including cleaners, security guards, construction crews, and fleet management professionals for over 3000 employees."
+      },
+      "3": {
+        "title": "HR Consultancy",
+        "description": "Human resource consultancy services including assessment in the selection process as well as training & development for various business organizations."
+      }
+    },
+    "team": {
+      "title": "Our Team",
+      "description": "BELIMUNO is divided into three main departments: administration and finance, human resources, and outsourced service management. Each department handles administrative tasks, procurements, and financial activities, while the outsourced service management department manages outsourced staff and projects."
+    },
+    "clients": {
+      "title": "Our Clients",
+      "description": "BELIMUNO Human outsource solution is one of the leading companies in the industry. It has been operating in the field since 2012 and served more than fifty international, business, and non-governmental organizations.",
+      "viewButton": "View Our Clients"
+    },
+    "cta": {
+      "title": "Ready to Work with Us?",
+      "subtitle": "\"The only way to do great work is to love what you do. And we Love what we do! That's why we say come to Us.\"",
+      "buttons": {
+        "contact": "📞 Get In Touch",
+        "jobs": "💼 View Job Opportunities"
+      },
+      "contact": {
+        "email": {
+          "title": "Email Us"
+        },
+        "telegram": {
+          "title": "Telegram"
+        },
+        "phone": {
+          "title": "Call Us"
+        }
+      }
+    }
   }
 }

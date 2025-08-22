@@ -98,5 +98,109 @@
       "linkedin": "Linkediinii",
       "twitter": "Tiwiterii"
     }
+  },
+  "AboutPage": {
+    "hero": {
+      "title": "Waa'ee Belimuno",
+      "subtitle": "Furmaata Hiree HRaa - Qophiiwwan carraawwan waliin 2011 irraa Itoophiyaa guutuutti walqunnamsiisu",
+      "motto": "Hojii Garaan Hojjadhu, Hinqabaanu Hojii Cimaa Hojjadhu!"
+    },
+    "executiveSummary": {
+      "title": "Xiyyeeffannaa Mudataa",
+      "content": {
+        "part1": "Furmaata Hiree HRaa Belimuno 2011tti akka tajaajila hiree galii Belimuno taasifamee tajaajila hiree namaa kennuuf. Yeroo sanirraa kaasee dorgommii nageenyaa, qulqulleessitoota fi hojjettoota ijaarsaa dhaala gosa gosa qabduuf kennuu itti fufte. Yeroo hojii ishee keessatti, Belimuno tajaajila ishee hiree mijataa, gorsaa fi tajaajila barnoota HRii dabalatee bal'isitee, akkasumas maqaa ishee Furmaata Hiree HRaa Belimuno jedhuuf jijjiiramte.",
+        "part2": "Kaampaaninni amma kana gatii waggaa waggaa Birrii miliyoona 200 qaba. Kaampaanota daldalaa sectorra keessatti dagaagaa jiran keessaa ishee tokko. Maamiloonni ishee NGOwwan addunyaa kan akka WFP, NRS fi FHI; Kaampaanota ijaarsaa addunyaa kan akka China Genzuba group, Dong Fang electrics, Kalpataru group fi Alec fitout engineering dabalata. Amma Belimuno hojjettoota 3000 ol dhaala gosa 36 tiif bulchiittii jirti."
+      }
+    },
+    "visionMissionValues": {
+      "vision": {
+        "title": "Arggama",
+        "content": "Akka tajaajila hiree namaa irratti hirkatteenya guddaa qabanii fi hirmaattoota amanamaa ta'anii, hiree namaa maamilota keenyaaf kan galmaan ga'u kennu ta'uudhaan beekamuu."
+      },
+      "mission": {
+        "title": "Ergaa",
+        "content": "Hiree mijataa fi hiree hinmijatinne barbaachisu isaaniif barbaachisaa jiran barbaaduu, qulqulleessuu fi kennuu, akkasumas maamilota keenyaaf yaadawwan milkaa'inaatti geessisan gorsuu."
+      },
+      "values": {
+        "title": "Qoqqoodama",
+        "content": "Amantaa, irratti hirkatteenya, fi ijaarsa irratti ijaaramee - qoqqoodama keenya giddugaleessaa murteessaa hundaa fi dalagaa hundaa qajeelchisan keessaa milkaa'ina kennina.",
+        "sectionTitle": "Qoqqoodama Giddugaleessaa Keenya",
+        "1": {
+          "title": "Adhocracy",
+          "description": "Sirni bulchiinsa keenya laaffisaa hiree namaa kan galmaan ga'u hiree gochuuf nu dandaamsisa"
+        },
+        "2": {
+          "title": "Irratti Hirkatteenya",
+          "description": "Yeroo hundaa waadaa keenya eeguuf carraaqna"
+        },
+        "3": {
+          "title": "Amanamaa",
+          "description": "Hirmaattoota keessan amanamaa ta'uuf kan kennine taane"
+        },
+        "4": {
+          "title": "Amantaa",
+          "description": "Waan nuti kennu qofa waadaa goona, waadaa hundaa kennachuu danda'ana"
+        },
+        "5": {
+          "title": "Xiyyeeffannaa",
+          "description": "Nuti hojjettoota beekumsa qaban taane, ofii keenya barsiisuu itti fufna, rikkanaan dabran daandii qophaa'aa taane"
+        },
+        "6": {
+          "title": "Teknikaalaa",
+          "description": "Rikkanaan hundi furmaata addaa qaba jedhee amanna, hundaa teknikaaan haala itti gaafatamutti deemsina"
+        },
+        "7": {
+          "title": "Qulqullina",
+          "description": "Hanga ammaatti dalagaa gatii-dhokataa keessatti hinargamne, argachuufis hinfe'ne"
+        },
+        "8": {
+          "title": "Ijaarsa",
+          "description": "Yeroo hundaa karaa haaraa qo'annoowwan maamilota keenyaa fooyya'isuuf barbaadna"
+        }
+      }
+    },
+    "services": {
+      "title": "Tajaajila Keenya",
+      "1": {
+        "title": "Kennuu Hiree Namaa",
+        "description": "Kennuu hiree namaa mijataa database fooyya'ifamaa qabuun fi hojjettoota HRii beekumsa qaban hiree namaa sirrii ta'e maamilota keenyaaf barbaadu."
+      },
+      "2": {
+        "title": "Kennuu Ala Hiree Namaa",
+        "description": "Tajaajila kennuu ala guutuu, qulqulleessitoota, dorgommii nageenyaa, hirmaata ijaarsaa, fi hojjettoota bulchiinsa baay'inaa hojjettoota 3000 ol dabalate."
+      },
+      "3": {
+        "title": "Gorsaa HRii",
+        "description": "Tajaajila gorsaa hiree namaa, qo'annoowwan filannaa fi barnoota fi fooyya'insa kaampaanota daldalaa gosa gosaaf dabalate."
+      }
+    },
+    "team": {
+      "title": "Hirmaata Keenya",
+      "description": "BELIMUNO qoqaawaalee gurguddoo sadanitti qooddame: bulchinsa fi herrega, hiree namaa, fi bulchiinsa tajaajilaa ala. Qoqaawaan hundi dalagawwan bulchinsaa, bitaa, fi dalagawwan herregaa hojjetu, yeroo qoqaawaan bulchiinsa tajaajilaa alaas hojjettoota alaa fi pirojeektota bulchu."
+    },
+    "clients": {
+      "title": "Maamilota Keenya",
+      "description": "Furmaata Hiree Namaa BELIMUNO kaampaanota gurguddoo industry keessaa tokko. 2012 irraa iddoo kana hojii hojjechaa jira, dhaala NGOwwan addunyaa, daldalaa, fi NGOwwan hin-govranne shantama ol ta'ee tajaajilte.",
+      "viewButton": "Maamilota Keenya Ilaali"
+    },
+    "cta": {
+      "title": "Nu Waliin Hojjechuuf Ready Taattaa?",
+      "subtitle": "\"Karaa hojii gaarii hojjechuuf qofatu jira: waan hojjettu jaaladhu. Nutis waan nuti hojjannu jaalanna! Kanaaf 'Nu Biraa Kottaa' jedhana.\"",
+      "buttons": {
+        "contact": "📞 Nu Qunnamaa",
+        "jobs": "💼 Carraawwan Hojii Ilaali"
+      },
+      "contact": {
+        "email": {
+          "title": "Imeelii Nu Ergaa"
+        },
+        "telegram": {
+          "title": "Telegram"
+        },
+        "phone": {
+          "title": "Nu Bilbilaa"
+        }
+      }
+    }
   }
 }
