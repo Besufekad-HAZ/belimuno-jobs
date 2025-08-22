@@ -202,5 +202,49 @@
         }
       }
     }
+  },
+  "ServicesPage": {
+    "hero": {
+      "title": "Our Services",
+      "subtitle": "Flexible HR outsourcing built for Ethiopia's leading NGOs, construction and service companies."
+    },
+    "services": {
+      "1": {
+        "title": "Manpower Supply",
+        "description": "Professional and non‑professional staffing with a deep candidate network and rigorous vetting.",
+        "icon": "Users"
+      },
+      "2": {
+        "title": "Manpower Outsourcing",
+        "description": "End‑to‑end outsourcing of cleaners, security guards, construction and fleet crews, with supervision.",
+        "icon": "ShieldCheck"
+      },
+      "3": {
+        "title": "Recruitment for Employers",
+        "description": "Targeted hiring campaigns, assessments and onboarding coordination for local and international firms.",
+        "icon": "Briefcase"
+      },
+      "4": {
+        "title": "HR Consultancy",
+        "description": "Policies, org design, compensation reviews, performance systems and compliance advisory.",
+        "icon": "Building2"
+      },
+      "5": {
+        "title": "Training & Development",
+        "description": "Soft skills and technical trainings for security, cleaning, HSE, site operations and customer service.",
+        "icon": "GraduationCap"
+      },
+      "6": {
+        "title": "Project-based Crews",
+        "description": "Rapid mobilization of skilled labor for construction, logistics and facilities management projects.",
+        "icon": "Wrench"
+      }
+    }
+  },
+  "ClientsPage": {
+    "hero": {
+      "title": "Our Clients",
+      "subtitle": "We have been trusted by international NGOs and leading construction companies since 2011."
+    }
   }
 }

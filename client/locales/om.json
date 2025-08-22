@@ -202,5 +202,49 @@
         }
       }
     }
+  },
+  "ServicesPage": {
+    "hero": {
+      "title": "Tajaajila Keenya",
+      "subtitle": "Hiree HRaa laaffisaa kaampaanota gurguddoo NGO, ijaarsaa fi tajaajilaa Itoophiyaa kan irratti ijaarame."
+    },
+    "services": {
+      "1": {
+        "title": "Kennuu Hiree Namaa",
+        "description": "Hiree mijataa fi hinmijatinne kennuu, naannoo filatamaa fi qorannoo cimaa qabu.",
+        "icon": "Users"
+      },
+      "2": {
+        "title": "Kennuu Ala Hiree Namaa",
+        "description": "Kennuu ala guutuu qulqulleessitootaa, dorgommii nageenyaa, ijaarsaa fi bulchiinsa baay'inaa, eegumsa waliin.",
+        "icon": "ShieldCheck"
+      },
+      "3": {
+        "title": "Hiree Hojjetaaf Barbaaduu",
+        "description": "Kaampaanota biyyaa fi addunyaaaf kaampiyinii hiree, qorannoo fi walqunnamsiinsa galmaa'isaa.",
+        "icon": "Briefcase"
+      },
+      "4": {
+        "title": "Gorsaa HRii",
+        "description": "Imaannaa, ijaarsa dhaabbataa, qorannoo kaffaltii, sirna dalagaa fi gorsa faallessummaa.",
+        "icon": "Building2"
+      },
+      "5": {
+        "title": "Barumsaa & Fooyya'insa",
+        "description": "Barumsa qaamaa fi teknikalaa nageenya, qulqulleessuu, HSE, dalagaa iddoo fi tajaajila maamilaa.",
+        "icon": "GraduationCap"
+      },
+      "6": {
+        "title": "Hirmaata Pirojeektii",
+        "description": "Kaachumsa ariifaa hiree qophaa'aa pirojeektota ijaarsaa, lojistiksii fi bulchiinsa qopheessuu.",
+        "icon": "Wrench"
+      }
+    }
+  },
+  "ClientsPage": {
+    "hero": {
+      "title": "Maamilota Keenya",
+      "subtitle": "2011 irraa kaasee NGOwwan addunyaa fi kaampaanota ijaarsaa gurguddoon nu amananiiru."
+    }
   }
 }
