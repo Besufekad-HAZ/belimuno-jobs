@@ -4,8 +4,9 @@ import "./globals.css";
 import "./fonts.css";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import {NextIntlClientProvider, hasLocale} from 'next-intl';
+import {notFound} from 'next/navigation';
+import {routing} from '@/i18n/routing';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,20 +25,22 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  params: { locale },
-}: Readonly<{
+  params
+}: {
   children: React.ReactNode;
-  params: { locale: string };
-}>) {
-  const messages = await getMessages();
-
+  params: Promise<{locale: string}>;
+}) {
+  // Ensure that the incoming `locale` is valid
+  const {locale} = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+ 
   return (
     <html lang={locale}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <NextIntlClientProvider messages={messages}>
-          <Navbar />    
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <NextIntlClientProvider>
+          <Navbar />
             {children}
           <Footer />
         </NextIntlClientProvider>
