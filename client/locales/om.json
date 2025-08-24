@@ -599,5 +599,46 @@
         }
       }
     }
+  },
+  "LoginPage": {
+    "header": {
+      "title": "Baga Nagaan Dhuftan",
+      "subtitle": "Seenuu",
+      "brandName": "Belimuno Jobs",
+      "noAccount": {
+        "text": "Akkaawuntii hin qabduu?",
+        "link": "Hunda kanas hojjedhu"
+      }
+    },
+    "tabs": {
+      "login": "Seenuu",
+      "signup": "Galmaa'i"
+    },
+    "form": {
+      "fields": {
+        "email": "Akaawuntii Imeelii",
+        "password": "Jecha Iccitii"
+      },
+      "buttons": {
+        "submit": {
+          "default": "Akaawuntii keetti seenuu",
+          "loading": "Seenuu keessatti..."
+        }
+      },
+      "divider": "Yookiin itti fufu"
+    },
+    "testAccounts": {
+      "title": "Akaawuntii Qormaata",
+      "info": {
+        "title": "Seenuu Ariifaa:",
+        "description": "Foormii akka otomaatii ta'een guutuuf akaawuntii qormaata irraa ta'ee tokko tuqi. Mirkaneessi",
+        "command": "node seedTestData.js",
+        "location": "dirrektoraa serverii keessatti jalqabaa hojjedhu."
+      }
+    },
+    "errors": {
+      "default": "Seenuu hin milkaa'inne",
+      "googleSignIn": "Seenuu Google hin milkaa'inne. Yoo haaraa ta'ee, fayyadamaa Galmaa'i."
+    }
   }
 }

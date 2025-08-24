@@ -599,5 +599,46 @@
         }
       }
     }
+  },
+  "LoginPage": {
+    "header": {
+      "title": "እንኳን ደህና መጡ",
+      "subtitle": "ወደ",
+      "brandName": "ቤሊሙኖ ስራዎች",
+      "noAccount": {
+        "text": "መለያ የሎትም?",
+        "link": "አዲስ ይፍጠሩ"
+      }
+    },
+    "tabs": {
+      "login": "ግባ",
+      "signup": "ተመዝገቢ"
+    },
+    "form": {
+      "fields": {
+        "email": "የኢሜይል አድራሻ",
+        "password": "የይለፍ ቃል"
+      },
+      "buttons": {
+        "submit": {
+          "default": "ወደ መለያዎ ይግቡ",
+          "loading": "በመግባት ላይ..."
+        }
+      },
+      "divider": "ወይም በመቀጠል"
+    },
+    "testAccounts": {
+      "title": "የሙከራ መለያዎች",
+      "info": {
+        "title": "ፈጣን መግቢያ:",
+        "description": "በሙከራ ማረጋገጫዎች ለመግባት ከላይ ካሉት ማንኛውም የሙከራ መለያ ላይ ጠቅ ያድርጉ። በመጀመሪያ",
+        "command": "node seedTestData.js",
+        "location": "በሰርቨር ማውጫ ውስጥ ማስጀመሮን ያረጋግጡ።"
+      }
+    },
+    "errors": {
+      "default": "ግባት አልተሳካም",
+      "googleSignIn": "በጉግል ግባት አልተሳካም። አዲስ ከሆኑ እባክዎ ይመዝገቡ።"
+    }
   }
 }

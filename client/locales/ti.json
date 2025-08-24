@@ -599,5 +599,46 @@
         }
       }
     }
+  },
+  "LoginPage": {
+    "header": {
+      "title": "እንቋዕ ብደሓን መጻእኩም",
+      "subtitle": "ናብ",
+      "brandName": "ቤሊሙኖ ዮብስ",
+      "noAccount": {
+        "text": "ሕሳብ የለካን?",
+        "link": "ሓድሽ ፍጠር"
+      }
+    },
+    "tabs": {
+      "login": "እምነት ኣእትው",
+      "signup": "ተመዝገብ"
+    },
+    "form": {
+      "fields": {
+        "email": "ናይ ኢ-መይል ኣድራሻ",
+        "password": "የይለፍ ቃል"
+      },
+      "buttons": {
+        "submit": {
+          "default": "ናብ ሕሳብካ እምነት ኣእትው",
+          "loading": "እምነት ኣእትዉ ኣሎ..."
+        }
+      },
+      "divider": "ወይ ብምቅጻል"
+    },
+    "testAccounts": {
+      "title": "ናይ ፈተና ሕሳባት",
+      "info": {
+        "title": "ቅልጡፍ እምነት ኣእትው:",
+        "description": "ብኡብኡ ናይ ፈተና ምልክታት ንምምላእ ካብ ላዕሊ ዘሎ ነንሕድሕድ ናይ ፈተና ሕሳብ ጠውቑ። ኣረጋግጹ",
+        "command": "node seedTestData.js",
+        "location": "ቀዳምነት ኣብ ማውጫ ሰርቨር ከተፍጽሙ።"
+      }
+    },
+    "errors": {
+      "default": "እምነት ኣእትው ኣይተኻኽለን",
+      "googleSignIn": "ብጉግል እምነት ኣእትው ኣይተኻኽለን። ሓድሽ እንተድኣኻ በጃኻ ተመዝገብ።"
+    }
   }
 }

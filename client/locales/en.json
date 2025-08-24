@@ -599,5 +599,46 @@
         }
       }
     }
+  },
+  "LoginPage": {
+    "header": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to",
+      "brandName": "Belimuno Jobs",
+      "noAccount": {
+        "text": "Don't have an account?",
+        "link": "Create one here"
+      }
+    },
+    "tabs": {
+      "login": "Login",
+      "signup": "Sign up"
+    },
+    "form": {
+      "fields": {
+        "email": "Email address",
+        "password": "Password"
+      },
+      "buttons": {
+        "submit": {
+          "default": "Sign in to your account",
+          "loading": "Signing in..."
+        }
+      },
+      "divider": "Or continue with"
+    },
+    "testAccounts": {
+      "title": "Test Accounts",
+      "info": {
+        "title": "Quick Login:",
+        "description": "Click any test account above to auto-fill the form with demo credentials. Make sure to run",
+        "command": "node seedTestData.js",
+        "location": "in the server directory first."
+      }
+    },
+    "errors": {
+      "default": "Login failed",
+      "googleSignIn": "Google sign-in failed. If you are new, please use Sign up."
+    }
   }
 }
