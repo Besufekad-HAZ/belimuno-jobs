@@ -640,5 +640,63 @@
       "default": "እምነት ኣእትው ኣይተኻኽለን",
       "googleSignIn": "ብጉግል እምነት ኣእትው ኣይተኻኽለን። ሓድሽ እንተድኣኻ በጃኻ ተመዝገብ።"
     }
+  },
+  "RegisterPage": {
+    "header": {
+      "title": "ሕሳብካ ፍጠር",
+      "subtitle": {
+        "text": "ወይ",
+        "link": "ናብ እቲ ዘሎካ ሕሳብ እምነት ኣእትው"
+      }
+    },
+    "tabs": {
+      "login": "እምነት ኣእትው",
+      "signup": "ተመዝገብ"
+    },
+    "form": {
+      "fields": {
+        "name": "ምሉእ ስም",
+        "email": "ናይ ኢ-መይል ኣድራሻ",
+        "role": {
+          "label": "ሚና",
+          "options": {
+            "worker": "ሰራሕተኛ",
+            "client": "ደንበኛ"
+          }
+        },
+        "phone": "ተሌፎን",
+        "location": "ኣድራሻ",
+        "bio": {
+          "label": "ዳርጋ ብዛዕባኻ",
+          "placeholder": "ብዛዕባኻ ንገረና..."
+        },
+        "worker": {
+          "skills": {
+            "label": "ብልክዕታት (ብኮማ ዝተፈላለየ)",
+            "placeholder": "ንኣብነት: JavaScript, React, Node.js"
+          },
+          "experience": "ተመክሮ ስራሕ (ብዓመታት)",
+          "hourlyRate": "ዋጋ ሰዓት (ብር)"
+        },
+        "client": {
+          "company": "ስም ኩባንያ",
+          "industry": "ኢንዱስትሪ",
+          "website": "ወብሳይት"
+        },
+        "password": "የይለፍ ቃል",
+        "confirmPassword": "የይለፍ ቃል ኣረጋግጽ"
+      },
+      "buttons": {
+        "submit": {
+          "default": "ሕሳብ ፍጠር",
+          "loading": "ሕሳብ እናፈጠርና ኣሎ..."
+        }
+      }
+    },
+    "errors": {
+      "passwordMismatch": "የይለፍ ቃላት ኣይመሳሰሉን",
+      "default": "ምዝገባ ኣይተኻኽለን",
+      "googleSignUp": "ብጉግል ምዝገባ ኣይተኻኽለን። በዚ ኢ-መይል ሕሳብ እንተለካ፡ በጃኻ እምነት ኣእትው።"
+    }
   }
 }

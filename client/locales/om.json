@@ -640,5 +640,63 @@
       "default": "Seenuu hin milkaa'inne",
       "googleSignIn": "Seenuu Google hin milkaa'inne. Yoo haaraa ta'ee, fayyadamaa Galmaa'i."
     }
+  },
+  "RegisterPage": {
+    "header": {
+      "title": "Akaawuntii Keetii Uumi",
+      "subtitle": {
+        "text": "Yookiin",
+        "link": "akaawuntii kee jirutti seenuu"
+      }
+    },
+    "tabs": {
+      "login": "Seenuu",
+      "signup": "Galmaa'i"
+    },
+    "form": {
+      "fields": {
+        "name": "Maqaa Guutuu",
+        "email": "Akaawuntii Imeelii",
+        "role": {
+          "label": "Dhuunfa",
+          "options": {
+            "worker": "Hojjetaa (Hojjetaa Free)",
+            "client": "Maamilaa (Hojjetaa Hire godhu)"
+          }
+        },
+        "phone": "Bilbila",
+        "location": "Bakka",
+        "bio": {
+          "label": "Seenaa",
+          "placeholder": "Waa'ee kee nu himi..."
+        },
+        "worker": {
+          "skills": {
+            "label": "Dandeettii (coma waliin adda baafame)",
+            "placeholder": "fak. JavaScript, React, Node.js"
+          },
+          "experience": "Waggaa Beekumsaa",
+          "hourlyRate": "Gatii Sa'aatii (ETB)"
+        },
+        "client": {
+          "company": "Maqaa Kaampaanii",
+          "industry": "Industry",
+          "website": "Website"
+        },
+        "password": "Jecha Iccitii",
+        "confirmPassword": "Jecha Iccitii Mirkaneessi"
+      },
+      "buttons": {
+        "submit": {
+          "default": "Akaawuntii Uumi",
+          "loading": "Akaawuntii uumuu keessatti..."
+        }
+      }
+    },
+    "errors": {
+      "passwordMismatch": "Jechoota icciitii wal hin ga'u",
+      "default": "Galmeessuu hin milkaa'inne",
+      "googleSignUp": "Galmeessuu Google hin milkaa'inne. Yoo akaawuntii imeelii kanaa qabaatte, fayyadamaa Seenuu."
+    }
   }
 }

@@ -612,7 +612,7 @@
     },
     "tabs": {
       "login": "ግባ",
-      "signup": "ተመዝገቢ"
+      "signup": "ተመዝገብ"
     },
     "form": {
       "fields": {
@@ -639,6 +639,64 @@
     "errors": {
       "default": "ግባት አልተሳካም",
       "googleSignIn": "በጉግል ግባት አልተሳካም። አዲስ ከሆኑ እባክዎ ይመዝገቡ።"
+    }
+  },
+  "RegisterPage": {
+    "header": {
+      "title": "መለያዎን ይፍጠሩ",
+      "subtitle": {
+        "text": "ወይም",
+        "link": "ባለዎት መለያ ይግቡ"
+      }
+    },
+    "tabs": {
+      "login": "ግባ",
+      "signup": "ተመዝገብ"
+    },
+    "form": {
+      "fields": {
+        "name": "ሙሉ ስም",
+        "email": "የኢሜይል አድራሻ",
+        "role": {
+          "label": "ሚና",
+          "options": {
+            "worker": "ሰራተኛ",
+            "client": "ቀጣሪ"
+          }
+        },
+        "phone": "ስልክ",
+        "location": "አድራሻ",
+        "bio": {
+          "label": "ስለራስዎ",
+          "placeholder": "ስለራስዎ ይንገሩን..."
+        },
+        "worker": {
+          "skills": {
+            "label": "ችሎታዎች (በኮማ ይለዩ)",
+            "placeholder": "ለምሳሌ: JavaScript, React, Node.js"
+          },
+          "experience": "የስራ ልምድ (በዓመታት)",
+          "hourlyRate": "ዋጋ በሰዓት (ብር)"
+        },
+        "client": {
+          "company": "የኩባንያ ስም",
+          "industry": "ኢንዱስትሪ",
+          "website": "ዌብሳይት"
+        },
+        "password": "የይለፍ ቃል",
+        "confirmPassword": "የይለፍ ቃል አረጋግጥ"
+      },
+      "buttons": {
+        "submit": {
+          "default": "መለያ ይፍጠሩ",
+          "loading": "መለያ በመፍጠር ላይ..."
+        }
+      }
+    },
+    "errors": {
+      "passwordMismatch": "የይለፍ ቃሎች አይጣጣሙም",
+      "default": "ምዝገባ አልተሳካም",
+      "googleSignUp": "በጉግል ምዝገባ አልተሳካም። በዚህ ኢሜይል መለያ ካለዎት እባክዎ ይግቡ።"
     }
   }
 }

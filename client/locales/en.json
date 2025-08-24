@@ -640,5 +640,63 @@
       "default": "Login failed",
       "googleSignIn": "Google sign-in failed. If you are new, please use Sign up."
     }
+  },
+  "RegisterPage": {
+    "header": {
+      "title": "Create your account",
+      "subtitle": {
+        "text": "Or",
+        "link": "sign in to your existing account"
+      }
+    },
+    "tabs": {
+      "login": "Login",
+      "signup": "Sign up"
+    },
+    "form": {
+      "fields": {
+        "name": "Full Name",
+        "email": "Email address",
+        "role": {
+          "label": "Role",
+          "options": {
+            "worker": "Worker (Freelancer)",
+            "client": "Client (Employer)"
+          }
+        },
+        "phone": "Phone",
+        "location": "Location",
+        "bio": {
+          "label": "Bio",
+          "placeholder": "Tell us about yourself..."
+        },
+        "worker": {
+          "skills": {
+            "label": "Skills (comma-separated)",
+            "placeholder": "e.g. JavaScript, React, Node.js"
+          },
+          "experience": "Years of Experience",
+          "hourlyRate": "Hourly Rate (ETB)"
+        },
+        "client": {
+          "company": "Company Name",
+          "industry": "Industry",
+          "website": "Website"
+        },
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "buttons": {
+        "submit": {
+          "default": "Create Account",
+          "loading": "Creating account..."
+        }
+      }
+    },
+    "errors": {
+      "passwordMismatch": "Passwords do not match",
+      "default": "Registration failed",
+      "googleSignUp": "Google sign-up failed. If you already have an account with this email, please use Login."
+    }
   }
 }
