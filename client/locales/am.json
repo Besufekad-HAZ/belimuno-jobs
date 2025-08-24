@@ -38,7 +38,7 @@
     "stats": {
       "title": "የፕላትፎርም ስታቲስቲክስ",
       "subtitle": "በመላው ኢትዮጵያ የምንፈጥረውን ተጽእኖ ይመልከቱ",
-      "activeUsers": "ንቃት ያላቸው ተጠቃሚዎች",
+      "activeUsers": "ክፍት ተጠቃሚዎች",
       "jobsPosted": "የቀረቡ ስራዎች",
       "jobsCompleted": "የተጠናቀቁ ስራዎች",
       "successRate": "የስኬት መጠን"
@@ -697,6 +697,97 @@
       "passwordMismatch": "የይለፍ ቃሎች አይጣጣሙም",
       "default": "ምዝገባ አልተሳካም",
       "googleSignUp": "በጉግል ምዝገባ አልተሳካም። በዚህ ኢሜይል መለያ ካለዎት እባክዎ ይግቡ።"
+    }
+  },
+  "OutsourceAdminDashboard": {
+    "header": {
+      "title": "የሶስተኛ ወገን አስተዳዳሪ ዳሽቦርድ",
+      "subtitle": "ፕሮጀክቶችን፣ ቀጣሪዎችን እና የንግድ ስራዎችን ያስተዳድሩ",
+      "buttons": {
+        "manageProjects": "ፕሮጀክቶችን ያስተዳድሩ",
+        "clientManagement": "የቀጣሪዎች አስተዳደር"
+      }
+    },
+    "stats": {
+      "totalClients": {
+        "title": "ጠቅላላ ቀጣሪዎች",
+        "label": "ጠቅላላ ቀጣሪዎች"
+      },
+      "activeProjects": {
+        "title": "ክፍት ፕሮጀክቶች",
+        "label": "ክፍት ፕሮጀክቶች"
+      },
+      "totalRevenue": {
+        "title": "ጠቅላላ ገቢ",
+        "label": "ጠቅላላ ገቢ"
+      },
+      "monthlyRevenue": {
+        "title": "ወርሃዊ ገቢ",
+        "label": "ወርሃዊ ገቢ"
+      }
+    },
+    "metrics": {
+      "clientSatisfaction": {
+        "title": "የቀጣሪዎች እርካታ",
+        "rating": "ከ5"
+      },
+      "projectSuccess": {
+        "title": "የፕሮጀክት ስኬት መጠን"
+      },
+      "revenueGrowth": {
+        "title": "የገቢ እድገት"
+      }
+    },
+    "projects": {
+      "title": "የቅርብ ጊዜ ፕሮጀክቶች",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "details": {
+        "client": "ቀጣሪ",
+        "progress": "እድገት",
+        "title": "የፕሮጀክት ዝርዝሮች",
+        "assignedWorker": "የተመደበ ሰራተኛ",
+        "deadline": "የመዝጋት ቀን",
+        "budget": "በጀት",
+        "buttons": {
+          "viewDetails": "ዝርዝሮችን ይመልከቱ",
+          "contactClient": "ከደንበኛ ይገናኙ",
+          "generateReport": "ሪፖርት ይፍጠሩ"
+        }
+      },
+      "status": {
+        "completed": "ተጠናቅቋል",
+        "inProgress": "በሂደት ላይ",
+        "assigned": "ተመድቧል",
+        "posted": "ተለጥፏል"
+      }
+    },
+    "clients": {
+      "title": "ከፍተኛ ቀጣሪዎች",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "metrics": {
+        "projects": "ፕሮጀክቶች"
+      }
+    },
+    "operations": {
+      "title": "የንግድ ስራዎች",
+      "buttons": {
+        "clientManagement": "የቀጣሪዎች አስተዳደር",
+        "projectOversight": "የፕሮጀክት ቁጥጥር",
+        "businessAnalytics": "የንግድ ትንታኔ",
+        "financialReports": "የፋይናንስ ሪፖርቶች"
+      }
+    },
+    "keyMetrics": {
+      "title": "መሠረታዊ አባላት",
+      "metrics": {
+        "avgProjectValue": "አማካኝ የፕሮጀክት ዋጋ",
+        "clientRetention": "የቀጣሪዎች መቆየት",
+        "projectCompletionRate": "የፕሮጀክት ማጠናቀቂያ መጠን",
+        "avgProjectDuration": "አማካኝ የፕሮጀክት ቆይታ"
+      }
+    },
+    "recentActivity": {
+      "title": "የቅርብ ጊዜ እንቅስቃሴ"
     }
   }
 }

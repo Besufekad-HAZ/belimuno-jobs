@@ -698,5 +698,96 @@
       "default": "Registration failed",
       "googleSignUp": "Google sign-up failed. If you already have an account with this email, please use Login."
     }
+  },
+  "OutsourceAdminDashboard": {
+    "header": {
+      "title": "Outsourcing Admin Dashboard",
+      "subtitle": "Manage projects, clients, and business operations",
+      "buttons": {
+        "manageProjects": "Manage Projects",
+        "clientManagement": "Client Management"
+      }
+    },
+    "stats": {
+      "totalClients": {
+        "title": "Total Clients",
+        "label": "Total Clients"
+      },
+      "activeProjects": {
+        "title": "Active Projects",
+        "label": "Active Projects"
+      },
+      "totalRevenue": {
+        "title": "Total Revenue",
+        "label": "Total Revenue"
+      },
+      "monthlyRevenue": {
+        "title": "Monthly Revenue",
+        "label": "Monthly Revenue"
+      }
+    },
+    "metrics": {
+      "clientSatisfaction": {
+        "title": "Client Satisfaction",
+        "rating": "out of 5"
+      },
+      "projectSuccess": {
+        "title": "Project Success Rate"
+      },
+      "revenueGrowth": {
+        "title": "Revenue Growth"
+      }
+    },
+    "projects": {
+      "title": "Recent Projects",
+      "viewAll": "View All",
+      "details": {
+        "client": "Client",
+        "progress": "Progress",
+        "title": "Project Details",
+        "assignedWorker": "Assigned Worker",
+        "deadline": "Deadline",
+        "budget": "Budget",
+        "buttons": {
+          "viewDetails": "View Details",
+          "contactClient": "Contact Client",
+          "generateReport": "Generate Report"
+        }
+      },
+      "status": {
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "assigned": "Assigned",
+        "posted": "Posted"
+      }
+    },
+    "clients": {
+      "title": "Top Clients",
+      "viewAll": "View All",
+      "metrics": {
+        "projects": "projects"
+      }
+    },
+    "operations": {
+      "title": "Business Operations",
+      "buttons": {
+        "clientManagement": "Client Management",
+        "projectOversight": "Project Oversight",
+        "businessAnalytics": "Business Analytics",
+        "financialReports": "Financial Reports"
+      }
+    },
+    "keyMetrics": {
+      "title": "Key Metrics",
+      "metrics": {
+        "avgProjectValue": "Avg. Project Value",
+        "clientRetention": "Client Retention",
+        "projectCompletionRate": "Project Completion Rate",
+        "avgProjectDuration": "Avg. Project Duration"
+      }
+    },
+    "recentActivity": {
+      "title": "Recent Activity"
+    }
   }
 }

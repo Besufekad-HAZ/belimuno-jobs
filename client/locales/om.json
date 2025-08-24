@@ -698,5 +698,96 @@
       "default": "Galmeessuu hin milkaa'inne",
       "googleSignUp": "Galmeessuu Google hin milkaa'inne. Yoo akaawuntii imeelii kanaa qabaatte, fayyadamaa Seenuu."
     }
+  },
+  "OutsourceAdminDashboard": {
+    "header": {
+      "title": "Daashbooraa Bulchinsa Ala Tajaajilaa",
+      "subtitle": "Pirojeektota, maamiloota, fi dalagaa daldalaa bulchiisi",
+      "buttons": {
+        "manageProjects": "Pirojeektota Bulchiisi",
+        "clientManagement": "Bulchiinsa Maamilaa"
+      }
+    },
+    "stats": {
+      "totalClients": {
+        "title": "Maamiloota Waliigalaa",
+        "label": "Maamiloota Waliigalaa"
+      },
+      "activeProjects": {
+        "title": "Pirojeektota Hojii Irra Jiran",
+        "label": "Pirojeektota Hojii Irra Jiran"
+      },
+      "totalRevenue": {
+        "title": "Argatta Waliigalaa",
+        "label": "Argatta Waliigalaa"
+      },
+      "monthlyRevenue": {
+        "title": "Argatta Ji'a",
+        "label": "Argatta Ji'a"
+      }
+    },
+    "metrics": {
+      "clientSatisfaction": {
+        "title": "Qo'annoo Maamilaa",
+        "rating": "irraa 5"
+      },
+      "projectSuccess": {
+        "title": "Sadarkaa Milkaa'ina Pirojeektii"
+      },
+      "revenueGrowth": {
+        "title": "Guddina Argattaa"
+      }
+    },
+    "projects": {
+      "title": "Pirojeektota Duraanii",
+      "viewAll": "Hunda Ilali",
+      "details": {
+        "client": "Maamilaa",
+        "progress": "Itti Fufiinsa",
+        "title": "Faallaawwan Pirojeektii",
+        "assignedWorker": "Hojjetaa Kenname",
+        "deadline": "Yeroo Xumuraa",
+        "budget": "Baajeta",
+        "buttons": {
+          "viewDetails": "Faallaawwan Ilali",
+          "contactClient": "Maamilaa Qunnamaa",
+          "generateReport": "Ripoorii Uumi"
+        }
+      },
+      "status": {
+        "completed": "Xumurame",
+        "inProgress": "Hojii Irra Jira",
+        "assigned": "Kenname",
+        "posted": "Maxxanfame"
+      }
+    },
+    "clients": {
+      "title": "Maamiloota Ol'aanaa",
+      "viewAll": "Hunda Ilali",
+      "metrics": {
+        "projects": "pirojeektota"
+      }
+    },
+    "operations": {
+      "title": "Dalagaa Daldalaa",
+      "buttons": {
+        "clientManagement": "Bulchiinsa Maamilaa",
+        "projectOversight": "Ilaalcha Pirojeektii",
+        "businessAnalytics": "Qorannoo Daldalaa",
+        "financialReports": "Ripoorota Qabeenyaa"
+      }
+    },
+    "keyMetrics": {
+      "title": "Meetirika Gurguddoo",
+      "metrics": {
+        "avgProjectValue": "Giddugaleessaa Gatii Pirojeektii",
+        "clientRetention": "Dhaabbannaa Maamilaa",
+        "projectCompletionRate": "Sadarkaa Xumura Pirojeektii",
+        "avgProjectDuration": "Giddugaleessaa Yeroo Pirojeektii"
+      }
+    },
+    "recentActivity": {
+      "title": "Dalaga Duraanii"
+    }
   }
 }
