@@ -491,5 +491,113 @@
         }
       }
     }
+  },
+  "ClientDashboard": {
+    "header": {
+      "title": "Daashbooraa Maamilaa",
+      "subtitle": "Hojiiwwan maxxansaa fi pirojeektota kee bulchiisi",
+      "postJob": "Hojii Haaraa Maxxansii"
+    },
+    "stats": {
+      "totalJobs": {
+        "title": "Hojiiwwan Waliigalaa",
+        "label": "Hojiiwwan Waliigalaa"
+      },
+      "activeJobs": {
+        "title": "Hojii Irra Jira",
+        "label": "Hojii Irra Jira"
+      },
+      "completedJobs": {
+        "title": "Xumurame",
+        "label": "Xumurame"
+      },
+      "totalSpent": {
+        "title": "Waliigalaa Baafame",
+        "label": "Waliigalaa Baafame"
+      },
+      "rating": {
+        "title": "Sadarkaa Giddugaleessaa",
+        "label": "Sadarkaa Giddugaleessaa"
+      },
+      "applications": {
+        "title": "Appliiwwan",
+        "label": "Appliiwwan"
+      }
+    },
+    "sections": {
+      "jobs": {
+        "title": "Hojiiwwan Koo",
+        "due": "Yeroo Xumuraa",
+        "applications": "Appliiwwan",
+        "worker": "Hojjetaa",
+        "actions": {
+          "viewDetails": "Faallaawwan Ilali",
+          "applications": "Appliiwwan",
+          "requestRevision": "Deebii Kadhadhu",
+          "payAndRate": "Kaffaltiifii Sadarkaa"
+        }
+      },
+      "recentApplications": {
+        "title": "Appliiwwan Duraanii",
+        "actions": {
+          "reject": "Dhiisi",
+          "accept": "Qeebali"
+        }
+      }
+    },
+    "modals": {
+      "jobDetails": {
+        "title": "Faallaawwan Hojii",
+        "fields": {
+          "description": "Ibsaa",
+          "budget": "Baajeta",
+          "deadline": "Yeroo Xumuraa",
+          "category": "Gosa",
+          "status": "Haala",
+          "requirements": "Barbaachisoomota"
+        }
+      },
+      "payment": {
+        "title": "Kaffaltii Chapa Waliin Hojjedhu",
+        "summary": {
+          "title": "Xumura Hojii",
+          "fields": {
+            "jobTitle": "Maqaa Hojii",
+            "worker": "Hojjetaa",
+            "amount": "Baay'ina",
+            "status": "Haala",
+            "readyForPayment": "Kaffaltiif Ready"
+          }
+        },
+        "chapa": {
+          "title": "Kaffaltii Nageenya Qabu Chapa Waliin",
+          "description": "Kaffaltiin kee nageenyaan Chapa Payment Gateway irratti hojjetama",
+          "security": {
+            "encrypted": "SSL Encrypted",
+            "bankGrade": "Nageenya Sadarka Baankii"
+          }
+        },
+        "actions": {
+          "cancel": "Dhiisi",
+          "process": "Kaffaltii Hojjedhu"
+        }
+      },
+      "rating": {
+        "title": "Dalagaa Hojjettootaa Sadarkaa'i",
+        "subtitle": "Hojii kana hojjechuun maal akka ture?",
+        "rating": {
+          "label": "Sadarkaa",
+          "outOf": "urjii 5 irraa"
+        },
+        "review": {
+          "label": "Yaada (Filannoo)",
+          "placeholder": "Hojii kana hojjechuun keessan waliin qoodaa..."
+        },
+        "actions": {
+          "skip": "Sadarkaa Dhiisi",
+          "submit": "Sadarkaa Ergame"
+        }
+      }
+    }
   }
 }

@@ -49,7 +49,7 @@
       "applyNow": "አሁን ያመልክቱ",
       "loginToApply": "ለመመልከት ይግቡ",
       "viewAllJobs": "ሁሉንም ስራዎች ይመልከቱ",
-      "due": "የመዝጋት ቀን"
+      "due": "የሚዘጋበት ቀን"
     },
     "howItWorks": {
       "title": "እንዴት እንደሚሰራ",
@@ -287,7 +287,7 @@
       "requiredSkills": "የሚያስፈልጉ ችሎታዎች፡",
       "moreSkills": "ተጨማሪ",
       "posted": "ተለጠፈ",
-      "applications": "የማመልከቻዎች",
+      "applications": "ማመልከቻዎች",
       "actions": {
         "viewDetails": "ዝርዝሮችን ይመልከቱ",
         "applyNow": "አሁን ያመልክቱ",
@@ -429,7 +429,7 @@
         "applyTo": "ለስራ ያመልክቱ",
         "fields": {
           "budget": "በጀት",
-          "deadline": "የመዝጋት ቀን",
+          "deadline": "የሚዘጋበት ቀን",
           "category": "ምድብ",
           "region": "ክልል",
           "proposal": {
@@ -488,6 +488,114 @@
           "title": "ተቀላጫጮች",
           "button": "ያያይዙ",
           "placeholder": "መልእክት ይፃፉ"
+        }
+      }
+    }
+  },
+  "ClientDashboard": {
+    "header": {
+      "title": "የቀጣሪ ዳሽቦርድ",
+      "subtitle": "ስራዎችን ይለጥፉ እና ፕሮጀክቶችዎን ያስተዳድሩ",
+      "postJob": "አዲስ ስራ ይለጥፉ"
+    },
+    "stats": {
+      "totalJobs": {
+        "title": "ጠቅላላ ስራዎች",
+        "label": "ጠቅላላ ስራዎች"
+      },
+      "activeJobs": {
+        "title": "ክፍት ስራዎች",
+        "label": "ክፍት ስራዎች"
+      },
+      "completedJobs": {
+        "title": "የተጠናቀቁ",
+        "label": "የተጠናቀቁ"
+      },
+      "totalSpent": {
+        "title": "ጠቅላላ የከፈሉት",
+        "label": "ጠቅላላ የከፈሉት"
+      },
+      "rating": {
+        "title": "አማካኝ ደረጃ",
+        "label": "አማካኝ ደረጃ"
+      },
+      "applications": {
+        "title": "ማመልከቻዎች",
+        "label": "ማመልከቻዎች"
+      }
+    },
+    "sections": {
+      "jobs": {
+        "title": "የእኔ ስራዎች",
+        "due": "የሚዘጋበት ቀን",
+        "applications": "ማመልከቻዎች",
+        "worker": "ሰራተኛ",
+        "actions": {
+          "viewDetails": "ዝርዝሮችን ይመልከቱ",
+          "applications": "ማመልከቻዎች",
+          "requestRevision": "ማስተካከያ ይጠይቁ",
+          "payAndRate": "ይክፈሉ እና ደረጃ ይስጡ"
+        }
+      },
+      "recentApplications": {
+        "title": "የቅርብ ጊዜ ማመልከቻዎች",
+        "actions": {
+          "reject": "ውደቅ አርግ",
+          "accept": "ተቀበል"
+        }
+      }
+    },
+    "modals": {
+      "jobDetails": {
+        "title": "የስራ ዝርዝሮች",
+        "fields": {
+          "description": "መግለጫ",
+          "budget": "በጀት",
+          "deadline": "የሚዘጋበት ቀን",
+          "category": "ምድብ",
+          "status": "ሁኔታ",
+          "requirements": "መስፈርቶች"
+        }
+      },
+      "payment": {
+        "title": "የክፍያ ሂደት በቻፓ",
+        "summary": {
+          "title": "የስራ ማጠቃለያ",
+          "fields": {
+            "jobTitle": "የስራ ርእስ",
+            "worker": "ሰራተኛ",
+            "amount": "መጠን",
+            "status": "ሁኔታ",
+            "readyForPayment": "ለክፍያ ዝግጁ"
+          }
+        },
+        "chapa": {
+          "title": "ደህንነቱ የተጠበቀ ክፍያ በቻፓ",
+          "description": "ክፍያዎ በቻፓ የክፍያ መግቢያ በደህንነት ይከናወናል",
+          "security": {
+            "encrypted": "SSL ሚስጥራዊ ተደርጎ የተላከ",
+            "bankGrade": "የባንክ ደረጃ ደህንነት"
+          }
+        },
+        "actions": {
+          "cancel": "ይቅር",
+          "process": "ክፍያ ያከናውኑ"
+        }
+      },
+      "rating": {
+        "title": "የሰራተኛ አፈጻጸም ደረጃ ይስጡ",
+        "subtitle": "ከዚህ ነፃ ሰራተኛ ጋር ያገኘኸው ልምድ እንዴት ነበር?",
+        "rating": {
+          "label": "ደረጃ",
+          "outOf": "ከ5 ኮከቦች"
+        },
+        "review": {
+          "label": "ግምገማ (አማራጭ)",
+          "placeholder": "ከዚህ ነፃ ሰራተኛ ጋር ያገኘኸውን ልምድ ያጋሩ..."
+        },
+        "actions": {
+          "skip": "ደረጃ መስጠት ይቅር",
+          "submit": "ደረጃ አስገባ"
         }
       }
     }

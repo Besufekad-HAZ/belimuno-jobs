@@ -491,5 +491,113 @@
         }
       }
     }
+  },
+  "ClientDashboard": {
+    "header": {
+      "title": "Client Dashboard",
+      "subtitle": "Post jobs and manage your projects",
+      "postJob": "Post New Job"
+    },
+    "stats": {
+      "totalJobs": {
+        "title": "Total Jobs",
+        "label": "Total Jobs"
+      },
+      "activeJobs": {
+        "title": "Active",
+        "label": "Active"
+      },
+      "completedJobs": {
+        "title": "Completed",
+        "label": "Completed"
+      },
+      "totalSpent": {
+        "title": "Total Spent",
+        "label": "Total Spent"
+      },
+      "rating": {
+        "title": "Avg Rating",
+        "label": "Avg Rating"
+      },
+      "applications": {
+        "title": "Applications",
+        "label": "Applications"
+      }
+    },
+    "sections": {
+      "jobs": {
+        "title": "My Jobs",
+        "due": "Due",
+        "applications": "Applications",
+        "worker": "Worker",
+        "actions": {
+          "viewDetails": "View Details",
+          "applications": "Applications",
+          "requestRevision": "Request Revision",
+          "payAndRate": "Pay & Rate"
+        }
+      },
+      "recentApplications": {
+        "title": "Recent Applications",
+        "actions": {
+          "reject": "Reject",
+          "accept": "Accept"
+        }
+      }
+    },
+    "modals": {
+      "jobDetails": {
+        "title": "Job Details",
+        "fields": {
+          "description": "Description",
+          "budget": "Budget",
+          "deadline": "Deadline",
+          "category": "Category",
+          "status": "Status",
+          "requirements": "Requirements"
+        }
+      },
+      "payment": {
+        "title": "Process Payment via Chapa",
+        "summary": {
+          "title": "Job Summary",
+          "fields": {
+            "jobTitle": "Job Title",
+            "worker": "Worker",
+            "amount": "Amount",
+            "status": "Status",
+            "readyForPayment": "Ready for Payment"
+          }
+        },
+        "chapa": {
+          "title": "Secure Payment via Chapa",
+          "description": "Your payment will be processed securely through Chapa Payment Gateway",
+          "security": {
+            "encrypted": "SSL Encrypted",
+            "bankGrade": "Bank Grade Security"
+          }
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "process": "Process Payment"
+        }
+      },
+      "rating": {
+        "title": "Rate Worker Performance",
+        "subtitle": "How was your experience working with this freelancer?",
+        "rating": {
+          "label": "Rating",
+          "outOf": "out of 5 stars"
+        },
+        "review": {
+          "label": "Review (Optional)",
+          "placeholder": "Share your experience working with this freelancer..."
+        },
+        "actions": {
+          "skip": "Skip Rating",
+          "submit": "Submit Rating"
+        }
+      }
+    }
   }
 }

@@ -491,5 +491,113 @@
         }
       }
     }
+  },
+  "ClientDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ደንበኛ",
+      "subtitle": "ስራሓት ኣለግፍ ከምኡውን ፕሮጀክትካ ኣስተድሕን",
+      "postJob": "ሓድሽ ስራሕ ኣለግፍ"
+    },
+    "stats": {
+      "totalJobs": {
+        "title": "ጠቕላላ ስራሓት",
+        "label": "ጠቕላላ ስራሓት"
+      },
+      "activeJobs": {
+        "title": "ንቑሓት",
+        "label": "ንቑሓት"
+      },
+      "completedJobs": {
+        "title": "ዝተፈጸመ",
+        "label": "ዝተፈጸመ"
+      },
+      "totalSpent": {
+        "title": "ጠቕላላ ዝተኸፍለ",
+        "label": "ጠቕላላ ዝተኸፍለ"
+      },
+      "rating": {
+        "title": "ኣማካይ ደረጃ",
+        "label": "ኣማካይ ደረጃ"
+      },
+      "applications": {
+        "title": "ኣመልካቺታት",
+        "label": "ኣመልካቺታት"
+      }
+    },
+    "sections": {
+      "jobs": {
+        "title": "ስራሓተይ",
+        "due": "ዕለት መዛግብቲ",
+        "applications": "ኣመልካቺታት",
+        "worker": "ሰራሕተኛ",
+        "actions": {
+          "viewDetails": "ዝርዝራት ርኢ",
+          "applications": "ኣመልካቺታት",
+          "requestRevision": "ምምሕርሻር ሕተት",
+          "payAndRate": "ክፍሊትን ደረጃን"
+        }
+      },
+      "recentApplications": {
+        "title": "ቀረባ ኣመልካቺታት",
+        "actions": {
+          "reject": "ኣትርፍ",
+          "accept": "ተቐበል"
+        }
+      }
+    },
+    "modals": {
+      "jobDetails": {
+        "title": "ዝርዝራት ስራሕ",
+        "fields": {
+          "description": "ገለጻ",
+          "budget": "በጀት",
+          "deadline": "ዕለት መዛግብቲ",
+          "category": "መደብ",
+          "status": "ሁኔታ",
+          "requirements": "ሕቶታት"
+        }
+      },
+      "payment": {
+        "title": "ክፍሊት በቻፓ ኣካይድ",
+        "summary": {
+          "title": "ጽማቝ ስራሕ",
+          "fields": {
+            "jobTitle": "ርእሲ ስራሕ",
+            "worker": "ሰራሕተኛ",
+            "amount": "መጠን",
+            "status": "ሁኔታ",
+            "readyForPayment": "ንክፍሊት ድሉው"
+          }
+        },
+        "chapa": {
+          "title": "ውሑስ ክፍሊት በቻፓ",
+          "description": "ክፍሊትካ በቻፓ ክፍሊት መግቢያ ብውሑስነት ክካየድ እዩ",
+          "security": {
+            "encrypted": "SSL ተመስጢሩ",
+            "bankGrade": "ባንካዊ ደረጃ ውሑስነት"
+          }
+        },
+        "actions": {
+          "cancel": "ኣትርፍ",
+          "process": "ክፍሊት ኣካይድ"
+        }
+      },
+      "rating": {
+        "title": "ኣፈጻጸም ሰራሕተኛ ደረጃ ሃብ",
+        "subtitle": "ምስዚ ናጻ ሰራሕተኛ ዝነበርካዮ ተመክሮ ከመይ እዩ ነይሩ?",
+        "rating": {
+          "label": "ደረጃ",
+          "outOf": "ካብ 5 ኮኾብ"
+        },
+        "review": {
+          "label": "ርኢቶ (ኣማራጺ)",
+          "placeholder": "ምስዚ ናጻ ሰራሕተኛ ዝነበርካዮ ተመክሮ ኣካፍል..."
+        },
+        "actions": {
+          "skip": "ደረጃ ምሃብ ስጠላ",
+          "submit": "ደረጃ ኣረክብ"
+        }
+      }
+    }
   }
 }
