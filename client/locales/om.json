@@ -789,5 +789,144 @@
     "recentActivity": {
       "title": "Dalaga Duraanii"
     }
+  },
+  "HRAdminDashboard": {
+    "header": {
+      "title": "Daashbooraa Bulchinsa HR",
+      "subtitle": "Hiree hojjetaa, wal dhabdamuu, fi dalagaa HR bulchiisi",
+      "buttons": {
+        "sendAnnouncement": "Beekumsa Ergamuu",
+        "manageWorkers": "Hojjettoota Bulchiisi"
+      }
+    },
+    "stats": {
+      "totalWorkers": {
+        "title": "Hojjettoota Waliigalaa",
+        "label": "Hojjettoota Waliigalaa"
+      },
+      "verifiedWorkers": {
+        "title": "Hojjettoota Mirkaneeffamoo",
+        "label": "Hojjettoota Mirkaneeffamoo"
+      },
+      "pendingVerification": {
+        "title": "Mirkaneessuu Eegamaa",
+        "label": "Mirkaneessuu Eegamaa"
+      },
+      "openDisputes": {
+        "title": "Wal Dhabdamuu Banaa",
+        "label": "Wal Dhabdamuu Banaa"
+      }
+    },
+    "verifications": {
+      "title": "Mirkaneessuu Eegamaa",
+      "empty": "Mirkaneessuu eegamaa hin jiru"
+    },
+    "disputes": {
+      "title": "Wal Dhabdamuu Hojii Irra Jira",
+      "empty": "Wal dhabdamuu hojii irra jira hin jiru",
+      "priority": {
+        "high": "olfaa",
+        "medium": "giddugaleessa",
+        "low": "gadi aanaa"
+      },
+      "details": {
+        "title": "Faallaawwan Wal Dhabdamuu",
+        "priority": "Dur-sammuu",
+        "partiesInvolved": "Qooddootni Walqabatan",
+        "fields": {
+          "worker": "Hojjetaa",
+          "client": "Maamilaa",
+          "job": "Hojii",
+          "description": "Ibsaa"
+        },
+        "buttons": {
+          "investigate": "Qorannoo Godhaa",
+          "contactParties": "Qooddoota Qunnamaa",
+          "resolve": "Furmaata Kennaa"
+        }
+      }
+    },
+    "actions": {
+      "title": "Dalagaa HR",
+      "buttons": {
+        "workerManagement": "Bulchiinsa Hojjettootaa",
+        "disputeResolution": "Furmaata Wal Dhabdamuu",
+        "performanceReviews": "Qorannoo Dalagaa"
+      }
+    },
+    "metrics": {
+      "performance": {
+        "title": "Meetirika Dalagaa",
+        "workerSatisfaction": "Qo'annoo Hojjettootaa",
+        "verificationRate": "Sadarkaa Mirkaneessuu",
+        "disputeResolution": "Furmaata Wal Dhabdamuu"
+      },
+      "monthly": {
+        "title": "Ji'a Kana",
+        "fields": {
+          "newWorkers": "Hojjettoota Haaraa",
+          "verifications": "Mirkaneessuu",
+          "disputesResolved": "Wal Dhabdamuu Furan",
+          "trainingCompleted": "Barumsa Xumurame"
+        }
+      }
+    },
+    "worker": {
+      "status": {
+        "inactive": "Hojii Irra Hin Jiru",
+        "pending": "Eegamaa",
+        "verified": "Mirkaneeffame"
+      },
+      "verification": {
+        "title": "Mirkaneessuu Hojjetaa",
+        "profile": {
+          "title": "Profaayilii Hojjetaa",
+          "fields": {
+            "experience": "Beekumsa",
+            "rating": "Sadarkaa",
+            "jobsCompleted": "Hojiiwwan Xumurame",
+            "skills": "Dandeettii"
+          }
+        },
+        "buttons": {
+          "verify": "Hojjetaa Mirkaneessaa",
+          "reject": "Dhiisi"
+        }
+      }
+    },
+    "announcement": {
+      "title": "Beekumsa Sirnaa Ergamuu",
+      "fields": {
+        "title": {
+          "label": "Maqaa",
+          "placeholder": "Maqaa beekumsaa..."
+        },
+        "message": {
+          "label": "Ergaa",
+          "placeholder": "Ergaa beekumsaa kee..."
+        },
+        "targetAudience": {
+          "label": "Dhaggeeffattoota Baa'uu",
+          "options": {
+            "workers": "Hojjettoota",
+            "clients": "Maamiloota",
+            "both": "Hojjettoota fi Maamiloota Lamaanuu"
+          }
+        },
+        "priority": {
+          "label": "Dur-sammuu",
+          "options": {
+            "low": "Gadi aanaa",
+            "medium": "Giddugaleessa",
+            "high": "Olfaa",
+            "urgent": "Ariifaa"
+          }
+        }
+      },
+      "buttons": {
+        "send": "Beekumsa Ergamuu",
+        "cancel": "Dhiisi"
+      }
+    }
   }
 }

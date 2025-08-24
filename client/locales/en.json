@@ -789,5 +789,144 @@
     "recentActivity": {
       "title": "Recent Activity"
     }
+  },
+  "HRAdminDashboard": {
+    "header": {
+      "title": "HR Admin Dashboard",
+      "subtitle": "Manage workforce, disputes, and HR operations",
+      "buttons": {
+        "sendAnnouncement": "Send Announcement",
+        "manageWorkers": "Manage Workers"
+      }
+    },
+    "stats": {
+      "totalWorkers": {
+        "title": "Total Workers",
+        "label": "Total Workers"
+      },
+      "verifiedWorkers": {
+        "title": "Verified Workers",
+        "label": "Verified Workers"
+      },
+      "pendingVerification": {
+        "title": "Pending Verification",
+        "label": "Pending Verification"
+      },
+      "openDisputes": {
+        "title": "Open Disputes",
+        "label": "Open Disputes"
+      }
+    },
+    "verifications": {
+      "title": "Pending Verifications",
+      "empty": "No pending verifications"
+    },
+    "disputes": {
+      "title": "Active Disputes",
+      "empty": "No active disputes",
+      "priority": {
+        "high": "high",
+        "medium": "medium",
+        "low": "low"
+      },
+      "details": {
+        "title": "Dispute Details",
+        "priority": "Priority",
+        "partiesInvolved": "Parties Involved",
+        "fields": {
+          "worker": "Worker",
+          "client": "Client",
+          "job": "Job",
+          "description": "Description"
+        },
+        "buttons": {
+          "investigate": "Investigate",
+          "contactParties": "Contact Parties",
+          "resolve": "Resolve"
+        }
+      }
+    },
+    "actions": {
+      "title": "HR Actions",
+      "buttons": {
+        "workerManagement": "Worker Management",
+        "disputeResolution": "Dispute Resolution",
+        "performanceReviews": "Performance Reviews"
+      }
+    },
+    "metrics": {
+      "performance": {
+        "title": "Performance Metrics",
+        "workerSatisfaction": "Worker Satisfaction",
+        "verificationRate": "Verification Rate",
+        "disputeResolution": "Dispute Resolution"
+      },
+      "monthly": {
+        "title": "This Month",
+        "fields": {
+          "newWorkers": "New Workers",
+          "verifications": "Verifications",
+          "disputesResolved": "Disputes Resolved",
+          "trainingCompleted": "Training Completed"
+        }
+      }
+    },
+    "worker": {
+      "status": {
+        "inactive": "Inactive",
+        "pending": "Pending",
+        "verified": "Verified"
+      },
+      "verification": {
+        "title": "Worker Verification",
+        "profile": {
+          "title": "Worker Profile",
+          "fields": {
+            "experience": "Experience",
+            "rating": "Rating",
+            "jobsCompleted": "Jobs Completed",
+            "skills": "Skills"
+          }
+        },
+        "buttons": {
+          "verify": "Verify Worker",
+          "reject": "Reject"
+        }
+      }
+    },
+    "announcement": {
+      "title": "Send System Announcement",
+      "fields": {
+        "title": {
+          "label": "Title",
+          "placeholder": "Announcement title..."
+        },
+        "message": {
+          "label": "Message",
+          "placeholder": "Your announcement message..."
+        },
+        "targetAudience": {
+          "label": "Target Audience",
+          "options": {
+            "workers": "Workers",
+            "clients": "Clients",
+            "both": "Both Workers & Clients"
+          }
+        },
+        "priority": {
+          "label": "Priority",
+          "options": {
+            "low": "Low",
+            "medium": "Medium",
+            "high": "High",
+            "urgent": "Urgent"
+          }
+        }
+      },
+      "buttons": {
+        "send": "Send Announcement",
+        "cancel": "Cancel"
+      }
+    }
   }
 }

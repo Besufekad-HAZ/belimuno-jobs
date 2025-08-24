@@ -789,5 +789,144 @@
     "recentActivity": {
       "title": "ቀረባ ንጥፈታት"
     }
+  },
+  "HRAdminDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ኣስተዳደሪ ሰብኣዊ ሃብቲ",
+      "subtitle": "ሰራሕተኛታት፣ ግጭታትን ናይ ሰብኣዊ ሃብቲ ሂደታትን ኣስተድሕን",
+      "buttons": {
+        "sendAnnouncement": "መንበርሂ ላክ",
+        "manageWorkers": "ሰራሕተኛታት ኣስተድሕን"
+      }
+    },
+    "stats": {
+      "totalWorkers": {
+        "title": "ጠቕላላ ሰራሕተኛታት",
+        "label": "ጠቕላላ ሰራሕተኛታት"
+      },
+      "verifiedWorkers": {
+        "title": "ዝተረጋገጡ ሰራሕተኛታት",
+        "label": "ዝተረጋገጡ ሰራሕተኛታት"
+      },
+      "pendingVerification": {
+        "title": "ኣብ ሂደት ዘለዉ ምርግጋጽ",
+        "label": "ኣብ ሂደት ዘለዉ ምርግጋጽ"
+      },
+      "openDisputes": {
+        "title": "ክፍቲ ግጭታት",
+        "label": "ክፍቲ ግጭታት"
+      }
+    },
+    "verifications": {
+      "title": "ኣብ ሂደት ዘለዉ ምርግጋጽ",
+      "empty": "ኣብ ሂደት ዘለዉ ምርግጋጽ የለን"
+    },
+    "disputes": {
+      "title": "ዝተኸፍቱ ግጭታት",
+      "empty": "ዝተኸፍቱ ግጭታት የለን",
+      "priority": {
+        "high": "ልዑል",
+        "medium": "መንጎኛ",
+        "low": "ትሑት"
+      },
+      "details": {
+        "title": "ዝርዝራት ግጭት",
+        "priority": "ቅድሚት ዝህቡ",
+        "partiesInvolved": "ተሳቲፎም ወገናት",
+        "fields": {
+          "worker": "ሰራሕተኛ",
+          "client": "ደንበኛ",
+          "job": "ስራሕ",
+          "description": "ገለጻ"
+        },
+        "buttons": {
+          "investigate": "ምርመራ",
+          "contactParties": "ምስ ወገናት ተራኸብ",
+          "resolve": "ፍታሕ"
+        }
+      }
+    },
+    "actions": {
+      "title": "እማዞም ሰብኣዊ ሃብቲ",
+      "buttons": {
+        "workerManagement": "ኣስተዳደር ሰራሕተኛ",
+        "disputeResolution": "ፍታሕ ግጭት",
+        "performanceReviews": "ግምገማ ኣፈጻጸም"
+      }
+    },
+    "metrics": {
+      "performance": {
+        "title": "መለክዒታት ኣፈጻጸም",
+        "workerSatisfaction": "ርእሚ ሰራሕተኛ",
+        "verificationRate": "መጠን ምርግጋጽ",
+        "disputeResolution": "ፍታሕ ግጭት"
+      },
+      "monthly": {
+        "title": "እዚ ወርሒ",
+        "fields": {
+          "newWorkers": "ሓደሽቲ ሰራሕተኛታት",
+          "verifications": "ምርግጋጽ",
+          "disputesResolved": "ዝተፈቱ ግጭታት",
+          "trainingCompleted": "ዝተውድኡ ስልጠናታት"
+        }
+      }
+    },
+    "worker": {
+      "status": {
+        "inactive": "ዘይንቑሓት",
+        "pending": "ኣብ ሂደት",
+        "verified": "ተረጋጊጹ"
+      },
+      "verification": {
+        "title": "ምርግጋጽ ሰራሕተኛ",
+        "profile": {
+          "title": "መገለጺ ሰራሕተኛ",
+          "fields": {
+            "experience": "ተመክሮ",
+            "rating": "ደረጃ",
+            "jobsCompleted": "ዝተውድኡ ስራሓት",
+            "skills": "ብልክዕታት"
+          }
+        },
+        "buttons": {
+          "verify": "ሰራሕተኛ ኣረጋግጽ",
+          "reject": "ኣትርፍ"
+        }
+      }
+    },
+    "announcement": {
+      "title": "መንበርሂ ሲስተም ላክ",
+      "fields": {
+        "title": {
+          "label": "ርእሲ",
+          "placeholder": "ርእሲ መንበርሂ..."
+        },
+        "message": {
+          "label": "መልእኽቲ",
+          "placeholder": "መልእኽቲ መንበርሂኻ..."
+        },
+        "targetAudience": {
+          "label": "ዕላማ",
+          "options": {
+            "workers": "ሰራሕተኛታት",
+            "clients": "ደንበኛታት",
+            "both": "ክልቲኦም ሰራሕተኛታትን ደንበኛታትን"
+          }
+        },
+        "priority": {
+          "label": "ቅድሚት ዝህቡ",
+          "options": {
+            "low": "ትሑት",
+            "medium": "መንጎኛ",
+            "high": "ልዑል",
+            "urgent": "እንጡፍ"
+          }
+        }
+      },
+      "buttons": {
+        "send": "መንበርሂ ላክ",
+        "cancel": "ኣትርፍ"
+      }
+    }
   }
 }
