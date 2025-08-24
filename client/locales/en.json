@@ -928,5 +928,115 @@
         "cancel": "Cancel"
       }
     }
+  },
+  "AdminDashboard": {
+    "header": {
+      "title": "Super Admin Dashboard",
+      "subtitle": "Monitor and manage the entire Belimuno Jobs platform",
+      "buttons": {
+        "generateReports": "Generate Reports",
+        "resolveDisputes": "Resolve Disputes"
+      }
+    },
+    "stats": {
+      "totalUsers": {
+        "title": "Total Users",
+        "label": "Total Users"
+      },
+      "totalJobs": {
+        "title": "Total Jobs",
+        "label": "Total Jobs"
+      },
+      "totalRevenue": {
+        "title": "Total Revenue",
+        "label": "Total Revenue"
+      },
+      "monthlyGrowth": {
+        "title": "Monthly Growth",
+        "label": "Monthly Growth"
+      }
+    },
+    "activity": {
+      "activeJobs": {
+        "title": "Active Jobs",
+        "label": "Active Jobs"
+      },
+      "completedJobs": {
+        "title": "Completed Jobs",
+        "label": "Completed Jobs"
+      },
+      "pendingVerifications": {
+        "title": "Pending Verifications",
+        "label": "Pending Verifications"
+      }
+    },
+    "recentUsers": {
+      "title": "Recent Users",
+      "viewAll": "View All",
+      "buttons": {
+        "verify": "Verify"
+      }
+    },
+    "recentJobs": {
+      "title": "Recent Jobs",
+      "viewAll": "View All",
+      "fields": {
+        "amount": "ETB",
+        "posted": "Posted"
+      }
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "buttons": {
+        "manageUsers": "Manage Users",
+        "manageJobs": "Manage Jobs",
+        "paymentDisputes": "Payment Disputes"
+      }
+    },
+    "reports": {
+      "title": "Generate Reports",
+      "fields": {
+        "type": {
+          "label": "Report Type",
+          "options": {
+            "revenue": "Revenue Report",
+            "completion": "Completion Rates",
+            "users": "User Analytics",
+            "performance": "Performance Metrics"
+          }
+        }
+      },
+      "preview": {
+        "title": "Report Preview",
+        "fields": {
+          "totalUsers": "Total Users",
+          "totalJobs": "Total Jobs",
+          "totalRevenue": "Total Revenue",
+          "monthlyGrowth": "Monthly Growth"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "download": "Download Report"
+      }
+    },
+    "disputes": {
+      "title": "Payment Disputes",
+      "fields": {
+        "paymentId": "Payment ID",
+        "amount": "Amount",
+        "date": "Date",
+        "status": "Disputed"
+      },
+      "empty": {
+        "title": "No Active Disputes",
+        "message": "All payments are processing smoothly!"
+      },
+      "buttons": {
+        "refundClient": "Refund Client",
+        "payWorker": "Pay Worker",
+        "investigate": "Investigate"
+      }
+    }
   }
 }

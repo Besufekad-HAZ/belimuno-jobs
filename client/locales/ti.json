@@ -928,5 +928,115 @@
         "cancel": "ኣትርፍ"
       }
     }
+  },
+  "AdminDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ኣስተዳደሪ ልዑል",
+      "subtitle": "ኩሉ መተግበሪ ስራሓት ቤሊሙኖ ኣስተድሕንን ኣስተዳድርን",
+      "buttons": {
+        "generateReports": "ሪፖርት ፍጠር",
+        "resolveDisputes": "ግጭታት ፍታሕ"
+      }
+    },
+    "stats": {
+      "totalUsers": {
+        "title": "ጠቕላላ ተጠቃምቲ",
+        "label": "ጠቕላላ ተጠቃምቲ"
+      },
+      "totalJobs": {
+        "title": "ጠቕላላ ስራሓት",
+        "label": "ጠቕላላ ስራሓት"
+      },
+      "totalRevenue": {
+        "title": "ጠቕላላ እታኻ",
+        "label": "ጠቕላላ እታኻ"
+      },
+      "monthlyGrowth": {
+        "title": "ወርሓዊ ዕብየት",
+        "label": "ወርሓዊ ዕብየት"
+      }
+    },
+    "activity": {
+      "activeJobs": {
+        "title": "ንቑሓት ስራሓት",
+        "label": "ንቑሓት ስራሓት"
+      },
+      "completedJobs": {
+        "title": "ዝተፈጸሙ ስራሓት",
+        "label": "ዝተፈጸሙ ስራሓት"
+      },
+      "pendingVerifications": {
+        "title": "ኣብ ጸግማት ዘለዉ ምርግጋጽ",
+        "label": "ኣብ ጸግማት ዘለዉ ምርግጋጽ"
+      }
+    },
+    "recentUsers": {
+      "title": "ቀረባ ተጠቃምቲ",
+      "viewAll": "ኩሉ ርኢ",
+      "buttons": {
+        "verify": "ኣረጋግጽ"
+      }
+    },
+    "recentJobs": {
+      "title": "ቀረባ ስራሓት",
+      "viewAll": "ኩሉ ርኢ",
+      "fields": {
+        "amount": "ብር",
+        "posted": "ተለጊጹ"
+      }
+    },
+    "quickActions": {
+      "title": "ቅልጡፍ እማዓት",
+      "buttons": {
+        "manageUsers": "ተጠቃምቲ ኣስተድሕን",
+        "manageJobs": "ስራሓት ኣስተድሕን",
+        "paymentDisputes": "ግጭታት ክፍሊት"
+      }
+    },
+    "reports": {
+      "title": "ሪፖርት ፍጠር",
+      "fields": {
+        "type": {
+          "label": "ዓይነት ሪፖርት",
+          "options": {
+            "revenue": "ሪፖርት እታኻ",
+            "completion": "መጠን ምውዳእ",
+            "users": "ትንታነ ተጠቃምቲ",
+            "performance": "መለክዒታት ኣፈጻጸም"
+          }
+        }
+      },
+      "preview": {
+        "title": "ኣስቀድሞ ርኢ ሪፖርት",
+        "fields": {
+          "totalUsers": "ጠቕላላ ተጠቃምቲ",
+          "totalJobs": "ጠቕላላ ስራሓት",
+          "totalRevenue": "ጠቕላላ እታኻ",
+          "monthlyGrowth": "ወርሓዊ ዕብየት"
+        }
+      },
+      "buttons": {
+        "cancel": "ኣትርፍ",
+        "download": "ሪፖርት ልዘብ"
+      }
+    },
+    "disputes": {
+      "title": "ግጭታት ክፍሊት",
+      "fields": {
+        "paymentId": "መንነት ክፍሊት",
+        "amount": "መጠን",
+        "date": "ዕለት",
+        "status": "ኣብ ግጭት"
+      },
+      "empty": {
+        "title": "ንቑሓት ግጭታት የለን",
+        "message": "ኩሉ ክፍልታት ብሰናይ እዩ እናተካይዱ!"
+      },
+      "buttons": {
+        "refundClient": "ደንበኛ መልስ",
+        "payWorker": "ሰራሕተኛ ክፈል",
+        "investigate": "ምርመራ"
+      }
+    }
   }
 }

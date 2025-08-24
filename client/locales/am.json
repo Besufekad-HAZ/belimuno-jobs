@@ -928,5 +928,115 @@
         "cancel": "ይቅር"
       }
     }
+  },
+  "AdminDashboard": {
+    "header": {
+      "title": "የዋና አስተዳዳሪ ዳሽቦርድ",
+      "subtitle": "ሙሉውን የቤሊሙኖ ስራዎች መተግበሪያ ይቆጣጠሩ እና ያስተዳድሩ",
+      "buttons": {
+        "generateReports": "ሪፖርቶችን ይፍጠሩ",
+        "resolveDisputes": "ክርክሮችን ይፍቱ"
+      }
+    },
+    "stats": {
+      "totalUsers": {
+        "title": "ጠቅላላ ተጠቃሚዎች",
+        "label": "ጠቅላላ ተጠቃሚዎች"
+      },
+      "totalJobs": {
+        "title": "ጠቅላላ ስራዎች",
+        "label": "ጠቅላላ ስራዎች"
+      },
+      "totalRevenue": {
+        "title": "ጠቅላላ ገቢ",
+        "label": "ጠቅላላ ገቢ"
+      },
+      "monthlyGrowth": {
+        "title": "ወርሃዊ እድገት",
+        "label": "ወርሃዊ እድገት"
+      }
+    },
+    "activity": {
+      "activeJobs": {
+        "title": "ክፍት ስራዎች",
+        "label": "ክፍት ስራዎች"
+      },
+      "completedJobs": {
+        "title": "የተጠናቀቁ ስራዎች",
+        "label": "የተጠናቀቁ ስራዎች"
+      },
+      "pendingVerifications": {
+        "title": "በጥበቃ ላይ ያሉ ማረጋገጫዎች",
+        "label": "በጥበቃ ላይ ያሉ ማረጋገጫዎች"
+      }
+    },
+    "recentUsers": {
+      "title": "የቅርብ ጊዜ ተጠቃሚዎች",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "buttons": {
+        "verify": "ያረጋግጡ"
+      }
+    },
+    "recentJobs": {
+      "title": "የቅርብ ጊዜ ስራዎች",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "fields": {
+        "amount": "ብር",
+        "posted": "ተለጥፏል"
+      }
+    },
+    "quickActions": {
+      "title": "ፈጣን እርምጃዎች",
+      "buttons": {
+        "manageUsers": "ተጠቃሚዎችን ያስተዳድሩ",
+        "manageJobs": "ስራዎችን ያስተዳድሩ",
+        "paymentDisputes": "የክፍያ ግጭቶች"
+      }
+    },
+    "reports": {
+      "title": "ሪፖርቶችን ይፍጠሩ",
+      "fields": {
+        "type": {
+          "label": "የሪፖርት አይነት",
+          "options": {
+            "revenue": "የገቢ ሪፖርት",
+            "completion": "የማጠናቀቂያ መጠኖች",
+            "users": "የተጠቃሚ ትንታኔ",
+            "performance": "የአፈጻጸም መለኪያዎች"
+          }
+        }
+      },
+      "preview": {
+        "title": "የሪፖርት ቅድመ እይታ",
+        "fields": {
+          "totalUsers": "ጠቅላላ ተጠቃሚዎች",
+          "totalJobs": "ጠቅላላ ስራዎች",
+          "totalRevenue": "ጠቅላላ ገቢ",
+          "monthlyGrowth": "ወርሃዊ እድገት"
+        }
+      },
+      "buttons": {
+        "cancel": "ይቅር",
+        "download": "ሪፖርት ያውርዱ"
+      }
+    },
+    "disputes": {
+      "title": "የክፍያ ግጭቶች",
+      "fields": {
+        "paymentId": "የክፍያ መለያ",
+        "amount": "መጠን",
+        "date": "ቀን",
+        "status": "በክርክር ላይ"
+      },
+      "empty": {
+        "title": "ክፍት ግጭቶች የሉም",
+        "message": "ሁሉም ክፍያዎች በተሳካ ሁኔታ እየተከናወኑ ነው!"
+      },
+      "buttons": {
+        "refundClient": "ደንበኛውን ይመልሱ",
+        "payWorker": "ሠራተኛውን ይክፈሉ",
+        "investigate": "ይመረምሩ"
+      }
+    }
   }
 }

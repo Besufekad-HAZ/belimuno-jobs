@@ -928,5 +928,115 @@
         "cancel": "Dhiisi"
       }
     }
+  },
+  "AdminDashboard": {
+    "header": {
+      "title": "Daashbooraa Manguddoo Ol'aanaa",
+      "subtitle": "Platforma Belimuno Jobs guutuutti ilaaliifi bulchiisi",
+      "buttons": {
+        "generateReports": "Ripoorota Uumi",
+        "resolveDisputes": "Wal Dhabdamuu Furmuu"
+      }
+    },
+    "stats": {
+      "totalUsers": {
+        "title": "Fayyadamtoota Waliigalaa",
+        "label": "Fayyadamtoota Waliigalaa"
+      },
+      "totalJobs": {
+        "title": "Hojiiwwan Waliigalaa",
+        "label": "Hojiiwwan Waliigalaa"
+      },
+      "totalRevenue": {
+        "title": "Argatta Waliigalaa",
+        "label": "Argatta Waliigalaa"
+      },
+      "monthlyGrowth": {
+        "title": "Guddina Ji'a",
+        "label": "Guddina Ji'a"
+      }
+    },
+    "activity": {
+      "activeJobs": {
+        "title": "Hojiiwwan Hojii Irra Jiran",
+        "label": "Hojiiwwan Hojii Irra Jiran"
+      },
+      "completedJobs": {
+        "title": "Hojiiwwan Xumurame",
+        "label": "Hojiiwwan Xumurame"
+      },
+      "pendingVerifications": {
+        "title": "Mirkaneessuu Eegamaa",
+        "label": "Mirkaneessuu Eegamaa"
+      }
+    },
+    "recentUsers": {
+      "title": "Fayyadamtoota Duraanii",
+      "viewAll": "Hunda Ilali",
+      "buttons": {
+        "verify": "Mirkaneessuu"
+      }
+    },
+    "recentJobs": {
+      "title": "Hojiiwwan Duraanii",
+      "viewAll": "Hunda Ilali",
+      "fields": {
+        "amount": "ETB",
+        "posted": "Maxxanfame"
+      }
+    },
+    "quickActions": {
+      "title": "Dalagaa Ariifaa",
+      "buttons": {
+        "manageUsers": "Fayyadamtoota Bulchiisi",
+        "manageJobs": "Hojiiwwan Bulchiisi",
+        "paymentDisputes": "Wal Dhabdamuu Kaffaltii"
+      }
+    },
+    "reports": {
+      "title": "Ripoorota Uumi",
+      "fields": {
+        "type": {
+          "label": "Gosa Ripoorotaa",
+          "options": {
+            "revenue": "Ripoorota Argattaa",
+            "completion": "Sadarkaa Xumuraa",
+            "users": "Qorannoo Fayyadamtootaa",
+            "performance": "Meetirika Dalagaa"
+          }
+        }
+      },
+      "preview": {
+        "title": "Dursee Ilala Ripoorotaa",
+        "fields": {
+          "totalUsers": "Fayyadamtoota Waliigalaa",
+          "totalJobs": "Hojiiwwan Waliigalaa",
+          "totalRevenue": "Argatta Waliigalaa",
+          "monthlyGrowth": "Guddina Ji'a"
+        }
+      },
+      "buttons": {
+        "cancel": "Dhiisi",
+        "download": "Ripoorota Buusi"
+      }
+    },
+    "disputes": {
+      "title": "Wal Dhabdamuu Kaffaltii",
+      "fields": {
+        "paymentId": "ID Kaffaltii",
+        "amount": "Baay'ina",
+        "date": "Guyyaa",
+        "status": "Wal Dhabdame"
+      },
+      "empty": {
+        "title": "Wal Dhabdamuu Hojii Irra Jira Hin Jiru",
+        "message": "Kaffaltiin hundi sirriitti hojjechuu jira!"
+      },
+      "buttons": {
+        "refundClient": "Maamilaa Deebisi",
+        "payWorker": "Hojjetaa Kaffali",
+        "investigate": "Qorannoo Godhaa"
+      }
+    }
   }
 }
