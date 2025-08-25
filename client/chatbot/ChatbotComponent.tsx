@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import ChatBotLogo from "@/assets/Home-Page/ChatBot Logo.png";
 import Chatbot from "react-chatbot-kit";
 import "react-chatbot-kit/build/main.css";
 import config from "@/chatbot/config";
@@ -24,16 +23,11 @@ function ChatbotComponent() {
   return (
     <div className="fixed z-50 bottom-[5px] md:right-[7px] w-[331px] text-black">
       <div
-        className="h-[65px] bg-primary-green rounded-t-2xl shadow-2xl flex justify-between items-center px-[20px] cursor-pointer hover:bg-[#73a333] transition-all"
+        className="h-[65px] bg-gradient-to-r from-blue-900 via-cyan-700 to-cyan-500 rounded-t-2xl shadow-2xl flex justify-between items-center px-[20px] cursor-pointer hover:bg-cyan-600 transition-all"
         onClick={handleOpenChatbot}
       >
-        <div className="flex items-center">
-          <Image
-            src={ChatBotLogo}
-            alt="chatbot"
-            className="w-[40px] h-[40px]"
-          />
-          <div className="pl-2">
+        <div className="flex items-center justify-center w-full">
+          <div>
             <h3 className="text-white text-[20px] font-extrabold font-eb-garamond">
               ChatBot
             </h3>

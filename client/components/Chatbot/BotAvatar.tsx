@@ -1,15 +1,16 @@
 import React from "react";
 import Image from "next/image";
-import ChatBotLogo from "@/assets/Home-Page/ChatBot Logo.png";
 import { AvatarProps } from "@/chatbot/config";
 
 const BotAvatar: React.FC<AvatarProps> = () => {
   return (
-    <div className="bg-primary-green w-[40px] h-[40px] rounded-full flex items-center justify-center">
+    <div className="bg-white w-[100px] rounded-full flex items-center justify-center">
       <Image
-        src={ChatBotLogo}
+        src="/belimuno.png"
         alt="chatbot"
-        className="w-[40px] h-[40px] object-cover"
+        className="w-full object-cover"
+        width={100}
+        height={100}
       />
     </div>
   );
