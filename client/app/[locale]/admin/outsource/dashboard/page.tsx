@@ -6,18 +6,10 @@ import {
   Briefcase,
   DollarSign,
   TrendingUp,
-  Users,
   Building,
-  Target,
-  Clock,
   CheckCircle,
-  AlertCircle,
   BarChart3,
-  PieChart,
-  Calendar,
   FileText,
-  MessageSquare,
-  Download,
   Eye,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -85,9 +77,9 @@ const OutsourceAdminDashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showClientModal, setShowClientModal] = useState(false);
+  // const [showClientModal, setShowClientModal] = useState(false);
   const [showProjectModal, setShowProjectModal] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  // const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const router = useRouter();
   const t = useTranslations("OutsourceAdminDashboard");
@@ -105,12 +97,10 @@ const OutsourceAdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [usersResponse, jobsResponse, dashboardResponse] =
-        await Promise.all([
-          adminAPI.getUsers({ role: "client", limit: 100 }),
-          adminAPI.getAllJobs(),
-          adminAPI.getDashboard(),
-        ]);
+      const [usersResponse, jobsResponse] = await Promise.all([
+        adminAPI.getUsers({ role: "client", limit: 100 }),
+        adminAPI.getAllJobs(),
+      ]);
 
       // Handle different API response structures
       const clientsData =
@@ -127,32 +117,45 @@ const OutsourceAdminDashboard: React.FC = () => {
       setClients(clientsData);
 
       // Transform jobs to projects with mock data
-      const projectsData: Project[] = jobsData.slice(0, 20).map((job: any) => ({
-        _id: job._id,
-        title: job.title,
-        status: job.status,
-        budget: job.budget || Math.floor(Math.random() * 5000) + 1000,
-        progress:
-          job.status === "completed"
-            ? 100
-            : job.status === "in_progress"
-            ? Math.floor(Math.random() * 80) + 20
-            : 0,
-        deadline:
-          job.deadline ||
-          new Date(
-            Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000
-          ).toISOString(),
-        client: job.client || { _id: "unknown", name: "Unknown Client" },
-        worker: job.worker,
-        createdAt: job.createdAt,
-      }));
+      const projectsData: Project[] = jobsData
+        .slice(0, 20)
+        .map(
+          (job: {
+            _id: string;
+            title: string;
+            status: string;
+            budget?: number;
+            deadline?: string;
+            client?: { _id: string; name: string };
+            worker?: { _id: string; name: string };
+            createdAt?: string;
+          }) => ({
+            _id: job._id,
+            title: job.title,
+            status: job.status,
+            budget: job.budget || Math.floor(Math.random() * 5000) + 1000,
+            progress:
+              job.status === "completed"
+                ? 100
+                : job.status === "in_progress"
+                  ? Math.floor(Math.random() * 80) + 20
+                  : 0,
+            deadline:
+              job.deadline ||
+              new Date(
+                Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000,
+              ).toISOString(),
+            client: job.client || { _id: "unknown", name: "Unknown Client" },
+            worker: job.worker,
+            createdAt: job.createdAt,
+          }),
+        );
       setProjects(projectsData);
 
       // Calculate outsourcing-specific stats
       const totalRevenue = projectsData.reduce(
         (sum, p) => sum + (p.status === "completed" ? p.budget : 0),
-        0
+        0,
       );
       const monthlyRevenue = projectsData
         .filter((p) => {
@@ -166,7 +169,7 @@ const OutsourceAdminDashboard: React.FC = () => {
       const outsourceStats: OutsourceStats = {
         totalClients: clientsData.length,
         activeProjects: projectsData.filter((p) =>
-          ["posted", "assigned", "in_progress"].includes(p.status)
+          ["posted", "assigned", "in_progress"].includes(p.status),
         ).length,
         totalRevenue,
         monthlyRevenue,
@@ -346,8 +349,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-3xl font-bold text-green-600">
-                    {stats?.clientSatisfaction || 0}{" "}
-                    {t("metrics.clientSatisfaction.rating")}
+                    {stats?.clientSatisfaction || 0}/5
                   </span>
                   <span className="text-sm text-gray-600">⭐⭐⭐⭐⭐</span>
                 </div>
@@ -390,7 +392,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               {t("metrics.revenueGrowth.title")}
             </h2>
             <div className="space-y-2">
-              {revenueData.slice(-3).map((data, idx) => (
+              {revenueData.slice(-3).map((data) => (
                 <div
                   key={data.month}
                   className="flex items-center justify-between"
@@ -458,9 +460,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className={`h-2 rounded-full ${getProgressColor(
-                        project.progress
-                      )}`}
+                      className={`h-2 rounded-full ${getProgressColor(project.progress)}`}
                       style={{ width: `${project.progress}%` }}
                     ></div>
                   </div>
@@ -612,13 +612,13 @@ const OutsourceAdminDashboard: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div className="h-2 w-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">
-                  Project "E-commerce Platform" completed
+                  Project &quot;E-commerce Platform&quot; completed
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">
-                  New client "TechCorp Inc" onboarded
+                  New client &quot;TechCorp Inc&quot; onboarded
                 </span>
               </div>
               <div className="flex items-center space-x-3">
@@ -705,9 +705,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
-                    className={`h-3 rounded-full ${getProgressColor(
-                      selectedProject.progress
-                    )}`}
+                    className={`h-3 rounded-full ${getProgressColor(selectedProject.progress)}`}
                     style={{ width: `${selectedProject.progress}%` }}
                   ></div>
                 </div>

@@ -1,14 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Bell, CheckCircle, Clock, Trash2, Filter, Search, User, Briefcase, DollarSign, AlertTriangle, Eye, EyeOff } from 'lucide-react';
-import { getStoredUser } from '@/lib/auth';
-import { notificationsAPI } from '@/lib/api';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import { formatDistanceToNow } from 'date-fns';
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Bell,
+  CheckCircle,
+  Clock,
+  Trash2,
+  Filter,
+  Search,
+  User,
+  Briefcase,
+  DollarSign,
+  AlertTriangle,
+  Eye,
+} from "lucide-react";
+import { getStoredUser } from "@/lib/auth";
+import { notificationsAPI } from "@/lib/api";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import { formatDistanceToNow } from "date-fns";
 
 interface Notification {
   _id: string;
@@ -18,7 +30,7 @@ interface Notification {
   isRead: boolean;
   readAt?: string;
   createdAt: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: "low" | "medium" | "high" | "urgent";
   actionButton?: {
     text: string;
     url: string;
@@ -44,115 +56,130 @@ interface Notification {
 const NotificationsPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState({ total: 0, unread: 0 });
   const router = useRouter();
 
-  useEffect(() => {
-    const user = getStoredUser();
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    fetchNotifications();
-    fetchStats();
-  }, [router, filter, typeFilter]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       const response = await notificationsAPI.getAll();
       let fetchedNotifications = response.data?.data || [];
 
       // Apply filters
-      if (filter === 'unread') {
-        fetchedNotifications = fetchedNotifications.filter((n: Notification) => !n.isRead);
-      } else if (filter === 'read') {
-        fetchedNotifications = fetchedNotifications.filter((n: Notification) => n.isRead);
+      if (filter === "unread") {
+        fetchedNotifications = fetchedNotifications.filter(
+          (n: Notification) => !n.isRead,
+        );
+      } else if (filter === "read") {
+        fetchedNotifications = fetchedNotifications.filter(
+          (n: Notification) => n.isRead,
+        );
       }
 
-      if (typeFilter !== 'all') {
-        fetchedNotifications = fetchedNotifications.filter((n: Notification) => n.type === typeFilter);
+      if (typeFilter !== "all") {
+        fetchedNotifications = fetchedNotifications.filter(
+          (n: Notification) => n.type === typeFilter,
+        );
       }
 
       if (searchQuery) {
-        fetchedNotifications = fetchedNotifications.filter((n: Notification) =>
-          n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          n.message.toLowerCase().includes(searchQuery.toLowerCase())
+        fetchedNotifications = fetchedNotifications.filter(
+          (n: Notification) =>
+            n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            n.message.toLowerCase().includes(searchQuery.toLowerCase()),
         );
       }
 
       setNotifications(fetchedNotifications);
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error("Failed to fetch notifications:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, typeFilter, searchQuery]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await notificationsAPI.getStats();
       setStats(response.data?.data || { total: 0, unread: 0 });
     } catch (error) {
-      console.error('Failed to fetch notification stats:', error);
+      console.error("Failed to fetch notification stats:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    fetchNotifications();
+    fetchStats();
+  }, [router, fetchNotifications, fetchStats]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await notificationsAPI.markAsRead(notificationId);
-      setNotifications(prev =>
-        prev.map(n => n._id === notificationId ? { ...n, isRead: true, readAt: new Date().toISOString() } : n)
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === notificationId
+            ? { ...n, isRead: true, readAt: new Date().toISOString() }
+            : n,
+        ),
       );
       fetchStats();
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await notificationsAPI.markAllAsRead();
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, isRead: true, readAt: new Date().toISOString() }))
+      setNotifications((prev) =>
+        prev.map((n) => ({
+          ...n,
+          isRead: true,
+          readAt: new Date().toISOString(),
+        })),
       );
       fetchStats();
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
   const handleDeleteNotification = async (notificationId: string) => {
     try {
       await notificationsAPI.delete(notificationId);
-      setNotifications(prev => prev.filter(n => n._id !== notificationId));
+      setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
       fetchStats();
     } catch (error) {
-      console.error('Failed to delete notification:', error);
+      console.error("Failed to delete notification:", error);
     }
   };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'job_posted':
-      case 'job_application':
-      case 'job_assigned':
-      case 'job_completed':
+      case "job_posted":
+      case "job_application":
+      case "job_assigned":
+      case "job_completed":
         return <Briefcase className="h-5 w-5" />;
-      case 'payment_received':
-      case 'payment_processed':
+      case "payment_received":
+      case "payment_processed":
         return <DollarSign className="h-5 w-5" />;
-      case 'review_received':
+      case "review_received":
         return <CheckCircle className="h-5 w-5" />;
-      case 'dispute_raised':
-      case 'dispute_resolved':
+      case "dispute_raised":
+      case "dispute_resolved":
         return <AlertTriangle className="h-5 w-5" />;
-      case 'profile_verified':
+      case "profile_verified":
         return <User className="h-5 w-5" />;
-      case 'deadline_reminder':
+      case "deadline_reminder":
         return <Clock className="h-5 w-5" />;
       default:
         return <Bell className="h-5 w-5" />;
@@ -161,24 +188,24 @@ const NotificationsPage: React.FC = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent':
-        return 'bg-red-100 border-red-300 text-red-800';
-      case 'high':
-        return 'bg-orange-100 border-orange-300 text-orange-800';
-      case 'medium':
-        return 'bg-blue-100 border-blue-300 text-blue-800';
-      case 'low':
-        return 'bg-gray-100 border-gray-300 text-gray-800';
+      case "urgent":
+        return "bg-red-100 border-red-300 text-red-800";
+      case "high":
+        return "bg-orange-100 border-orange-300 text-orange-800";
+      case "medium":
+        return "bg-blue-100 border-blue-300 text-blue-800";
+      case "low":
+        return "bg-gray-100 border-gray-300 text-gray-800";
       default:
-        return 'bg-gray-100 border-gray-300 text-gray-800';
+        return "bg-gray-100 border-gray-300 text-gray-800";
     }
   };
 
   const getTypeDisplayName = (type: string) => {
-    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
-  const uniqueTypes = Array.from(new Set(notifications.map(n => n.type)));
+  const uniqueTypes = Array.from(new Set(notifications.map((n) => n.type)));
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -188,17 +215,21 @@ const NotificationsPage: React.FC = () => {
           <div className="flex items-center space-x-3 mb-4 sm:mb-0">
             <Bell className="h-8 w-8 text-blue-600" />
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-              <p className="text-gray-600">Stay updated with your latest activities</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Notifications
+              </h1>
+              <p className="text-gray-600">
+                Stay updated with your latest activities
+              </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Badge variant="blue" className="px-3 py-1">
+              <Badge variant="info" className="px-3 py-1">
                 Total: {stats.total}
               </Badge>
-              <Badge variant="red" className="px-3 py-1">
+              <Badge variant="danger" className="px-3 py-1">
                 Unread: {stats.unread}
               </Badge>
             </div>
@@ -240,14 +271,14 @@ const NotificationsPage: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
               </div>
 
-              {['all', 'unread', 'read'].map((status) => (
+              {(["all", "unread", "read"] as const).map((status) => (
                 <button
                   key={status}
-                  onClick={() => setFilter(status as any)}
+                  onClick={() => setFilter(status)}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                     filter === status
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                 >
                   {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -261,7 +292,7 @@ const NotificationsPage: React.FC = () => {
                   className="px-3 py-1 rounded-full text-sm border border-gray-300 focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Types</option>
-                  {uniqueTypes.map(type => (
+                  {uniqueTypes.map((type) => (
                     <option key={type} value={type}>
                       {getTypeDisplayName(type)}
                     </option>
@@ -280,11 +311,15 @@ const NotificationsPage: React.FC = () => {
         ) : notifications.length === 0 ? (
           <Card className="p-12 text-center">
             <Bell className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No notifications found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No notifications found
+            </h3>
             <p className="text-gray-600">
-              {filter === 'unread' ? 'You have no unread notifications.' :
-               searchQuery ? 'No notifications match your search.' :
-               'You have no notifications yet.'}
+              {filter === "unread"
+                ? "You have no unread notifications."
+                : searchQuery
+                  ? "No notifications match your search."
+                  : "You have no notifications yet."}
             </p>
           </Card>
         ) : (
@@ -293,12 +328,16 @@ const NotificationsPage: React.FC = () => {
               <Card
                 key={notification._id}
                 className={`p-6 transition-all duration-200 hover:shadow-md ${
-                  !notification.isRead ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                  !notification.isRead
+                    ? "bg-blue-50 border-l-4 border-blue-500"
+                    : ""
                 }`}
               >
                 <div className="flex items-start space-x-4">
                   {/* Icon */}
-                  <div className={`flex-shrink-0 p-3 rounded-full ${getPriorityColor(notification.priority)}`}>
+                  <div
+                    className={`flex-shrink-0 p-3 rounded-full ${getPriorityColor(notification.priority)}`}
+                  >
                     {getNotificationIcon(notification.type)}
                   </div>
 
@@ -307,16 +346,24 @@ const NotificationsPage: React.FC = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
-                          <h3 className={`text-lg font-semibold ${!notification.isRead ? 'text-gray-900' : 'text-gray-700'}`}>
+                          <h3
+                            className={`text-lg font-semibold ${!notification.isRead ? "text-gray-900" : "text-gray-700"}`}
+                          >
                             {notification.title}
                           </h3>
                           <Badge
-                            variant={notification.priority === 'urgent' ? 'red' : notification.priority === 'high' ? 'orange' : 'blue'}
+                            variant={
+                              notification.priority === "urgent"
+                                ? "danger"
+                                : notification.priority === "high"
+                                  ? "warning"
+                                  : "info"
+                            }
                             size="sm"
                           >
                             {notification.priority}
                           </Badge>
-                          <Badge variant="gray" size="sm">
+                          <Badge variant="secondary" size="sm">
                             {getTypeDisplayName(notification.type)}
                           </Badge>
                         </div>
@@ -326,24 +373,32 @@ const NotificationsPage: React.FC = () => {
                         </p>
 
                         {/* Related entities */}
-                        {(notification.relatedJob || notification.relatedUser || notification.sender) && (
+                        {(notification.relatedJob ||
+                          notification.relatedUser ||
+                          notification.sender) && (
                           <div className="flex flex-wrap gap-2 mb-3">
                             {notification.relatedJob && (
                               <div className="bg-gray-100 px-3 py-1 rounded-full flex items-center space-x-1">
                                 <Briefcase className="h-3 w-3 text-gray-600" />
-                                <span className="text-sm text-gray-700">Job: {notification.relatedJob.title}</span>
+                                <span className="text-sm text-gray-700">
+                                  Job: {notification.relatedJob.title}
+                                </span>
                               </div>
                             )}
                             {notification.relatedUser && (
                               <div className="bg-gray-100 px-3 py-1 rounded-full flex items-center space-x-1">
                                 <User className="h-3 w-3 text-gray-600" />
-                                <span className="text-sm text-gray-700">User: {notification.relatedUser.name}</span>
+                                <span className="text-sm text-gray-700">
+                                  User: {notification.relatedUser.name}
+                                </span>
                               </div>
                             )}
                             {notification.sender && (
                               <div className="bg-gray-100 px-3 py-1 rounded-full flex items-center space-x-1">
                                 <User className="h-3 w-3 text-gray-600" />
-                                <span className="text-sm text-gray-700">From: {notification.sender.name}</span>
+                                <span className="text-sm text-gray-700">
+                                  From: {notification.sender.name}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -353,7 +408,10 @@ const NotificationsPage: React.FC = () => {
                         {notification.actionButton && (
                           <div className="mb-3">
                             <Button
-                              onClick={() => window.location.href = notification.actionButton!.url}
+                              onClick={() =>
+                                (window.location.href =
+                                  notification.actionButton!.url)
+                              }
                               variant="primary"
                               size="sm"
                             >
@@ -364,12 +422,21 @@ const NotificationsPage: React.FC = () => {
 
                         <div className="flex items-center justify-between text-sm text-gray-500">
                           <span>
-                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(
+                              new Date(notification.createdAt),
+                              { addSuffix: true },
+                            )}
                           </span>
                           {notification.isRead && notification.readAt && (
                             <span className="flex items-center space-x-1">
                               <Eye className="h-3 w-3" />
-                              <span>Read {formatDistanceToNow(new Date(notification.readAt), { addSuffix: true })}</span>
+                              <span>
+                                Read{" "}
+                                {formatDistanceToNow(
+                                  new Date(notification.readAt),
+                                  { addSuffix: true },
+                                )}
+                              </span>
                             </span>
                           )}
                         </div>
@@ -395,7 +462,9 @@ const NotificationsPage: React.FC = () => {
                         )}
 
                         <Button
-                          onClick={() => handleDeleteNotification(notification._id)}
+                          onClick={() =>
+                            handleDeleteNotification(notification._id)
+                          }
                           variant="outline"
                           size="sm"
                           className="flex items-center space-x-1 text-red-600 hover:bg-red-50"

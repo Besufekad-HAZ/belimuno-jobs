@@ -17,10 +17,25 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 
+type StoredUser = { role: string } | null;
+type Stats = {
+  totalUsers?: number;
+  totalJobs?: number;
+  completedJobs?: number;
+} | null;
+type FeaturedJob = {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  deadline?: string;
+  budget?: number;
+};
+
 export default function Home() {
-  const [user, setUser] = useState<any>(null);
-  const [stats, setStats] = useState<any>(null);
-  const [featuredJobs, setFeaturedJobs] = useState<any[]>([]);
+  const [user, setUser] = useState<StoredUser>(null);
+  const [stats, setStats] = useState<Stats>(null);
+  const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
   const router = useRouter();
   const t = useTranslations("Home");
 
@@ -169,16 +184,15 @@ export default function Home() {
                     <Badge variant="primary" size="sm">
                       {job.category}
                     </Badge>
-                    <span className="text-xs text-gray-500">
-                      {t("featuredJobs.due")}:{" "}
-                      {new Date(job.deadline).toLocaleDateString()}
-                    </span>
+                    {job.deadline && (
+                      <span className="text-xs text-gray-500">
+                        Due: {new Date(job.deadline).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
                   <Link href={user ? `/jobs/${job._id}` : "/login"}>
                     <Button size="sm" className="shadow-sm">
-                      {user
-                        ? t("featuredJobs.applyNow")
-                        : t("featuredJobs.loginToApply")}
+                      {user ? "Apply Now" : "Login to Apply"}
                     </Button>
                   </Link>
                 </div>

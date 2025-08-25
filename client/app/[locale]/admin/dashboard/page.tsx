@@ -104,7 +104,7 @@ const AdminDashboard: React.FC = () => {
               disputedPayments: 0,
               monthlyGrowth: 0,
             }
-          : null
+          : null,
       );
       setRecentUsers(usersResponse.data.data || []);
       setRecentJobs(jobsResponse.data.data?.slice(0, 5) || []);
@@ -130,7 +130,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleResolveDispute = async (
     disputeId: string,
-    action: "refund" | "release" | "partial" | "investigate"
+    action: "refund" | "release" | "partial" | "investigate",
   ) => {
     try {
       if (action === "investigate") {
@@ -142,8 +142,8 @@ const AdminDashboard: React.FC = () => {
         action === "refund"
           ? "Refund to client"
           : action === "release"
-          ? "Release payment to worker"
-          : "Partial refund to client";
+            ? "Release payment to worker"
+            : "Partial refund to client";
       await adminAPI.handlePaymentDispute(disputeId, action, resolution);
       setShowDisputeModal(false);
 
@@ -168,9 +168,7 @@ const AdminDashboard: React.FC = () => {
       const dataUri =
         "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-      const exportFileDefaultName = `belimuno-${reportType}-report-${
-        new Date().toISOString().split("T")[0]
-      }.json`;
+      const exportFileDefaultName = `belimuno-${reportType}-report-${new Date().toISOString().split("T")[0]}.json`;
 
       const linkElement = document.createElement("a");
       linkElement.setAttribute("href", dataUri);
@@ -404,10 +402,10 @@ const AdminDashboard: React.FC = () => {
                         job.status === "posted"
                           ? "bg-green-100 text-green-800"
                           : job.status === "in_progress"
-                          ? "bg-blue-100 text-blue-800"
-                          : job.status === "completed"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
+                            ? "bg-blue-100 text-blue-800"
+                            : job.status === "completed"
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
                       {job.status.replace("_", " ")}

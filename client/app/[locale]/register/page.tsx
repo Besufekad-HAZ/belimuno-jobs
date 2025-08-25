@@ -19,7 +19,7 @@ type GoogleIdentity = {
       }) => void;
       renderButton: (
         parent: HTMLElement,
-        options?: Record<string, unknown>
+        options?: Record<string, unknown>,
       ) => void;
     };
   };
@@ -57,7 +57,7 @@ const RegisterPage: React.FC = () => {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     setFormData({
       ...formData,
@@ -127,7 +127,7 @@ const RegisterPage: React.FC = () => {
       }
 
       const response = await authAPI.register(
-        registrationData as unknown as Record<string, unknown>
+        registrationData as unknown as Record<string, unknown>,
       );
       const { token, user } = response.data;
 
@@ -188,7 +188,7 @@ const RegisterPage: React.FC = () => {
         try {
           const res = await authAPI.loginWithGoogle(
             resp.credential,
-            formData.role as "worker" | "client"
+            formData.role as "worker" | "client",
           );
           const { token, user } = res.data;
           setAuth(token, user);

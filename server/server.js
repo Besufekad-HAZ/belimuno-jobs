@@ -20,9 +20,20 @@ app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 // Cookie parser middleware
 app.use(cookieParser());
 
-// CORS configuration
+// CORS configuration (supports multiple comma-separated origins and Vercel previews)
+const rawOrigins = (process.env.CLIENT_URLS || process.env.CLIENT_URL || 'http://localhost:3000').split(',').map(s => s.trim()).filter(Boolean);
+const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEWS !== 'false';
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true; // allow same-origin/SSR
+  if (rawOrigins.includes(origin)) return true;
+  if (allowVercelPreviews && /\.vercel\.app$/.test(origin)) return true;
+  return false;
+};
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET','POST','PUT','DELETE','OPTIONS','PATCH'],
   allowedHeaders: ['Content-Type','Authorization'],

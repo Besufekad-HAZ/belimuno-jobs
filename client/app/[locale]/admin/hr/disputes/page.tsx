@@ -1,27 +1,42 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
-  AlertTriangle, Search, Filter, Eye, MessageSquare, Clock, CheckCircle,
-  XCircle, User, Briefcase, DollarSign, Calendar, FileText, Phone, Mail,
-  ArrowRight, MoreVertical, Flag, Award
-} from 'lucide-react';
-import { getStoredUser, hasRole } from '@/lib/auth';
-import { adminAPI, notificationsAPI } from '@/lib/api';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import Modal from '@/components/ui/Modal';
-import { formatDistanceToNow } from 'date-fns';
+  AlertTriangle,
+  Search,
+  Filter,
+  Eye,
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  Briefcase,
+  DollarSign,
+  FileText,
+  Flag,
+  Award,
+} from "lucide-react";
+import { getStoredUser, hasRole } from "@/lib/auth";
+import { notificationsAPI } from "@/lib/api";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import Modal from "@/components/ui/Modal";
+import { formatDistanceToNow } from "date-fns";
 
 interface Dispute {
   _id: string;
   title: string;
   description: string;
-  status: 'open' | 'investigating' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  type: 'payment' | 'quality' | 'communication' | 'deadline' | 'scope' | 'other';
+  status: "open" | "investigating" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
+  type:
+    | "payment"
+    | "quality"
+    | "communication"
+    | "deadline"
+    | "scope"
+    | "other";
   worker: {
     _id: string;
     name: string;
@@ -54,42 +69,71 @@ interface Dispute {
   resolution?: string;
   hrNotes?: string;
   evidence?: {
-    type: 'image' | 'document' | 'message';
+    type: "image" | "document" | "message";
     url: string;
     description: string;
   }[];
 }
 
+type StatusFilter = "all" | "open" | "investigating" | "resolved";
+type PriorityFilter = "all" | "urgent" | "high" | "medium" | "low";
+type ResolutionStatus = "investigating" | "resolved" | "closed";
+
 const DisputeResolution: React.FC = () => {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
   const [filteredDisputes, setFilteredDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'investigating' | 'resolved'>('all');
-  const [priorityFilter, setPriorityFilter] = useState<'all' | 'urgent' | 'high' | 'medium' | 'low'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
   const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [resolutionData, setResolutionData] = useState({
-    status: 'resolved' as 'investigating' | 'resolved' | 'closed',
-    resolution: '',
-    hrNotes: ''
+    status: "resolved" as ResolutionStatus,
+    resolution: "",
+    hrNotes: "",
   });
   const router = useRouter();
 
   useEffect(() => {
     const user = getStoredUser();
-    if (!user || !hasRole(user, ['admin_hr'])) {
-      router.push('/login');
+    if (!user || !hasRole(user, ["admin_hr"])) {
+      router.push("/login");
       return;
     }
 
     fetchDisputes();
   }, [router]);
 
+  const filterDisputes = useCallback(() => {
+    let filtered = [...disputes];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (dispute) =>
+          dispute.title.toLowerCase().includes(q) ||
+          dispute.description.toLowerCase().includes(q) ||
+          dispute.worker.name.toLowerCase().includes(q) ||
+          dispute.client.name.toLowerCase().includes(q) ||
+          (dispute.job?.title?.toLowerCase().includes(q) ?? false),
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((d) => d.status === statusFilter);
+    }
+    if (priorityFilter !== "all") {
+      filtered = filtered.filter((d) => d.priority === priorityFilter);
+    }
+
+    setFilteredDisputes(filtered);
+  }, [disputes, searchQuery, statusFilter, priorityFilter]);
+
   useEffect(() => {
     filterDisputes();
-  }, [disputes, searchQuery, statusFilter, priorityFilter]);
+  }, [filterDisputes]);
 
   const fetchDisputes = async () => {
     try {
@@ -97,156 +141,151 @@ const DisputeResolution: React.FC = () => {
       // Mock data for now - in real implementation, fetch from API
       const mockDisputes: Dispute[] = [
         {
-          _id: '1',
-          title: 'Payment dispute for web development project',
-          description: 'Client is refusing to pay the final installment claiming the work is not up to standard. Worker claims all requirements were met as per the original specification.',
-          status: 'open',
-          priority: 'high',
-          type: 'payment',
+          _id: "1",
+          title: "Payment dispute for web development project",
+          description:
+            "Client is refusing to pay the final installment claiming the work is not up to standard. Worker claims all requirements were met as per the original specification.",
+          status: "open",
+          priority: "high",
+          type: "payment",
           worker: {
-            _id: 'w1',
-            name: 'John Smith',
-            email: 'john.smith@email.com',
-            phone: '+1234567890',
+            _id: "w1",
+            name: "John Smith",
+            email: "john.smith@email.com",
+            phone: "+1234567890",
             workerProfile: {
               rating: 4.2,
-              completedJobs: 15
-            }
+              completedJobs: 15,
+            },
           },
           client: {
-            _id: 'c1',
-            name: 'Sarah Johnson',
-            email: 'sarah.johnson@company.com',
-            phone: '+1987654321',
+            _id: "c1",
+            name: "Sarah Johnson",
+            email: "sarah.johnson@company.com",
+            phone: "+1987654321",
             clientProfile: {
-              company: 'Tech Solutions Inc',
-              totalProjects: 8
-            }
+              company: "Tech Solutions Inc",
+              totalProjects: 8,
+            },
           },
           job: {
-            _id: 'j1',
-            title: 'E-commerce Website Development',
+            _id: "j1",
+            title: "E-commerce Website Development",
             budget: 2500,
-            status: 'completed'
+            status: "completed",
           },
-          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          createdAt: new Date(
+            Date.now() - 2 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          updatedAt: new Date(
+            Date.now() - 1 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
           evidence: [
             {
-              type: 'document',
-              url: '/evidence/requirements.pdf',
-              description: 'Original project requirements'
+              type: "document",
+              url: "/evidence/requirements.pdf",
+              description: "Original project requirements",
             },
             {
-              type: 'image',
-              url: '/evidence/final-website.png',
-              description: 'Screenshot of completed website'
-            }
-          ]
+              type: "image",
+              url: "/evidence/final-website.png",
+              description: "Screenshot of completed website",
+            },
+          ],
         },
         {
-          _id: '2',
-          title: 'Work quality dispute',
-          description: 'Client claims the delivered graphic design work does not match the brief and is requesting a full refund.',
-          status: 'investigating',
-          priority: 'medium',
-          type: 'quality',
+          _id: "2",
+          title: "Work quality dispute",
+          description:
+            "Client claims the delivered graphic design work does not match the brief and is requesting a full refund.",
+          status: "investigating",
+          priority: "medium",
+          type: "quality",
           worker: {
-            _id: 'w2',
-            name: 'Maria Garcia',
-            email: 'maria.garcia@email.com',
+            _id: "w2",
+            name: "Maria Garcia",
+            email: "maria.garcia@email.com",
             workerProfile: {
               rating: 4.8,
-              completedJobs: 32
-            }
+              completedJobs: 32,
+            },
           },
           client: {
-            _id: 'c2',
-            name: 'David Wilson',
-            email: 'david@startup.com',
+            _id: "c2",
+            name: "David Wilson",
+            email: "david@startup.com",
             clientProfile: {
-              company: 'Startup Ventures',
-              totalProjects: 3
-            }
+              company: "Startup Ventures",
+              totalProjects: 3,
+            },
           },
           job: {
-            _id: 'j2',
-            title: 'Logo and Brand Identity Design',
+            _id: "j2",
+            title: "Logo and Brand Identity Design",
             budget: 800,
-            status: 'completed'
+            status: "completed",
           },
-          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          hrNotes: 'Initial investigation started. Reviewing project brief and delivered work.',
+          createdAt: new Date(
+            Date.now() - 5 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          updatedAt: new Date(
+            Date.now() - 3 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          hrNotes:
+            "Initial investigation started. Reviewing project brief and delivered work.",
         },
         {
-          _id: '3',
-          title: 'Scope expansion dispute',
-          description: 'Worker claims client added additional requirements beyond the original scope without agreeing to additional compensation.',
-          status: 'resolved',
-          priority: 'medium',
-          type: 'scope',
+          _id: "3",
+          title: "Scope expansion dispute",
+          description:
+            "Worker claims client added additional requirements beyond the original scope without agreeing to additional compensation.",
+          status: "resolved",
+          priority: "medium",
+          type: "scope",
           worker: {
-            _id: 'w3',
-            name: 'Alex Chen',
-            email: 'alex.chen@email.com',
+            _id: "w3",
+            name: "Alex Chen",
+            email: "alex.chen@email.com",
             workerProfile: {
               rating: 4.5,
-              completedJobs: 28
-            }
+              completedJobs: 28,
+            },
           },
           client: {
-            _id: 'c3',
-            name: 'Lisa Brown',
-            email: 'lisa@enterprise.com',
+            _id: "c3",
+            name: "Lisa Brown",
+            email: "lisa@enterprise.com",
             clientProfile: {
-              company: 'Enterprise Corp',
-              totalProjects: 12
-            }
+              company: "Enterprise Corp",
+              totalProjects: 12,
+            },
           },
           job: {
-            _id: 'j3',
-            title: 'Mobile App Development',
+            _id: "j3",
+            title: "Mobile App Development",
             budget: 4000,
-            status: 'completed'
+            status: "completed",
           },
-          createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          resolvedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          resolution: 'Dispute resolved in favor of worker. Client agreed to pay additional 20% for extra features. Both parties satisfied with outcome.',
-          hrNotes: 'Clear evidence of scope creep. Original contract reviewed and additional work confirmed.'
-        }
+          createdAt: new Date(
+            Date.now() - 10 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          updatedAt: new Date(
+            Date.now() - 1 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          resolvedAt: new Date(
+            Date.now() - 1 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          resolution:
+            "Dispute resolved in favor of worker. Client agreed to pay additional 20% for extra features. Both parties satisfied with outcome.",
+          hrNotes:
+            "Clear evidence of scope creep. Original contract reviewed and additional work confirmed.",
+        },
       ];
 
       setDisputes(mockDisputes);
-    } catch (error) {
-      console.error('Failed to fetch disputes:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterDisputes = () => {
-    let filtered = [...disputes];
-
-    if (searchQuery) {
-      filtered = filtered.filter(dispute =>
-        dispute.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dispute.worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dispute.client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        dispute.job?.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(dispute => dispute.status === statusFilter);
-    }
-
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(dispute => dispute.priority === priorityFilter);
-    }
-
-    setFilteredDisputes(filtered);
   };
 
   const handleResolveDispute = async () => {
@@ -259,71 +298,76 @@ const DisputeResolution: React.FC = () => {
         status: resolutionData.status,
         resolution: resolutionData.resolution,
         hrNotes: resolutionData.hrNotes,
-        resolvedAt: resolutionData.status === 'resolved' ? new Date().toISOString() : undefined,
-        updatedAt: new Date().toISOString()
+        resolvedAt:
+          resolutionData.status === "resolved"
+            ? new Date().toISOString()
+            : undefined,
+        updatedAt: new Date().toISOString(),
       };
 
-      setDisputes(prev => prev.map(d => d._id === selectedDispute._id ? updatedDispute : d));
+      setDisputes((prev) =>
+        prev.map((d) => (d._id === selectedDispute._id ? updatedDispute : d)),
+      );
 
       // Send notifications to involved parties
       await notificationsAPI.create({
         recipients: [selectedDispute.worker._id, selectedDispute.client._id],
         title: `Dispute Update: ${selectedDispute.title}`,
         message: `Your dispute has been updated. Status: ${resolutionData.status}. ${resolutionData.resolution}`,
-        type: 'dispute_resolved',
-        priority: 'high'
+        type: "dispute_resolved",
+        priority: "high",
       });
 
       setShowResolutionModal(false);
-      setResolutionData({ status: 'resolved', resolution: '', hrNotes: '' });
-      alert('Dispute updated successfully!');
+      setResolutionData({ status: "resolved", resolution: "", hrNotes: "" });
+      alert("Dispute updated successfully!");
     } catch (error) {
-      console.error('Failed to resolve dispute:', error);
-      alert('Failed to update dispute. Please try again.');
+      console.error("Failed to resolve dispute:", error);
+      alert("Failed to update dispute. Please try again.");
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'open':
-        return <Badge variant="red">Open</Badge>;
-      case 'investigating':
-        return <Badge variant="orange">Investigating</Badge>;
-      case 'resolved':
-        return <Badge variant="green">Resolved</Badge>;
-      case 'closed':
-        return <Badge variant="gray">Closed</Badge>;
+      case "open":
+        return <Badge variant="danger">Open</Badge>;
+      case "investigating":
+        return <Badge variant="warning">Investigating</Badge>;
+      case "resolved":
+        return <Badge variant="success">Resolved</Badge>;
+      case "closed":
+        return <Badge variant="secondary">Closed</Badge>;
       default:
-        return <Badge variant="gray">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
-      case 'urgent':
-        return <Badge variant="red">Urgent</Badge>;
-      case 'high':
-        return <Badge variant="orange">High</Badge>;
-      case 'medium':
-        return <Badge variant="blue">Medium</Badge>;
-      case 'low':
-        return <Badge variant="gray">Low</Badge>;
+      case "urgent":
+        return <Badge variant="danger">Urgent</Badge>;
+      case "high":
+        return <Badge variant="warning">High</Badge>;
+      case "medium":
+        return <Badge variant="info">Medium</Badge>;
+      case "low":
+        return <Badge variant="secondary">Low</Badge>;
       default:
-        return <Badge variant="gray">{priority}</Badge>;
+        return <Badge variant="secondary">{priority}</Badge>;
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'payment':
+      case "payment":
         return <DollarSign className="h-5 w-5 text-green-600" />;
-      case 'quality':
+      case "quality":
         return <Award className="h-5 w-5 text-blue-600" />;
-      case 'communication':
+      case "communication":
         return <MessageSquare className="h-5 w-5 text-purple-600" />;
-      case 'deadline':
+      case "deadline":
         return <Clock className="h-5 w-5 text-orange-600" />;
-      case 'scope':
+      case "scope":
         return <Briefcase className="h-5 w-5 text-teal-600" />;
       default:
         return <AlertTriangle className="h-5 w-5 text-gray-600" />;
@@ -344,12 +388,16 @@ const DisputeResolution: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dispute Resolution</h1>
-            <p className="text-gray-600">Manage and resolve disputes between workers and clients</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Dispute Resolution
+            </h1>
+            <p className="text-gray-600">
+              Manage and resolve disputes between workers and clients
+            </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
             <Button
-              onClick={() => router.push('/admin/hr/dashboard')}
+              onClick={() => router.push("/admin/hr/dashboard")}
               variant="outline"
             >
               Back to Dashboard
@@ -363,9 +411,11 @@ const DisputeResolution: React.FC = () => {
             <div className="flex items-center">
               <AlertTriangle className="h-8 w-8 text-red-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Open Disputes</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Open Disputes
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {disputes.filter(d => d.status === 'open').length}
+                  {disputes.filter((d) => d.status === "open").length}
                 </p>
               </div>
             </div>
@@ -374,9 +424,11 @@ const DisputeResolution: React.FC = () => {
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-orange-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">Investigating</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Investigating
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {disputes.filter(d => d.status === 'investigating').length}
+                  {disputes.filter((d) => d.status === "investigating").length}
                 </p>
               </div>
             </div>
@@ -387,7 +439,7 @@ const DisputeResolution: React.FC = () => {
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-600">Resolved</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {disputes.filter(d => d.status === 'resolved').length}
+                  {disputes.filter((d) => d.status === "resolved").length}
                 </p>
               </div>
             </div>
@@ -396,9 +448,15 @@ const DisputeResolution: React.FC = () => {
             <div className="flex items-center">
               <Flag className="h-8 w-8 text-purple-600" />
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600">High Priority</p>
+                <p className="text-sm font-medium text-gray-600">
+                  High Priority
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {disputes.filter(d => d.priority === 'high' || d.priority === 'urgent').length}
+                  {
+                    disputes.filter(
+                      (d) => d.priority === "high" || d.priority === "urgent",
+                    ).length
+                  }
                 </p>
               </div>
             </div>
@@ -427,7 +485,9 @@ const DisputeResolution: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setStatusFilter(e.target.value as StatusFilter)
+                  }
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
@@ -441,7 +501,9 @@ const DisputeResolution: React.FC = () => {
                 <span className="text-sm text-gray-600">Priority:</span>
                 <select
                   value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setPriorityFilter(e.target.value as PriorityFilter)
+                  }
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
@@ -460,14 +522,21 @@ const DisputeResolution: React.FC = () => {
           {filteredDisputes.length === 0 ? (
             <Card className="p-12 text-center">
               <AlertTriangle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No disputes found</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No disputes found
+              </h3>
               <p className="text-gray-600">
-                {searchQuery ? 'No disputes match your search criteria.' : 'No disputes to display.'}
+                {searchQuery
+                  ? "No disputes match your search criteria."
+                  : "No disputes to display."}
               </p>
             </Card>
           ) : (
             filteredDisputes.map((dispute) => (
-              <Card key={dispute._id} className="p-6 hover:shadow-md transition-shadow">
+              <Card
+                key={dispute._id}
+                className="p-6 hover:shadow-md transition-shadow"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4 flex-1">
                     <div className="p-3 rounded-lg bg-gray-100">
@@ -476,56 +545,95 @@ const DisputeResolution: React.FC = () => {
 
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{dispute.title}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {dispute.title}
+                        </h3>
                         {getStatusBadge(dispute.status)}
                         {getPriorityBadge(dispute.priority)}
-                        <Badge variant="gray" size="sm">{dispute.type}</Badge>
+                        <Badge variant="secondary" size="sm">
+                          {dispute.type}
+                        </Badge>
                       </div>
 
-                      <p className="text-gray-600 mb-4 line-clamp-2">{dispute.description}</p>
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {dispute.description}
+                      </p>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">Worker</p>
-                          <p className="text-sm text-gray-600">{dispute.worker.name}</p>
-                          <p className="text-xs text-gray-500">{dispute.worker.email}</p>
+                          <p className="text-sm font-medium text-gray-700">
+                            Worker
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {dispute.worker.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {dispute.worker.email}
+                          </p>
                           {dispute.worker.workerProfile && (
                             <div className="flex items-center space-x-2 mt-1">
                               <span className="text-xs text-gray-500">
                                 ⭐ {dispute.worker.workerProfile.rating}/5
                               </span>
                               <span className="text-xs text-gray-500">
-                                {dispute.worker.workerProfile.completedJobs} jobs
+                                {dispute.worker.workerProfile.completedJobs}{" "}
+                                jobs
                               </span>
                             </div>
                           )}
                         </div>
 
                         <div>
-                          <p className="text-sm font-medium text-gray-700">Client</p>
-                          <p className="text-sm text-gray-600">{dispute.client.name}</p>
-                          <p className="text-xs text-gray-500">{dispute.client.email}</p>
+                          <p className="text-sm font-medium text-gray-700">
+                            Client
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {dispute.client.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {dispute.client.email}
+                          </p>
                           {dispute.client.clientProfile?.company && (
-                            <p className="text-xs text-gray-500">{dispute.client.clientProfile.company}</p>
+                            <p className="text-xs text-gray-500">
+                              {dispute.client.clientProfile.company}
+                            </p>
                           )}
                         </div>
 
                         <div>
                           {dispute.job && (
                             <>
-                              <p className="text-sm font-medium text-gray-700">Related Job</p>
-                              <p className="text-sm text-gray-600">{dispute.job.title}</p>
-                              <p className="text-xs text-gray-500">Budget: ${dispute.job.budget}</p>
-                              <p className="text-xs text-gray-500">Status: {dispute.job.status}</p>
+                              <p className="text-sm font-medium text-gray-700">
+                                Related Job
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {dispute.job.title}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Budget: ${dispute.job.budget}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Status: {dispute.job.status}
+                              </p>
                             </>
                           )}
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>Created {formatDistanceToNow(new Date(dispute.createdAt), { addSuffix: true })}</span>
+                        <span>
+                          Created{" "}
+                          {formatDistanceToNow(new Date(dispute.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </span>
                         {dispute.resolvedAt && (
-                          <span>Resolved {formatDistanceToNow(new Date(dispute.resolvedAt), { addSuffix: true })}</span>
+                          <span>
+                            Resolved{" "}
+                            {formatDistanceToNow(new Date(dispute.resolvedAt), {
+                              addSuffix: true,
+                            })}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -545,34 +653,38 @@ const DisputeResolution: React.FC = () => {
                       <span>View Details</span>
                     </Button>
 
-                    {dispute.status !== 'resolved' && dispute.status !== 'closed' && (
-                      <Button
-                        onClick={() => {
-                          setSelectedDispute(dispute);
-                          setResolutionData({
-                            status: dispute.status === 'open' ? 'investigating' : 'resolved',
-                            resolution: dispute.resolution || '',
-                            hrNotes: dispute.hrNotes || ''
-                          });
-                          setShowResolutionModal(true);
-                        }}
-                        variant="primary"
-                        size="sm"
-                        className="flex items-center space-x-2"
-                      >
-                        {dispute.status === 'open' ? (
-                          <>
-                            <Clock className="h-4 w-4" />
-                            <span>Investigate</span>
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Resolve</span>
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    {dispute.status !== "resolved" &&
+                      dispute.status !== "closed" && (
+                        <Button
+                          onClick={() => {
+                            setSelectedDispute(dispute);
+                            setResolutionData({
+                              status:
+                                dispute.status === "open"
+                                  ? "investigating"
+                                  : "resolved",
+                              resolution: dispute.resolution || "",
+                              hrNotes: dispute.hrNotes || "",
+                            });
+                            setShowResolutionModal(true);
+                          }}
+                          variant="primary"
+                          size="sm"
+                          className="flex items-center space-x-2"
+                        >
+                          {dispute.status === "open" ? (
+                            <>
+                              <Clock className="h-4 w-4" />
+                              <span>Investigate</span>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-4 w-4" />
+                              <span>Resolve</span>
+                            </>
+                          )}
+                        </Button>
+                      )}
                   </div>
                 </div>
               </Card>
@@ -594,29 +706,45 @@ const DisputeResolution: React.FC = () => {
             <div className="space-y-6 max-h-96 overflow-y-auto">
               <div className="flex items-center space-x-3">
                 {getTypeIcon(selectedDispute.type)}
-                <h3 className="text-xl font-semibold">{selectedDispute.title}</h3>
+                <h3 className="text-xl font-semibold">
+                  {selectedDispute.title}
+                </h3>
                 {getStatusBadge(selectedDispute.status)}
                 {getPriorityBadge(selectedDispute.priority)}
               </div>
 
               <div>
                 <h4 className="font-semibold mb-2">Description</h4>
-                <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">{selectedDispute.description}</p>
+                <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
+                  {selectedDispute.description}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-semibold mb-3">Worker Details</h4>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p><strong>Name:</strong> {selectedDispute.worker.name}</p>
-                    <p><strong>Email:</strong> {selectedDispute.worker.email}</p>
+                    <p>
+                      <strong>Name:</strong> {selectedDispute.worker.name}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {selectedDispute.worker.email}
+                    </p>
                     {selectedDispute.worker.phone && (
-                      <p><strong>Phone:</strong> {selectedDispute.worker.phone}</p>
+                      <p>
+                        <strong>Phone:</strong> {selectedDispute.worker.phone}
+                      </p>
                     )}
                     {selectedDispute.worker.workerProfile && (
                       <>
-                        <p><strong>Rating:</strong> {selectedDispute.worker.workerProfile.rating}/5 ⭐</p>
-                        <p><strong>Completed Jobs:</strong> {selectedDispute.worker.workerProfile.completedJobs}</p>
+                        <p>
+                          <strong>Rating:</strong>{" "}
+                          {selectedDispute.worker.workerProfile.rating}/5 ⭐
+                        </p>
+                        <p>
+                          <strong>Completed Jobs:</strong>{" "}
+                          {selectedDispute.worker.workerProfile.completedJobs}
+                        </p>
                       </>
                     )}
                   </div>
@@ -625,16 +753,28 @@ const DisputeResolution: React.FC = () => {
                 <div>
                   <h4 className="font-semibold mb-3">Client Details</h4>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p><strong>Name:</strong> {selectedDispute.client.name}</p>
-                    <p><strong>Email:</strong> {selectedDispute.client.email}</p>
+                    <p>
+                      <strong>Name:</strong> {selectedDispute.client.name}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {selectedDispute.client.email}
+                    </p>
                     {selectedDispute.client.phone && (
-                      <p><strong>Phone:</strong> {selectedDispute.client.phone}</p>
+                      <p>
+                        <strong>Phone:</strong> {selectedDispute.client.phone}
+                      </p>
                     )}
                     {selectedDispute.client.clientProfile?.company && (
-                      <p><strong>Company:</strong> {selectedDispute.client.clientProfile.company}</p>
+                      <p>
+                        <strong>Company:</strong>{" "}
+                        {selectedDispute.client.clientProfile.company}
+                      </p>
                     )}
                     {selectedDispute.client.clientProfile?.totalProjects && (
-                      <p><strong>Total Projects:</strong> {selectedDispute.client.clientProfile.totalProjects}</p>
+                      <p>
+                        <strong>Total Projects:</strong>{" "}
+                        {selectedDispute.client.clientProfile.totalProjects}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -644,30 +784,46 @@ const DisputeResolution: React.FC = () => {
                 <div>
                   <h4 className="font-semibold mb-3">Related Job</h4>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p><strong>Title:</strong> {selectedDispute.job.title}</p>
-                    <p><strong>Budget:</strong> ${selectedDispute.job.budget}</p>
-                    <p><strong>Status:</strong> {selectedDispute.job.status}</p>
+                    <p>
+                      <strong>Title:</strong> {selectedDispute.job.title}
+                    </p>
+                    <p>
+                      <strong>Budget:</strong> ${selectedDispute.job.budget}
+                    </p>
+                    <p>
+                      <strong>Status:</strong> {selectedDispute.job.status}
+                    </p>
                   </div>
                 </div>
               )}
 
-              {selectedDispute.evidence && selectedDispute.evidence.length > 0 && (
-                <div>
-                  <h4 className="font-semibold mb-3">Evidence</h4>
-                  <div className="space-y-2">
-                    {selectedDispute.evidence.map((evidence, idx) => (
-                      <div key={idx} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <FileText className="h-5 w-5 text-gray-600" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{evidence.description}</p>
-                          <p className="text-xs text-gray-500">{evidence.type}</p>
+              {selectedDispute.evidence &&
+                selectedDispute.evidence.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Evidence</h4>
+                    <div className="space-y-2">
+                      {selectedDispute.evidence.map((evidence, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                        >
+                          <FileText className="h-5 w-5 text-gray-600" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              {evidence.description}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {evidence.type}
+                            </p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            View
+                          </Button>
                         </div>
-                        <Button variant="outline" size="sm">View</Button>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {selectedDispute.hrNotes && (
                 <div>
@@ -688,8 +844,14 @@ const DisputeResolution: React.FC = () => {
               )}
 
               <div className="flex items-center justify-between text-sm text-gray-500">
-                <span>Created: {new Date(selectedDispute.createdAt).toLocaleDateString()}</span>
-                <span>Updated: {new Date(selectedDispute.updatedAt).toLocaleDateString()}</span>
+                <span>
+                  Created:{" "}
+                  {new Date(selectedDispute.createdAt).toLocaleDateString()}
+                </span>
+                <span>
+                  Updated:{" "}
+                  {new Date(selectedDispute.updatedAt).toLocaleDateString()}
+                </span>
               </div>
             </div>
           )}
@@ -701,20 +863,34 @@ const DisputeResolution: React.FC = () => {
           onClose={() => {
             setShowResolutionModal(false);
             setSelectedDispute(null);
-            setResolutionData({ status: 'resolved', resolution: '', hrNotes: '' });
+            setResolutionData({
+              status: "resolved",
+              resolution: "",
+              hrNotes: "",
+            });
           }}
           title="Update Dispute"
           size="lg"
         >
           {selectedDispute && (
             <div className="space-y-4">
-              <p className="text-gray-700">Update the status and resolution for: <strong>{selectedDispute.title}</strong></p>
+              <p className="text-gray-700">
+                Update the status and resolution for:{" "}
+                <strong>{selectedDispute.title}</strong>
+              </p>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
                 <select
                   value={resolutionData.status}
-                  onChange={(e) => setResolutionData(prev => ({ ...prev, status: e.target.value as any }))}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setResolutionData((prev) => ({
+                      ...prev,
+                      status: e.target.value as ResolutionStatus,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="investigating">Investigating</option>
@@ -729,7 +905,12 @@ const DisputeResolution: React.FC = () => {
                 </label>
                 <textarea
                   value={resolutionData.resolution}
-                  onChange={(e) => setResolutionData(prev => ({ ...prev, resolution: e.target.value }))}
+                  onChange={(e) =>
+                    setResolutionData((prev) => ({
+                      ...prev,
+                      resolution: e.target.value,
+                    }))
+                  }
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                   placeholder="Describe the resolution or current status..."
@@ -742,7 +923,12 @@ const DisputeResolution: React.FC = () => {
                 </label>
                 <textarea
                   value={resolutionData.hrNotes}
-                  onChange={(e) => setResolutionData(prev => ({ ...prev, hrNotes: e.target.value }))}
+                  onChange={(e) =>
+                    setResolutionData((prev) => ({
+                      ...prev,
+                      hrNotes: e.target.value,
+                    }))
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                   placeholder="Internal notes and observations..."
@@ -760,7 +946,11 @@ const DisputeResolution: React.FC = () => {
                 <Button
                   onClick={() => {
                     setShowResolutionModal(false);
-                    setResolutionData({ status: 'resolved', resolution: '', hrNotes: '' });
+                    setResolutionData({
+                      status: "resolved",
+                      resolution: "",
+                      hrNotes: "",
+                    });
                   }}
                   variant="outline"
                 >

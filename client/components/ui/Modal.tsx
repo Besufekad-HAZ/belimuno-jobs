@@ -1,13 +1,13 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import Button from './Button';
+import React from "react";
+import { X } from "lucide-react";
+import Button from "./Button";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
   showCloseButton?: boolean;
   // When true (default), the modal body scrolls if content is tall.
   // Set to false when children manage their own scroll (e.g., chat, editors).
@@ -22,24 +22,26 @@ const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   children,
-  size = 'md',
+  size = "md",
   showCloseButton = true,
   scrollContent = true,
-  containerClassName = '',
-  contentClassName = '',
+  containerClassName = "",
+  contentClassName = "",
 }) => {
   if (!isOpen) return null;
 
   const sizes = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-2xl",
+    xl: "max-w-4xl",
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`bg-white rounded-lg shadow-xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden ${containerClassName}`}>
+      <div
+        className={`bg-white rounded-lg shadow-xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden ${containerClassName}`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
@@ -56,7 +58,9 @@ const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className={`p-6 ${scrollContent ? 'overflow-y-auto max-h-[calc(90vh-120px)]' : ''} ${contentClassName}`}>
+        <div
+          className={`p-6 ${scrollContent ? "overflow-y-auto max-h-[calc(90vh-120px)]" : ""} ${contentClassName}`}
+        >
           {children}
         </div>
       </div>

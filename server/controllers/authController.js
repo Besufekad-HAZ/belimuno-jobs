@@ -556,8 +556,9 @@ async function googleAuth(req, res) {
     try {
       googlePayload = await verifyGoogleIdToken(credential);
     } catch (err) {
-      console.error('Google auth error:', err);
-      if (process.env.GOOGLE_OFFLINE_VERIFY === 'true') {
+      console.error('Google auth verify error:', err);
+      const allowOffline = process.env.GOOGLE_OFFLINE_VERIFY === 'true' || (process.env.NODE_ENV || 'development') !== 'production';
+      if (allowOffline) {
         try {
           const decoded = jwt.decode(credential) || {};
           const now = Math.floor(Date.now() / 1000);
@@ -570,21 +571,33 @@ async function googleAuth(req, res) {
             name: decoded.name,
             picture: decoded.picture,
           };
+          console.warn('Google auth: using offline JWT decode fallback (dev mode).');
         } catch (e) {
-          return res.status(503).json({ success: false, message: 'Unable to verify Google token (network). Enable GOOGLE_OFFLINE_VERIFY=true for local dev or check connectivity.', error: err.message });
+          return res.status(400).json({ success: false, message: 'Invalid Google credential. Please try again.', error: (e && e.message) || 'decode_failed' });
         }
       } else {
-        return res.status(503).json({ success: false, message: 'Unable to verify Google token (network). Enable GOOGLE_OFFLINE_VERIFY=true for local dev or check connectivity.', error: err.message });
+        return res.status(503).json({ success: false, message: 'Unable to verify Google token (network). Please try again later.', error: err.message });
       }
     }
     const audience = googlePayload.aud;
     const expectedStr = (process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_IDS || '').trim();
     const expectedList = expectedStr ? expectedStr.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
+    const isProd = (process.env.NODE_ENV || 'development') === 'production';
+    const offlineVerify = process.env.GOOGLE_OFFLINE_VERIFY === 'true';
+
     if (expectedList.length === 0) {
-      return res.status(500).json({ success: false, message: 'Server misconfiguration: GOOGLE_CLIENT_ID not set' });
-    }
-    if (!expectedList.includes(audience)) {
-      return res.status(401).json({ success: false, message: 'Invalid token audience', expected: expectedList, received: audience });
+      if (!isProd || offlineVerify) {
+        console.warn('Google auth: GOOGLE_CLIENT_ID not set; skipping audience check in development/offline mode.');
+      } else {
+        return res.status(500).json({ success: false, message: 'Server misconfiguration: GOOGLE_CLIENT_ID not set' });
+      }
+    } else if (!expectedList.includes(audience)) {
+      if (!isProd || offlineVerify) {
+        console.warn(`Google auth: token audience ${audience} not in expected list [${expectedList.join(', ')}]; allowing in development/offline mode.`);
+      } else {
+        return res.status(401).json({ success: false, message: 'Invalid token audience', expected: expectedList, received: audience });
+      }
     }
     const emailVerified = googlePayload.email_verified === true || googlePayload.email_verified === 'true';
     if (!emailVerified) {

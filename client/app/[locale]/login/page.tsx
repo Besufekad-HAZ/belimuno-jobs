@@ -18,7 +18,7 @@ type GoogleIdentity = {
       }) => void;
       renderButton: (
         parent: HTMLElement,
-        options?: Record<string, unknown>
+        options?: Record<string, unknown>,
       ) => void;
     };
   };

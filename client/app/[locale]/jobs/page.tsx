@@ -41,11 +41,11 @@ const JobsPage: React.FC = () => {
   const [regionFilter, setRegionFilter] = useState("");
   const [budgetRange, setBudgetRange] = useState({ min: "", max: "" });
   const [user, setUser] = useState<ReturnType<typeof getStoredUser> | null>(
-    null
+    null,
   );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [savingJobId, setSavingJobId] = useState<string | null>(null);
+  // Removed unused saving state to satisfy eslint
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
   const t = useTranslations("JobsPage");
 
@@ -99,7 +99,7 @@ const JobsPage: React.FC = () => {
           workType: j.workType as string | undefined,
           location: j.location as string | undefined,
           applications: j.applications as unknown[] | undefined,
-        }))
+        })),
       );
       setTotalPages(payload.pagination?.pages || 1);
     } catch (error) {
@@ -118,9 +118,12 @@ const JobsPage: React.FC = () => {
       try {
         if (currentUser?.role === "worker") {
           const res = await workerAPI.getSavedJobs();
+          const arr: unknown = res.data?.data || [];
           const ids = new Set(
-            (res.data?.data || []).map((j: any) => String(j._id))
-          ) as Set<string>;
+            (Array.isArray(arr) ? arr : []).map((j) =>
+              String((j as { _id?: unknown })._id),
+            ),
+          );
           setSavedJobIds(ids);
         }
       } catch {}
@@ -239,12 +242,7 @@ const JobsPage: React.FC = () => {
                 </Button>
               </div>
               <p className="text-sm text-gray-500">
-                {jobs.length}{" "}
-                {t(
-                  jobs.length === 1
-                    ? "search.filters.results.single"
-                    : "search.filters.results.multiple"
-                )}
+                {jobs.length} job{jobs.length !== 1 ? "s" : ""} found
               </p>
             </div>
           </div>
@@ -293,10 +291,10 @@ const JobsPage: React.FC = () => {
                             job.priority === "urgent"
                               ? "bg-red-100 text-red-800"
                               : job.priority === "high"
-                              ? "bg-orange-100 text-orange-800"
-                              : job.priority === "medium"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-800"
+                                ? "bg-orange-100 text-orange-800"
+                                : job.priority === "medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
                           }`}
                         >
                           {job.priority} priority
@@ -379,7 +377,7 @@ const JobsPage: React.FC = () => {
                           size="sm"
                           onClick={async () => {
                             if (user?.role !== "worker") return;
-                            setSavingJobId(job._id);
+                            // Optimistically update saved jobs set
                             try {
                               if (savedJobIds.has(job._id)) {
                                 await workerAPI.unsaveJob(job._id);
@@ -394,8 +392,6 @@ const JobsPage: React.FC = () => {
                               }
                             } catch (e) {
                               console.error(e);
-                            } finally {
-                              setSavingJobId(null);
                             }
                           }}
                         >
@@ -410,11 +406,15 @@ const JobsPage: React.FC = () => {
                           onClick={async () => {
                             const url = `${window.location.origin}/jobs/${job._id}`;
                             try {
-                              if ((navigator as any).share) {
-                                await (navigator as any).share({
-                                  title: `Belimuno Job: ${job.title}`,
-                                  url,
-                                });
+                              const shareData: ShareData = {
+                                title: `Belimuno Job: ${job.title}`,
+                                url,
+                              };
+                              if (
+                                "share" in navigator &&
+                                typeof navigator.share === "function"
+                              ) {
+                                await navigator.share(shareData);
                               } else if (navigator.clipboard) {
                                 await navigator.clipboard.writeText(url);
                                 alert("Link copied to clipboard");
@@ -471,7 +471,7 @@ const JobsPage: React.FC = () => {
                     budgetMin: budgetRange.min || undefined,
                     budgetMax: budgetRange.max || undefined,
                   },
-                  newPage
+                  newPage,
                 );
               }}
             >
@@ -494,7 +494,7 @@ const JobsPage: React.FC = () => {
                     budgetMin: budgetRange.min || undefined,
                     budgetMax: budgetRange.max || undefined,
                   },
-                  newPage
+                  newPage,
                 );
               }}
             >

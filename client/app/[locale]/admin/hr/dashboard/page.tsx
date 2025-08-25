@@ -5,19 +5,12 @@ import { useRouter } from "next/navigation";
 import {
   Users,
   UserCheck,
-  UserX,
   Clock,
-  TrendingUp,
   AlertTriangle,
-  FileText,
-  MessageSquare,
   Award,
-  Calendar,
   CheckCircle,
   XCircle,
   Eye,
-  Download,
-  UserPlus,
   Bell,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -110,6 +103,7 @@ const HRAdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [usersResponse, dashboardResponse] = await Promise.all([
         adminAPI.getUsers({ role: "worker", limit: 100 }),
         adminAPI.getDashboard(),
@@ -127,10 +121,10 @@ const HRAdminDashboard: React.FC = () => {
       const hrStats: HRStats = {
         totalWorkers: workersData.length,
         verifiedWorkers: workersData.filter(
-          (w: Worker) => w.isVerified || w.profile?.verified
+          (w: Worker) => w.isVerified || w.profile?.verified,
         ).length,
         pendingVerifications: workersData.filter(
-          (w: Worker) => !w.isVerified && !w.profile?.verified
+          (w: Worker) => !w.isVerified && !w.profile?.verified,
         ).length,
         activeWorkers: workersData.filter((w: Worker) => w.isActive).length,
         workersThisMonth: workersData.filter((w: Worker) => {
@@ -177,7 +171,7 @@ const HRAdminDashboard: React.FC = () => {
               disputesOpen: mockDisputes.filter((d) => d.status === "open")
                 .length,
             }
-          : null
+          : null,
       );
     } catch (error) {
       console.error("Failed to fetch HR dashboard data:", error);
@@ -188,7 +182,7 @@ const HRAdminDashboard: React.FC = () => {
 
   const handleWorkerVerification = async (
     workerId: string,
-    action: "verify" | "reject"
+    action: "verify" | "reject",
   ) => {
     try {
       if (action === "verify") {
@@ -443,12 +437,15 @@ const HRAdminDashboard: React.FC = () => {
                           dispute.priority === "high"
                             ? "danger"
                             : dispute.priority === "medium"
-                            ? "warning"
-                            : "info"
+                              ? "warning"
+                              : "info"
                         }
                         size="sm"
                       >
                         {t(`disputes.priority.${dispute.priority}`)}
+                      </Badge>
+                      <Badge variant="secondary" size="sm">
+                        {dispute.status}
                       </Badge>
                       <Badge variant="secondary" size="sm">
                         {dispute.status}
@@ -671,7 +668,7 @@ const HRAdminDashboard: React.FC = () => {
                             <Badge key={idx} variant="info" size="sm">
                               {skill}
                             </Badge>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -723,8 +720,8 @@ const HRAdminDashboard: React.FC = () => {
                     selectedDispute.priority === "high"
                       ? "danger"
                       : selectedDispute.priority === "medium"
-                      ? "warning"
-                      : "info"
+                        ? "warning"
+                        : "info"
                   }
                 >
                   {t(`disputes.priority.${selectedDispute.priority}`)}{" "}

@@ -1,19 +1,30 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
-  Building, Search, Filter, Eye, Edit, Mail, Phone, MapPin,
-  Calendar, Star, Briefcase, DollarSign, TrendingUp, Users,
-  CheckCircle, AlertCircle, MoreVertical, MessageSquare, FileText
-} from 'lucide-react';
-import { getStoredUser, hasRole } from '@/lib/auth';
-import { adminAPI, notificationsAPI } from '@/lib/api';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
-import Modal from '@/components/ui/Modal';
-import { formatDistanceToNow } from 'date-fns';
+  Building,
+  Search,
+  Filter,
+  Eye,
+  Mail,
+  Phone,
+  Calendar,
+  Star,
+  Briefcase,
+  DollarSign,
+  TrendingUp,
+  CheckCircle,
+  MessageSquare,
+} from "lucide-react";
+import { getStoredUser, hasRole } from "@/lib/auth";
+import { adminAPI, notificationsAPI } from "@/lib/api";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import Modal from "@/components/ui/Modal";
+import { formatDistanceToNow } from "date-fns";
 
 interface Client {
   _id: string;
@@ -61,55 +72,138 @@ interface ClientStats {
   clientRetentionRate: number;
 }
 
+type StatusFilter = "all" | "active" | "inactive";
+interface MessageContent {
+  title: string;
+  message: string;
+}
+type ApiClient = Partial<Client> & {
+  _id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  isActive?: boolean;
+};
+type BadgeVariant =
+  | "primary"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info";
+
 const ClientManagement: React.FC = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [stats, setStats] = useState<ClientStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [industryFilter, setIndustryFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [industryFilter, setIndustryFilter] = useState<string>("all");
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showClientModal, setShowClientModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageContent, setMessageContent] = useState({ title: '', message: '' });
+  const [messageContent, setMessageContent] = useState<MessageContent>({
+    title: "",
+    message: "",
+  });
   const router = useRouter();
 
   useEffect(() => {
     const user = getStoredUser();
-    if (!user || !hasRole(user, ['admin_outsource'])) {
-      router.push('/login');
+    if (!user || !hasRole(user, ["admin_outsource"])) {
+      router.push("/login");
       return;
     }
 
     fetchClients();
   }, [router]);
 
+  const filterClients = useCallback(() => {
+    let filtered = [...clients];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (client) =>
+          client.name.toLowerCase().includes(q) ||
+          client.email.toLowerCase().includes(q) ||
+          (client.clientProfile?.company?.toLowerCase().includes(q) ?? false) ||
+          (client.clientProfile?.industry?.toLowerCase().includes(q) ?? false),
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((client) =>
+        statusFilter === "active" ? client.isActive : !client.isActive,
+      );
+    }
+
+    if (industryFilter !== "all") {
+      filtered = filtered.filter(
+        (client) => client.clientProfile?.industry === industryFilter,
+      );
+    }
+
+    setFilteredClients(filtered);
+  }, [clients, searchQuery, statusFilter, industryFilter]);
+
   useEffect(() => {
     filterClients();
-  }, [clients, searchQuery, statusFilter, industryFilter]);
+  }, [filterClients]);
 
   const fetchClients = async () => {
     try {
       setLoading(true);
-      const response = await adminAPI.getUsers({ role: 'client', limit: 100 });
-      const clientsData = response.data?.data || response.data?.users || response.data || [];
+      const response = await adminAPI.getUsers({ role: "client", limit: 100 });
+      const clientsData = (response.data?.data ||
+        response.data?.users ||
+        response.data ||
+        []) as ApiClient[];
 
       // Enhance client data with mock business metrics
-      const enhancedClients: Client[] = clientsData.map((client: any) => ({
-        ...client,
+      const enhancedClients: Client[] = clientsData.map((client) => ({
+        _id: client._id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        isActive: client.isActive ?? true,
+        createdAt: client.createdAt,
         clientProfile: {
           ...client.clientProfile,
           company: client.clientProfile?.company || `${client.name} Corp`,
-          industry: client.clientProfile?.industry || ['Technology', 'Healthcare', 'Finance', 'Education', 'Retail'][Math.floor(Math.random() * 5)],
-          companySize: client.clientProfile?.companySize || ['1-10', '11-50', '51-200', '201-500', '500+'][Math.floor(Math.random() * 5)],
-          website: client.clientProfile?.website || `https://${client.name.toLowerCase().replace(/\s+/g, '')}.com`,
-          totalSpent: client.clientProfile?.totalSpent || Math.floor(Math.random() * 50000) + 5000,
-          projectsCompleted: client.clientProfile?.projectsCompleted || Math.floor(Math.random() * 20) + 1,
-          totalProjects: client.clientProfile?.totalProjects || Math.floor(Math.random() * 25) + 1,
-          averageRating: client.clientProfile?.averageRating || (Math.random() * 1.5 + 3.5).toFixed(1),
-          lastProjectDate: client.clientProfile?.lastProjectDate || new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-        }
+          industry:
+            client.clientProfile?.industry ||
+            ["Technology", "Healthcare", "Finance", "Education", "Retail"][
+              Math.floor(Math.random() * 5)
+            ],
+          companySize:
+            client.clientProfile?.companySize ||
+            ["1-10", "11-50", "51-200", "201-500", "500+"][
+              Math.floor(Math.random() * 5)
+            ],
+          website:
+            client.clientProfile?.website ||
+            `https://${client.name.toLowerCase().replace(/\s+/g, "")}.com`,
+          totalSpent:
+            client.clientProfile?.totalSpent ||
+            Math.floor(Math.random() * 50000) + 5000,
+          projectsCompleted:
+            client.clientProfile?.projectsCompleted ||
+            Math.floor(Math.random() * 20) + 1,
+          totalProjects:
+            client.clientProfile?.totalProjects ||
+            Math.floor(Math.random() * 25) + 1,
+          averageRating:
+            client.clientProfile?.averageRating ??
+            parseFloat((Math.random() * 1.5 + 3.5).toFixed(1)),
+          lastProjectDate:
+            client.clientProfile?.lastProjectDate ||
+            new Date(
+              Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
+        },
+        profile: client.profile,
       }));
 
       setClients(enhancedClients);
@@ -117,92 +211,75 @@ const ClientManagement: React.FC = () => {
       // Calculate stats
       const clientStats: ClientStats = {
         totalClients: enhancedClients.length,
-        activeClients: enhancedClients.filter(c => c.isActive).length,
-        newThisMonth: enhancedClients.filter(c => {
+        activeClients: enhancedClients.filter((c) => c.isActive).length,
+        newThisMonth: enhancedClients.filter((c) => {
           const createdDate = new Date(c.createdAt);
           const thisMonth = new Date();
           thisMonth.setDate(1);
           return createdDate >= thisMonth;
         }).length,
-        topSpenders: enhancedClients.filter(c => (c.clientProfile?.totalSpent || 0) > 20000).length,
-        averageProjectValue: enhancedClients.reduce((sum, c) => sum + (c.clientProfile?.totalSpent || 0), 0) / Math.max(enhancedClients.length, 1),
-        clientRetentionRate: 85 // Mock data
+        topSpenders: enhancedClients.filter(
+          (c) => (c.clientProfile?.totalSpent || 0) > 20000,
+        ).length,
+        averageProjectValue:
+          enhancedClients.reduce(
+            (sum, c) => sum + (c.clientProfile?.totalSpent || 0),
+            0,
+          ) / Math.max(enhancedClients.length, 1),
+        clientRetentionRate: 85, // Mock data
       };
 
       setStats(clientStats);
     } catch (error) {
-      console.error('Failed to fetch clients:', error);
+      console.error("Failed to fetch clients:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filterClients = () => {
-    let filtered = [...clients];
-
-    if (searchQuery) {
-      filtered = filtered.filter(client =>
-        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.clientProfile?.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.clientProfile?.industry?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(client =>
-        statusFilter === 'active' ? client.isActive : !client.isActive
-      );
-    }
-
-    if (industryFilter !== 'all') {
-      filtered = filtered.filter(client =>
-        client.clientProfile?.industry === industryFilter
-      );
-    }
-
-    setFilteredClients(filtered);
-  };
+  // Filtering logic moved into useCallback above
 
   const handleSendMessage = async () => {
-    if (!selectedClient || !messageContent.title || !messageContent.message) return;
+    if (!selectedClient || !messageContent.title || !messageContent.message)
+      return;
 
     try {
       await notificationsAPI.create({
         recipients: [selectedClient._id],
         title: messageContent.title,
         message: messageContent.message,
-        type: 'general',
-        priority: 'medium'
+        type: "general",
+        priority: "medium",
       });
 
       setShowMessageModal(false);
-      setMessageContent({ title: '', message: '' });
-      alert('Message sent successfully!');
+      setMessageContent({ title: "", message: "" });
+      alert("Message sent successfully!");
     } catch (error) {
-      console.error('Failed to send message:', error);
-      alert('Failed to send message. Please try again.');
+      console.error("Failed to send message:", error);
+      alert("Failed to send message. Please try again.");
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
-  const getIndustryColor = (industry: string) => {
+  const getIndustryColor = (industry: string): BadgeVariant => {
     const colors = {
-      Technology: 'info',
-      Healthcare: 'success',
-      Finance: 'warning',
-      Education: 'primary',
-      Retail: 'secondary'
+      Technology: "info",
+      Healthcare: "success",
+      Finance: "warning",
+      Education: "primary",
+      Retail: "secondary",
     };
-    return colors[industry as keyof typeof colors] || 'secondary';
+    return (colors[industry as keyof typeof colors] ||
+      "secondary") as BadgeVariant;
   };
 
   const getClientScore = (client: Client) => {
@@ -212,12 +289,19 @@ const ClientManagement: React.FC = () => {
     let score = 0;
     if (profile.totalSpent) score += Math.min(profile.totalSpent / 1000, 20);
     if (profile.projectsCompleted) score += profile.projectsCompleted * 2;
-    if (profile.averageRating) score += parseFloat(profile.averageRating.toString()) * 2;
+    if (profile.averageRating)
+      score += parseFloat(profile.averageRating.toString()) * 2;
 
     return Math.min(Math.round(score), 100);
   };
 
-  const uniqueIndustries = Array.from(new Set(clients.map(c => c.clientProfile?.industry).filter(Boolean)));
+  const uniqueIndustries = Array.from(
+    new Set(
+      clients
+        .map((c) => c.clientProfile?.industry)
+        .filter((i): i is string => Boolean(i)),
+    ),
+  );
 
   if (loading) {
     return (
@@ -233,12 +317,16 @@ const ClientManagement: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Client Management</h1>
-            <p className="text-gray-600">Manage client relationships and business accounts</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Client Management
+            </h1>
+            <p className="text-gray-600">
+              Manage client relationships and business accounts
+            </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
             <Button
-              onClick={() => router.push('/admin/outsource/dashboard')}
+              onClick={() => router.push("/admin/outsource/dashboard")}
               variant="outline"
             >
               Back to Dashboard
@@ -252,8 +340,12 @@ const ClientManagement: React.FC = () => {
             <div className="flex items-center">
               <Building className="h-6 w-6 text-blue-600" />
               <div className="ml-3">
-                <p className="text-xs font-medium text-gray-600">Total Clients</p>
-                <p className="text-lg font-bold text-gray-900">{stats?.totalClients || 0}</p>
+                <p className="text-xs font-medium text-gray-600">
+                  Total Clients
+                </p>
+                <p className="text-lg font-bold text-gray-900">
+                  {stats?.totalClients || 0}
+                </p>
               </div>
             </div>
           </Card>
@@ -262,7 +354,9 @@ const ClientManagement: React.FC = () => {
               <CheckCircle className="h-6 w-6 text-green-600" />
               <div className="ml-3">
                 <p className="text-xs font-medium text-gray-600">Active</p>
-                <p className="text-lg font-bold text-gray-900">{stats?.activeClients || 0}</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {stats?.activeClients || 0}
+                </p>
               </div>
             </div>
           </Card>
@@ -270,8 +364,12 @@ const ClientManagement: React.FC = () => {
             <div className="flex items-center">
               <Calendar className="h-6 w-6 text-purple-600" />
               <div className="ml-3">
-                <p className="text-xs font-medium text-gray-600">New This Month</p>
-                <p className="text-lg font-bold text-gray-900">{stats?.newThisMonth || 0}</p>
+                <p className="text-xs font-medium text-gray-600">
+                  New This Month
+                </p>
+                <p className="text-lg font-bold text-gray-900">
+                  {stats?.newThisMonth || 0}
+                </p>
               </div>
             </div>
           </Card>
@@ -279,8 +377,12 @@ const ClientManagement: React.FC = () => {
             <div className="flex items-center">
               <Star className="h-6 w-6 text-yellow-600" />
               <div className="ml-3">
-                <p className="text-xs font-medium text-gray-600">Top Spenders</p>
-                <p className="text-lg font-bold text-gray-900">{stats?.topSpenders || 0}</p>
+                <p className="text-xs font-medium text-gray-600">
+                  Top Spenders
+                </p>
+                <p className="text-lg font-bold text-gray-900">
+                  {stats?.topSpenders || 0}
+                </p>
               </div>
             </div>
           </Card>
@@ -289,7 +391,9 @@ const ClientManagement: React.FC = () => {
               <DollarSign className="h-6 w-6 text-green-600" />
               <div className="ml-3">
                 <p className="text-xs font-medium text-gray-600">Avg. Value</p>
-                <p className="text-lg font-bold text-gray-900">{formatCurrency(stats?.averageProjectValue || 0)}</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {formatCurrency(stats?.averageProjectValue || 0)}
+                </p>
               </div>
             </div>
           </Card>
@@ -298,7 +402,9 @@ const ClientManagement: React.FC = () => {
               <TrendingUp className="h-6 w-6 text-blue-600" />
               <div className="ml-3">
                 <p className="text-xs font-medium text-gray-600">Retention</p>
-                <p className="text-lg font-bold text-gray-900">{stats?.clientRetentionRate || 0}%</p>
+                <p className="text-lg font-bold text-gray-900">
+                  {stats?.clientRetentionRate || 0}%
+                </p>
               </div>
             </div>
           </Card>
@@ -326,7 +432,9 @@ const ClientManagement: React.FC = () => {
                 <span className="text-sm text-gray-600">Status:</span>
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setStatusFilter(e.target.value as StatusFilter)
+                  }
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
@@ -343,8 +451,10 @@ const ClientManagement: React.FC = () => {
                   className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All Industries</option>
-                  {uniqueIndustries.map(industry => (
-                    <option key={industry} value={industry}>{industry}</option>
+                  {uniqueIndustries.map((industry) => (
+                    <option key={industry} value={industry}>
+                      {industry}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -357,22 +467,28 @@ const ClientManagement: React.FC = () => {
           {filteredClients.length === 0 ? (
             <Card className="p-12 text-center">
               <Building className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No clients found</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No clients found
+              </h3>
               <p className="text-gray-600">
-                {searchQuery ? 'No clients match your search criteria.' : 'No clients available.'}
+                {searchQuery
+                  ? "No clients match your search criteria."
+                  : "No clients available."}
               </p>
             </Card>
           ) : (
-            filteredClients.map((client) => (
-              <Card key={client._id} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    {/* Avatar */}
-                    <div className="h-16 w-16 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+            filteredClients.map((client) => {
+              return (
+                <Card key={client._id} className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4 flex-1">
+                      {/* Avatar */}
                       {client.profile?.avatar ? (
-                        <img
+                        <Image
                           src={client.profile.avatar}
                           alt={client.name}
+                          width={64}
+                          height={64}
                           className="h-16 w-16 rounded-full object-cover"
                         />
                       ) : (
@@ -383,9 +499,11 @@ const ClientManagement: React.FC = () => {
                     {/* Client Info */}
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900">{client.name}</h3>
-                        <Badge variant={client.isActive ? 'success' : 'danger'}>
-                          {client.isActive ? 'Active' : 'Inactive'}
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          {client.name}
+                        </h3>
+                        <Badge variant={client.isActive ? "success" : "danger"}>
+                          {client.isActive ? "Active" : "Inactive"}
                         </Badge>
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 text-yellow-500" />
@@ -417,23 +535,37 @@ const ClientManagement: React.FC = () => {
 
                         <div>
                           <p className="text-sm text-gray-600">
-                            <strong>Total Spent:</strong> {formatCurrency(client.clientProfile?.totalSpent || 0)}
+                            <strong>Total Spent:</strong>{" "}
+                            {formatCurrency(
+                              client.clientProfile?.totalSpent || 0,
+                            )}
                           </p>
                           <p className="text-sm text-gray-600">
-                            <strong>Projects:</strong> {client.clientProfile?.projectsCompleted || 0}/{client.clientProfile?.totalProjects || 0}
+                            <strong>Projects:</strong>{" "}
+                            {client.clientProfile?.projectsCompleted || 0}/
+                            {client.clientProfile?.totalProjects || 0}
                           </p>
                           <p className="text-sm text-gray-600">
-                            <strong>Company Size:</strong> {client.clientProfile?.companySize || 'Not specified'}
+                            <strong>Company Size:</strong>{" "}
+                            {client.clientProfile?.companySize ||
+                              "Not specified"}
                           </p>
                         </div>
 
                         <div>
                           <p className="text-sm text-gray-600">
-                            <strong>Joined:</strong> {formatDistanceToNow(new Date(client.createdAt), { addSuffix: true })}
+                            <strong>Joined:</strong>{" "}
+                            {formatDistanceToNow(new Date(client.createdAt), {
+                              addSuffix: true,
+                            })}
                           </p>
                           {client.clientProfile?.lastProjectDate && (
                             <p className="text-sm text-gray-600">
-                              <strong>Last Project:</strong> {formatDistanceToNow(new Date(client.clientProfile.lastProjectDate), { addSuffix: true })}
+                              <strong>Last Project:</strong>{" "}
+                              {formatDistanceToNow(
+                                new Date(client.clientProfile.lastProjectDate),
+                                { addSuffix: true },
+                              )}
                             </p>
                           )}
                           <div className="flex items-center space-x-1 mt-1">
@@ -448,7 +580,12 @@ const ClientManagement: React.FC = () => {
                       {/* Industry & Website */}
                       <div className="flex items-center space-x-4 mb-2">
                         {client.clientProfile?.industry && (
-                          <Badge variant={getIndustryColor(client.clientProfile.industry) as any} size="sm">
+                          <Badge
+                            variant={getIndustryColor(
+                              client.clientProfile.industry,
+                            )}
+                            size="sm"
+                          >
                             {client.clientProfile.industry}
                           </Badge>
                         )}
@@ -491,11 +628,15 @@ const ClientManagement: React.FC = () => {
                       className="flex items-center space-x-2"
                     >
                       <MessageSquare className="h-4 w-4" />
-                      <span>Contact</span>
+                      <span>Message</span>
                     </Button>
 
                     <Button
-                      onClick={() => router.push(`/admin/outsource/clients/${client._id}/projects`)}
+                      onClick={() =>
+                        router.push(
+                          `/admin/outsource/clients/${client._id}/projects`,
+                        )
+                      }
                       variant="primary"
                       size="sm"
                       className="flex items-center space-x-2"
@@ -504,9 +645,9 @@ const ClientManagement: React.FC = () => {
                       <span>Projects</span>
                     </Button>
                   </div>
-                </div>
-              </Card>
-            ))
+                </Card>
+              );
+            })
           )}
         </div>
 
@@ -521,38 +662,56 @@ const ClientManagement: React.FC = () => {
           size="xl"
         >
           {selectedClient && (
-            <div className="space-y-6 max-h-96 overflow-y-auto">
+            <div className="space-y-6">
               <div className="flex items-start space-x-4">
-                <div className="h-20 w-20 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                  {selectedClient.profile?.avatar ? (
-                    <img
-                      src={selectedClient.profile.avatar}
-                      alt={selectedClient.name}
-                      className="h-20 w-20 rounded-full object-cover"
-                    />
-                  ) : (
-                    <Building className="h-10 w-10 text-gray-600" />
-                  )}
-                </div>
+                {selectedClient.profile?.avatar ? (
+                  <Image
+                    src={selectedClient.profile.avatar}
+                    alt={selectedClient.name}
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <Building className="h-10 w-10 text-gray-600" />
+                )}
                 <div className="flex-1">
-                  <h3 className="text-2xl font-semibold">{selectedClient.name}</h3>
+                  <h3 className="text-2xl font-semibold">
+                    {selectedClient.name}
+                  </h3>
                   <p className="text-gray-600">{selectedClient.email}</p>
-                  <Badge variant={selectedClient.isActive ? 'success' : 'danger'}>
-                    {selectedClient.isActive ? 'Active' : 'Inactive'}
+                  <Badge
+                    variant={selectedClient.isActive ? "success" : "danger"}
+                  >
+                    {selectedClient.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
               </div>
 
-              {/* Company Information */}
               {selectedClient.clientProfile && (
                 <div>
                   <h4 className="font-semibold mb-3">Company Information</h4>
                   <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
-                    <p><strong>Company:</strong> {selectedClient.clientProfile.company}</p>
-                    <p><strong>Industry:</strong> {selectedClient.clientProfile.industry}</p>
-                    <p><strong>Size:</strong> {selectedClient.clientProfile.companySize}</p>
-                    <p><strong>Website:</strong>
-                      <a href={selectedClient.clientProfile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 ml-1">
+                    <p>
+                      <strong>Company:</strong>{" "}
+                      {selectedClient.clientProfile.company}
+                    </p>
+                    <p>
+                      <strong>Industry:</strong>{" "}
+                      {selectedClient.clientProfile.industry}
+                    </p>
+                    <p>
+                      <strong>Size:</strong>{" "}
+                      {selectedClient.clientProfile.companySize}
+                    </p>
+                    <p>
+                      <strong>Website:</strong>
+                      <a
+                        href={selectedClient.clientProfile.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 ml-1"
+                      >
                         {selectedClient.clientProfile.website}
                       </a>
                     </p>
@@ -560,25 +719,47 @@ const ClientManagement: React.FC = () => {
                 </div>
               )}
 
-              {/* Business Metrics */}
               <div>
                 <h4 className="font-semibold mb-3">Business Metrics</h4>
                 <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
-                  <p><strong>Total Spent:</strong> {formatCurrency(selectedClient.clientProfile?.totalSpent || 0)}</p>
-                  <p><strong>Average Rating:</strong> {selectedClient.clientProfile?.averageRating}/5 ⭐</p>
-                  <p><strong>Projects Completed:</strong> {selectedClient.clientProfile?.projectsCompleted}</p>
-                  <p><strong>Total Projects:</strong> {selectedClient.clientProfile?.totalProjects}</p>
-                  <p><strong>Client Score:</strong> {getClientScore(selectedClient)}/100</p>
-                  <p><strong>Member Since:</strong> {new Date(selectedClient.createdAt).toLocaleDateString()}</p>
+                  <p>
+                    <strong>Total Spent:</strong>{" "}
+                    {formatCurrency(
+                      selectedClient.clientProfile?.totalSpent || 0,
+                    )}
+                  </p>
+                  <p>
+                    <strong>Average Rating:</strong>{" "}
+                    {selectedClient.clientProfile?.averageRating}/5 ⭐
+                  </p>
+                  <p>
+                    <strong>Projects Completed:</strong>{" "}
+                    {selectedClient.clientProfile?.projectsCompleted}
+                  </p>
+                  <p>
+                    <strong>Total Projects:</strong>{" "}
+                    {selectedClient.clientProfile?.totalProjects}
+                  </p>
+                  <p>
+                    <strong>Client Score:</strong>{" "}
+                    {getClientScore(selectedClient)}/100
+                  </p>
+                  <p>
+                    <strong>Member Since:</strong>{" "}
+                    {new Date(selectedClient.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
 
-              {/* Contact Information */}
               {selectedClient.profile && (
                 <div>
                   <h4 className="font-semibold mb-3">Contact Information</h4>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    {selectedClient.phone && <p><strong>Phone:</strong> {selectedClient.phone}</p>}
+                    {selectedClient.phone && (
+                      <p>
+                        <strong>Phone:</strong> {selectedClient.phone}
+                      </p>
+                    )}
                     {selectedClient.profile.address && (
                       <div>
                         <strong>Address:</strong>
@@ -587,15 +768,19 @@ const ClientManagement: React.FC = () => {
                             selectedClient.profile.address.street,
                             selectedClient.profile.address.city,
                             selectedClient.profile.address.region,
-                            selectedClient.profile.address.country
-                          ].filter(Boolean).join(', ')}
+                            selectedClient.profile.address.country,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
                         </p>
                       </div>
                     )}
                     {selectedClient.profile.bio && (
                       <div className="mt-3">
                         <strong>Bio:</strong>
-                        <p className="text-sm text-gray-600 mt-1">{selectedClient.profile.bio}</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {selectedClient.profile.bio}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -611,31 +796,47 @@ const ClientManagement: React.FC = () => {
           onClose={() => {
             setShowMessageModal(false);
             setSelectedClient(null);
-            setMessageContent({ title: '', message: '' });
+            setMessageContent({ title: "", message: "" });
           }}
           title="Send Message to Client"
           size="md"
         >
           {selectedClient && (
             <div className="space-y-4">
-              <p className="text-gray-700">Send a message to {selectedClient.name}</p>
+              <p className="text-gray-700">
+                Send a message to {selectedClient.name}
+              </p>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject
+                </label>
                 <input
                   type="text"
                   value={messageContent.title}
-                  onChange={(e) => setMessageContent(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setMessageContent((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                   placeholder="Message subject..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Message
+                </label>
                 <textarea
                   value={messageContent.message}
-                  onChange={(e) => setMessageContent(prev => ({ ...prev, message: e.target.value }))}
+                  onChange={(e) =>
+                    setMessageContent((prev) => ({
+                      ...prev,
+                      message: e.target.value,
+                    }))
+                  }
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                   placeholder="Your message..."
@@ -653,7 +854,7 @@ const ClientManagement: React.FC = () => {
                 <Button
                   onClick={() => {
                     setShowMessageModal(false);
-                    setMessageContent({ title: '', message: '' });
+                    setMessageContent({ title: "", message: "" });
                   }}
                   variant="outline"
                 >
