@@ -7,6 +7,8 @@ import Footer from "@/components/Layout/Footer";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import ChatbotComponent from "@/chatbot/ChatbotComponent";
+import "react-chatbot-kit/build/main.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +46,7 @@ export default async function RootLayout({
         <NextIntlClientProvider>
           <Navbar />
           {children}
+          <ChatbotComponent />
           <Footer />
         </NextIntlClientProvider>
       </body>
