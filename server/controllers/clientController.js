@@ -513,8 +513,46 @@ exports.markJobCompleted = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Job marked as completed',
-    data: job
+    data: { job, paymentId: payment._id }
   });
+});
+
+// @desc    Upload payment proof (check image) for a manual payment
+// @route   PUT /api/client/payments/:id/proof
+// @access  Private/Client
+exports.uploadPaymentProof = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { imageData, filename, mimeType, note } = req.body || {};
+
+  if (!imageData || typeof imageData !== 'string') {
+    return res.status(400).json({ success: false, message: 'imageData is required' });
+  }
+
+  const payment = await Payment.findById(id);
+  if (!payment) {
+    return res.status(404).json({ success: false, message: 'Payment not found' });
+  }
+
+  // Only the client/payer can upload proof
+  if (String(payment.payer) !== String(req.user._id)) {
+    return res.status(403).json({ success: false, message: 'Not authorized to upload proof for this payment' });
+  }
+
+  payment.proof = {
+    imageData,
+    filename,
+    mimeType,
+    note,
+    uploadedAt: new Date(),
+    uploadedBy: req.user._id
+  };
+  // Move to processing to indicate submitted proof
+  if (payment.status === 'pending') {
+    payment.status = 'processing';
+  }
+  await payment.save();
+
+  return res.status(200).json({ success: true, message: 'Payment proof uploaded', data: payment });
 });
 
 // @desc    Request job revision
@@ -573,14 +611,14 @@ exports.requestRevision = asyncHandler(async (req, res) => {
 exports.getPayments = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
-  const payments = await Payment.find({ client: req.user._id })
+  const payments = await Payment.find({ payer: req.user._id })
     .populate('job', 'title')
-    .populate('worker', 'name profile.avatar')
+    .populate('recipient', 'name role profile.avatar')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip((page - 1) * limit);
 
-  const total = await Payment.countDocuments({ client: req.user._id });
+  const total = await Payment.countDocuments({ payer: req.user._id });
 
   res.status(200).json({
     success: true,

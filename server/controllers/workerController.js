@@ -327,25 +327,25 @@ exports.getEarnings = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
   const payments = await Payment.find({
-    worker: req.user._id,
-    status: { $in: ['completed', 'pending'] }
+    recipient: req.user._id,
+    status: { $in: ['completed', 'pending', 'processing'] }
   })
     .populate('job', 'title')
-    .populate('client', 'name profile.avatar')
+    .populate('payer', 'name role profile.avatar')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip((page - 1) * limit);
 
   const total = await Payment.countDocuments({
-    worker: req.user._id,
-    status: { $in: ['completed', 'pending'] }
+    recipient: req.user._id,
+    status: { $in: ['completed', 'pending', 'processing'] }
   });
 
   // Calculate earnings summary
   const totalEarnings = await Payment.aggregate([
     {
       $match: {
-        worker: req.user._id,
+        recipient: req.user._id,
         status: 'completed'
       }
     },
@@ -361,8 +361,8 @@ exports.getEarnings = asyncHandler(async (req, res) => {
   const pendingEarnings = await Payment.aggregate([
     {
       $match: {
-        worker: req.user._id,
-        status: 'pending'
+        recipient: req.user._id,
+        status: { $in: ['pending', 'processing'] }
       }
     },
     {

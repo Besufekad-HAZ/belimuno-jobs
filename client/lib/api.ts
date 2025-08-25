@@ -9,12 +9,12 @@ const envBase =
     : undefined;
 const DEFAULT_BASES = [
   "http://localhost:5000/api",
-  "https://belimuno-jobs.onrender.com/api",
-  "http://localhost:5001/api",
-  "http://localhost:5002/api",
-  "http://localhost:5003/api",
-  "http://localhost:5004/api",
-  "http://localhost:5005/api",
+  // "https://belimuno-jobs.onrender.com/api",
+  // "http://localhost:5001/api",
+  // "http://localhost:5002/api",
+  // "http://localhost:5003/api",
+  // "http://localhost:5004/api",
+  // "http://localhost:5005/api",
 ];
 const BASES = envBase ? [envBase] : DEFAULT_BASES;
 let currentBaseIndex = 0;
@@ -117,6 +117,15 @@ export const clientAPI = {
   requestRevision: (id: string, reason: string) =>
     api.put(`/client/jobs/${id}/request-revision`, { reason }),
   getPayments: () => api.get("/client/payments"),
+  uploadPaymentProof: (
+    paymentId: string,
+    payload: {
+      imageData: string;
+      filename?: string;
+      mimeType?: string;
+      note?: string;
+    },
+  ) => api.put(`/client/payments/${paymentId}/proof`, payload),
   getJobMessages: (jobId: string) => api.get(`/client/jobs/${jobId}/messages`),
   sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
     api.post(`/client/jobs/${jobId}/messages`, { content, attachments }),
@@ -173,7 +182,8 @@ export const adminAPI = {
     api.put(`/admin/jobs/${id}`, payload),
   deleteJob: (id: string) => api.delete(`/admin/jobs/${id}`),
   getPerformance: () => api.get("/admin/performance"),
-  getPayments: () => api.get("/admin/payments"),
+  getPayments: (params?: Record<string, unknown>) =>
+    api.get("/admin/payments", { params }),
   handlePaymentDispute: (
     id: string,
     action: "refund" | "release" | "partial",
