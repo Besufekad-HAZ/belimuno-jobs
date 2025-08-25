@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { jobsAPI } from '@/lib/api';
+import React, { useState, useEffect } from "react";
+import { jobsAPI } from "@/lib/api";
 
 interface Job {
   title: string;
@@ -23,13 +23,13 @@ const TestAPIPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Testing API connection...');
-      const response = await jobsAPI.getAll({ status: 'posted' });
-      console.log('API Response:', response);
+      console.log("Testing API connection...");
+      const response = await jobsAPI.getAll({ status: "posted" });
+      console.log("API Response:", response);
       setResult(response.data as JobsApiResult);
     } catch (err: unknown) {
-      console.error('API Error:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      console.error("API Error:", err);
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ const TestAPIPage: React.FC = () => {
           {result && (
             <div className="space-y-4">
               <div>
-                <strong>Success:</strong> {result.success ? 'Yes' : 'No'}
+                <strong>Success:</strong> {result.success ? "Yes" : "No"}
               </div>
               <div>
                 <strong>Count:</strong> {result.count}

@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { jobsAPI } from '@/lib/api';
-import { getStoredUser } from '@/lib/auth';
+import React, { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import { jobsAPI } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
 
 const ApplyJobPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params?.id) ? params.id[0] : (params?.id as string);
   const user = getStoredUser();
-  const [proposal, setProposal] = useState('');
-  const [budget, setBudget] = useState('');
+  const [proposal, setProposal] = useState("");
+  const [budget, setBudget] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!user || user.role !== 'worker') {
+  if (!user || user.role !== "worker") {
     return (
       <div className="p-8">You must be logged in as a worker to apply.</div>
     );
@@ -32,10 +32,12 @@ const ApplyJobPage: React.FC = () => {
       await jobsAPI.apply(id, proposal.trim(), parseFloat(budget));
       router.push(`/jobs/${id}`);
     } catch (err: unknown) {
-      const msg = (err && typeof err === 'object' && 'response' in err)
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        : undefined;
-      setError(msg || 'Failed to submit application');
+      const msg =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : undefined;
+      setError(msg || "Failed to submit application");
     } finally {
       setLoading(false);
     }
@@ -45,10 +47,14 @@ const ApplyJobPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card>
-          <h1 className="text-xl font-bold text-gray-900 mb-4">Apply for Job</h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-4">
+            Apply for Job
+          </h1>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Proposal</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Proposal
+              </label>
               <textarea
                 value={proposal}
                 onChange={(e) => setProposal(e.target.value)}
@@ -66,8 +72,16 @@ const ApplyJobPage: React.FC = () => {
             />
             {error && <p className="text-sm text-red-600">{error}</p>}
             <div className="flex gap-2">
-              <Button type="submit" loading={loading}>Submit Application</Button>
-              <Button variant="outline" type="button" onClick={() => router.push(`/jobs/${id}`)}>Cancel</Button>
+              <Button type="submit" loading={loading}>
+                Submit Application
+              </Button>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.push(`/jobs/${id}`)}
+              >
+                Cancel
+              </Button>
             </div>
           </form>
         </Card>

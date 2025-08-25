@@ -11,12 +11,22 @@ import Input from "@/components/ui/Input";
 type GoogleIdentity = {
   accounts?: {
     id?: {
-      initialize: (options: { client_id: string; callback: (resp: { credential: string }) => void }) => void;
-      renderButton: (parent: HTMLElement, options?: Record<string, unknown>) => void;
-    }
-  }
+      initialize: (options: {
+        client_id: string;
+        callback: (resp: { credential: string }) => void;
+      }) => void;
+      renderButton: (
+        parent: HTMLElement,
+        options?: Record<string, unknown>,
+      ) => void;
+    };
+  };
 };
-declare global { interface Window { google?: GoogleIdentity } }
+declare global {
+  interface Window {
+    google?: GoogleIdentity;
+  }
+}
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -77,13 +87,16 @@ const LoginPage: React.FC = () => {
 
   // Load Google Identity script once
   useEffect(() => {
-    const existing = document.getElementById('google-identity');
-    if (existing) { setGoogleReady(true); return; }
-    const s = document.createElement('script');
-    s.src = 'https://accounts.google.com/gsi/client';
+    const existing = document.getElementById("google-identity");
+    if (existing) {
+      setGoogleReady(true);
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
     s.async = true;
     s.defer = true;
-    s.id = 'google-identity';
+    s.id = "google-identity";
     s.onload = () => setGoogleReady(true);
     document.body.appendChild(s);
   }, []);
@@ -92,7 +105,7 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (!googleReady) return;
     if (!window.google || !window.google.accounts?.id) return;
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
     if (!clientId) return;
     window.google.accounts.id!.initialize({
       client_id: clientId,
@@ -101,30 +114,62 @@ const LoginPage: React.FC = () => {
           const res = await authAPI.loginWithGoogle(resp.credential);
           const { token, user } = res.data;
           setAuth(token, user);
-          if (typeof window !== 'undefined') window.dispatchEvent(new Event('authChanged'));
+          if (typeof window !== "undefined")
+            window.dispatchEvent(new Event("authChanged"));
           router.push(getRoleDashboardPath(user.role));
         } catch (e) {
           console.error(e);
-          setError('Google sign-in failed. If you are new, please use Sign up.');
+          setError(
+            "Google sign-in failed. If you are new, please use Sign up.",
+          );
         }
-      }
+      },
     });
     if (googleBtnRef.current) {
-      googleBtnRef.current.innerHTML = '';
+      googleBtnRef.current.innerHTML = "";
       window.google.accounts.id!.renderButton(googleBtnRef.current, {
-        type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', logo_alignment: 'left'
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        shape: "rectangular",
+        logo_alignment: "left",
       });
     }
   }, [googleReady, router]);
 
   // Test accounts (seeded) - aligned with server/seedTestData.js
   const testAccounts = [
-    { email: 'admin1@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 1' },
-    { email: 'admin2@belimuno.com', password: 'Belimuno#2025!', role: 'Super Admin 2' },
-    { email: 'admin.hr@belimuno.com', password: 'Belimuno#2025!', role: 'Admin (HR)' },
-    { email: 'admin.outsource@belimuno.com', password: 'Belimuno#2025!', role: 'Admin (Outsource)' },
-    { email: 'worker1@belimuno.com', password: 'Belimuno#2025!', role: 'Worker' },
-    { email: 'client1@belimuno.com', password: 'Belimuno#2025!', role: 'Client' },
+    {
+      email: "admin1@belimuno.com",
+      password: "Belimuno#2025!",
+      role: "Super Admin 1",
+    },
+    {
+      email: "admin2@belimuno.com",
+      password: "Belimuno#2025!",
+      role: "Super Admin 2",
+    },
+    {
+      email: "admin.hr@belimuno.com",
+      password: "Belimuno#2025!",
+      role: "Admin (HR)",
+    },
+    {
+      email: "admin.outsource@belimuno.com",
+      password: "Belimuno#2025!",
+      role: "Admin (Outsource)",
+    },
+    {
+      email: "worker1@belimuno.com",
+      password: "Belimuno#2025!",
+      role: "Worker",
+    },
+    {
+      email: "client1@belimuno.com",
+      password: "Belimuno#2025!",
+      role: "Client",
+    },
   ] as const;
 
   const fillTestAccount = (email: string, password: string) => {
@@ -179,10 +224,14 @@ const LoginPage: React.FC = () => {
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex">
             <Link href="/login" className="flex-1">
-              <div className="text-center py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">Login</div>
+              <div className="text-center py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">
+                Login
+              </div>
             </Link>
             <Link href="/register" className="flex-1">
-              <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">Sign up</div>
+              <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">
+                Sign up
+              </div>
             </Link>
           </div>
         </div>
@@ -248,11 +297,16 @@ const LoginPage: React.FC = () => {
 
                 {/* OR Divider */}
                 <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div
+                    className="absolute inset-0 flex items-center"
+                    aria-hidden="true"
+                  >
                     <div className="w-full border-t border-gray-200" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                    <span className="px-2 bg-white text-gray-500">
+                      Or continue with
+                    </span>
                   </div>
                 </div>
 
@@ -325,7 +379,11 @@ const LoginPage: React.FC = () => {
                   <p className="text-xs text-blue-700">
                     <span className="font-medium">Quick Login:</span> Click any
                     test account above to auto-fill the form with demo
-                    credentials. Make sure to run <code className="bg-blue-100 px-1 rounded">node seedTestData.js</code> in the server directory first.
+                    credentials. Make sure to run{" "}
+                    <code className="bg-blue-100 px-1 rounded">
+                      node seedTestData.js
+                    </code>{" "}
+                    in the server directory first.
                   </p>
                 </div>
               </div>

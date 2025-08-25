@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import ClientsGrid from '@/components/clients/ClientsGrid';
-import { CLIENTS } from '@/data/clients';
+import React from "react";
+import ClientsGrid from "@/components/clients/ClientsGrid";
+import { CLIENTS } from "@/data/clients";
 
 const ClientsPage: React.FC = () => {
   return (
@@ -11,7 +11,8 @@ const ClientsPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <h1 className="text-4xl font-bold">Our Clients</h1>
           <p className="text-blue-100 mt-2 max-w-3xl">
-            We have been trusted by international NGOs and leading construction companies since 2011.
+            We have been trusted by international NGOs and leading construction
+            companies since 2011.
           </p>
         </div>
       </div>
@@ -26,5 +27,3 @@ const ClientsPage: React.FC = () => {
 };
 
 export default ClientsPage;
-
-

@@ -1,59 +1,67 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getStoredUser, hasRole } from '@/lib/auth';
-import { clientAPI } from '@/lib/api';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { getStoredUser, hasRole } from "@/lib/auth";
+import { clientAPI } from "@/lib/api";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Card from "@/components/ui/Card";
 
 const NewJobPage: React.FC = () => {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    budget: '',
-    deadline: '',
-    requirements: [''],
-    skills: [''],
-    priority: 'medium',
-    location: '',
-    workType: 'remote',
+    title: "",
+    description: "",
+    category: "",
+    budget: "",
+    deadline: "",
+    requirements: [""],
+    skills: [""],
+    priority: "medium",
+    location: "",
+    workType: "remote",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   React.useEffect(() => {
     const user = getStoredUser();
-    if (!user || !hasRole(user, ['client'])) {
-      router.push('/login');
+    if (!user || !hasRole(user, ["client"])) {
+      router.push("/login");
       return;
     }
   }, [router]);
 
   const categories = [
-    'Web Development',
-    'Mobile Development',
-    'Design',
-    'Writing',
-    'Marketing',
-    'Data Entry',
-    'Customer Service',
-    'Sales',
-    'Consulting',
-    'Other'
+    "Web Development",
+    "Mobile Development",
+    "Design",
+    "Writing",
+    "Marketing",
+    "Data Entry",
+    "Customer Service",
+    "Sales",
+    "Consulting",
+    "Other",
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleArrayChange = (index: number, value: string, field: 'requirements' | 'skills') => {
+  const handleArrayChange = (
+    index: number,
+    value: string,
+    field: "requirements" | "skills",
+  ) => {
     const updatedArray = [...formData[field]];
     updatedArray[index] = value;
     setFormData({
@@ -62,14 +70,14 @@ const NewJobPage: React.FC = () => {
     });
   };
 
-  const addArrayItem = (field: 'requirements' | 'skills') => {
+  const addArrayItem = (field: "requirements" | "skills") => {
     setFormData({
       ...formData,
-      [field]: [...formData[field], ''],
+      [field]: [...formData[field], ""],
     });
   };
 
-  const removeArrayItem = (index: number, field: 'requirements' | 'skills') => {
+  const removeArrayItem = (index: number, field: "requirements" | "skills") => {
     const updatedArray = formData[field].filter((_, i) => i !== index);
     setFormData({
       ...formData,
@@ -80,22 +88,24 @@ const NewJobPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-  const user = getStoredUser();
-  // Support region being either a populated object or an id string
+      const user = getStoredUser();
+      // Support region being either a populated object or an id string
       const regionId = (() => {
         if (!user) return undefined;
-        if (typeof user.region === 'string') return user.region;
-        if (user.region && typeof user.region === 'object') {
+        if (typeof user.region === "string") return user.region;
+        if (user.region && typeof user.region === "object") {
           const maybeObj = user.region as unknown as { _id?: string };
           return maybeObj._id;
         }
         return undefined;
       })();
       if (!regionId) {
-        setError('Your account has no region assigned. Please contact support or update your profile.');
+        setError(
+          "Your account has no region assigned. Please contact support or update your profile.",
+        );
         setLoading(false);
         return;
       }
@@ -110,23 +120,25 @@ const NewJobPage: React.FC = () => {
         location: formData.location,
         workType: formData.workType,
         // Backend expects 'requiredSkills'
-        requiredSkills: formData.skills.filter(skill => skill.trim()),
+        requiredSkills: formData.skills.filter((skill) => skill.trim()),
         // Provide region from user context
         region: regionId,
         // Immediately post the job (instead of leaving as draft)
-        status: 'posted',
+        status: "posted",
         // Keep requirements as tags if we want (map to tags) or drop if not used
-  tags: formData.requirements.filter(req => req.trim()),
+        tags: formData.requirements.filter((req) => req.trim()),
       };
 
       await clientAPI.createJob(jobData);
-      router.push('/client/dashboard');
+      router.push("/client/dashboard");
     } catch (error: unknown) {
-      if (typeof error === 'object' && error && 'response' in error) {
-        const axiosErr = error as { response?: { data?: { message?: string } } };
-        setError(axiosErr.response?.data?.message || 'Failed to create job');
+      if (typeof error === "object" && error && "response" in error) {
+        const axiosErr = error as {
+          response?: { data?: { message?: string } };
+        };
+        setError(axiosErr.response?.data?.message || "Failed to create job");
       } else {
-        setError('Failed to create job');
+        setError("Failed to create job");
       }
     } finally {
       setLoading(false);
@@ -138,7 +150,9 @@ const NewJobPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Post a New Job</h1>
-          <p className="text-gray-600 mt-2">Find the perfect worker for your project</p>
+          <p className="text-gray-600 mt-2">
+            Find the perfect worker for your project
+          </p>
         </div>
 
         <Card>
@@ -151,7 +165,9 @@ const NewJobPage: React.FC = () => {
 
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Basic Information
+              </h3>
 
               <Input
                 label="Job Title"
@@ -164,7 +180,10 @@ const NewJobPage: React.FC = () => {
               />
 
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Job Description
                 </label>
                 <textarea
@@ -181,7 +200,10 @@ const NewJobPage: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="category"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Category
                   </label>
                   <select
@@ -222,11 +244,14 @@ const NewJobPage: React.FC = () => {
                   required
                   value={formData.deadline}
                   onChange={handleChange}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                 />
 
                 <div>
-                  <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="priority"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Priority
                   </label>
                   <select
@@ -244,7 +269,10 @@ const NewJobPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="workType" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="workType"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Work Type
                   </label>
                   <select
@@ -271,25 +299,31 @@ const NewJobPage: React.FC = () => {
               />
               {/* Region (derived from user) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Region
+                </label>
                 <input
                   type="text"
                   disabled
                   value={(() => {
                     const u = getStoredUser();
-                    if (!u) return 'Not set';
-                    if (typeof u.region === 'string') return 'Assigned';
-                    return u.region?.name || 'Assigned';
+                    if (!u) return "Not set";
+                    if (typeof u.region === "string") return "Assigned";
+                    return u.region?.name || "Assigned";
                   })()}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 placeholder-gray-400 focus:outline-none"
                 />
-                <p className="mt-1 text-xs text-gray-500">Region is taken from your account and required to post a job.</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Region is taken from your account and required to post a job.
+                </p>
               </div>
             </div>
 
             {/* Requirements */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Requirements</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Requirements
+              </h3>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -300,7 +334,9 @@ const NewJobPage: React.FC = () => {
                     <input
                       type="text"
                       value={requirement}
-                      onChange={(e) => handleArrayChange(index, e.target.value, 'requirements')}
+                      onChange={(e) =>
+                        handleArrayChange(index, e.target.value, "requirements")
+                      }
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter a requirement..."
                     />
@@ -309,7 +345,7 @@ const NewJobPage: React.FC = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem(index, 'requirements')}
+                        onClick={() => removeArrayItem(index, "requirements")}
                       >
                         Remove
                       </Button>
@@ -320,7 +356,7 @@ const NewJobPage: React.FC = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => addArrayItem('requirements')}
+                  onClick={() => addArrayItem("requirements")}
                 >
                   Add Requirement
                 </Button>
@@ -335,7 +371,9 @@ const NewJobPage: React.FC = () => {
                     <input
                       type="text"
                       value={skill}
-                      onChange={(e) => handleArrayChange(index, e.target.value, 'skills')}
+                      onChange={(e) =>
+                        handleArrayChange(index, e.target.value, "skills")
+                      }
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter a required skill..."
                     />
@@ -344,7 +382,7 @@ const NewJobPage: React.FC = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem(index, 'skills')}
+                        onClick={() => removeArrayItem(index, "skills")}
                       >
                         Remove
                       </Button>
@@ -355,7 +393,7 @@ const NewJobPage: React.FC = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => addArrayItem('skills')}
+                  onClick={() => addArrayItem("skills")}
                 >
                   Add Skill
                 </Button>
@@ -367,14 +405,11 @@ const NewJobPage: React.FC = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/client/dashboard')}
+                onClick={() => router.push("/client/dashboard")}
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                loading={loading}
-              >
+              <Button type="submit" loading={loading}>
                 Post Job
               </Button>
             </div>

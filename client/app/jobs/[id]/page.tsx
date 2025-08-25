@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import { jobsAPI } from '@/lib/api';
-import { getStoredUser } from '@/lib/auth';
-import { workerAPI } from '@/lib/api';
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { jobsAPI } from "@/lib/api";
+import { getStoredUser } from "@/lib/auth";
+import { workerAPI } from "@/lib/api";
 
 type Job = {
   _id: string;
@@ -39,7 +39,7 @@ const JobDetailPage: React.FC = () => {
           category: j.category,
           budget: j.budget,
         } as Job);
-  } catch {
+      } catch {
         setJob(null);
       } finally {
         setLoading(false);
@@ -49,17 +49,17 @@ const JobDetailPage: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      if (user?.role !== 'worker' || !id) return;
+      if (user?.role !== "worker" || !id) return;
       try {
         const res = await workerAPI.getSavedJobs();
-  const list: { _id: string }[] = res.data?.data || [];
-  setIsSaved(list.some((j) => String(j._id) === String(id)));
+        const list: { _id: string }[] = res.data?.data || [];
+        setIsSaved(list.some((j) => String(j._id) === String(id)));
       } catch {}
     })();
   }, [id, user?.role]);
 
   const toggleSave = async () => {
-    if (user?.role !== 'worker' || !id) return;
+    if (user?.role !== "worker" || !id) return;
     setSaving(true);
     try {
       if (isSaved) {
@@ -78,20 +78,22 @@ const JobDetailPage: React.FC = () => {
 
   const shareJob = async () => {
     if (!job) return;
-    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const url = typeof window !== "undefined" ? window.location.href : "";
     const shareData: ShareData = {
       title: `Belimuno Job: ${job.title}`,
-      text: `${job.title} — ETB ${job.budget}.` ,
-      url
+      text: `${job.title} — ETB ${job.budget}.`,
+      url,
     };
     try {
       if (navigator.share) {
         await navigator.share(shareData);
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url);
-        alert('Link copied to clipboard');
+        alert("Link copied to clipboard");
       }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   if (loading) return <div className="p-8">Loading...</div>;
@@ -103,16 +105,26 @@ const JobDetailPage: React.FC = () => {
         <Card>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{job.title}</h1>
           <p className="text-gray-600 mb-4">{job.description}</p>
-          <div className="text-sm text-gray-500 mb-4">Category: {job.category} • Budget: ETB {job.budget}</div>
+          <div className="text-sm text-gray-500 mb-4">
+            Category: {job.category} • Budget: ETB {job.budget}
+          </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push('/jobs')}>Back to Jobs</Button>
-            {user?.role === 'worker' && (
-              <Button onClick={() => router.push(`/jobs/${job._id}/apply`)}>Apply Now</Button>
+            <Button variant="outline" onClick={() => router.push("/jobs")}>
+              Back to Jobs
+            </Button>
+            {user?.role === "worker" && (
+              <Button onClick={() => router.push(`/jobs/${job._id}/apply`)}>
+                Apply Now
+              </Button>
             )}
-            {user?.role === 'worker' && (
-              <Button variant="outline" onClick={toggleSave} loading={saving}>{isSaved ? 'Saved' : 'Save Job'}</Button>
+            {user?.role === "worker" && (
+              <Button variant="outline" onClick={toggleSave} loading={saving}>
+                {isSaved ? "Saved" : "Save Job"}
+              </Button>
             )}
-            <Button variant="ghost" onClick={shareJob}>Share</Button>
+            <Button variant="ghost" onClick={shareJob}>
+              Share
+            </Button>
           </div>
         </Card>
       </div>

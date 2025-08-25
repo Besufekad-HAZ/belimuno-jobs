@@ -5,13 +5,13 @@
   --foreground: #171717;
 
   /* Belimuno Brand Colors */
-  --belimuno-primary: #2E4B8B; /* Navy Blue from logo */
-  --belimuno-secondary: #4A90E2; /* Light Blue from logo */
-  --belimuno-accent: #5BB3E8; /* Sky Blue from logo */
-  --belimuno-purple: #7B68B6; /* Purple from company materials */
-  --belimuno-cyan: #2BBAE8; /* Cyan from company materials */
-  --belimuno-dark: #1A2B5C; /* Dark navy */
-  --belimuno-light: #E8F3FF; /* Light blue background */
+  --belimuno-primary: #2e4b8b; /* Navy Blue from logo */
+  --belimuno-secondary: #4a90e2; /* Light Blue from logo */
+  --belimuno-accent: #5bb3e8; /* Sky Blue from logo */
+  --belimuno-purple: #7b68b6; /* Purple from company materials */
+  --belimuno-cyan: #2bbae8; /* Cyan from company materials */
+  --belimuno-dark: #1a2b5c; /* Dark navy */
+  --belimuno-light: #e8f3ff; /* Light blue background */
 }
 
 @theme inline {
@@ -34,7 +34,12 @@ body {
   font-family: var(--font-primary);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   letter-spacing: -0.01em;
 }
@@ -67,7 +72,17 @@ option {
 }
 
 /* Subtle scrollbar styling for chat */
-.custom-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
-.custom-scroll::-webkit-scrollbar-track { background: transparent; }
-.custom-scroll::-webkit-scrollbar-thumb { background: rgba(30,64,175,0.25); border-radius: 9999px; }
-.custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(30,64,175,0.4); }
+.custom-scroll::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(30, 64, 175, 0.25);
+  border-radius: 9999px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(30, 64, 175, 0.4);
+}
