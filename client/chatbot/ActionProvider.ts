@@ -105,7 +105,9 @@ class ActionProvider {
         "- Onboarding coordination\n" +
         "- Deep candidate network\n" +
         "- Services for both local and international firms\n\n" +
-        "We help businesses scale with flexible, high-quality workforce solutions.",
+        "We help businesses scale with flexible, high-quality workforce solutions.\n\n" +
+        "You can hire workers by visiting our website at www.belimunojobs.com and buying a job package to get the best workers for your business.\n\n" +
+        "Contact us if you would like to know more about our recruitment process or discuss your staffing needs.",
     );
     this.updateChatbotState(message);
   }
@@ -166,6 +168,13 @@ class ActionProvider {
         "2. Human Resources\n" +
         "3. Outsourced Service Management\n\n" +
         "Each department is led by experienced professionals dedicated to delivering excellence in HR solutions.",
+    );
+    this.updateChatbotState(message);
+  }
+
+  handleApply() {
+    const message = this.createChatBotMessage(
+      "You can apply for a job by visiting our website at www.belimunojobs.com/jobs and find the perfect opportunity for your skills.",
     );
     this.updateChatbotState(message);
   }

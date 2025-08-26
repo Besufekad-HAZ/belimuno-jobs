@@ -25,7 +25,9 @@ class MessageParser {
 
     if (
       lowerCase.includes("who are you") ||
-      lowerCase.includes("what is belimuno")
+      lowerCase.includes("what is belimuno") ||
+      lowerCase.includes("belimuno") ||
+      lowerCase.includes("belimuno jobs")
     ) {
       this.actionProvider.handleIntroduction();
       return;
@@ -38,7 +40,8 @@ class MessageParser {
 
     if (
       lowerCase.includes("services") ||
-      lowerCase.includes("what do you offer")
+      lowerCase.includes("what do you offer") ||
+      lowerCase.includes("what do you do")
     ) {
       this.actionProvider.handleServices();
       return;
@@ -54,7 +57,11 @@ class MessageParser {
       return;
     }
 
-    if (lowerCase.includes("training") || lowerCase.includes("development")) {
+    if (
+      lowerCase.includes("training") ||
+      lowerCase.includes("development") ||
+      lowerCase.includes("programs")
+    ) {
       this.actionProvider.handleTraining();
       return;
     }
@@ -62,13 +69,19 @@ class MessageParser {
     if (
       lowerCase.includes("contact") ||
       lowerCase.includes("office") ||
-      lowerCase.includes("location")
+      lowerCase.includes("location") ||
+      lowerCase.includes("address")
     ) {
       this.actionProvider.handleContact();
       return;
     }
 
-    if (lowerCase.includes("about") || lowerCase.includes("company")) {
+    if (
+      lowerCase.includes("about") ||
+      lowerCase.includes("company") ||
+      lowerCase.includes("website") ||
+      lowerCase.includes("belimuno website")
+    ) {
       this.actionProvider.handleAbout();
       return;
     }
@@ -82,8 +95,24 @@ class MessageParser {
       return;
     }
 
-    if (lowerCase.includes("team") || lowerCase.includes("management")) {
+    if (
+      lowerCase.includes("team") ||
+      lowerCase.includes("management") ||
+      lowerCase.includes("team members")
+    ) {
       this.actionProvider.handleTeam();
+      return;
+    }
+
+    if (
+      lowerCase.includes("apply") ||
+      lowerCase.includes("job") ||
+      lowerCase.includes("jobs") ||
+      lowerCase.includes("career") ||
+      lowerCase.includes("opportunities") ||
+      lowerCase.includes("job opportunities")
+    ) {
+      this.actionProvider.handleApply();
       return;
     }
 
