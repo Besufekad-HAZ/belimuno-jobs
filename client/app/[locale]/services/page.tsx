@@ -27,7 +27,7 @@ const ServicesPage: React.FC = () => {
 
   // Generate array of service numbers (1-6)
   const serviceNumbers = Array.from({ length: 6 }, (_, i) =>
-    (i + 1).toString()
+    (i + 1).toString(),
   );
 
   return (

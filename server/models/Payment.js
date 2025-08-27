@@ -34,7 +34,7 @@ const PaymentSchema = new mongoose.Schema({
   // Status and Processing
   status: {
     type: String,
-    enum: ['pending', 'processing', 'completed', 'failed', 'cancelled', 'refunded'],
+    enum: ['pending', 'processing', 'completed', 'failed', 'cancelled', 'refunded', 'partially_refunded'],
     default: 'pending'
   },
 
@@ -62,10 +62,28 @@ const PaymentSchema = new mongoose.Schema({
     details: mongoose.Schema.Types.Mixed
   },
 
+  // Admin dispute resolution record
+  adminResolution: {
+    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    resolution: String,
+    action: { type: String, enum: ['refund', 'release', 'partial'] },
+    resolvedAt: Date
+  },
+
   // Reconciliation
   isReconciled: { type: Boolean, default: false },
   reconciledAt: Date,
   reconciledBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
+  // Manual payment proof (client uploads check image)
+  proof: {
+    imageData: String, // base64 data URL or direct URL (future)
+    filename: String,
+    mimeType: String,
+    note: String,
+    uploadedAt: Date,
+    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  },
 
   // Metadata
   ipAddress: String,

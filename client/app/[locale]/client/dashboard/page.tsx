@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Plus,
@@ -60,14 +61,22 @@ const ClientDashboard: React.FC = () => {
   const [selectedJob, setSelectedJob] = useState<EnrichedJob | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showProofModal, setShowProofModal] = useState(false);
   const [selectedWorker, setSelectedWorker] = useState<{
     name: string;
     _id?: string;
   } | null>(null);
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
-  const router = useRouter();
+
   const t = useTranslations("ClientDashboard");
+  const [pendingProof, setPendingProof] = useState<{
+    dataUrl: string;
+    name?: string;
+    type?: string;
+  } | null>(null);
+  const [recentPaymentId, setRecentPaymentId] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const user = getStoredUser();
@@ -98,7 +107,7 @@ const ClientDashboard: React.FC = () => {
 
   const handleAcceptApplication = async (
     jobId: string,
-    applicationId: string
+    applicationId: string,
   ) => {
     try {
       await clientAPI.acceptApplication(jobId, applicationId);
@@ -110,7 +119,7 @@ const ClientDashboard: React.FC = () => {
 
   const handleRejectApplication = async (
     jobId: string,
-    applicationId: string
+    applicationId: string,
   ) => {
     try {
       await clientAPI.rejectApplication(jobId, applicationId);
@@ -168,7 +177,20 @@ const ClientDashboard: React.FC = () => {
   const submitRating = async () => {
     try {
       if (!selectedJob) return;
-      await clientAPI.completeJobWithRating(selectedJob._id, rating, review);
+      const res = await clientAPI.completeJobWithRating(
+        selectedJob._id,
+        rating,
+        review,
+      );
+
+      // If a payment was created for manual check, allow uploading proof now
+      const paymentId: string | undefined = res.data?.data?.paymentId;
+      if (paymentId) {
+        setRecentPaymentId(paymentId);
+        setShowRatingModal(false);
+        setShowProofModal(true);
+        return;
+      }
 
       setShowRatingModal(false);
       setRating(5);
@@ -179,6 +201,44 @@ const ClientDashboard: React.FC = () => {
       fetchDashboardData();
     } catch (error) {
       console.error("Failed to submit rating:", error);
+    }
+  };
+
+  const onPickProof = async (files: FileList | null) => {
+    const f = files?.[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () =>
+      setPendingProof({
+        dataUrl: String(r.result),
+        name: f.name,
+        type: f.type,
+      });
+    r.readAsDataURL(f);
+  };
+
+  const uploadProof = async () => {
+    if (!recentPaymentId || !pendingProof) {
+      setShowProofModal(false);
+      return;
+    }
+    try {
+      await clientAPI.uploadPaymentProof(recentPaymentId, {
+        imageData: pendingProof.dataUrl,
+        filename: pendingProof.name,
+        mimeType: pendingProof.type,
+        note: `Check proof for job ${selectedJob?.title || ""}`,
+      });
+      setPendingProof(null);
+      setRecentPaymentId(null);
+      setShowProofModal(false);
+      setSelectedJob(null);
+      setSelectedWorker(null);
+      fetchDashboardData();
+      alert("Payment proof uploaded. Admin will verify and mark paid.");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to upload proof.");
     }
   };
 
@@ -295,6 +355,53 @@ const ClientDashboard: React.FC = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <h4 className="font-medium text-gray-900">{job.title}</h4>
+                    {/* Payment Proof Modal */}
+                    <Modal
+                      isOpen={showProofModal}
+                      onClose={() => setShowProofModal(false)}
+                      title="Upload Payment Check Proof"
+                    >
+                      <div className="space-y-3">
+                        <p className="text-sm text-gray-600">
+                          Upload a photo/scan of the payment check. This helps
+                          admins verify and mark your payment as completed.
+                        </p>
+                        <label className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer hover:bg-gray-50 w-fit">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => onPickProof(e.target.files)}
+                          />
+                          Choose image…
+                        </label>
+                        {pendingProof && (
+                          <div className="mt-2">
+                            <Image
+                              src={pendingProof.dataUrl}
+                              alt="Check preview"
+                              width={220}
+                              height={140}
+                              className="rounded border"
+                            />
+                          </div>
+                        )}
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowProofModal(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={uploadProof}
+                            disabled={!pendingProof}
+                          >
+                            Upload Proof
+                          </Button>
+                        </div>
+                      </div>
+                    </Modal>
                     <p className="text-sm text-gray-600 mt-1">
                       {job.description}
                     </p>
@@ -305,12 +412,12 @@ const ClientDashboard: React.FC = () => {
                         job.status === "open"
                           ? "bg-green-100 text-green-800"
                           : job.status === "in_progress"
-                          ? "bg-blue-100 text-blue-800"
-                          : job.status === "completed"
-                          ? "bg-gray-100 text-gray-800"
-                          : job.status === "awaiting_completion"
-                          ? "bg-purple-100 text-purple-800"
-                          : "bg-yellow-100 text-yellow-800"
+                            ? "bg-blue-100 text-blue-800"
+                            : job.status === "completed"
+                              ? "bg-gray-100 text-gray-800"
+                              : job.status === "awaiting_completion"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-yellow-100 text-yellow-800"
                       }`}
                     >
                       {job.status.replace("_", " ")}
@@ -413,12 +520,12 @@ const ClientDashboard: React.FC = () => {
                                   onClick={() =>
                                     handleRejectApplication(
                                       job._id,
-                                      application._id
+                                      application._id,
                                     )
                                   }
                                 >
                                   {t(
-                                    "sections.recentApplications.actions.reject"
+                                    "sections.recentApplications.actions.reject",
                                   )}
                                 </Button>
                                 <Button
@@ -426,12 +533,12 @@ const ClientDashboard: React.FC = () => {
                                   onClick={() =>
                                     handleAcceptApplication(
                                       job._id,
-                                      application._id
+                                      application._id,
                                     )
                                   }
                                 >
                                   {t(
-                                    "sections.recentApplications.actions.accept"
+                                    "sections.recentApplications.actions.accept",
                                   )}
                                 </Button>
                               </div>
@@ -503,7 +610,7 @@ const ClientDashboard: React.FC = () => {
                       {selectedJob.requirements.map(
                         (req: string, index: number) => (
                           <li key={index}>{req}</li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>
@@ -640,9 +747,7 @@ const ClientDashboard: React.FC = () => {
                       <button
                         key={star}
                         onClick={() => setRating(star)}
-                        className={`p-1 ${
-                          star <= rating ? "text-yellow-400" : "text-gray-300"
-                        } hover:text-yellow-400 transition-colors`}
+                        className={`p-1 ${star <= rating ? "text-yellow-400" : "text-gray-300"} hover:text-yellow-400 transition-colors`}
                       >
                         <Star className="h-8 w-8 fill-current" />
                       </button>
