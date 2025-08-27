@@ -86,3 +86,8 @@ option {
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(30, 64, 175, 0.4);
 }
+
+/* Chatbot */
+.react-chatbot-kit-chat-container {
+  width: 100% !important;
+}
