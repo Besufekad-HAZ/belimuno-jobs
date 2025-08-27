@@ -11,7 +11,8 @@ const {
   requestRevision,
   getPayments,
   getJobMessages,
-  sendJobMessage
+  sendJobMessage,
+  uploadPaymentProof
 } = require('../controllers/clientController');
 const { protect } = require('../middleware/auth');
 const { requireClient } = require('../middleware/roleCheck');
@@ -42,5 +43,6 @@ router.put('/jobs/:id/request-revision', requestRevision);
 
 // Payments
 router.get('/payments', getPayments);
+router.put('/payments/:id/proof', uploadPaymentProof);
 
 module.exports = router;

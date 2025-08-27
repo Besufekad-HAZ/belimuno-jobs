@@ -170,14 +170,16 @@ exports.getUser = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 });
   }
 
-  // Get user's payments
+  // Get user's payments (as payer or recipient)
   const payments = await Payment.find({
     $or: [
-      { client: user._id },
-      { worker: user._id }
+      { payer: user._id },
+      { recipient: user._id }
     ]
   })
     .populate('job', 'title')
+    .populate('payer', 'name role profile.avatar')
+    .populate('recipient', 'name role profile.avatar')
     .sort({ createdAt: -1 })
     .limit(10);
 
@@ -500,8 +502,8 @@ exports.getPayments = asyncHandler(async (req, res) => {
   if (status) query.status = status;
 
   const payments = await Payment.find(query)
-    .populate('client', 'name profile.avatar')
-    .populate('worker', 'name profile.avatar')
+    .populate('payer', 'name role profile.avatar')
+    .populate('recipient', 'name role profile.avatar')
     .populate('job', 'title')
     .sort({ createdAt: -1 })
     .limit(limit * 1)
@@ -530,8 +532,8 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
 
   const payment = await Payment.findById(req.params.id)
     .populate('job')
-    .populate('client')
-    .populate('worker');
+    .populate('payer')
+    .populate('recipient');
 
   if (!payment) {
     return res.status(404).json({
@@ -564,7 +566,7 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
   await payment.save();
 
   // Update job dispute status
-  if (payment.job && payment.job.dispute.isDisputed) {
+  if (payment.job && payment.job.dispute && payment.job.dispute.isDisputed) {
     payment.job.dispute.status = 'resolved';
     payment.job.dispute.resolvedBy = req.user._id;
     payment.job.dispute.resolution = resolution;
@@ -574,7 +576,7 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
 
   // Create notifications
   await Notification.create({
-    recipient: payment.client._id,
+    recipient: payment.payer._id,
     title: 'Payment Dispute Resolved',
     message: `The dispute for your payment has been resolved: ${resolution}`,
     type: 'dispute_resolved',
@@ -582,7 +584,7 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
   });
 
   await Notification.create({
-    recipient: payment.worker._id,
+    recipient: payment.recipient._id,
     title: 'Payment Dispute Resolved',
     message: `The dispute for your payment has been resolved: ${resolution}`,
     type: 'dispute_resolved',
@@ -600,36 +602,81 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/payments/:id/mark-paid
 // @access  Private/Super Admin
 exports.markPaymentPaid = asyncHandler(async (req, res) => {
-  const payment = await Payment.findById(req.params.id).populate('job').populate('recipient');
+  // Load payment with relations
+  const payment = await Payment.findById(req.params.id)
+    .populate('job')
+    .populate('recipient')
+    .populate('payer');
 
   if (!payment) {
     return res.status(404).json({ success: false, message: 'Payment not found' });
   }
 
+  // Idempotency: if already completed, still ensure job payment structure is updated and return success
+  const now = new Date();
+  const wasCompleted = payment.status === 'completed';
   payment.status = 'completed';
-  payment.processedAt = new Date();
-  payment.completedAt = new Date();
+  payment.processedAt = payment.processedAt || now;
+  payment.completedAt = payment.completedAt || now;
   await payment.save();
 
+  // Safely update related job payment fields
   if (payment.job) {
+    // Initialize job.payment object if missing
+    if (!payment.job.payment) {
+      payment.job.payment = {
+        totalAmount: payment.amount,
+        paidAmount: 0,
+        escrowAmount: 0,
+        platformFee: 0,
+        workerEarnings: undefined,
+        paymentStatus: 'pending',
+        paymentHistory: []
+      };
+    }
+
+    // Ensure history array exists
+    payment.job.payment.paymentHistory = payment.job.payment.paymentHistory || [];
+
+    // Update amounts and status
+    const prevPaid = Number(payment.job.payment.paidAmount || 0);
+    payment.job.payment.paidAmount = prevPaid + Number(payment.amount || 0);
     payment.job.payment.paymentStatus = 'paid';
-    payment.job.payment.paidAmount = payment.amount;
-    payment.job.payment.paymentHistory.push({ amount: payment.amount, type: 'manual_check', transactionId: payment.transactionId, status: 'completed' });
+
+    // Append a history record if not already appended for this transactionId
+    const alreadyLogged = payment.job.payment.paymentHistory.some(
+      (h) => h && h.transactionId === payment.transactionId,
+    );
+    if (!alreadyLogged) {
+      payment.job.payment.paymentHistory.push({
+        amount: payment.amount,
+        type: payment.paymentMethod || 'manual_check',
+        transactionId: payment.transactionId,
+        processedAt: now,
+        status: 'completed'
+      });
+    }
+
     await payment.job.save();
   }
 
+  // Notify recipient (worker) if present
   if (payment.recipient) {
     await Notification.create({
       recipient: payment.recipient._id,
       title: 'Payment Completed',
-      message: `A manual check payment of ETB ${payment.amount.toLocaleString()} has been approved.`,
+      message: `A manual check payment of ETB ${Number(payment.amount || 0).toLocaleString()} has been approved.`,
       type: 'payment',
       relatedPayment: payment._id,
       relatedJob: payment.job?._id,
     });
   }
 
-  res.status(200).json({ success: true, message: 'Payment marked as completed', data: payment });
+  return res.status(200).json({
+    success: true,
+    message: wasCompleted ? 'Payment already completed' : 'Payment marked as completed',
+    data: payment
+  });
 });
 
 // @desc    Deactivate user

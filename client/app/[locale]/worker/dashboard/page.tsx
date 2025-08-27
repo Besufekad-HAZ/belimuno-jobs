@@ -92,6 +92,7 @@ const WorkerDashboard: React.FC = () => {
     progress?: number;
     acceptedApplication?: { proposedBudget?: number };
     applicationCount?: number;
+    review?: { workerReview?: { rating?: number } };
   }
   interface EarningsData {
     recentPayments?: { jobTitle?: string; amount?: number; date?: string }[];
@@ -129,7 +130,7 @@ const WorkerDashboard: React.FC = () => {
     dataUrl: string;
   };
   const [chatAttachments, setChatAttachments] = useState<PendingAttachment[]>(
-    []
+    [],
   );
   const [showEmoji, setShowEmoji] = useState(false);
   const chatInputRef = React.useRef<HTMLInputElement>(null);
@@ -185,7 +186,7 @@ const WorkerDashboard: React.FC = () => {
       const apps: { job?: { _id: string } }[] =
         applicationsResponse.data.data || [];
       setAppliedJobIds(
-        new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[])
+        new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]),
       );
       setEarnings(earningsResponse.data);
     } catch (error) {
@@ -201,7 +202,7 @@ const WorkerDashboard: React.FC = () => {
       const fetchedNotifications = response.data?.data || [];
       setNotifications(fetchedNotifications);
       setUnreadCount(
-        fetchedNotifications.filter((n: RealNotification) => !n.isRead).length
+        fetchedNotifications.filter((n: RealNotification) => !n.isRead).length,
       );
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
@@ -215,8 +216,8 @@ const WorkerDashboard: React.FC = () => {
         prev.map((n) =>
           n._id === notificationId
             ? { ...n, isRead: true, readAt: new Date().toISOString() }
-            : n
-        )
+            : n,
+        ),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
@@ -232,7 +233,7 @@ const WorkerDashboard: React.FC = () => {
           ...n,
           isRead: true,
           readAt: new Date().toISOString(),
-        }))
+        })),
       );
       setUnreadCount(0);
     } catch (error) {
@@ -290,7 +291,7 @@ const WorkerDashboard: React.FC = () => {
       await jobsAPI.apply(
         jobId,
         applicationData.proposal,
-        parseFloat(applicationData.proposedBudget)
+        parseFloat(applicationData.proposedBudget),
       );
       setSelectedJob(null);
       setApplicationData({ proposal: "", proposedBudget: "" });
@@ -303,7 +304,7 @@ const WorkerDashboard: React.FC = () => {
   const handleUpdateJobStatus = async (
     jobId: string,
     status: string,
-    progress?: number
+    progress?: number,
   ) => {
     try {
       await workerAPI.updateJobStatus(jobId, status, progress);
@@ -331,7 +332,7 @@ const WorkerDashboard: React.FC = () => {
       const res = await workerAPI.sendJobMessage(
         chatJobId,
         newMessage.trim(),
-        chatAttachments.map((a) => a.dataUrl)
+        chatAttachments.map((a) => a.dataUrl),
       );
       setChatMessages((prev) => [...prev, res.data.data]);
       setNewMessage("");
@@ -594,7 +595,7 @@ const WorkerDashboard: React.FC = () => {
                           </p>
                           <p className="text-xs text-gray-500">
                             {t(
-                              "sections.activeJobs.pendingApplications.applied"
+                              "sections.activeJobs.pendingApplications.applied",
                             )}{" "}
                             {new Date(app.appliedAt).toLocaleDateString()}
                           </p>
@@ -620,7 +621,7 @@ const WorkerDashboard: React.FC = () => {
                       "in_progress",
                       "revision_requested",
                       "completed",
-                    ].includes(job.status)
+                    ].includes(job.status),
                 )
                 .map((job) => (
                   <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
@@ -631,8 +632,8 @@ const WorkerDashboard: React.FC = () => {
                           job.status === "in_progress"
                             ? "bg-blue-100 text-blue-800"
                             : job.status === "assigned"
-                            ? "bg-purple-100 text-purple-800"
-                            : "bg-yellow-100 text-yellow-800"
+                              ? "bg-purple-100 text-purple-800"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {job.status ? job.status.replace("_", " ") : ""}
@@ -646,8 +647,8 @@ const WorkerDashboard: React.FC = () => {
                           (job.progress || 0) >= 100
                             ? "green"
                             : (job.progress || 0) >= 50
-                            ? "blue"
-                            : "yellow"
+                              ? "blue"
+                              : "yellow"
                         }
                       />
                     </div>
@@ -705,7 +706,7 @@ const WorkerDashboard: React.FC = () => {
                           <MessageCircle className="h-4 w-4" />
                         </Button>
                         {job.status === "completed" &&
-                          !(job as any).review?.workerReview?.rating && (
+                          !job.review?.workerReview?.rating && (
                             <Button
                               size="sm"
                               onClick={() => {
@@ -713,8 +714,7 @@ const WorkerDashboard: React.FC = () => {
                                 setShowRateModal(true);
                               }}
                             >
-                              <Star className="h-4 w-4 mr-1" />{" "}
-                              {t("sections.activeJobs.actions.rateClient")}
+                              <Star className="h-4 w-4 mr-1" /> Rate Client
                             </Button>
                           )}
                       </div>
@@ -795,11 +795,7 @@ const WorkerDashboard: React.FC = () => {
                         Proposal
                       </label>
                       <span
-                        className={`text-xs ${
-                          applicationData.proposal.length > PROPOSAL_MAX
-                            ? "text-red-500"
-                            : "text-gray-400"
-                        }`}
+                        className={`text-xs ${applicationData.proposal.length > PROPOSAL_MAX ? "text-red-500" : "text-gray-400"}`}
                       >
                         {applicationData.proposal.length}/{PROPOSAL_MAX}
                       </span>
@@ -936,7 +932,7 @@ const WorkerDashboard: React.FC = () => {
                       amount?: number;
                       date?: string;
                     },
-                    index: number
+                    index: number,
                   ) => (
                     <div
                       key={index}
@@ -961,7 +957,7 @@ const WorkerDashboard: React.FC = () => {
                         </Badge>
                       </div>
                     </div>
-                  )
+                  ),
                 ) ||
                   [
                     // Mock data for demo
@@ -1041,9 +1037,7 @@ const WorkerDashboard: React.FC = () => {
                   <button
                     key={star}
                     onClick={() => setClientRating(star)}
-                    className={`p-1 ${
-                      star <= clientRating ? "text-yellow-400" : "text-gray-300"
-                    } hover:text-yellow-400`}
+                    className={`p-1 ${star <= clientRating ? "text-yellow-400" : "text-gray-300"} hover:text-yellow-400`}
                   >
                     <Star className="h-8 w-8 fill-current" />
                   </button>
@@ -1114,9 +1108,7 @@ const WorkerDashboard: React.FC = () => {
                 {notifications.map((notification) => (
                   <Card
                     key={notification._id}
-                    className={`p-4 ${
-                      !notification.isRead ? "bg-blue-50 border-blue-200" : ""
-                    }`}
+                    className={`p-4 ${!notification.isRead ? "bg-blue-50 border-blue-200" : ""}`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -1124,7 +1116,7 @@ const WorkerDashboard: React.FC = () => {
                           {getNotificationIcon(notification.type)}
                           <Badge
                             variant={getNotificationBadgeVariant(
-                              notification.type
+                              notification.type,
                             )}
                             size="sm"
                           >
@@ -1140,7 +1132,7 @@ const WorkerDashboard: React.FC = () => {
                         <p className="text-sm text-gray-500">
                           {formatDistanceToNow(
                             new Date(notification.createdAt),
-                            { addSuffix: true }
+                            { addSuffix: true },
                           )}
                         </p>
                         {notification.actionButton && (
@@ -1150,7 +1142,7 @@ const WorkerDashboard: React.FC = () => {
                             onClick={() =>
                               window.open(
                                 notification.actionButton?.url,
-                                "_blank"
+                                "_blank",
                               )
                             }
                             className="mt-2"
@@ -1220,7 +1212,7 @@ const WorkerDashboard: React.FC = () => {
                 if (!files) return;
                 const list = Array.from(files).slice(
                   0,
-                  5 - chatAttachments.length
+                  5 - chatAttachments.length,
                 );
                 const reads = await Promise.all(
                   list.map(
@@ -1235,8 +1227,8 @@ const WorkerDashboard: React.FC = () => {
                             dataUrl: String(r.result),
                           });
                         r.readAsDataURL(f);
-                      })
-                  )
+                      }),
+                  ),
                 );
                 setChatAttachments((prev) => [...prev, ...reads]);
               }}
@@ -1246,11 +1238,7 @@ const WorkerDashboard: React.FC = () => {
               {chatMessages.map((m, i) => (
                 <div
                   key={i}
-                  className={`p-3 rounded-lg text-sm max-w-md ${
-                    m.sender?.role === "worker"
-                      ? "bg-blue-50 ml-auto border border-blue-200"
-                      : "bg-gray-100 border border-gray-200"
-                  }`}
+                  className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role === "worker" ? "bg-blue-50 ml-auto border border-blue-200" : "bg-gray-100 border border-gray-200"}`}
                 >
                   <p className="font-medium mb-1 text-blue-700">
                     {m.sender?.name || "You"}
@@ -1298,7 +1286,7 @@ const WorkerDashboard: React.FC = () => {
                         className="absolute -top-2 -right-2 bg-white border rounded-full p-0.5 shadow hidden group-hover:block"
                         onClick={() =>
                           setChatAttachments((prev) =>
-                            prev.filter((_, i) => i !== idx)
+                            prev.filter((_, i) => i !== idx),
                           )
                         }
                       >
@@ -1320,7 +1308,7 @@ const WorkerDashboard: React.FC = () => {
                   onChange={async (e) => {
                     const files = Array.from(e.target.files || []).slice(
                       0,
-                      5 - chatAttachments.length
+                      5 - chatAttachments.length,
                     );
                     const reads = await Promise.all(
                       files.map(
@@ -1335,8 +1323,8 @@ const WorkerDashboard: React.FC = () => {
                                 dataUrl: String(r.result),
                               });
                             r.readAsDataURL(f);
-                          })
-                      )
+                          }),
+                      ),
                     );
                     setChatAttachments((prev) => [...prev, ...reads]);
                   }}
@@ -1364,7 +1352,7 @@ const WorkerDashboard: React.FC = () => {
                       (async () => {
                         const list = Array.from(dt.files).slice(
                           0,
-                          5 - chatAttachments.length
+                          5 - chatAttachments.length,
                         );
                         const reads = await Promise.all(
                           list.map(
@@ -1379,8 +1367,8 @@ const WorkerDashboard: React.FC = () => {
                                     dataUrl: String(r.result),
                                   });
                                 r.readAsDataURL(f);
-                              })
-                          )
+                              }),
+                          ),
                         );
                         setChatAttachments((prev) => [...prev, ...reads]);
                       })();

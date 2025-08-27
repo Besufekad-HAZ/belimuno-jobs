@@ -14,7 +14,7 @@ const ContactPage: React.FC = () => {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle"
+    "idle",
   );
   const t = useTranslations("ContactPage");
 
@@ -29,7 +29,7 @@ const ContactPage: React.FC = () => {
       setPhone("");
       setSubject("");
       setMessage("");
-    } catch (err) {
+    } catch {
       setStatus("error");
     }
   };
