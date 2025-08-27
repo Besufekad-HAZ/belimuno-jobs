@@ -19,6 +19,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import { useTranslations } from "next-intl";
 
 interface HRStats {
   totalWorkers: number;
@@ -87,6 +88,7 @@ const HRAdminDashboard: React.FC = () => {
     priority: "medium",
   });
   const router = useRouter();
+  const t = useTranslations("HRAdminDashboard");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -235,10 +237,11 @@ const HRAdminDashboard: React.FC = () => {
   };
 
   const getWorkerStatusBadge = (worker: Worker) => {
-    if (!worker.isActive) return <Badge variant="danger">Inactive</Badge>;
+    if (!worker.isActive)
+      return <Badge variant="danger">{t("worker.status.inactive")}</Badge>;
     if (!worker.isVerified && !worker.profile?.verified)
-      return <Badge variant="warning">Pending</Badge>;
-    return <Badge variant="success">Verified</Badge>;
+      return <Badge variant="warning">{t("worker.status.pending")}</Badge>;
+    return <Badge variant="success">{t("worker.status.verified")}</Badge>;
   };
 
   if (loading) {
@@ -256,11 +259,9 @@ const HRAdminDashboard: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              HR Admin Dashboard
+              {t("header.title")}
             </h1>
-            <p className="text-gray-600">
-              Manage workforce, disputes, and HR operations
-            </p>
+            <p className="text-gray-600">{t("header.subtitle")}</p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
             <Button
@@ -269,7 +270,7 @@ const HRAdminDashboard: React.FC = () => {
               className="flex items-center space-x-2"
             >
               <Bell className="h-4 w-4" />
-              <span>Send Announcement</span>
+              <span>{t("header.buttons.sendAnnouncement")}</span>
             </Button>
             <Button
               onClick={() => router.push("/admin/hr/workers")}
@@ -277,7 +278,7 @@ const HRAdminDashboard: React.FC = () => {
               className="flex items-center space-x-2"
             >
               <Users className="h-4 w-4" />
-              <span>Manage Workers</span>
+              <span>{t("header.buttons.manageWorkers")}</span>
             </Button>
           </div>
         </div>
@@ -291,7 +292,7 @@ const HRAdminDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  Total Workers
+                  {t("stats.totalWorkers.label")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.totalWorkers || 0}
@@ -307,7 +308,7 @@ const HRAdminDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  Verified Workers
+                  {t("stats.verifiedWorkers.label")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.verifiedWorkers || 0}
@@ -323,7 +324,7 @@ const HRAdminDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  Pending Verification
+                  {t("stats.pendingVerification.label")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.pendingVerifications || 0}
@@ -339,7 +340,7 @@ const HRAdminDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  Open Disputes
+                  {t("stats.openDisputes.label")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.disputesOpen || 0}
@@ -355,7 +356,7 @@ const HRAdminDashboard: React.FC = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                Pending Verifications
+                {t("verifications.title")}
               </h2>
               <Badge variant="warning">
                 {
@@ -410,7 +411,7 @@ const HRAdminDashboard: React.FC = () => {
               {workers.filter((w) => !w.isVerified && !w.profile?.verified)
                 .length === 0 && (
                 <p className="text-gray-500 text-center py-4">
-                  No pending verifications
+                  {t("verifications.empty")}
                 </p>
               )}
             </div>
@@ -420,7 +421,7 @@ const HRAdminDashboard: React.FC = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                Active Disputes
+                {t("disputes.title")}
               </h2>
               <Badge variant="danger">
                 {disputes.filter((d) => d.status === "open").length}
@@ -441,7 +442,10 @@ const HRAdminDashboard: React.FC = () => {
                         }
                         size="sm"
                       >
-                        {dispute.priority}
+                        {t(`disputes.priority.${dispute.priority}`)}
+                      </Badge>
+                      <Badge variant="secondary" size="sm">
+                        {dispute.status}
                       </Badge>
                       <Badge variant="secondary" size="sm">
                         {dispute.status}
@@ -466,14 +470,14 @@ const HRAdminDashboard: React.FC = () => {
                   </p>
                   {dispute.job && (
                     <p className="text-xs text-blue-600 mt-1">
-                      Job: {dispute.job.title}
+                      {t("disputes.details.fields.job")}: {dispute.job.title}
                     </p>
                   )}
                 </div>
               ))}
               {disputes.length === 0 && (
                 <p className="text-gray-500 text-center py-4">
-                  No active disputes
+                  {t("disputes.empty")}
                 </p>
               )}
             </div>
@@ -485,7 +489,7 @@ const HRAdminDashboard: React.FC = () => {
           {/* HR Actions */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              HR Actions
+              {t("actions.title")}
             </h2>
             <div className="space-y-3">
               <Button
@@ -494,7 +498,7 @@ const HRAdminDashboard: React.FC = () => {
                 className="w-full justify-start"
               >
                 <Users className="h-4 w-4 mr-2" />
-                Worker Management
+                {t("actions.buttons.workerManagement")}
               </Button>
               <Button
                 onClick={() => router.push("/admin/hr/disputes")}
@@ -502,7 +506,7 @@ const HRAdminDashboard: React.FC = () => {
                 className="w-full justify-start"
               >
                 <AlertTriangle className="h-4 w-4 mr-2" />
-                Dispute Resolution
+                {t("actions.buttons.disputeResolution")}
               </Button>
               <Button
                 onClick={() => router.push("/admin/hr/performance")}
@@ -510,7 +514,7 @@ const HRAdminDashboard: React.FC = () => {
                 className="w-full justify-start"
               >
                 <Award className="h-4 w-4 mr-2" />
-                Performance Reviews
+                {t("actions.buttons.performanceReviews")}
               </Button>
             </div>
           </Card>
@@ -518,12 +522,14 @@ const HRAdminDashboard: React.FC = () => {
           {/* Performance Metrics */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Performance Metrics
+              {t("metrics.performance.title")}
             </h2>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-900">Worker Satisfaction</span>
+                  <span className="text-gray-900">
+                    {t("metrics.performance.workerSatisfaction")}
+                  </span>
                   <span className="text-gray-900">85%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -535,7 +541,9 @@ const HRAdminDashboard: React.FC = () => {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-900">Verification Rate</span>
+                  <span className="text-gray-900">
+                    {t("metrics.performance.verificationRate")}
+                  </span>
                   <span className="text-gray-900">92%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -547,7 +555,9 @@ const HRAdminDashboard: React.FC = () => {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-900">Dispute Resolution</span>
+                  <span className="text-gray-900">
+                    {t("metrics.performance.disputeResolution")}
+                  </span>
                   <span className="text-gray-900">78%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -563,27 +573,35 @@ const HRAdminDashboard: React.FC = () => {
           {/* Recent Metrics */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              This Month
+              {t("metrics.monthly.title")}
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">New Workers</span>
+                <span className="text-gray-600">
+                  {t("metrics.monthly.fields.newWorkers")}
+                </span>
                 <span className="font-semibold text-gray-900">
                   {stats?.workersThisMonth || 0}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Verifications</span>
+                <span className="text-gray-600">
+                  {t("metrics.monthly.fields.verifications")}
+                </span>
                 <span className="font-semibold text-gray-900">
                   {stats?.verifiedWorkers || 0}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Disputes Resolved</span>
+                <span className="text-gray-600">
+                  {t("metrics.monthly.fields.disputesResolved")}
+                </span>
                 <span className="font-semibold text-gray-900">12</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600">Training Completed</span>
+                <span className="text-gray-600">
+                  {t("metrics.monthly.fields.trainingCompleted")}
+                </span>
                 <span className="font-semibold text-gray-900">45</span>
               </div>
             </div>
@@ -597,7 +615,7 @@ const HRAdminDashboard: React.FC = () => {
             setShowWorkerModal(false);
             setSelectedWorker(null);
           }}
-          title="Worker Verification"
+          title={t("worker.verification.title")}
           size="lg"
         >
           {selectedWorker && (
@@ -618,24 +636,32 @@ const HRAdminDashboard: React.FC = () => {
               {selectedWorker.workerProfile && (
                 <div>
                   <h4 className="font-medium mb-2 text-gray-700">
-                    Worker Profile
+                    {t("worker.verification.profile.title")}
                   </h4>
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-gray-700">
                     <p>
-                      <strong>Experience:</strong>{" "}
+                      <strong>
+                        {t("worker.verification.profile.fields.experience")}:
+                      </strong>{" "}
                       {selectedWorker.workerProfile.experience}
                     </p>
                     <p>
-                      <strong>Rating:</strong>{" "}
+                      <strong>
+                        {t("worker.verification.profile.fields.rating")}:
+                      </strong>{" "}
                       {selectedWorker.workerProfile.rating}/5
                     </p>
                     <p>
-                      <strong>Jobs Completed:</strong>{" "}
+                      <strong>
+                        {t("worker.verification.profile.fields.jobsCompleted")}:
+                      </strong>{" "}
                       {selectedWorker.workerProfile.completedJobs}/
                       {selectedWorker.workerProfile.totalJobs}
                     </p>
                     <div>
-                      <strong>Skills:</strong>
+                      <strong>
+                        {t("worker.verification.profile.fields.skills")}:
+                      </strong>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {selectedWorker.workerProfile.skills?.map(
                           (skill, idx) => (
@@ -659,7 +685,7 @@ const HRAdminDashboard: React.FC = () => {
                   className="flex items-center space-x-2"
                 >
                   <CheckCircle className="h-4 w-4" />
-                  <span>Verify Worker</span>
+                  <span>{t("worker.verification.buttons.verify")}</span>
                 </Button>
                 <Button
                   onClick={() =>
@@ -669,7 +695,7 @@ const HRAdminDashboard: React.FC = () => {
                   className="flex items-center space-x-2 text-red-600"
                 >
                   <XCircle className="h-4 w-4" />
-                  <span>Reject</span>
+                  <span>{t("worker.verification.buttons.reject")}</span>
                 </Button>
               </div>
             </div>
@@ -683,7 +709,7 @@ const HRAdminDashboard: React.FC = () => {
             setShowDisputeModal(false);
             setSelectedDispute(null);
           }}
-          title="Dispute Details"
+          title={t("disputes.details.title")}
           size="lg"
         >
           {selectedDispute && (
@@ -698,42 +724,52 @@ const HRAdminDashboard: React.FC = () => {
                         : "info"
                   }
                 >
-                  {selectedDispute.priority} Priority
+                  {t(`disputes.priority.${selectedDispute.priority}`)}{" "}
+                  {t("disputes.details.priority")}
                 </Badge>
                 <Badge variant="secondary">{selectedDispute.status}</Badge>
               </div>
 
               <div>
                 <h4 className="font-medium mb-2 text-gray-700">
-                  Parties Involved
+                  {t("disputes.details.partiesInvolved")}
                 </h4>
                 <div className="bg-gray-50 p-4 rounded-lg text-gray-700">
                   <p>
-                    <strong>Worker:</strong> {selectedDispute.worker.name}
+                    <strong>{t("disputes.details.fields.worker")}:</strong>{" "}
+                    {selectedDispute.worker.name}
                   </p>
                   <p>
-                    <strong>Client:</strong> {selectedDispute.client.name}
+                    <strong>{t("disputes.details.fields.client")}:</strong>{" "}
+                    {selectedDispute.client.name}
                   </p>
                   {selectedDispute.job && (
                     <p>
-                      <strong>Job:</strong> {selectedDispute.job.title}
+                      <strong>{t("disputes.details.fields.job")}:</strong>{" "}
+                      {selectedDispute.job.title}
                     </p>
                   )}
                 </div>
               </div>
 
               <div>
-                <h4 className="font-medium mb-2 text-gray-700">Description</h4>
+                <h4 className="font-medium mb-2 text-gray-700">
+                  {t("disputes.details.fields.description")}
+                </h4>
                 <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
                   {selectedDispute.description}
                 </p>
               </div>
 
               <div className="flex space-x-3">
-                <Button variant="primary">Investigate</Button>
-                <Button variant="outline">Contact Parties</Button>
+                <Button variant="primary">
+                  {t("disputes.details.buttons.investigate")}
+                </Button>
+                <Button variant="outline">
+                  {t("disputes.details.buttons.contactParties")}
+                </Button>
                 <Button variant="outline" className="text-green-600">
-                  Resolve
+                  {t("disputes.details.buttons.resolve")}
                 </Button>
               </div>
             </div>
@@ -744,13 +780,13 @@ const HRAdminDashboard: React.FC = () => {
         <Modal
           isOpen={showAnnouncementModal}
           onClose={() => setShowAnnouncementModal(false)}
-          title="Send System Announcement"
+          title={t("announcement.title")}
           size="lg"
         >
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title
+                {t("announcement.fields.title.label")}
               </label>
               <input
                 type="text"
@@ -762,13 +798,13 @@ const HRAdminDashboard: React.FC = () => {
                   }))
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder="Announcement title..."
+                placeholder={t("announcement.fields.title.placeholder")}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message
+                {t("announcement.fields.message.label")}
               </label>
               <textarea
                 value={announcement.message}
@@ -780,14 +816,14 @@ const HRAdminDashboard: React.FC = () => {
                 }
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder="Your announcement message..."
+                placeholder={t("announcement.fields.message.placeholder")}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Target Audience
+                  {t("announcement.fields.targetAudience.label")}
                 </label>
                 <select
                   value={announcement.targetRoles[0]}
@@ -799,15 +835,21 @@ const HRAdminDashboard: React.FC = () => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="worker">Workers</option>
-                  <option value="client">Clients</option>
-                  <option value="both">Both Workers & Clients</option>
+                  <option value="worker">
+                    {t("announcement.fields.targetAudience.options.workers")}
+                  </option>
+                  <option value="client">
+                    {t("announcement.fields.targetAudience.options.clients")}
+                  </option>
+                  <option value="both">
+                    {t("announcement.fields.targetAudience.options.both")}
+                  </option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Priority
+                  {t("announcement.fields.priority.label")}
                 </label>
                 <select
                   value={announcement.priority}
@@ -819,10 +861,18 @@ const HRAdminDashboard: React.FC = () => {
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
+                  <option value="low">
+                    {t("announcement.fields.priority.options.low")}
+                  </option>
+                  <option value="medium">
+                    {t("announcement.fields.priority.options.medium")}
+                  </option>
+                  <option value="high">
+                    {t("announcement.fields.priority.options.high")}
+                  </option>
+                  <option value="urgent">
+                    {t("announcement.fields.priority.options.urgent")}
+                  </option>
                 </select>
               </div>
             </div>
@@ -833,13 +883,13 @@ const HRAdminDashboard: React.FC = () => {
                 variant="primary"
                 disabled={!announcement.title || !announcement.message}
               >
-                Send Announcement
+                {t("announcement.buttons.send")}
               </Button>
               <Button
                 onClick={() => setShowAnnouncementModal(false)}
                 variant="outline"
               >
-                Cancel
+                {t("announcement.buttons.cancel")}
               </Button>
             </div>
           </div>

@@ -6,9 +6,10 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const AboutPage: React.FC = () => {
-  // clients now come from shared data
+  const t = useTranslations("AboutPage");
 
   const teamMembers = [
     {
@@ -98,17 +99,16 @@ const AboutPage: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">About Belimuno</h1>
+            <h1 className="text-5xl font-bold mb-6">{t("hero.title")}</h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              HR Outsourcing Solution - Connecting talent with opportunities
-              across Ethiopia since 2011
+              {t("hero.subtitle")}
             </p>
             <div className="mt-8">
               <Badge
                 variant="secondary"
                 className="bg-white/20 text-white border-white/30 text-lg px-6 py-2"
               >
-                &quot;Work Smarter Not Harder!&quot;
+                {t("hero.motto")}
               </Badge>
             </div>
           </div>
@@ -120,30 +120,17 @@ const AboutPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Executive Summary
+              {t("executiveSummary.title")}
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 mx-auto"></div>
           </div>
 
           <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 p-8">
             <p className="text-lg text-gray-700 leading-relaxed">
-              Belimuno HR outsourcing solution was established in 2011 as
-              Belimuno recruiting service to provide manpower outsourcing
-              services. Since then it has been outsourcing security guards,
-              cleaners and construction workers for various renowned
-              organizations. During its course of operation, Belimuno expanded
-              its services to include professional manpower supply, consultancy
-              and HR training services which in turn made it improve its name to
-              Belimuno HR outsourcing solution.
+              {t("executiveSummary.content.part1")}
             </p>
             <p className="text-lg text-gray-700 leading-relaxed mt-4">
-              The company currently has an annual turnover of about 200 million
-              birr and is one of the fast growing firms in the sector. Its
-              clients include international NGOs like WFP, NRS and FHI;
-              International construction firms like China Genzuba group, Dong
-              Fang electrics, Kalpataru group and Alec fitout engineering.
-              Belimuno is currently managing over 3000 employees for 36
-              organizations.
+              {t("executiveSummary.content.part2")}
             </p>
           </Card>
         </div>
@@ -157,34 +144,32 @@ const AboutPage: React.FC = () => {
             <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200 text-center p-8">
               <Eye className="h-16 w-16 text-purple-600 mx-auto mb-6" />
               <h3 className="text-2xl font-bold text-purple-900 mb-4">
-                Vision
+                {t("visionMissionValues.vision.title")}
               </h3>
               <p className="text-gray-700">
-                To be the most reliable human resource outsourcing service
-                providers and trusted partners through staffing a tailored to
-                fit manpower to our clients.
+                {t("visionMissionValues.vision.content")}
               </p>
             </Card>
 
             {/* Mission */}
             <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 text-center p-8">
               <Target className="h-16 w-16 text-blue-600 mx-auto mb-6" />
-              <h3 className="text-2xl font-bold text-blue-900 mb-4">Mission</h3>
+              <h3 className="text-2xl font-bold text-blue-900 mb-4">
+                {t("visionMissionValues.mission.title")}
+              </h3>
               <p className="text-gray-700">
-                Searching, refining and staffing professional and
-                non-professional manpower where they best fit and consult our
-                clients with ideas leading them to success.
+                {t("visionMissionValues.mission.content")}
               </p>
             </Card>
 
             {/* Values */}
             <Card className="bg-gradient-to-br from-cyan-50 to-green-50 border-cyan-200 text-center p-8">
               <Heart className="h-16 w-16 text-cyan-600 mx-auto mb-6" />
-              <h3 className="text-2xl font-bold text-cyan-900 mb-4">Values</h3>
+              <h3 className="text-2xl font-bold text-cyan-900 mb-4">
+                {t("visionMissionValues.values.title")}
+              </h3>
               <p className="text-gray-700">
-                Built on integrity, reliability, and innovation - we deliver
-                excellence through our core values that guide every decision and
-                action.
+                {t("visionMissionValues.values.content")}
               </p>
             </Card>
           </div>
@@ -192,13 +177,17 @@ const AboutPage: React.FC = () => {
           {/* Detailed Values */}
           <div className="mb-16">
             <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">
-              Our Core Values
+              {t("visionMissionValues.values.sectionTitle")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {values.map((value, index) => (
                 <Card key={index} className={`${value.color} p-4`}>
-                  <h4 className="font-bold mb-2">{value.title}</h4>
-                  <p className="text-sm">{value.description}</p>
+                  <h4 className="font-bold mb-2">
+                    {t(`visionMissionValues.values.${index + 1}.title`)}
+                  </h4>
+                  <p className="text-sm">
+                    {t(`visionMissionValues.values.${index + 1}.description`)}
+                  </p>
                 </Card>
               ))}
             </div>
@@ -211,53 +200,41 @@ const AboutPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Our Services
+              {t("services.title")}
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 mx-auto"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="text-center">
-                <Users className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Manpower Supply
-                </h3>
-                <p className="text-gray-600">
-                  Professional manpower supply with a well-developed database
-                  and experienced HR professionals who can recruit the best
-                  talent for our clients.
-                </p>
-              </div>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="text-center">
-                <Award className="h-12 w-12 text-cyan-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Manpower Outsourcing
-                </h3>
-                <p className="text-gray-600">
-                  Comprehensive outsourcing services including cleaners,
-                  security guards, construction crews, and fleet management
-                  professionals for over 3000 employees.
-                </p>
-              </div>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow">
-              <div className="text-center">
-                <Target className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  HR Consultancy
-                </h3>
-                <p className="text-gray-600">
-                  Human resource consultancy services including assessment in
-                  the selection process as well as training & development for
-                  various business organizations.
-                </p>
-              </div>
-            </Card>
+            {[
+              <Users
+                className="h-12 w-12 text-blue-600 mx-auto mb-4"
+                key="users"
+              />,
+              <Award
+                className="h-12 w-12 text-cyan-600 mx-auto mb-4"
+                key="award"
+              />,
+              <Target
+                className="h-12 w-12 text-purple-600 mx-auto mb-4"
+                key="target"
+              />,
+            ].map((icon, index) => (
+              <Card
+                key={index}
+                className="p-6 hover:shadow-lg transition-shadow"
+              >
+                <div className="text-center">
+                  {icon}
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">
+                    {t(`services.${index + 1}.title`)}
+                  </h3>
+                  <p className="text-gray-600">
+                    {t(`services.${index + 1}.description`)}
+                  </p>
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -266,14 +243,12 @@ const AboutPage: React.FC = () => {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Team</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              {t("team.title")}
+            </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 mx-auto mb-6"></div>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              BELIMUNO is divided into three main departments: administration
-              and finance, human resources, and outsourced service management.
-              Each department handles administrative tasks, procurements, and
-              financial activities, while the outsourced service management
-              department manages outsourced staff and projects.
+              {t("team.description")}
             </p>
           </div>
 
@@ -306,20 +281,15 @@ const AboutPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Our Clients
+              {t("clients.title")}
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 mx-auto mb-6"></div>
-            <p className="text-lg text-gray-600">
-              BELIMUNO Human outsource solution is one of the leading companies
-              in the industry. It has been operating in the field since 2012 and
-              served more than fifty international, business, and
-              non-governmental organizations.
-            </p>
+            <p className="text-lg text-gray-600">{t("clients.description")}</p>
           </div>
 
           <div className="text-center">
             <Link href="/clients">
-              <Button>View Our Clients</Button>
+              <Button>{t("clients.viewButton")}</Button>
             </Link>
           </div>
         </div>
@@ -335,22 +305,21 @@ const AboutPage: React.FC = () => {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-4xl font-bold mb-6 leading-tight">
-            Ready to Work with Us?
+            {t("cta.title")}
           </h2>
           <p className="text-xl text-cyan-100 font-medium mb-10 leading-relaxed max-w-3xl mx-auto">
-            &quot;The only way to do great work is to love what you do. And we
-            Love what we do! That&apos;s why we say come to Us.&quot;
+            {t("cta.subtitle")}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
             <Link href="/contact">
               <Button className="bg-white text-blue-800 hover:bg-cyan-50 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
-                📞 Get In Touch
+                {t("cta.buttons.contact")}
               </Button>
             </Link>
             <Link href="/jobs">
               <Button className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-800 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
-                💼 View Job Opportunities
+                {t("cta.buttons.jobs")}
               </Button>
             </Link>
           </div>
@@ -365,7 +334,9 @@ const AboutPage: React.FC = () => {
                 📧
               </div>
               <div className="text-left">
-                <p className="font-semibold text-white">Email Us</p>
+                <p className="font-semibold text-white">
+                  {t("cta.contact.email.title")}
+                </p>
                 <p className="text-cyan-200 text-sm">info@belimunojobs.com</p>
               </div>
             </a>
@@ -380,7 +351,9 @@ const AboutPage: React.FC = () => {
                 📱
               </div>
               <div className="text-left">
-                <p className="font-semibold text-white">Telegram</p>
+                <p className="font-semibold text-white">
+                  {t("cta.contact.telegram.title")}
+                </p>
                 <p className="text-cyan-200 text-sm">@belimunojobs</p>
               </div>
             </a>
@@ -393,7 +366,9 @@ const AboutPage: React.FC = () => {
                 📞
               </div>
               <div className="text-left">
-                <p className="font-semibold text-white">Call Us</p>
+                <p className="font-semibold text-white">
+                  {t("cta.contact.phone.title")}
+                </p>
                 <p className="text-cyan-200 text-sm">+251 118 69 78 80</p>
               </div>
             </a>

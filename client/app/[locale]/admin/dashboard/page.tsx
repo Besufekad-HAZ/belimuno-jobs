@@ -20,6 +20,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import { useTranslations } from "next-intl";
 
 interface DashboardStats {
   totalUsers: number;
@@ -64,6 +65,7 @@ const AdminDashboard: React.FC = () => {
   const [reportType, setReportType] = useState("revenue");
   const [disputes, setDisputes] = useState<PaymentDispute[]>([]);
   const router = useRouter();
+  const t = useTranslations("AdminDashboard");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -195,11 +197,9 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Super Admin Dashboard
+                {t("header.title")}
               </h1>
-              <p className="text-gray-600 mt-2">
-                Monitor and manage the entire Belimuno Jobs platform
-              </p>
+              <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
             </div>
             <div className="flex space-x-3">
               <Button
@@ -207,7 +207,7 @@ const AdminDashboard: React.FC = () => {
                 onClick={() => setShowReportsModal(true)}
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
-                Generate Reports
+                {t("header.buttons.generateReports")}
               </Button>
               {disputes.length > 0 && (
                 <Button
@@ -215,7 +215,7 @@ const AdminDashboard: React.FC = () => {
                   onClick={() => setShowDisputeModal(true)}
                 >
                   <AlertTriangle className="h-4 w-4 mr-2" />
-                  Resolve Disputes ({disputes.length})
+                  {t("header.buttons.resolveDisputes")} ({disputes.length})
                 </Button>
               )}
             </div>
@@ -230,7 +230,9 @@ const AdminDashboard: React.FC = () => {
                 <Users className="h-8 w-8 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-blue-600">Total Users</p>
+                <p className="text-sm font-medium text-blue-600">
+                  {t("stats.totalUsers.label")}
+                </p>
                 <p className="text-2xl font-bold text-blue-900">
                   {stats?.totalUsers || 0}
                 </p>
@@ -244,7 +246,9 @@ const AdminDashboard: React.FC = () => {
                 <Briefcase className="h-8 w-8 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-green-600">Total Jobs</p>
+                <p className="text-sm font-medium text-green-600">
+                  {t("stats.totalJobs.label")}
+                </p>
                 <p className="text-2xl font-bold text-green-900">
                   {stats?.totalJobs || 0}
                 </p>
@@ -259,7 +263,7 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-yellow-600">
-                  Total Revenue
+                  {t("stats.totalRevenue.label")}
                 </p>
                 <p className="text-2xl font-bold text-yellow-900">
                   ETB {stats?.totalRevenue?.toLocaleString() || 0}
@@ -275,7 +279,7 @@ const AdminDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-purple-600">
-                  Monthly Growth
+                  {t("stats.monthlyGrowth.label")}
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
                   +{stats?.monthlyGrowth || 0}%
@@ -290,7 +294,9 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
+                <p className="text-sm font-medium text-gray-600">
+                  {t("activity.activeJobs.label")}
+                </p>
                 <p className="text-3xl font-bold text-gray-900">
                   {stats?.activeJobs || 0}
                 </p>
@@ -303,7 +309,7 @@ const AdminDashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
-                  Completed Jobs
+                  {t("activity.completedJobs.label")}
                 </p>
                 <p className="text-3xl font-bold text-gray-900">
                   {stats?.completedJobs || 0}
@@ -317,7 +323,7 @@ const AdminDashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
-                  Pending Verifications
+                  {t("activity.pendingVerifications.label")}
                 </p>
                 <p className="text-3xl font-bold text-gray-900">
                   {stats?.pendingVerifications || 0}
@@ -333,14 +339,14 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
-                Recent Users
+                {t("recentUsers.title")}
               </h3>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => router.push("/admin/users")}
               >
-                View All
+                {t("recentUsers.viewAll")}
               </Button>
             </div>
             <div className="space-y-4">
@@ -362,7 +368,7 @@ const AdminDashboard: React.FC = () => {
                       onClick={() => handleVerifyWorker(user._id)}
                     >
                       <UserCheck className="h-4 w-4 mr-1" />
-                      Verify
+                      {t("recentUsers.buttons.verify")}
                     </Button>
                   )}
                 </div>
@@ -374,14 +380,14 @@ const AdminDashboard: React.FC = () => {
           <Card>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
-                Recent Jobs
+                {t("recentJobs.title")}
               </h3>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => router.push("/admin/jobs")}
               >
-                View All
+                {t("recentJobs.viewAll")}
               </Button>
             </div>
             <div className="space-y-4">
@@ -406,10 +412,12 @@ const AdminDashboard: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-2">
-                    ETB {job.budget?.toLocaleString()}
+                    {t("recentJobs.fields.amount")}{" "}
+                    {job.budget?.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500">
-                    Posted {new Date(job.createdAt).toLocaleDateString()}
+                    {t("recentJobs.fields.posted")}{" "}
+                    {new Date(job.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               ))}
@@ -420,7 +428,7 @@ const AdminDashboard: React.FC = () => {
         {/* Quick Actions */}
         <Card className="mt-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            Quick Actions
+            {t("quickActions.title")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
@@ -429,7 +437,7 @@ const AdminDashboard: React.FC = () => {
               onClick={() => router.push("/admin/users")}
             >
               <Users className="h-6 w-6 mb-2" />
-              Manage Users
+              {t("quickActions.buttons.manageUsers")}
             </Button>
             <Button
               variant="outline"
@@ -437,7 +445,7 @@ const AdminDashboard: React.FC = () => {
               onClick={() => router.push("/admin/jobs")}
             >
               <Briefcase className="h-6 w-6 mb-2" />
-              Manage Jobs
+              {t("quickActions.buttons.manageJobs")}
             </Button>
             <Button
               variant="outline"
@@ -445,7 +453,7 @@ const AdminDashboard: React.FC = () => {
               onClick={() => router.push("/admin/payments")}
             >
               <DollarSign className="h-6 w-6 mb-2" />
-              Payment Disputes
+              {t("quickActions.buttons.paymentDisputes")}
             </Button>
           </div>
         </Card>
@@ -454,36 +462,55 @@ const AdminDashboard: React.FC = () => {
         <Modal
           isOpen={showReportsModal}
           onClose={() => setShowReportsModal(false)}
-          title="Generate Reports"
+          title={t("reports.title")}
           size="md"
         >
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Report Type
+                {t("reports.fields.type.label")}
               </label>
               <select
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="revenue">Revenue Report</option>
-                <option value="completion">Completion Rates</option>
-                <option value="users">User Analytics</option>
-                <option value="performance">Performance Metrics</option>
+                <option value="revenue">
+                  {t("reports.fields.type.options.revenue")}
+                </option>
+                <option value="completion">
+                  {t("reports.fields.type.options.completion")}
+                </option>
+                <option value="users">
+                  {t("reports.fields.type.options.users")}
+                </option>
+                <option value="performance">
+                  {t("reports.fields.type.options.performance")}
+                </option>
               </select>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Report Preview</h4>
+              <h4 className="font-medium text-gray-900 mb-2">
+                {t("reports.preview.title")}
+              </h4>
               <div className="text-sm text-gray-600 space-y-1">
-                <p>• Total Users: {stats?.totalUsers || 0}</p>
-                <p>• Total Jobs: {stats?.totalJobs || 0}</p>
                 <p>
-                  • Total Revenue: ETB{" "}
+                  • {t("reports.preview.fields.totalUsers")}:{" "}
+                  {stats?.totalUsers || 0}
+                </p>
+                <p>
+                  • {t("reports.preview.fields.totalJobs")}:{" "}
+                  {stats?.totalJobs || 0}
+                </p>
+                <p>
+                  • {t("reports.preview.fields.totalRevenue")}: ETB{" "}
                   {stats?.totalRevenue?.toLocaleString() || 0}
                 </p>
-                <p>• Monthly Growth: +{stats?.monthlyGrowth || 0}%</p>
+                <p>
+                  • {t("reports.preview.fields.monthlyGrowth")}: +
+                  {stats?.monthlyGrowth || 0}%
+                </p>
               </div>
             </div>
 
@@ -492,11 +519,11 @@ const AdminDashboard: React.FC = () => {
                 variant="outline"
                 onClick={() => setShowReportsModal(false)}
               >
-                Cancel
+                {t("reports.buttons.cancel")}
               </Button>
               <Button onClick={generateReport}>
                 <Download className="h-4 w-4 mr-2" />
-                Download Report
+                {t("reports.buttons.download")}
               </Button>
             </div>
           </div>
@@ -506,7 +533,7 @@ const AdminDashboard: React.FC = () => {
         <Modal
           isOpen={showDisputeModal}
           onClose={() => setShowDisputeModal(false)}
-          title="Payment Disputes"
+          title={t("disputes.title")}
           size="lg"
         >
           <div className="space-y-4">
@@ -516,16 +543,21 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h4 className="font-medium text-gray-900">
-                        Payment ID: {dispute._id?.slice(-6) || "Unknown"}
+                        {t("disputes.fields.paymentId")}:{" "}
+                        {dispute._id?.slice(-6) || "Unknown"}
                       </h4>
                       <p className="text-sm text-gray-600">
-                        Amount: ETB {dispute.amount?.toLocaleString() || 0}
+                        {t("disputes.fields.amount")}: ETB{" "}
+                        {dispute.amount?.toLocaleString() || 0}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Date: {new Date(dispute.createdAt).toLocaleDateString()}
+                        {t("disputes.fields.date")}:{" "}
+                        {new Date(dispute.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <Badge variant="danger">Disputed</Badge>
+                    <Badge variant="danger">
+                      {t("disputes.fields.status")}
+                    </Badge>
                   </div>
 
                   <div className="flex space-x-2">
@@ -536,7 +568,7 @@ const AdminDashboard: React.FC = () => {
                         handleResolveDispute(dispute._id, "refund")
                       }
                     >
-                      Refund Client
+                      {t("disputes.buttons.refundClient")}
                     </Button>
                     <Button
                       size="sm"
@@ -545,7 +577,7 @@ const AdminDashboard: React.FC = () => {
                         handleResolveDispute(dispute._id, "release")
                       }
                     >
-                      Pay Worker
+                      {t("disputes.buttons.payWorker")}
                     </Button>
                     <Button
                       size="sm"
@@ -553,7 +585,7 @@ const AdminDashboard: React.FC = () => {
                         handleResolveDispute(dispute._id, "investigate")
                       }
                     >
-                      Investigate
+                      {t("disputes.buttons.investigate")}
                     </Button>
                   </div>
                 </Card>
@@ -562,11 +594,9 @@ const AdminDashboard: React.FC = () => {
               <div className="text-center py-8">
                 <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No Active Disputes
+                  {t("disputes.empty.title")}
                 </h3>
-                <p className="text-gray-600">
-                  All payments are processing smoothly!
-                </p>
+                <p className="text-gray-600">{t("disputes.empty.message")}</p>
               </div>
             )}
           </div>

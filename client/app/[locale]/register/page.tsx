@@ -8,6 +8,7 @@ import { authAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
+import { useTranslations } from "next-intl";
 
 type GoogleIdentity = {
   accounts?: {
@@ -51,6 +52,7 @@ const RegisterPage: React.FC = () => {
   const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("RegisterPage");
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -69,7 +71,7 @@ const RegisterPage: React.FC = () => {
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("errors.passwordMismatch"));
       setLoading(false);
       return;
     }
@@ -149,10 +151,10 @@ const RegisterPage: React.FC = () => {
       ) {
         setError(
           (error as { response: { data: { message: string } } }).response.data
-            .message,
+            .message
         );
       } else {
-        setError("Registration failed");
+        setError(t("errors.default"));
       }
     } finally {
       setLoading(false);
@@ -195,9 +197,7 @@ const RegisterPage: React.FC = () => {
           router.push(getRoleDashboardPath(user.role));
         } catch (e) {
           console.error(e);
-          setError(
-            "Google sign-up failed. If you already have an account with this email, please use Login.",
-          );
+          setError(t("errors.googleSignUp"));
         }
       },
     });
@@ -220,25 +220,25 @@ const RegisterPage: React.FC = () => {
         <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex mt-2">
           <Link href="/login" className="flex-1">
             <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">
-              Login
+              {t("tabs.login")}
             </div>
           </Link>
           <Link href="/register" className="flex-1">
             <div className="text-center py-2 rounded-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">
-              Sign up
+              {t("tabs.signup")}
             </div>
           </Link>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
+          {t("header.title")}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Or{" "}
+          {t("header.subtitle.text")}{" "}
           <Link
             href="/login"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            sign in to your existing account
+            {t("header.subtitle.link")}
           </Link>
         </p>
       </div>
@@ -253,7 +253,7 @@ const RegisterPage: React.FC = () => {
             )}
 
             <Input
-              label="Full Name"
+              label={t("form.fields.name")}
               name="name"
               type="text"
               required
@@ -262,7 +262,7 @@ const RegisterPage: React.FC = () => {
             />
 
             <Input
-              label="Email address"
+              label={t("form.fields.email")}
               name="email"
               type="email"
               required
@@ -275,7 +275,7 @@ const RegisterPage: React.FC = () => {
                 htmlFor="role"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Role
+                {t("form.fields.role.label")}
               </label>
               <select
                 id="role"
@@ -284,8 +284,12 @@ const RegisterPage: React.FC = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="worker">Worker (Freelancer)</option>
-                <option value="client">Client (Employer)</option>
+                <option value="worker">
+                  {t("form.fields.role.options.worker")}
+                </option>
+                <option value="client">
+                  {t("form.fields.role.options.client")}
+                </option>
               </select>
             </div>
 
@@ -295,7 +299,7 @@ const RegisterPage: React.FC = () => {
             </div>
 
             <Input
-              label="Phone"
+              label={t("form.fields.phone")}
               name="phone"
               type="tel"
               value={formData.phone}
@@ -303,7 +307,7 @@ const RegisterPage: React.FC = () => {
             />
 
             <Input
-              label="Location"
+              label={t("form.fields.location")}
               name="location"
               type="text"
               value={formData.location}
@@ -315,7 +319,7 @@ const RegisterPage: React.FC = () => {
                 htmlFor="bio"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Bio
+                {t("form.fields.bio.label")}
               </label>
               <textarea
                 id="bio"
@@ -324,7 +328,7 @@ const RegisterPage: React.FC = () => {
                 value={formData.bio}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Tell us about yourself..."
+                placeholder={t("form.fields.bio.placeholder")}
               />
             </div>
 
@@ -332,16 +336,16 @@ const RegisterPage: React.FC = () => {
             {formData.role === "worker" && (
               <>
                 <Input
-                  label="Skills (comma-separated)"
+                  label={t("form.fields.worker.skills.label")}
                   name="skills"
                   type="text"
                   value={formData.skills}
                   onChange={handleChange}
-                  placeholder="e.g. JavaScript, React, Node.js"
+                  placeholder={t("form.fields.worker.skills.placeholder")}
                 />
 
                 <Input
-                  label="Years of Experience"
+                  label={t("form.fields.worker.experience")}
                   name="experience"
                   type="number"
                   min="0"
@@ -350,7 +354,7 @@ const RegisterPage: React.FC = () => {
                 />
 
                 <Input
-                  label="Hourly Rate (ETB)"
+                  label={t("form.fields.worker.hourlyRate")}
                   name="hourlyRate"
                   type="number"
                   min="0"
@@ -365,7 +369,7 @@ const RegisterPage: React.FC = () => {
             {formData.role === "client" && (
               <>
                 <Input
-                  label="Company Name"
+                  label={t("form.fields.client.company")}
                   name="company"
                   type="text"
                   value={formData.company}
@@ -373,7 +377,7 @@ const RegisterPage: React.FC = () => {
                 />
 
                 <Input
-                  label="Industry"
+                  label={t("form.fields.client.industry")}
                   name="industry"
                   type="text"
                   value={formData.industry}
@@ -381,7 +385,7 @@ const RegisterPage: React.FC = () => {
                 />
 
                 <Input
-                  label="Website"
+                  label={t("form.fields.client.website")}
                   name="website"
                   type="url"
                   value={formData.website}
@@ -391,7 +395,7 @@ const RegisterPage: React.FC = () => {
             )}
 
             <Input
-              label="Password"
+              label={t("form.fields.password")}
               name="password"
               type="password"
               required
@@ -400,7 +404,7 @@ const RegisterPage: React.FC = () => {
             />
 
             <Input
-              label="Confirm Password"
+              label={t("form.fields.confirmPassword")}
               name="confirmPassword"
               type="password"
               required
@@ -409,7 +413,9 @@ const RegisterPage: React.FC = () => {
             />
 
             <Button type="submit" className="w-full" loading={loading}>
-              Create Account
+              {loading
+                ? t("form.buttons.submit.loading")
+                : t("form.buttons.submit.default")}
             </Button>
           </form>
         </Card>

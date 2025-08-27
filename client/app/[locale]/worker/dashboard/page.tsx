@@ -30,6 +30,7 @@ import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
 
 interface WorkerStats {
   totalApplications: number;
@@ -140,6 +141,7 @@ const WorkerDashboard: React.FC = () => {
   const [clientReview, setClientReview] = useState("");
   const router = useRouter();
   const PROPOSAL_MAX = 1200;
+  const t = useTranslations("WorkerDashboard");
 
   useEffect(() => {
     const user = getStoredUser();
@@ -390,11 +392,9 @@ const WorkerDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Worker Dashboard
+                {t("header.title")}
               </h1>
-              <p className="text-gray-600 mt-2">
-                Manage your jobs and track your earnings
-              </p>
+              <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
             </div>
             <div className="flex space-x-3">
               <Button
@@ -403,7 +403,7 @@ const WorkerDashboard: React.FC = () => {
                 className="relative"
               >
                 <Bell className="h-4 w-4 mr-2" />
-                Notifications
+                {t("buttons.notifications")}
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     {unreadCount}
@@ -415,7 +415,7 @@ const WorkerDashboard: React.FC = () => {
                 onClick={() => setShowWalletModal(true)}
               >
                 <Wallet className="h-4 w-4 mr-2" />
-                Wallet
+                {t("buttons.wallet")}
               </Button>
             </div>
           </div>
@@ -426,7 +426,9 @@ const WorkerDashboard: React.FC = () => {
           <Card className="bg-blue-50 border-blue-200">
             <div className="text-center">
               <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-blue-600">Active Jobs</p>
+              <p className="text-sm font-medium text-blue-600">
+                {t("stats.activeJobs.label")}
+              </p>
               <p className="text-2xl font-bold text-blue-900">
                 {stats?.activeJobs ?? 0}
               </p>
@@ -436,7 +438,9 @@ const WorkerDashboard: React.FC = () => {
           <Card className="bg-green-50 border-green-200">
             <div className="text-center">
               <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-green-600">Completed</p>
+              <p className="text-sm font-medium text-green-600">
+                {t("stats.completedJobs.label")}
+              </p>
               <p className="text-2xl font-bold text-green-900">
                 {stats?.completedJobs ?? 0}
               </p>
@@ -447,7 +451,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <DollarSign className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-yellow-600">
-                Total Earnings
+                {t("stats.earnings.label")}
               </p>
               <p className="text-xl font-bold text-yellow-900">
                 ETB {(stats?.totalEarnings || 0).toLocaleString()}
@@ -458,7 +462,9 @@ const WorkerDashboard: React.FC = () => {
           <Card className="bg-purple-50 border-purple-200">
             <div className="text-center">
               <Star className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-purple-600">Rating</p>
+              <p className="text-sm font-medium text-purple-600">
+                {t("stats.rating.label")}
+              </p>
               <p className="text-2xl font-bold text-purple-900">
                 {stats?.averageRating !== undefined
                   ? stats.averageRating.toFixed(1)
@@ -471,7 +477,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="text-center">
               <Send className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-indigo-600">
-                Applications
+                {t("stats.applications.label")}
               </p>
               <p className="text-2xl font-bold text-indigo-900">
                 {stats?.totalApplications ?? 0}
@@ -482,7 +488,9 @@ const WorkerDashboard: React.FC = () => {
           <Card className="bg-orange-50 border-orange-200">
             <div className="text-center">
               <Clock className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-orange-600">Pending</p>
+              <p className="text-sm font-medium text-orange-600">
+                {t("stats.pending.label")}
+              </p>
               <p className="text-2xl font-bold text-orange-900">
                 {stats?.pendingApplications ?? 0}
               </p>
@@ -495,14 +503,14 @@ const WorkerDashboard: React.FC = () => {
           <Card>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
-                Available Jobs
+                {t("sections.availableJobs.title")}
               </h3>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => router.push("/jobs")}
               >
-                View All
+                {t("buttons.viewAll")}
               </Button>
             </div>
             <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -516,7 +524,8 @@ const WorkerDashboard: React.FC = () => {
                       </span>
                       {job.applicationCount !== undefined && (
                         <span className="text-[11px] text-gray-500">
-                          {job.applicationCount} apps
+                          {job.applicationCount}{" "}
+                          {t("sections.availableJobs.applications")}
                         </span>
                       )}
                     </div>
@@ -527,7 +536,8 @@ const WorkerDashboard: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-xs text-gray-500">
                       <span>
-                        Due: {new Date(job.deadline).toLocaleDateString()}
+                        {t("sections.availableJobs.due")}:{" "}
+                        {new Date(job.deadline).toLocaleDateString()}
                       </span>
                       <span>•</span>
                       <span>{job.category}</span>
@@ -539,14 +549,18 @@ const WorkerDashboard: React.FC = () => {
                         onClick={() => setSelectedJob(job)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        {appliedJobIds.has(job._id) ? "Details" : "View"}
+                        {appliedJobIds.has(job._id)
+                          ? t("sections.availableJobs.details")
+                          : t("sections.availableJobs.view")}
                       </Button>
                       <Button
                         size="sm"
                         onClick={() => setSelectedJob(job)}
                         disabled={appliedJobIds.has(job._id)}
                       >
-                        {appliedJobIds.has(job._id) ? "Applied" : "Apply"}
+                        {appliedJobIds.has(job._id)
+                          ? t("sections.availableJobs.applied")
+                          : t("sections.availableJobs.apply")}
                       </Button>
                     </div>
                   </div>
@@ -559,14 +573,14 @@ const WorkerDashboard: React.FC = () => {
           <Card>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold text-gray-900">
-                My Active Jobs
+                {t("sections.activeJobs.title")}
               </h3>
             </div>
             <div className="space-y-4 max-h-96 overflow-y-auto">
               {/* Pending Applications Snapshot */}
               <Card className="mt-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Pending Applications
+                  {t("sections.activeJobs.pendingApplications.title")}
                 </h3>
                 {stats?.pendingApplicationsList?.length ? (
                   <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -580,19 +594,21 @@ const WorkerDashboard: React.FC = () => {
                             {app.job?.title || "Job"}
                           </p>
                           <p className="text-xs text-gray-500">
-                            Applied{" "}
+                            {t(
+                              "sections.activeJobs.pendingApplications.applied",
+                            )}{" "}
                             {new Date(app.appliedAt).toLocaleDateString()}
                           </p>
                         </div>
                         <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
-                          Pending
+                          {t("sections.activeJobs.pendingApplications.status")}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500">
-                    No pending applications.
+                    {t("sections.activeJobs.pendingApplications.empty")}
                   </p>
                 )}
               </Card>
@@ -650,14 +666,14 @@ const WorkerDashboard: React.FC = () => {
                               onClick={() => declineAssignment(job._id)}
                             >
                               <ThumbsDown className="h-4 w-4 mr-1" />
-                              Decline
+                              {t("sections.activeJobs.actions.decline")}
                             </Button>
                             <Button
                               size="sm"
                               onClick={() => acceptAssignment(job._id)}
                             >
                               <ThumbsUp className="h-4 w-4 mr-1" />
-                              Accept
+                              {t("sections.activeJobs.actions.accept")}
                             </Button>
                           </>
                         )}
@@ -668,7 +684,7 @@ const WorkerDashboard: React.FC = () => {
                               handleUpdateJobStatus(job._id, "completed")
                             }
                           >
-                            Mark Complete
+                            {t("sections.activeJobs.actions.markComplete")}
                           </Button>
                         )}
                         {job.status === "revision_requested" && (
@@ -679,7 +695,7 @@ const WorkerDashboard: React.FC = () => {
                               handleUpdateJobStatus(job._id, "in_progress")
                             }
                           >
-                            Resubmit
+                            {t("sections.activeJobs.actions.resubmit")}
                           </Button>
                         )}
                         <Button
@@ -886,7 +902,7 @@ const WorkerDashboard: React.FC = () => {
         <Modal
           isOpen={showWalletModal}
           onClose={() => setShowWalletModal(false)}
-          title="Worker Wallet"
+          title={t("modals.wallet.title")}
           size="md"
         >
           <div className="space-y-6">
@@ -897,14 +913,16 @@ const WorkerDashboard: React.FC = () => {
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
                   ETB {stats?.totalEarnings?.toLocaleString() || "0"}
                 </h3>
-                <p className="text-green-600 font-medium">Available Balance</p>
+                <p className="text-green-600 font-medium">
+                  {t("modals.wallet.balance.label")}
+                </p>
               </div>
             </Card>
 
             {/* Recent Earnings */}
             <div>
               <h4 className="font-medium text-gray-900 mb-3">
-                Recent Earnings
+                {t("modals.wallet.recentEarnings.title")}
               </h4>
               <div className="space-y-3">
                 {earnings?.recentPayments?.slice(0, 5).map(
@@ -922,10 +940,12 @@ const WorkerDashboard: React.FC = () => {
                     >
                       <div>
                         <p className="font-medium text-gray-900">
-                          {payment.jobTitle || "Job Payment"}
+                          {payment.jobTitle ||
+                            t("modals.wallet.recentEarnings.jobPayment")}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {payment.date || "Recently"}
+                          {payment.date ||
+                            t("modals.wallet.recentEarnings.recently")}
                         </p>
                       </div>
                       <div className="text-right">
@@ -933,7 +953,7 @@ const WorkerDashboard: React.FC = () => {
                           +ETB {payment.amount?.toLocaleString() || "1,000"}
                         </p>
                         <Badge variant="success" size="sm">
-                          Completed
+                          {t("modals.wallet.recentEarnings.status")}
                         </Badge>
                       </div>
                     </div>
@@ -972,7 +992,7 @@ const WorkerDashboard: React.FC = () => {
                           +ETB {payment.amount.toLocaleString()}
                         </p>
                         <Badge variant="success" size="sm">
-                          Completed
+                          {t("modals.wallet.recentEarnings.status")}
                         </Badge>
                       </div>
                     </div>
@@ -984,10 +1004,10 @@ const WorkerDashboard: React.FC = () => {
             <div className="pt-4 border-t border-gray-200">
               <Button
                 className="w-full"
-                onClick={() => alert("Withdrawal feature coming soon!")}
+                onClick={() => alert(t("modals.wallet.withdrawalFeature"))}
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
-                Withdraw Funds
+                {t("buttons.withdrawFunds")}
               </Button>
             </div>
           </div>
@@ -996,7 +1016,7 @@ const WorkerDashboard: React.FC = () => {
         <Modal
           isOpen={showRateModal}
           onClose={() => setShowRateModal(false)}
-          title="Rate Client"
+          title={t("modals.rating.title")}
           size="md"
         >
           <div className="space-y-6">
@@ -1004,9 +1024,11 @@ const WorkerDashboard: React.FC = () => {
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="h-8 w-8 text-purple-600" />
               </div>
-              <h4 className="font-medium text-gray-900">How was the client?</h4>
+              <h4 className="font-medium text-gray-900">
+                {t("modals.rating.subtitle")}
+              </h4>
               <p className="text-sm text-gray-500">
-                Rate your experience after completing this job.
+                {t("modals.rating.description")}
               </p>
             </div>
             <div className="text-center">
@@ -1022,19 +1044,19 @@ const WorkerDashboard: React.FC = () => {
                 ))}
               </div>
               <p className="text-sm text-gray-500 mt-2">
-                {clientRating} out of 5
+                {clientRating} {t("modals.rating.outOf")}
               </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Feedback (optional)
+                {t("modals.rating.feedback.label")}
               </label>
               <textarea
                 rows={4}
                 value={clientReview}
                 onChange={(e) => setClientReview(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Share details about communication, clarity, and professionalism."
+                placeholder={t("modals.rating.feedback.placeholder")}
               />
             </div>
             <div className="flex space-x-3">
@@ -1046,7 +1068,7 @@ const WorkerDashboard: React.FC = () => {
                   setClientReview("");
                 }}
               >
-                Cancel
+                {t("buttons.cancel")}
               </Button>
               <Button
                 className="flex-1"
@@ -1067,7 +1089,7 @@ const WorkerDashboard: React.FC = () => {
                   }
                 }}
               >
-                Submit Rating
+                {t("buttons.submit")}
               </Button>
             </div>
           </div>
@@ -1077,7 +1099,7 @@ const WorkerDashboard: React.FC = () => {
         <Modal
           isOpen={showNotificationsModal}
           onClose={() => setShowNotificationsModal(false)}
-          title="Notifications"
+          title={t("modals.notifications.title")}
           size="md"
         >
           <div className="space-y-4">
@@ -1144,9 +1166,11 @@ const WorkerDashboard: React.FC = () => {
               <div className="text-center py-8">
                 <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No notifications
+                  {t("modals.notifications.empty.title")}
                 </h3>
-                <p className="text-gray-600">You&apos;re all caught up!</p>
+                <p className="text-gray-600">
+                  {t("modals.notifications.empty.message")}
+                </p>
               </div>
             )}
 
@@ -1157,7 +1181,7 @@ const WorkerDashboard: React.FC = () => {
                   className="w-full"
                   onClick={handleMarkAllAsRead}
                 >
-                  Mark All as Read
+                  {t("buttons.markAllRead")}
                 </Button>
               </div>
             )}
@@ -1167,15 +1191,14 @@ const WorkerDashboard: React.FC = () => {
         <Modal
           isOpen={!!chatJobId}
           onClose={() => setChatJobId(null)}
-          title="Job Chat"
+          title={t("modals.chat.title")}
           size="xl"
           scrollContent={false}
         >
           <div className="flex flex-col h-[70vh] w-full max-w-[900px]">
             <div className="flex items-center justify-between mb-3 px-2">
               <div className="text-sm text-gray-500">
-                Collaborate professionally. Keep communication clear and
-                respectful.
+                {t("modals.chat.guidance")}
               </div>
             </div>
             <div
@@ -1229,13 +1252,16 @@ const WorkerDashboard: React.FC = () => {
                 </div>
               ))}
               {chatMessages.length === 0 && (
-                <div className="text-xs text-gray-400">No messages yet.</div>
+                <div className="text-xs text-gray-400">
+                  {t("modals.chat.empty")}
+                </div>
               )}
             </div>
             {chatAttachments.length > 0 && (
               <div className="mt-2 border rounded bg-white p-2">
                 <div className="text-xs text-gray-500 mb-2">
-                  Attachments ({chatAttachments.length}/5)
+                  {t("modals.chat.attachments.title")} ({chatAttachments.length}
+                  /5)
                 </div>
                 <div className="grid grid-cols-5 gap-2">
                   {chatAttachments.map((a, idx) => (
@@ -1274,7 +1300,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="mt-3 flex gap-2 items-center border-t pt-3 bg-white">
               <label className="inline-flex items-center gap-1 px-2 py-1 border rounded cursor-pointer text-sm text-gray-600 hover:bg-gray-50">
                 <Paperclip className="h-4 w-4" />
-                Attach
+                {t("modals.chat.attachments.button")}
                 <input
                   type="file"
                   multiple
@@ -1348,7 +1374,7 @@ const WorkerDashboard: React.FC = () => {
                       })();
                     }
                   }}
-                  placeholder="Type a message"
+                  placeholder={t("modals.chat.attachments.placeholder")}
                   className="flex-1 border rounded-full px-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <div className="relative">
@@ -1427,7 +1453,7 @@ const WorkerDashboard: React.FC = () => {
                 </div>
               </div>
               <Button disabled={sending} onClick={sendChat}>
-                Send
+                {t("buttons.send")}
               </Button>
             </div>
           </div>

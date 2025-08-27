@@ -5,6 +5,7 @@ import Card from "@/components/ui/Card";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { contactAPI } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 const ContactPage: React.FC = () => {
   const [name, setName] = useState("");
@@ -15,6 +16,7 @@ const ContactPage: React.FC = () => {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
     "idle",
   );
+  const t = useTranslations("ContactPage");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,11 +38,8 @@ const ContactPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h1 className="text-4xl font-bold">Contact Us</h1>
-          <p className="text-blue-100 mt-2 max-w-3xl">
-            We would love to hear from you. Send us a message and we will
-            respond promptly.
-          </p>
+          <h1 className="text-4xl font-bold">{t("hero.title")}</h1>
+          <p className="text-blue-100 mt-2 max-w-3xl">{t("hero.subtitle")}</p>
         </div>
       </div>
 
@@ -48,18 +47,18 @@ const ContactPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Send a message
+              {t("form.title")}
             </h2>
             <form onSubmit={submit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="Full name"
+                  label={t("form.fields.name")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
                 />
                 <Input
-                  label="Email"
+                  label={t("form.fields.email")}
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -67,19 +66,19 @@ const ContactPage: React.FC = () => {
                 />
               </div>
               <Input
-                label="Phone"
+                label={t("form.fields.phone")}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
               <Input
-                label="Subject"
+                label={t("form.fields.subject")}
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 required
               />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
+                  {t("form.fields.message")}
                 </label>
                 <textarea
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -91,32 +90,33 @@ const ContactPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Button type="submit" disabled={status === "sending"}>
-                  {status === "sending" ? "Sending…" : "Send message"}
+                  {status === "sending"
+                    ? t("form.button.sending")
+                    : t("form.button.send")}
                 </Button>
                 {status === "sent" && (
                   <span className="text-green-600 text-sm">
-                    Message sent. Thank you!
+                    {t("form.status.success")}
                   </span>
                 )}
                 {status === "error" && (
                   <span className="text-red-600 text-sm">
-                    Failed to send. Try again.
+                    {t("form.status.error")}
                   </span>
                 )}
               </div>
             </form>
           </Card>
           <Card className="p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Office</h2>
-            <p className="text-gray-700">
-              Bole Medhaniyalem to Hayahulet Road, in front of New Stadium, ANAT
-              Commercial Center, 4th floor Office No. 402
-            </p>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              {t("office.title")}
+            </h2>
+            <p className="text-gray-700">{t("office.address")}</p>
             <div className="mt-4 text-gray-700 space-y-1">
-              <p>Email: info@belimunojobs.com</p>
-              <p>Phone: +251 0118 69 78 80</p>
-              <p>P.O.Box: 100144, Addis Ababa</p>
-              <p>Website: www.belimunojobs.com</p>
+              <p>{t("office.contact.email")}: info@belimunojobs.com</p>
+              <p>{t("office.contact.phone")}: +251 0118 69 78 80</p>
+              <p>{t("office.contact.pobox")}: 100144, Addis Ababa</p>
+              <p>{t("office.contact.website")}: www.belimunojobs.com</p>
             </div>
           </Card>
         </div>

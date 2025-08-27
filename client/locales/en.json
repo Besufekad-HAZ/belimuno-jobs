@@ -1,0 +1,1042 @@
+{
+  "Navbar": {
+    "brand": "Belimuno Jobs",
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "services": "Services",
+      "clients": "Our Clients",
+      "jobs": "Jobs",
+      "contact": "Contact"
+    },
+    "auth": {
+      "login": "Login",
+      "signup": "Sign up",
+      "dashboard": "Dashboard",
+      "profile": "Profile",
+      "logout": "Logout"
+    },
+    "roles": {
+      "super_admin": "Super Admin",
+      "admin_hr": "Admin - HR",
+      "admin_outsource": "Admin - Outsource",
+      "worker": "Worker",
+      "client": "Client"
+    }
+  },
+  "Home": {
+    "hero": {
+      "title": {
+        "part1": "Connect Talent with",
+        "part2": "Opportunities"
+      },
+      "description": "Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country. Join thousands of professionals building their careers.",
+      "getStarted": "Get Started",
+      "goToDashboard": "Go to Dashboard",
+      "browseJobs": "Browse Jobs"
+    },
+    "stats": {
+      "title": "Platform Statistics",
+      "subtitle": "See the impact we're making across Ethiopia",
+      "activeUsers": "Active Users",
+      "jobsPosted": "Jobs Posted",
+      "jobsCompleted": "Jobs Completed",
+      "successRate": "Success Rate"
+    },
+    "featuredJobs": {
+      "title": "Featured Jobs",
+      "subtitle": "Discover exciting opportunities from top employers",
+      "applyNow": "Apply Now",
+      "loginToApply": "Login to Apply",
+      "viewAllJobs": "View All Jobs",
+      "due": "Due"
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Simple steps to get started",
+      "step1": {
+        "title": "Create Account",
+        "description": "Sign up as a worker to find jobs or as a client to post projects"
+      },
+      "step2": {
+        "title": "Connect & Work",
+        "description": "Browse opportunities, submit proposals, and get matched with the right projects"
+      },
+      "step3": {
+        "title": "Get Paid",
+        "description": "Complete projects and receive secure payments through our platform"
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Journey?",
+      "subtitle": "Join thousands of professionals already using Belimuno Jobs to advance their careers",
+      "findWorkers": "Find Workers",
+      "findWork": "Find Work"
+    }
+  },
+  "Footer": {
+    "brand": {
+      "name": "Belimuno Jobs",
+      "description": "HR outsourcing and recruiting partner connecting talent with opportunities across Ethiopia since 2011. We help businesses scale with flexible, high-quality workforce solutions."
+    },
+    "sections": {
+      "company": "Company",
+      "contact": "Contact",
+      "followUs": "Follow Us"
+    },
+    "links": {
+      "about": "About",
+      "services": "Services",
+      "jobs": "Jobs",
+      "contact": "Contact"
+    },
+    "contact": {
+      "address": "Addis Ababa, Ethiopia"
+    },
+    "social": {
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "twitter": "Twitter"
+    }
+  },
+  "AboutPage": {
+    "hero": {
+      "title": "About Belimuno",
+      "subtitle": "HR Outsourcing Solution - Connecting talent with opportunities across Ethiopia since 2011",
+      "motto": "Work Smarter Not Harder!"
+    },
+    "executiveSummary": {
+      "title": "Executive Summary",
+      "content": {
+        "part1": "Belimuno HR outsourcing solution was established in 2011 as Belimuno recruiting service to provide manpower outsourcing services. Since then it has been outsourcing security guards, cleaners and construction workers for various renowned organizations. During its course of operation, Belimuno expanded its services to include professional manpower supply, consultancy and HR training services which in turn made it improve its name to Belimuno HR outsourcing solution.",
+        "part2": "The company currently has an annual turnover of about 200 million birr and is one of the fast growing firms in the sector. Its clients include international NGOs like WFP, NRS and FHI; International construction firms like China Genzuba group, Dong Fang electrics, Kalpataru group and Alec fitout engineering. Belimuno is currently managing over 3000 employees for 36 organizations."
+      }
+    },
+    "visionMissionValues": {
+      "vision": {
+        "title": "Vision",
+        "content": "To be the most reliable human resource outsourcing service providers and trusted partners through staffing a tailored to fit manpower to our clients."
+      },
+      "mission": {
+        "title": "Mission",
+        "content": "Searching, refining and staffing professional and non-professional manpower where they best fit and consult our clients with ideas leading them to success."
+      },
+      "values": {
+        "title": "Values",
+        "content": "Built on integrity, reliability, and innovation - we deliver excellence through our core values that guide every decision and action.",
+        "sectionTitle": "Our Core Values",
+        "1": {
+          "title": "Adhocracy",
+          "description": "Our flexible management system enables us hire tailored to fit workforce"
+        },
+        "2": {
+          "title": "Reliability",
+          "description": "We always strive to keep what we promised"
+        },
+        "3": {
+          "title": "Trustworthy",
+          "description": "We are devoted to be your trusted partners"
+        },
+        "4": {
+          "title": "Integrity",
+          "description": "We promise only what we deliver and we can deliver on every promise"
+        },
+        "5": {
+          "title": "Specialty",
+          "description": "We are seasoned professionals continuously educating ourselves, ready for future challenges"
+        },
+        "6": {
+          "title": "Technicality",
+          "description": "We believe every challenge has unique solution and technically deal with each accordingly"
+        },
+        "7": {
+          "title": "Incorruptibility",
+          "description": "Never involved and will never in fraudulent acts"
+        },
+        "8": {
+          "title": "Creativity",
+          "description": "We are always looking for new ways to enhance our customers' satisfaction"
+        }
+      }
+    },
+    "services": {
+      "title": "Our Services",
+      "1": {
+        "title": "Manpower Supply",
+        "description": "Professional manpower supply with a well-developed database and experienced HR professionals who can recruit the best talent for our clients."
+      },
+      "2": {
+        "title": "Manpower Outsourcing",
+        "description": "Comprehensive outsourcing services including cleaners, security guards, construction crews, and fleet management professionals for over 3000 employees."
+      },
+      "3": {
+        "title": "HR Consultancy",
+        "description": "Human resource consultancy services including assessment in the selection process as well as training & development for various business organizations."
+      }
+    },
+    "team": {
+      "title": "Our Team",
+      "description": "BELIMUNO is divided into three main departments: administration and finance, human resources, and outsourced service management. Each department handles administrative tasks, procurements, and financial activities, while the outsourced service management department manages outsourced staff and projects."
+    },
+    "clients": {
+      "title": "Our Clients",
+      "description": "BELIMUNO Human outsource solution is one of the leading companies in the industry. It has been operating in the field since 2012 and served more than fifty international, business, and non-governmental organizations.",
+      "viewButton": "View Our Clients"
+    },
+    "cta": {
+      "title": "Ready to Work with Us?",
+      "subtitle": "\"The only way to do great work is to love what you do. And we Love what we do! That's why we say come to Us.\"",
+      "buttons": {
+        "contact": "📞 Get In Touch",
+        "jobs": "💼 View Job Opportunities"
+      },
+      "contact": {
+        "email": {
+          "title": "Email Us"
+        },
+        "telegram": {
+          "title": "Telegram"
+        },
+        "phone": {
+          "title": "Call Us"
+        }
+      }
+    }
+  },
+  "ServicesPage": {
+    "hero": {
+      "title": "Our Services",
+      "subtitle": "Flexible HR outsourcing built for Ethiopia's leading NGOs, construction and service companies."
+    },
+    "services": {
+      "1": {
+        "title": "Manpower Supply",
+        "description": "Professional and non‑professional staffing with a deep candidate network and rigorous vetting.",
+        "icon": "Users"
+      },
+      "2": {
+        "title": "Manpower Outsourcing",
+        "description": "End‑to‑end outsourcing of cleaners, security guards, construction and fleet crews, with supervision.",
+        "icon": "ShieldCheck"
+      },
+      "3": {
+        "title": "Recruitment for Employers",
+        "description": "Targeted hiring campaigns, assessments and onboarding coordination for local and international firms.",
+        "icon": "Briefcase"
+      },
+      "4": {
+        "title": "HR Consultancy",
+        "description": "Policies, org design, compensation reviews, performance systems and compliance advisory.",
+        "icon": "Building2"
+      },
+      "5": {
+        "title": "Training & Development",
+        "description": "Soft skills and technical trainings for security, cleaning, HSE, site operations and customer service.",
+        "icon": "GraduationCap"
+      },
+      "6": {
+        "title": "Project-based Crews",
+        "description": "Rapid mobilization of skilled labor for construction, logistics and facilities management projects.",
+        "icon": "Wrench"
+      }
+    }
+  },
+  "ClientsPage": {
+    "hero": {
+      "title": "Our Clients",
+      "subtitle": "We have been trusted by international NGOs and leading construction companies since 2011."
+    }
+  },
+  "JobsPage": {
+    "header": {
+      "title": "Browse Jobs",
+      "subtitle": "Find the perfect opportunity for your skills"
+    },
+    "search": {
+      "placeholder": "Search jobs by title, description, or skills...",
+      "button": "Search",
+      "filters": {
+        "category": {
+          "label": "Category",
+          "placeholder": "All Categories"
+        },
+        "region": {
+          "label": "Region",
+          "placeholder": "Enter region"
+        },
+        "budget": {
+          "min": {
+            "label": "Min Budget (ETB)",
+            "placeholder": "0"
+          },
+          "max": {
+            "label": "Max Budget (ETB)",
+            "placeholder": "100000"
+          }
+        },
+        "apply": "Apply Filters",
+        "clear": "Clear Filters",
+        "results": {
+          "single": "job found",
+          "multiple": "jobs found"
+        }
+      }
+    },
+    "job": {
+      "priority": "priority",
+      "requiredSkills": "Required Skills:",
+      "moreSkills": "more",
+      "posted": "Posted",
+      "applications": "applications",
+      "actions": {
+        "viewDetails": "View Details",
+        "applyNow": "Apply Now",
+        "save": "Save",
+        "saved": "Saved",
+        "share": "Share",
+        "loginToApply": "Login to Apply"
+      }
+    },
+    "noResults": {
+      "title": "No jobs found",
+      "description": "Try adjusting your search criteria or check back later for new opportunities.",
+      "button": "Clear All Filters"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "page": "Page",
+      "of": "of",
+      "next": "Next"
+    },
+    "categories": {
+      "1": "Web Development",
+      "2": "Mobile Development",
+      "3": "Design",
+      "4": "Writing",
+      "5": "Marketing",
+      "6": "Data Entry",
+      "7": "Customer Service",
+      "8": "Sales",
+      "9": "Consulting",
+      "10": "Other"
+    }
+  },
+  "ContactPage": {
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "We would love to hear from you. Send us a message and we will respond promptly."
+    },
+    "form": {
+      "title": "Send a message",
+      "fields": {
+        "name": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "subject": "Subject",
+        "message": "Message"
+      },
+      "button": {
+        "sending": "Sending…",
+        "send": "Send message"
+      },
+      "status": {
+        "success": "Message sent. Thank you!",
+        "error": "Failed to send. Try again."
+      }
+    },
+    "office": {
+      "title": "Office",
+      "address": "Bole Medhaniyalem to Hayahulet Road, in front of New Stadium, ANAT Commercial Center, 4th floor Office No. 402",
+      "contact": {
+        "email": "Email",
+        "phone": "Phone",
+        "pobox": "P.O.Box",
+        "website": "Website"
+      }
+    }
+  },
+  "WorkerDashboard": {
+    "header": {
+      "title": "Worker Dashboard",
+      "subtitle": "Manage your jobs and track your earnings"
+    },
+    "buttons": {
+      "notifications": "Notifications",
+      "wallet": "Wallet",
+      "viewAll": "View All",
+      "cancel": "Cancel",
+      "submit": "Submit Application",
+      "withdrawFunds": "Withdraw Funds",
+      "markAllRead": "Mark All as Read",
+      "send": "Send"
+    },
+    "stats": {
+      "activeJobs": {
+        "title": "Active Jobs",
+        "label": "Active Jobs"
+      },
+      "completedJobs": {
+        "title": "Completed",
+        "label": "Completed"
+      },
+      "earnings": {
+        "title": "Total Earnings",
+        "label": "Total Earnings"
+      },
+      "rating": {
+        "title": "Rating",
+        "label": "Rating"
+      },
+      "applications": {
+        "title": "Applications",
+        "label": "Applications"
+      },
+      "pending": {
+        "title": "Pending",
+        "label": "Pending"
+      }
+    },
+    "sections": {
+      "availableJobs": {
+        "title": "Available Jobs",
+        "applications": "apps",
+        "due": "Due",
+        "details": "Details",
+        "view": "View",
+        "applied": "Applied",
+        "apply": "Apply"
+      },
+      "activeJobs": {
+        "title": "My Active Jobs",
+        "pendingApplications": {
+          "title": "Pending Applications",
+          "empty": "No pending applications.",
+          "applied": "Applied",
+          "status": "Pending"
+        },
+        "actions": {
+          "decline": "Decline",
+          "accept": "Accept",
+          "markComplete": "Mark Complete",
+          "resubmit": "Resubmit",
+          "rateClient": "Rate Client"
+        }
+      }
+    },
+    "modals": {
+      "application": {
+        "title": "Apply to Job",
+        "applyTo": "Apply to Job",
+        "fields": {
+          "budget": "Budget",
+          "deadline": "Deadline",
+          "category": "Category",
+          "region": "Region",
+          "proposal": {
+            "label": "Proposal",
+            "placeholder": "Explain your approach, relevant experience, deliverables and timeline...",
+            "hint": "A clear, concise proposal improves acceptance chances."
+          },
+          "proposedBudget": {
+            "label": "Proposed Budget (ETB)",
+            "placeholder": "e.g. 4500",
+            "hint": "Client budget: ETB"
+          },
+          "duration": {
+            "label": "Estimated Duration",
+            "placeholder": "e.g. 5 days",
+            "hint": "Optional – helps the client assess timeline."
+          }
+        }
+      },
+      "wallet": {
+        "title": "Worker Wallet",
+        "balance": {
+          "title": "Available Balance",
+          "label": "Available Balance"
+        },
+        "recentEarnings": {
+          "title": "Recent Earnings",
+          "jobPayment": "Job Payment",
+          "recently": "Recently",
+          "status": "Completed"
+        },
+        "withdrawalFeature": "Withdrawal feature coming soon!"
+      },
+      "rating": {
+        "title": "Rate Client",
+        "subtitle": "How was the client?",
+        "description": "Rate your experience after completing this job.",
+        "outOf": "out of 5",
+        "feedback": {
+          "label": "Feedback (optional)",
+          "placeholder": "Share details about communication, clarity, and professionalism."
+        }
+      },
+      "notifications": {
+        "title": "Notifications",
+        "empty": {
+          "title": "No notifications",
+          "message": "You're all caught up!"
+        }
+      },
+      "chat": {
+        "title": "Job Chat",
+        "guidance": "Collaborate professionally. Keep communication clear and respectful.",
+        "empty": "No messages yet.",
+        "attachments": {
+          "title": "Attachments",
+          "button": "Attach",
+          "placeholder": "Type a message"
+        }
+      }
+    }
+  },
+  "ClientDashboard": {
+    "header": {
+      "title": "Client Dashboard",
+      "subtitle": "Post jobs and manage your projects",
+      "postJob": "Post New Job"
+    },
+    "stats": {
+      "totalJobs": {
+        "title": "Total Jobs",
+        "label": "Total Jobs"
+      },
+      "activeJobs": {
+        "title": "Active",
+        "label": "Active"
+      },
+      "completedJobs": {
+        "title": "Completed",
+        "label": "Completed"
+      },
+      "totalSpent": {
+        "title": "Total Spent",
+        "label": "Total Spent"
+      },
+      "rating": {
+        "title": "Avg Rating",
+        "label": "Avg Rating"
+      },
+      "applications": {
+        "title": "Applications",
+        "label": "Applications"
+      }
+    },
+    "sections": {
+      "jobs": {
+        "title": "My Jobs",
+        "due": "Due",
+        "applications": "Applications",
+        "worker": "Worker",
+        "actions": {
+          "viewDetails": "View Details",
+          "applications": "Applications",
+          "requestRevision": "Request Revision",
+          "payAndRate": "Pay & Rate"
+        }
+      },
+      "recentApplications": {
+        "title": "Recent Applications",
+        "actions": {
+          "reject": "Reject",
+          "accept": "Accept"
+        }
+      }
+    },
+    "modals": {
+      "jobDetails": {
+        "title": "Job Details",
+        "fields": {
+          "description": "Description",
+          "budget": "Budget",
+          "deadline": "Deadline",
+          "category": "Category",
+          "status": "Status",
+          "requirements": "Requirements"
+        }
+      },
+      "payment": {
+        "title": "Process Payment via Chapa",
+        "summary": {
+          "title": "Job Summary",
+          "fields": {
+            "jobTitle": "Job Title",
+            "worker": "Worker",
+            "amount": "Amount",
+            "status": "Status",
+            "readyForPayment": "Ready for Payment"
+          }
+        },
+        "chapa": {
+          "title": "Secure Payment via Chapa",
+          "description": "Your payment will be processed securely through Chapa Payment Gateway",
+          "security": {
+            "encrypted": "SSL Encrypted",
+            "bankGrade": "Bank Grade Security"
+          }
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "process": "Process Payment"
+        }
+      },
+      "rating": {
+        "title": "Rate Worker Performance",
+        "subtitle": "How was your experience working with this freelancer?",
+        "rating": {
+          "label": "Rating",
+          "outOf": "out of 5 stars"
+        },
+        "review": {
+          "label": "Review (Optional)",
+          "placeholder": "Share your experience working with this freelancer..."
+        },
+        "actions": {
+          "skip": "Skip Rating",
+          "submit": "Submit Rating"
+        }
+      }
+    }
+  },
+  "LoginPage": {
+    "header": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to",
+      "brandName": "Belimuno Jobs",
+      "noAccount": {
+        "text": "Don't have an account?",
+        "link": "Create one here"
+      }
+    },
+    "tabs": {
+      "login": "Login",
+      "signup": "Sign up"
+    },
+    "form": {
+      "fields": {
+        "email": "Email address",
+        "password": "Password"
+      },
+      "buttons": {
+        "submit": {
+          "default": "Sign in to your account",
+          "loading": "Signing in..."
+        }
+      },
+      "divider": "Or continue with"
+    },
+    "testAccounts": {
+      "title": "Test Accounts",
+      "info": {
+        "title": "Quick Login:",
+        "description": "Click any test account above to auto-fill the form with demo credentials. Make sure to run",
+        "command": "node seedTestData.js",
+        "location": "in the server directory first."
+      }
+    },
+    "errors": {
+      "default": "Login failed",
+      "googleSignIn": "Google sign-in failed. If you are new, please use Sign up."
+    }
+  },
+  "RegisterPage": {
+    "header": {
+      "title": "Create your account",
+      "subtitle": {
+        "text": "Or",
+        "link": "sign in to your existing account"
+      }
+    },
+    "tabs": {
+      "login": "Login",
+      "signup": "Sign up"
+    },
+    "form": {
+      "fields": {
+        "name": "Full Name",
+        "email": "Email address",
+        "role": {
+          "label": "Role",
+          "options": {
+            "worker": "Worker (Freelancer)",
+            "client": "Client (Employer)"
+          }
+        },
+        "phone": "Phone",
+        "location": "Location",
+        "bio": {
+          "label": "Bio",
+          "placeholder": "Tell us about yourself..."
+        },
+        "worker": {
+          "skills": {
+            "label": "Skills (comma-separated)",
+            "placeholder": "e.g. JavaScript, React, Node.js"
+          },
+          "experience": "Years of Experience",
+          "hourlyRate": "Hourly Rate (ETB)"
+        },
+        "client": {
+          "company": "Company Name",
+          "industry": "Industry",
+          "website": "Website"
+        },
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "buttons": {
+        "submit": {
+          "default": "Create Account",
+          "loading": "Creating account..."
+        }
+      }
+    },
+    "errors": {
+      "passwordMismatch": "Passwords do not match",
+      "default": "Registration failed",
+      "googleSignUp": "Google sign-up failed. If you already have an account with this email, please use Login."
+    }
+  },
+  "OutsourceAdminDashboard": {
+    "header": {
+      "title": "Outsourcing Admin Dashboard",
+      "subtitle": "Manage projects, clients, and business operations",
+      "buttons": {
+        "manageProjects": "Manage Projects",
+        "clientManagement": "Client Management"
+      }
+    },
+    "stats": {
+      "totalClients": {
+        "title": "Total Clients",
+        "label": "Total Clients"
+      },
+      "activeProjects": {
+        "title": "Active Projects",
+        "label": "Active Projects"
+      },
+      "totalRevenue": {
+        "title": "Total Revenue",
+        "label": "Total Revenue"
+      },
+      "monthlyRevenue": {
+        "title": "Monthly Revenue",
+        "label": "Monthly Revenue"
+      }
+    },
+    "metrics": {
+      "clientSatisfaction": {
+        "title": "Client Satisfaction",
+        "rating": "out of 5"
+      },
+      "projectSuccess": {
+        "title": "Project Success Rate"
+      },
+      "revenueGrowth": {
+        "title": "Revenue Growth"
+      }
+    },
+    "projects": {
+      "title": "Recent Projects",
+      "viewAll": "View All",
+      "details": {
+        "client": "Client",
+        "progress": "Progress",
+        "title": "Project Details",
+        "assignedWorker": "Assigned Worker",
+        "deadline": "Deadline",
+        "budget": "Budget",
+        "buttons": {
+          "viewDetails": "View Details",
+          "contactClient": "Contact Client",
+          "generateReport": "Generate Report"
+        }
+      },
+      "status": {
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "assigned": "Assigned",
+        "posted": "Posted"
+      }
+    },
+    "clients": {
+      "title": "Top Clients",
+      "viewAll": "View All",
+      "metrics": {
+        "projects": "projects"
+      }
+    },
+    "operations": {
+      "title": "Business Operations",
+      "buttons": {
+        "clientManagement": "Client Management",
+        "projectOversight": "Project Oversight",
+        "businessAnalytics": "Business Analytics",
+        "financialReports": "Financial Reports"
+      }
+    },
+    "keyMetrics": {
+      "title": "Key Metrics",
+      "metrics": {
+        "avgProjectValue": "Avg. Project Value",
+        "clientRetention": "Client Retention",
+        "projectCompletionRate": "Project Completion Rate",
+        "avgProjectDuration": "Avg. Project Duration"
+      }
+    },
+    "recentActivity": {
+      "title": "Recent Activity"
+    }
+  },
+  "HRAdminDashboard": {
+    "header": {
+      "title": "HR Admin Dashboard",
+      "subtitle": "Manage workforce, disputes, and HR operations",
+      "buttons": {
+        "sendAnnouncement": "Send Announcement",
+        "manageWorkers": "Manage Workers"
+      }
+    },
+    "stats": {
+      "totalWorkers": {
+        "title": "Total Workers",
+        "label": "Total Workers"
+      },
+      "verifiedWorkers": {
+        "title": "Verified Workers",
+        "label": "Verified Workers"
+      },
+      "pendingVerification": {
+        "title": "Pending Verification",
+        "label": "Pending Verification"
+      },
+      "openDisputes": {
+        "title": "Open Disputes",
+        "label": "Open Disputes"
+      }
+    },
+    "verifications": {
+      "title": "Pending Verifications",
+      "empty": "No pending verifications"
+    },
+    "disputes": {
+      "title": "Active Disputes",
+      "empty": "No active disputes",
+      "priority": {
+        "high": "high",
+        "medium": "medium",
+        "low": "low"
+      },
+      "details": {
+        "title": "Dispute Details",
+        "priority": "Priority",
+        "partiesInvolved": "Parties Involved",
+        "fields": {
+          "worker": "Worker",
+          "client": "Client",
+          "job": "Job",
+          "description": "Description"
+        },
+        "buttons": {
+          "investigate": "Investigate",
+          "contactParties": "Contact Parties",
+          "resolve": "Resolve"
+        }
+      }
+    },
+    "actions": {
+      "title": "HR Actions",
+      "buttons": {
+        "workerManagement": "Worker Management",
+        "disputeResolution": "Dispute Resolution",
+        "performanceReviews": "Performance Reviews"
+      }
+    },
+    "metrics": {
+      "performance": {
+        "title": "Performance Metrics",
+        "workerSatisfaction": "Worker Satisfaction",
+        "verificationRate": "Verification Rate",
+        "disputeResolution": "Dispute Resolution"
+      },
+      "monthly": {
+        "title": "This Month",
+        "fields": {
+          "newWorkers": "New Workers",
+          "verifications": "Verifications",
+          "disputesResolved": "Disputes Resolved",
+          "trainingCompleted": "Training Completed"
+        }
+      }
+    },
+    "worker": {
+      "status": {
+        "inactive": "Inactive",
+        "pending": "Pending",
+        "verified": "Verified"
+      },
+      "verification": {
+        "title": "Worker Verification",
+        "profile": {
+          "title": "Worker Profile",
+          "fields": {
+            "experience": "Experience",
+            "rating": "Rating",
+            "jobsCompleted": "Jobs Completed",
+            "skills": "Skills"
+          }
+        },
+        "buttons": {
+          "verify": "Verify Worker",
+          "reject": "Reject"
+        }
+      }
+    },
+    "announcement": {
+      "title": "Send System Announcement",
+      "fields": {
+        "title": {
+          "label": "Title",
+          "placeholder": "Announcement title..."
+        },
+        "message": {
+          "label": "Message",
+          "placeholder": "Your announcement message..."
+        },
+        "targetAudience": {
+          "label": "Target Audience",
+          "options": {
+            "workers": "Workers",
+            "clients": "Clients",
+            "both": "Both Workers & Clients"
+          }
+        },
+        "priority": {
+          "label": "Priority",
+          "options": {
+            "low": "Low",
+            "medium": "Medium",
+            "high": "High",
+            "urgent": "Urgent"
+          }
+        }
+      },
+      "buttons": {
+        "send": "Send Announcement",
+        "cancel": "Cancel"
+      }
+    }
+  },
+  "AdminDashboard": {
+    "header": {
+      "title": "Super Admin Dashboard",
+      "subtitle": "Monitor and manage the entire Belimuno Jobs platform",
+      "buttons": {
+        "generateReports": "Generate Reports",
+        "resolveDisputes": "Resolve Disputes"
+      }
+    },
+    "stats": {
+      "totalUsers": {
+        "title": "Total Users",
+        "label": "Total Users"
+      },
+      "totalJobs": {
+        "title": "Total Jobs",
+        "label": "Total Jobs"
+      },
+      "totalRevenue": {
+        "title": "Total Revenue",
+        "label": "Total Revenue"
+      },
+      "monthlyGrowth": {
+        "title": "Monthly Growth",
+        "label": "Monthly Growth"
+      }
+    },
+    "activity": {
+      "activeJobs": {
+        "title": "Active Jobs",
+        "label": "Active Jobs"
+      },
+      "completedJobs": {
+        "title": "Completed Jobs",
+        "label": "Completed Jobs"
+      },
+      "pendingVerifications": {
+        "title": "Pending Verifications",
+        "label": "Pending Verifications"
+      }
+    },
+    "recentUsers": {
+      "title": "Recent Users",
+      "viewAll": "View All",
+      "buttons": {
+        "verify": "Verify"
+      }
+    },
+    "recentJobs": {
+      "title": "Recent Jobs",
+      "viewAll": "View All",
+      "fields": {
+        "amount": "ETB",
+        "posted": "Posted"
+      }
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "buttons": {
+        "manageUsers": "Manage Users",
+        "manageJobs": "Manage Jobs",
+        "paymentDisputes": "Payment Disputes"
+      }
+    },
+    "reports": {
+      "title": "Generate Reports",
+      "fields": {
+        "type": {
+          "label": "Report Type",
+          "options": {
+            "revenue": "Revenue Report",
+            "completion": "Completion Rates",
+            "users": "User Analytics",
+            "performance": "Performance Metrics"
+          }
+        }
+      },
+      "preview": {
+        "title": "Report Preview",
+        "fields": {
+          "totalUsers": "Total Users",
+          "totalJobs": "Total Jobs",
+          "totalRevenue": "Total Revenue",
+          "monthlyGrowth": "Monthly Growth"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "download": "Download Report"
+      }
+    },
+    "disputes": {
+      "title": "Payment Disputes",
+      "fields": {
+        "paymentId": "Payment ID",
+        "amount": "Amount",
+        "date": "Date",
+        "status": "Disputed"
+      },
+      "empty": {
+        "title": "No Active Disputes",
+        "message": "All payments are processing smoothly!"
+      },
+      "buttons": {
+        "refundClient": "Refund Client",
+        "payWorker": "Pay Worker",
+        "investigate": "Investigate"
+      }
+    }
+  }
+}

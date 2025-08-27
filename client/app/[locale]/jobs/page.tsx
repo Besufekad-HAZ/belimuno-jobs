@@ -17,6 +17,7 @@ import { jobsAPI, workerAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
+import { useTranslations } from "next-intl";
 
 const JobsPage: React.FC = () => {
   type JobListItem = {
@@ -46,6 +47,7 @@ const JobsPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   // Removed unused saving state to satisfy eslint
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set());
+  const t = useTranslations("JobsPage");
 
   // fetchJobs defined below; initial effect will reference it
 
@@ -148,28 +150,17 @@ const JobsPage: React.FC = () => {
     fetchJobs({}, 1);
   };
 
-  const categories = [
-    "Web Development",
-    "Mobile Development",
-    "Design",
-    "Writing",
-    "Marketing",
-    "Data Entry",
-    "Customer Service",
-    "Sales",
-    "Consulting",
-    "Other",
-  ];
+  // Categories are now defined in translations
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Browse Jobs</h1>
-          <p className="text-gray-600 mt-2">
-            Find the perfect opportunity for your skills
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("header.title")}
+          </h1>
+          <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
         </div>
 
         {/* Search and Filters */}
@@ -179,14 +170,14 @@ const JobsPage: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="flex-1">
                 <Input
-                  placeholder="Search jobs by title, description, or skills..."
+                  placeholder={t("search.placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <Button onClick={handleSearch}>
                 <Search className="h-4 w-4 mr-2" />
-                Search
+                {t("search.button")}
               </Button>
             </div>
 
@@ -194,33 +185,35 @@ const JobsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
+                  {t("search.filters.category.label")}
                 </label>
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  <option value="">
+                    {t("search.filters.category.placeholder")}
+                  </option>
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                    <option key={num} value={t(`categories.${num}`)}>
+                      {t(`categories.${num}`)}
                     </option>
                   ))}
                 </select>
               </div>
 
               <Input
-                label="Region"
-                placeholder="Enter region"
+                label={t("search.filters.region.label")}
+                placeholder={t("search.filters.region.placeholder")}
                 value={regionFilter}
                 onChange={(e) => setRegionFilter(e.target.value)}
               />
 
               <Input
-                label="Min Budget (ETB)"
+                label={t("search.filters.budget.min.label")}
                 type="number"
-                placeholder="0"
+                placeholder={t("search.filters.budget.min.placeholder")}
                 value={budgetRange.min}
                 onChange={(e) =>
                   setBudgetRange({ ...budgetRange, min: e.target.value })
@@ -228,9 +221,9 @@ const JobsPage: React.FC = () => {
               />
 
               <Input
-                label="Max Budget (ETB)"
+                label={t("search.filters.budget.max.label")}
                 type="number"
-                placeholder="100000"
+                placeholder={t("search.filters.budget.max.placeholder")}
                 value={budgetRange.max}
                 onChange={(e) =>
                   setBudgetRange({ ...budgetRange, max: e.target.value })
@@ -242,10 +235,10 @@ const JobsPage: React.FC = () => {
               <div className="flex items-center space-x-4">
                 <Button variant="outline" onClick={handleSearch}>
                   <Filter className="h-4 w-4 mr-2" />
-                  Apply Filters
+                  {t("search.filters.apply")}
                 </Button>
                 <Button variant="ghost" onClick={clearFilters}>
-                  Clear Filters
+                  {t("search.filters.clear")}
                 </Button>
               </div>
               <p className="text-sm text-gray-500">
@@ -317,7 +310,7 @@ const JobsPage: React.FC = () => {
                     {job.requiredSkills && job.requiredSkills.length > 0 && (
                       <div className="mb-4">
                         <h4 className="text-sm font-medium text-gray-700 mb-2">
-                          Required Skills:
+                          {t("job.requiredSkills")}
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {job.requiredSkills
@@ -332,7 +325,8 @@ const JobsPage: React.FC = () => {
                             ))}
                           {job.requiredSkills.length > 5 && (
                             <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                              +{job.requiredSkills.length - 5} more
+                              +{job.requiredSkills.length - 5}{" "}
+                              {t("job.moreSkills")}
                             </span>
                           )}
                         </div>
@@ -342,16 +336,17 @@ const JobsPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <span>
-                          Posted{" "}
+                          {t("job.posted")}{" "}
                           {job.createdAt
                             ? new Date(
-                                job.createdAt as string | number | Date,
+                                job.createdAt as string | number | Date
                               ).toLocaleDateString()
                             : "—"}
                         </span>
                         <span>•</span>
                         <span>
-                          {job.applications?.length || 0} applications
+                          {job.applications?.length || 0}{" "}
+                          {t("job.applications")}
                         </span>
                         <span>•</span>
                         <span className="capitalize">{job.workType}</span>
@@ -362,7 +357,7 @@ const JobsPage: React.FC = () => {
                           className="inline-block"
                         >
                           <Button variant="outline" size="sm">
-                            View Details
+                            {t("job.actions.viewDetails")}
                           </Button>
                         </Link>
                         {user && user.role === "worker" && (
@@ -370,7 +365,9 @@ const JobsPage: React.FC = () => {
                             href={`/jobs/${job._id}/apply`}
                             className="inline-block"
                           >
-                            <Button size="sm">Apply Now</Button>
+                            <Button size="sm">
+                              {t("job.actions.applyNow")}
+                            </Button>
                           </Link>
                         )}
                         <Button
@@ -399,7 +396,9 @@ const JobsPage: React.FC = () => {
                           }}
                         >
                           <Bookmark className="h-4 w-4 mr-1" />{" "}
-                          {savedJobIds.has(job._id) ? "Saved" : "Save"}
+                          {savedJobIds.has(job._id)
+                            ? t("job.actions.saved")
+                            : t("job.actions.save")}
                         </Button>
                         <Button
                           variant="ghost"
@@ -425,11 +424,14 @@ const JobsPage: React.FC = () => {
                             }
                           }}
                         >
-                          <Share2 className="h-4 w-4 mr-1" /> Share
+                          <Share2 className="h-4 w-4 mr-1" />{" "}
+                          {t("job.actions.share")}
                         </Button>
                         {!user && (
                           <Link href="/login" className="inline-block">
-                            <Button size="sm">Login to Apply</Button>
+                            <Button size="sm">
+                              {t("job.actions.loginToApply")}
+                            </Button>
                           </Link>
                         )}
                       </div>
@@ -443,14 +445,11 @@ const JobsPage: React.FC = () => {
           <Card className="text-center py-12">
             <Briefcase className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No jobs found
+              {t("noResults.title")}
             </h3>
-            <p className="text-gray-600 mb-4">
-              Try adjusting your search criteria or check back later for new
-              opportunities.
-            </p>
+            <p className="text-gray-600 mb-4">{t("noResults.description")}</p>
             <Button variant="outline" onClick={clearFilters}>
-              Clear All Filters
+              {t("noResults.button")}
             </Button>
           </Card>
         )}
@@ -476,10 +475,10 @@ const JobsPage: React.FC = () => {
                 );
               }}
             >
-              Previous
+              {t("pagination.previous")}
             </Button>
             <span className="px-4 py-2 text-gray-700">
-              Page {page} of {totalPages}
+              {t("pagination.page")} {page} {t("pagination.of")} {totalPages}
             </span>
             <Button
               variant="outline"
@@ -499,7 +498,7 @@ const JobsPage: React.FC = () => {
                 );
               }}
             >
-              Next
+              {t("pagination.next")}
             </Button>
           </div>
         )}

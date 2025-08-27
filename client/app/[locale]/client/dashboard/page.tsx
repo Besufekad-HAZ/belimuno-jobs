@@ -21,6 +21,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import { useTranslations } from "next-intl";
 
 interface ClientStats {
   totalJobs: number;
@@ -67,6 +68,8 @@ const ClientDashboard: React.FC = () => {
   } | null>(null);
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
+
+  const t = useTranslations("ClientDashboard");
   const [pendingProof, setPendingProof] = useState<{
     dataUrl: string;
     name?: string;
@@ -254,15 +257,13 @@ const ClientDashboard: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Client Dashboard
+              {t("header.title")}
             </h1>
-            <p className="text-gray-600 mt-2">
-              Post jobs and manage your projects
-            </p>
+            <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
           </div>
           <Button onClick={() => router.push("/client/jobs/new")}>
             <Plus className="h-4 w-4 mr-2" />
-            Post New Job
+            {t("header.postJob")}
           </Button>
         </div>
 
@@ -271,7 +272,9 @@ const ClientDashboard: React.FC = () => {
           <Card className="bg-blue-50 border-blue-200">
             <div className="text-center">
               <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-blue-600">Total Jobs</p>
+              <p className="text-sm font-medium text-blue-600">
+                {t("stats.totalJobs.label")}
+              </p>
               <p className="text-2xl font-bold text-blue-900">
                 {stats?.totalJobs || 0}
               </p>
@@ -281,7 +284,9 @@ const ClientDashboard: React.FC = () => {
           <Card className="bg-yellow-50 border-yellow-200">
             <div className="text-center">
               <Clock className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-yellow-600">Active</p>
+              <p className="text-sm font-medium text-yellow-600">
+                {t("stats.activeJobs.label")}
+              </p>
               <p className="text-2xl font-bold text-yellow-900">
                 {stats?.activeJobs || 0}
               </p>
@@ -291,7 +296,9 @@ const ClientDashboard: React.FC = () => {
           <Card className="bg-green-50 border-green-200">
             <div className="text-center">
               <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-green-600">Completed</p>
+              <p className="text-sm font-medium text-green-600">
+                {t("stats.completedJobs.label")}
+              </p>
               <p className="text-2xl font-bold text-green-900">
                 {stats?.completedJobs || 0}
               </p>
@@ -301,7 +308,9 @@ const ClientDashboard: React.FC = () => {
           <Card className="bg-purple-50 border-purple-200">
             <div className="text-center">
               <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-purple-600">Total Spent</p>
+              <p className="text-sm font-medium text-purple-600">
+                {t("stats.totalSpent.label")}
+              </p>
               <p className="text-xl font-bold text-purple-900">
                 ETB {stats?.totalSpent?.toLocaleString() || 0}
               </p>
@@ -311,7 +320,9 @@ const ClientDashboard: React.FC = () => {
           <Card className="bg-indigo-50 border-indigo-200">
             <div className="text-center">
               <Star className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-indigo-600">Avg Rating</p>
+              <p className="text-sm font-medium text-indigo-600">
+                {t("stats.rating.label")}
+              </p>
               <p className="text-2xl font-bold text-indigo-900">
                 {stats?.averageRating?.toFixed(1) || "N/A"}
               </p>
@@ -322,7 +333,7 @@ const ClientDashboard: React.FC = () => {
             <div className="text-center">
               <Users className="h-8 w-8 text-orange-600 mx-auto mb-2" />
               <p className="text-sm font-medium text-orange-600">
-                Applications
+                {t("stats.applications.label")}
               </p>
               <p className="text-2xl font-bold text-orange-900">
                 {stats?.pendingApplications || 0}
@@ -334,7 +345,9 @@ const ClientDashboard: React.FC = () => {
         {/* Jobs List */}
         <Card>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">My Jobs</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {t("sections.jobs.title")}
+            </h3>
           </div>
           <div className="space-y-4">
             {jobs.map((job) => (
@@ -418,16 +431,19 @@ const ClientDashboard: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <span>
-                      Due: {new Date(job.deadline).toLocaleDateString()}
+                      {t("sections.jobs.due")}:{" "}
+                      {new Date(job.deadline).toLocaleDateString()}
                     </span>
                     <span>
-                      Applications:{" "}
+                      {t("sections.jobs.applications")}:{" "}
                       {job.applicationCount ??
                         job.recentApplications?.length ??
                         0}
                     </span>
                     {job.assignedWorker && (
-                      <span>Worker: {job.assignedWorker.name}</span>
+                      <span>
+                        {t("sections.jobs.worker")}: {job.assignedWorker.name}
+                      </span>
                     )}
                   </div>
                   <div className="flex space-x-2">
@@ -437,14 +453,14 @@ const ClientDashboard: React.FC = () => {
                       onClick={() => setSelectedJob(job)}
                     >
                       <Eye className="h-4 w-4 mr-1" />
-                      View Details
+                      {t("sections.jobs.actions.viewDetails")}
                     </Button>
                     <Link
                       href={`/client/jobs/${job._id}/applications`}
                       className="inline-block"
                     >
                       <Button size="sm" variant="outline">
-                        Applications
+                        {t("sections.jobs.actions.applications")}
                       </Button>
                     </Link>
                     {job.status === "awaiting_completion" && (
@@ -454,14 +470,14 @@ const ClientDashboard: React.FC = () => {
                           variant="outline"
                           onClick={() => handleRequestRevision(job._id)}
                         >
-                          Request Revision
+                          {t("sections.jobs.actions.requestRevision")}
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handlePaymentAndRating(job)}
                         >
                           <CreditCard className="h-4 w-4 mr-1" />
-                          Pay & Rate
+                          {t("sections.jobs.actions.payAndRate")}
                         </Button>
                       </>
                     )}
@@ -474,7 +490,7 @@ const ClientDashboard: React.FC = () => {
                   job.recentApplications.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
                       <h5 className="font-medium text-gray-900 mb-3">
-                        Recent Applications (
+                        {t("sections.recentApplications.title")} (
                         {job.applicationCount || job.recentApplications.length})
                       </h5>
                       <div className="space-y-3">
@@ -508,7 +524,9 @@ const ClientDashboard: React.FC = () => {
                                     )
                                   }
                                 >
-                                  Reject
+                                  {t(
+                                    "sections.recentApplications.actions.reject",
+                                  )}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -519,7 +537,9 @@ const ClientDashboard: React.FC = () => {
                                     )
                                   }
                                 >
-                                  Accept
+                                  {t(
+                                    "sections.recentApplications.actions.accept",
+                                  )}
                                 </Button>
                               </div>
                             </div>
@@ -544,28 +564,38 @@ const ClientDashboard: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-medium text-gray-900">Description</h4>
+                  <h4 className="font-medium text-gray-900">
+                    {t("modals.jobDetails.fields.description")}
+                  </h4>
                   <p className="text-gray-600">{selectedJob.description}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-medium text-gray-900">Budget</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {t("modals.jobDetails.fields.budget")}
+                    </h4>
                     <p className="text-gray-600">
                       ETB {selectedJob.budget?.toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Deadline</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {t("modals.jobDetails.fields.deadline")}
+                    </h4>
                     <p className="text-gray-600">
                       {new Date(selectedJob.deadline).toLocaleDateString()}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Category</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {t("modals.jobDetails.fields.category")}
+                    </h4>
                     <p className="text-gray-600">{selectedJob.category}</p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Status</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {t("modals.jobDetails.fields.status")}
+                    </h4>
                     <p className="text-gray-600 capitalize">
                       {selectedJob.status.replace("_", " ")}
                     </p>
@@ -573,7 +603,9 @@ const ClientDashboard: React.FC = () => {
                 </div>
                 {selectedJob.requirements && (
                   <div>
-                    <h4 className="font-medium text-gray-900">Requirements</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {t("modals.jobDetails.fields.requirements")}
+                    </h4>
                     <ul className="text-gray-600 list-disc list-inside">
                       {selectedJob.requirements.map(
                         (req: string, index: number) => (
@@ -592,7 +624,7 @@ const ClientDashboard: React.FC = () => {
         <Modal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
-          title="Process Payment via Chapa"
+          title={t("modals.payment.title")}
           size="md"
         >
           <div className="space-y-6">
@@ -601,18 +633,26 @@ const ClientDashboard: React.FC = () => {
                 {/* Job Summary */}
                 <Card className="bg-gray-50">
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900">Job Summary</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {t("modals.payment.summary.title")}
+                    </h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-500">Job Title</p>
+                        <p className="text-gray-500">
+                          {t("modals.payment.summary.fields.jobTitle")}
+                        </p>
                         <p className="font-medium">{selectedJob.title}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Worker</p>
+                        <p className="text-gray-500">
+                          {t("modals.payment.summary.fields.worker")}
+                        </p>
                         <p className="font-medium">{selectedWorker.name}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Amount</p>
+                        <p className="text-gray-500">
+                          {t("modals.payment.summary.fields.amount")}
+                        </p>
                         <p className="font-semibold text-green-600">
                           ETB{" "}
                           {(
@@ -622,8 +662,12 @@ const ClientDashboard: React.FC = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Status</p>
-                        <Badge variant="success">Ready for Payment</Badge>
+                        <p className="text-gray-500">
+                          {t("modals.payment.summary.fields.status")}
+                        </p>
+                        <Badge variant="success">
+                          {t("modals.payment.summary.fields.readyForPayment")}
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -634,17 +678,20 @@ const ClientDashboard: React.FC = () => {
                   <div className="text-center">
                     <CreditCard className="h-12 w-12 text-blue-600 mx-auto mb-4" />
                     <h4 className="font-medium text-gray-900 mb-2">
-                      Secure Payment via Chapa
+                      {t("modals.payment.chapa.title")}
                     </h4>
                     <p className="text-sm text-gray-600 mb-4">
-                      Your payment will be processed securely through Chapa
-                      Payment Gateway
+                      {t("modals.payment.chapa.description")}
                     </p>
                     <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>SSL Encrypted</span>
+                      <span>
+                        {t("modals.payment.chapa.security.encrypted")}
+                      </span>
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Bank Grade Security</span>
+                      <span>
+                        {t("modals.payment.chapa.security.bankGrade")}
+                      </span>
                     </div>
                   </div>
                 </Card>
@@ -655,11 +702,11 @@ const ClientDashboard: React.FC = () => {
                     variant="outline"
                     onClick={() => setShowPaymentModal(false)}
                   >
-                    Cancel
+                    {t("modals.payment.actions.cancel")}
                   </Button>
                   <Button onClick={processPayment} className="flex-1">
                     <CreditCard className="h-4 w-4 mr-2" />
-                    Process Payment
+                    {t("modals.payment.actions.process")}
                   </Button>
                 </div>
               </>
@@ -671,7 +718,7 @@ const ClientDashboard: React.FC = () => {
         <Modal
           isOpen={showRatingModal}
           onClose={() => setShowRatingModal(false)}
-          title="Rate Worker Performance"
+          title={t("modals.rating.title")}
           size="md"
         >
           <div className="space-y-6">
@@ -686,14 +733,14 @@ const ClientDashboard: React.FC = () => {
                     {selectedWorker.name}
                   </h4>
                   <p className="text-sm text-gray-500">
-                    How was your experience working with this freelancer?
+                    {t("modals.rating.subtitle")}
                   </p>
                 </div>
 
                 {/* Rating Stars */}
                 <div className="text-center">
                   <p className="text-sm font-medium text-gray-700 mb-3">
-                    Rating
+                    {t("modals.rating.rating.label")}
                   </p>
                   <div className="flex justify-center space-x-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -707,21 +754,21 @@ const ClientDashboard: React.FC = () => {
                     ))}
                   </div>
                   <p className="text-sm text-gray-500 mt-2">
-                    {rating} out of 5 stars
+                    {rating} {t("modals.rating.rating.outOf")}
                   </p>
                 </div>
 
                 {/* Review Text */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Review (Optional)
+                    {t("modals.rating.review.label")}
                   </label>
                   <textarea
                     rows={4}
                     value={review}
                     onChange={(e) => setReview(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Share your experience working with this freelancer..."
+                    placeholder={t("modals.rating.review.placeholder")}
                   />
                 </div>
 
@@ -735,11 +782,11 @@ const ClientDashboard: React.FC = () => {
                       setReview("");
                     }}
                   >
-                    Skip Rating
+                    {t("modals.rating.actions.skip")}
                   </Button>
                   <Button onClick={submitRating} className="flex-1">
                     <Star className="h-4 w-4 mr-2" />
-                    Submit Rating
+                    {t("modals.rating.actions.submit")}
                   </Button>
                 </div>
               </>

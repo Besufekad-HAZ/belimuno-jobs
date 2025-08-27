@@ -7,6 +7,7 @@ import { authAPI } from "@/lib/api";
 import { setAuth, getRoleDashboardPath } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import { useTranslations } from "next-intl";
 
 type GoogleIdentity = {
   accounts?: {
@@ -38,6 +39,7 @@ const LoginPage: React.FC = () => {
   const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("LoginPage");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -75,10 +77,10 @@ const LoginPage: React.FC = () => {
       ) {
         setError(
           (error.response as { data: { message?: string } }).data.message ||
-            "Login failed",
+            t("errors.default")
         );
       } else {
-        setError("Login failed");
+        setError(t("errors.default"));
       }
     } finally {
       setLoading(false);
@@ -119,9 +121,7 @@ const LoginPage: React.FC = () => {
           router.push(getRoleDashboardPath(user.role));
         } catch (e) {
           console.error(e);
-          setError(
-            "Google sign-in failed. If you are new, please use Sign up.",
-          );
+          setError(t("errors.googleSignIn"));
         }
       },
     });
@@ -203,19 +203,21 @@ const LoginPage: React.FC = () => {
             </svg>
           </div>
           <h2 className="text-4xl font-bold text-gray-900 mb-2">
-            Welcome Back
+            {t("header.title")}
           </h2>
           <p className="text-lg text-gray-600 mb-2">
-            Sign in to{" "}
-            <span className="font-semibold text-blue-700">Belimuno Jobs</span>
+            {t("header.subtitle")}{" "}
+            <span className="font-semibold text-blue-700">
+              {t("header.brandName")}
+            </span>
           </p>
           <p className="text-sm text-gray-500">
-            Don&apos;t have an account?
+            {t("header.noAccount.text")}{" "}
             <Link
               href="/register"
               className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
             >
-              Create one here
+              {t("header.noAccount.link")}
             </Link>
           </p>
         </div>
@@ -225,12 +227,12 @@ const LoginPage: React.FC = () => {
           <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex">
             <Link href="/login" className="flex-1">
               <div className="text-center py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">
-                Login
+                {t("tabs.login")}
               </div>
             </Link>
             <Link href="/register" className="flex-1">
               <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">
-                Sign up
+                {t("tabs.signup")}
               </div>
             </Link>
           </div>
@@ -264,7 +266,7 @@ const LoginPage: React.FC = () => {
 
                 <div className="space-y-5">
                   <Input
-                    label="Email address"
+                    label={t("form.fields.email")}
                     name="email"
                     type="email"
                     autoComplete="email"
@@ -275,7 +277,7 @@ const LoginPage: React.FC = () => {
                   />
 
                   <Input
-                    label="Password"
+                    label={t("form.fields.password")}
                     name="password"
                     type="password"
                     showPasswordToggle
@@ -292,7 +294,9 @@ const LoginPage: React.FC = () => {
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
                   loading={loading}
                 >
-                  {loading ? "Signing in..." : "Sign in to your account"}
+                  {loading
+                    ? t("form.buttons.submit.loading")
+                    : t("form.buttons.submit.default")}
                 </Button>
 
                 {/* OR Divider */}
@@ -305,7 +309,7 @@ const LoginPage: React.FC = () => {
                   </div>
                   <div className="relative flex justify-center text-sm">
                     <span className="px-2 bg-white text-gray-500">
-                      Or continue with
+                      {t("form.divider")}
                     </span>
                   </div>
                 </div>
@@ -322,7 +326,7 @@ const LoginPage: React.FC = () => {
               <div className="flex items-center mb-4">
                 <div className="flex-1 border-t border-gray-200"></div>
                 <span className="px-3 text-sm font-medium text-gray-500 bg-gray-50">
-                  Test Accounts
+                  {t("testAccounts.title")}
                 </span>
                 <div className="flex-1 border-t border-gray-200"></div>
               </div>
@@ -377,13 +381,14 @@ const LoginPage: React.FC = () => {
                     />
                   </svg>
                   <p className="text-xs text-blue-700">
-                    <span className="font-medium">Quick Login:</span> Click any
-                    test account above to auto-fill the form with demo
-                    credentials. Make sure to run{" "}
+                    <span className="font-medium">
+                      {t("testAccounts.info.title")}
+                    </span>{" "}
+                    {t("testAccounts.info.description")}{" "}
                     <code className="bg-blue-100 px-1 rounded">
-                      node seedTestData.js
+                      {t("testAccounts.info.command")}
                     </code>{" "}
-                    in the server directory first.
+                    {t("testAccounts.info.location")}
                   </p>
                 </div>
               </div>

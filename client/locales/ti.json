@@ -1,0 +1,1042 @@
+{
+  "Navbar": {
+    "brand": "ቤሊሙኖ ዮብስ",
+    "navigation": {
+      "home": "መነሻ",
+      "about": "ብዛዕባ",
+      "services": "ኣገልግሎታት",
+      "clients": "ክሊኦትና",
+      "jobs": "ስራሓት",
+      "contact": "ርኸብና"
+    },
+    "auth": {
+      "login": "እምነት ኣእትው",
+      "signup": "ተመዝገብ",
+      "dashboard": "ዳሽቦርድ",
+      "profile": "ፕሮፋይል",
+      "logout": "ውጻእ"
+    },
+    "roles": {
+      "super_admin": "ልዑል ኣስተዳድሪ",
+      "admin_hr": "ኣስተዳድሪ - ሰብኣዊ ሃብቲ",
+      "admin_outsource": "ኣስተዳድሪ - ወጻኢ ኣገልግሎት",
+      "worker": "ሰራሕተኛ",
+      "client": "ክሊኦት"
+    }
+  },
+  "Home": {
+    "hero": {
+      "title": {
+        "part1": "ክንይት ምስ",
+        "part2": "ዅንታታት ምትእስሳር"
+      },
+      "description": "ቤሊሙኖ ዮብስ ናይ ኢትዮጵያ ቀዳማይ HR ኣውትሶርሲንግ ፕላትፎርም እያ፣ ክኢላታት ዘለዎም ሰራሕተኛታት ምስ ኩሉ ናብ ሃገር ዝስፍሓ ንግዲታት ትትኣሳሰር። ሽዱሽተ ሚልዮን ሞግсаጽቲ ሞግсаጽቶም ከም ዝሃንጹ ብምክትል ከጥፍኡ።",
+      "getStarted": "ጅምር",
+      "goToDashboard": "ናብ ዳሽቦርድ ኪድ",
+      "browseJobs": "ስራሓት ኣርእይ"
+    },
+    "stats": {
+      "title": "ወግዓዊ ስታትስቲክስ",
+      "subtitle": "እቲ ኣብ ኩሉ ኢትዮጵያ ዝፈጥርናዮ ጽልዋ ርአ",
+      "activeUsers": "ንጡፍ ተጠቃምቲ",
+      "jobsPosted": "ስራሓት እተለጠፍዎ",
+      "jobsCompleted": "ስራሓት እተፈጸሙ",
+      "successRate": "ተሳታፍነት ዕድል"
+    },
+    "featuredJobs": {
+      "title": "ፍሉይ ስራሓት",
+      "subtitle": "ካብ ላዕለዋይ ሰራሕተኛታት ዝርከቡ መደምደምታዊ ዕድላት ኣረክብ",
+      "applyNow": "ሕጂ ኣመልክት",
+      "loginToApply": "ንምመልካት እምነት ኣእትው",
+      "viewAllJobs": "ኩሉ ስራሓት ርአ",
+      "due": "ዕለት ምዕጻው"
+    },
+    "howItWorks": {
+      "title": "ከመይ ጌርካ እዩ ዝሰርሕ",
+      "subtitle": "ምስቲ ንምጅማር ዘድሊ ቀሊል ስጉምትታት",
+      "step1": {
+        "title": "ሕሳብ ፍጠር",
+        "description": "ስራሕ ንምርካብ ከም ሰራሕተኛ ወይ ፕሮጀክትታት ንምለጥፋ ከም ክሊንት ተመዝገብ"
+      },
+      "step2": {
+        "title": "ምትእስሳር & ስራሕ",
+        "description": "ዕድላት ኣርእይ፣ ኣቕርበትታት ኣረክብ፣ ከምኡውን ምስ ቅኑዕ ፕሮጀክትታት ተተኳኺኻ"
+      },
+      "step3": {
+        "title": "ክፍሊት ረክብ",
+        "description": "ፕሮጀክትታት ወድእ ከምኡውን ብኣመሻሽልና ኣመንዝራዊ ክፍሊት ረክብ"
+      }
+    },
+    "cta": {
+      "title": "ንጕዓዝኻ ንምጅማር ድሉው ዲኻ?",
+      "subtitle": "ሞግсаጽቶም ንምምዕባል ቤሊሙኖ ዮብስ ዝጥቀሙ ሽዱሽተ ሚልዮን ሞግсаጽቲ ሞግсаጽቶም ከጥፍኡ።",
+      "findWorkers": "ሰራሕተኛታት ረክብ",
+      "findWork": "ስራሕ ረክብ"
+    }
+  },
+  "Footer": {
+    "brand": {
+      "name": "ቤሊሙኖ ዮብስ",
+      "description": "ካብ 2011 ናብ ሕጂ ክንይት ምስ ኣጋጣምታት ኣብ መላእ ኢትዮጵያ ዘተኣሳስር HR ኣውትሶርሲንግን ሪክሩቲንግ ኣጋርን። ንንግድታት ብተንቀሳቓስን ልዑል ጥራይን ዝኾኑ ውጥንታት ሰራሕተኛታት ብምጥቃም ክዕቀቡ ንሕግዞም።"
+    },
+    "sections": {
+      "company": "ኩባንያ",
+      "contact": "ርኸብ",
+      "followUs": "ተኸታተልና"
+    },
+    "links": {
+      "about": "ብዛዕባ",
+      "services": "ኣገልግሎታት",
+      "jobs": "ስራሓት",
+      "contact": "ርኸብ"
+    },
+    "contact": {
+      "address": "ኣዲስ ኣበባ፣ ኢትዮጵያ"
+    },
+    "social": {
+      "facebook": "ፌስቡክ",
+      "linkedin": "ሊንክድኢን",
+      "twitter": "ትዊተር"
+    }
+  },
+  "AboutPage": {
+    "hero": {
+      "title": "ብዛዕባ ቤሊሙኖ",
+      "subtitle": "HR ኣውትሶርሲንግ ፍታሕ - ካብ 2011 ኣትሒዙ ክንይት ምስ ኣጋጣምታት ኣብ መላእ ኢትዮጵያ ዘተኣሳስር",
+      "motto": "ብልክዕ ስርሑ ኣይትሃርሩ!"
+    },
+    "executiveSummary": {
+      "title": "ሓፈሻዊ ጽማቝ",
+      "content": {
+        "part1": "ቤሊሙኖ HR ኣውትሶርሲንግ ፍታሕ ኣብ 2011 ከም ቤሊሙኖ ሪክሩቲንግ ኣገልግሎት ተመስሪታ ንኽንይት ሰብኣዊ ሃብቲ ኣውትሶርሲንግ ኣገልግሎታት ንምሃብ። ካብታ ግዜ ኣትሒዙ ንዝተፈላለየ ፍሉያት ትካላት ደለይቲ ሓለዋ፣ ንጽሻት፣ ከምኡውን ሰራሕተኛታት ግንባታ ኣውትሶርስ ትገብር ነይራ። ኣብ ናይ ስራሕ መስርሓታ እዋን፣ ቤሊሙኖ ኣገልግሎታታ ፕሮፌሽናል ሰብኣዊ ሃብቲ ስፍሓት፣ ኮንሳልቲንግ፣ ከምኡውን HR ስልጠና ኣገልግሎታት ከጥቅዕ ኣስፊሓ፣ እዚ ኸኣ ስማ ናብ ቤሊሙኖ HR ኣውትሶርሲንግ ፍታሕ ከም ዝምዕባር ገበረት።",
+        "part2": "እቲ ኩባንያ ኣብ ናይ ሕጂ እዋን ዓመታዊ ዝወጽእ ገቢ 200 ሚልዮን ብር ይኸውን፣ ኣብ እቲ ሴክተር ዝርከቡ ቅልጡፍ ዝዕቀቡ ኩባንያታት ክሳብ እዚ እዋን እዚ ሓንቲ እያ። ክላየንታታ ከኣ ከም WFP፣ NRS፣ FHI ዝኣመሰሉ ዓለምለኻዊ ዘይመንግስታዊ ውድባት፣ ከም ቻይና ገንዙባ ጉሩፕ፣ ዶንግ ፋንግ ኤሌክትሪክስ፣ ካልፓታሩ ጉሩፕ፣ ከምኡውን ኣሌክ ፊትኣውት ምህንድስና ዝኣመሰሉ ዓለምለኻዊ ኩባንያታት ግንባታ የጠቃልል። ቤሊሙኖ ኣብ ናይ ሕጂ እዋን ን36 ውድባት ልዕሊ 3000 ሰራሕተኛታት ትውድእ ኣላ።"
+      }
+    },
+    "visionMissionValues": {
+      "vision": {
+        "title": "ራእይ",
+        "content": "እተኣማመነ ኣቅራቢ ኣገልግሎት ሰብኣዊ ሃብቲ ኣውትሶርሲንግን እተኣማመነ ኣጋርን ብምዃን፣ ንክላየንትና ኣጠቓሚ ዝኾነ ሰብኣዊ ሃብቲ ብምሃብ ንኽንፍለጥ ኢና።"
+      },
+      "mission": {
+        "title": "ሸቶ",
+        "content": "ፕሮፌሽናልን ዘይፕሮፌሽናልን ሰብኣዊ ሃብቲ ኣብቲ ዝግባኦም ቦታ ምድላው፣ ምጽራይ፣ ከምኡውን ምስፋሕ፣ ከምኡውን ንክላየንትና ናብ ዓወት ከዳምዶም ኣቕንዕታት ብምሃብ ምኽር ምሃብ።"
+      },
+      "values": {
+        "title": "ክብርታት",
+        "content": "ኣብ ቅንዕና፣ ኣማኒነት፣ ከምኡውን ህንጸት ዝተሃንጸ - ንኹሉ ውሳነን ተግባርን ዝመርሑ መበቆላዊ ዋጋናታት ብምስራሕ ጥራይነት ንህብ።",
+        "sectionTitle": "መበቆላዊ ዋጋናትና",
+        "1": {
+          "title": "ኣድሆክራሲ",
+          "description": "ልክዕ ዝበለ ሰብኣዊ ሃብቲ ንኽንቀጽር ዚኽእለና ተኣማሚልና ዘለዎ ልክዕ ናይ ምምሕዳር ስርዓት"
+        },
+        "2": {
+          "title": "ኣማኒነት",
+          "description": "ኩሉ ግዜ እቲ ዝወሰና ንኽንማላእ ንጻወር"
+        },
+        "3": {
+          "title": "እተኣማመነ",
+          "description": "እተኣማመኑ ኣጋርኩም ንኽንኾን ተኣማመንና ኣለና"
+        },
+        "4": {
+          "title": "ቅንዕና",
+          "description": "እቲ ዝኽእል ክንዲ ዚኸውን ክንዋስን ኢና፣ ኩሉ ቃል ኪዳን ክንማላእ ንኽእል"
+        },
+        "5": {
+          "title": "ብልሁትነት",
+          "description": "ንሕና ተመሃሮ ፕሮፌሽናላት ኢና፣ ብተደጋጋሚ ንገዛእ ርእስና ንስልጥን፣ ንመጻኢ ሓደጋታት ድሉዋት ኢና"
+        },
+        "6": {
+          "title": "ቴክኒካዊነት",
+          "description": "ኩሉ ሓደጋ ፍሉይ ፍታሕ ከም ዘለዎ ንኣምን፣ ብቴክኒካዊ መንገዲ ከኣ ከም ግድን ንመላለስ"
+        },
+        "7": {
+          "title": "ዘይብላሽነት",
+          "description": "ፈጺምና ኣብ ሓሶት ተግባራት ኣይተሳተፍናን፣ ፈጺምና ኣይንሳተፍን ኢና"
+        },
+        "8": {
+          "title": "ፈጠራ",
+          "description": "ንረብሓ ክላየንትና ንምዕባይ ሓድሽ መንገዲ ንደው ኢና ንገዝእ"
+        }
+      }
+    },
+    "services": {
+      "title": "ኣገልግሎታትና",
+      "1": {
+        "title": "ስፍሓት ሰብኣዊ ሃብቲ",
+        "description": "ጽሬት ዝበለ ዳታቤዝን ተመክሮ ዘለዎም HR ፕሮፌሽናላትን ዘለዎም ፕሮፌሽናል ሰብኣዊ ሃብቲ ስፍሓት ንክላየንትና ካብ ዝለዓለ ብልሁታት ንምምራጽ ይኽእል።"
+      },
+      "2": {
+        "title": "ኣውትሶርሲንግ ሰብኣዊ ሃብቲ",
+        "description": "ምሉእ ኣውትሶርሲንግ ኣገልግሎታት ንጽሻት፣ ደለይቲ ሓለዋ፣ ጋንጽላታት ግንባታ፣ ከምኡውን ፕሮፌሽናላት ምምሕዳር ጽረ-ፍልስፍላስ ልዕሊ 3000 ሰራሕተኛታት የጠቃልል።"
+      },
+      "3": {
+        "title": "HR ኮንሳልቲንግ",
+        "description": "ኣገልግሎታት ኮንሳልቲንግ ሰብኣዊ ሃብቲ ኣብ ናይ ምምራጽ ሂደት ግምት፣ ከምኡውን ስልጠናን ልምዓትን ንዝተፈላለየ ንግዲ ውድባት የጠቃልል።"
+      }
+    },
+    "team": {
+      "title": "ቡዙሕና",
+      "description": "ቤሊሙኖ ኣብ ሰለስተ ቀንዲ ክፋላት ተኸፊላ ኣላ፡ ምምሕዳርን ፋይናንስን፣ ሰብኣዊ ሃብትን፣ ከምኡውን ምምሕዳር ኣገልግሎት ኣውትሶርሲንግን። እኹል ክፋል ናይ ምምሕዳር ስራሓት፣ ዕዳጋታት፣ ከምኡውን ፋይናንሻዊ ተግባራት ይሰርሕ፣ ክፋል ምምሕዳር ኣገልግሎት ኣውትሶርሲንግ ከኣ ሰራሕተኛታት ኣውትሶርሲንግን ፕሮጀክትታትን ይውድእ።"
+    },
+    "clients": {
+      "title": "ክላየንትና",
+      "description": "ቤሊሙኖ ሰብኣዊ ኣውትሶርሲንግ ፍታሕ ኣብ እቲ ኢንዱስትሪ ዝርከቡ ቀንዲ ኩባንያታት ክሳብ እዚ እዋን እዚ ሓንቲ እያ። ካብ 2012 ኣትሒዛ ኣብዚ ዓውዲ ትሰርሕ ኣላ፣ ልዕሊ 50 ዓለምለኻዊ፣ ንግዲ፣ ከምኡውን ዘይመንግስታዊ ውድባት ኣገልግለት።",
+      "viewButton": "ክላየንትና ርአ"
+    },
+    "cta": {
+      "title": "ምሳና ንምስራሕ ድሉው ዲኻ?",
+      "subtitle": "\"ንላዕሊ ዓወታም ስራሕ ንምስራሕ እቲ እትስርሖ ስራሕ ክትፈትዎ እዩ። ንሕና ከኣ እትንስርሖ ስራሕ ንፈትዎ! ስለዚ ንሕና ንበል ኢና።\"",
+      "buttons": {
+        "contact": "📞 ተራኸቡና",
+        "jobs": "💼 ኣጋጣምታት ስራሕ ርአ"
+      },
+      "contact": {
+        "email": {
+          "title": "ኢ-መይል ይፈርዱና"
+        },
+        "telegram": {
+          "title": "ቴሌግራም"
+        },
+        "phone": {
+          "title": "ደውሉና"
+        }
+      }
+    }
+  },
+  "ServicesPage": {
+    "hero": {
+      "title": "ኣገልግሎታትና",
+      "subtitle": "ተኣማሚልና ዘለዎ HR ኣውትሶርሲንግ ንልዕለዋይ NGOታት፣ ኩባንያታት ግንባታን ኣገልግሎትን ኢትዮጵያ ንምእላይ ዝተሃንጸ።"
+    },
+    "services": {
+      "1": {
+        "title": "ስፍሓት ሰብኣዊ ሃብቲ",
+        "description": "ፕሮፌሽናልን ዘይፕሮፌሽናልን ሰብኣዊ ሃብቲ ስፍሓት፣ ጥልቀት ዘለዎ ኣውታረመረብ ተመዳዳርን ጽኑዕ ኣርኣያን ምስ ዘለዎ።",
+        "icon": "Users"
+      },
+      "2": {
+        "title": "ኣውትሶርሲንግ ሰብኣዊ ሃብቲ",
+        "description": "ምሉእ ኣውትሶርሲንግ ንጽሻት፣ ደለይቲ ሓለዋ፣ ግንባታን ኣመሓዳርን ጽረ-ፍልስፍላስ፣ ምስ ምቁጽጻር።",
+        "icon": "ShieldCheck"
+      },
+      "3": {
+        "title": "ምልመላ ንሰራሕተኛታት",
+        "description": "ንከባቢያውን ዓለምለኻውን ኩባንያታት ዝተደጋገመ ዘመቻታት ምልመላ፣ ኣርኣያን ኣስተባባሪነትን ምስፋሕ።",
+        "icon": "Briefcase"
+      },
+      "4": {
+        "title": "HR ኮንሳልቲንግ",
+        "description": "ፖሊሲታት፣ ዲዛይን ውድብ፣ ኣርኣያ ክፍሊት፣ ስርዓታት ኣፈጻጸምን ምኽርን ተኣማሚልነት።",
+        "icon": "Building2"
+      },
+      "5": {
+        "title": "ስልጠና & ልምዓት",
+        "description": "ልምዓት ልሙድን ቴክኒካልን ንደለይቲ ሓለዋ፣ ንጽህና፣ HSE፣ ስራሕ ጐደናን ኣገልግሎት ደንበኛን።",
+        "icon": "GraduationCap"
+      },
+      "6": {
+        "title": "ጋንጽላ ኣገልግሎት ፕሮጀክት",
+        "description": "ንፕሮጀክታት ግንባታ፣ ሎጂስቲክስን ምምሕዳር መዕርግትን ቅልጡፍ ምንቅስቓስ ክኢላታት ሰራሕተኛታት።",
+        "icon": "Wrench"
+      }
+    }
+  },
+  "ClientsPage": {
+    "hero": {
+      "title": "ክላየንትና",
+      "subtitle": "ካብ 2011 ኣትሒዙ ብዓለምለኻዊ ዘይመንግስታዊ ውድባትን ልዕለዋይ ኩባንያታት ግንባታን እንኣምነሉ ኢና።"
+    }
+  },
+  "JobsPage": {
+    "header": {
+      "title": "ስራሓት ኣርእይ",
+      "subtitle": "ንብልክዕታኻ ዝሰማማዕ ፍጹም ኣጋጣም ረክብ"
+    },
+    "search": {
+      "placeholder": "ስራሓት ብርእሲ፣ ብገለጻ ወይ ብብልክዕታት ድለይ...",
+      "button": "ድለይ",
+      "filters": {
+        "category": {
+          "label": "መደብ",
+          "placeholder": "ኩሎም መደባት"
+        },
+        "region": {
+          "label": "ክልል",
+          "placeholder": "ክልል ኣእትው"
+        },
+        "budget": {
+          "min": {
+            "label": "ዝተወሰነ በጀት (ብር)",
+            "placeholder": "0"
+          },
+          "max": {
+            "label": "ዝለዓለ በጀት (ብር)",
+            "placeholder": "100000"
+          }
+        },
+        "apply": "ፊልተራት ኣጽድቕ",
+        "clear": "ፊልተራት ኣፅምር",
+        "results": {
+          "single": "ስራሕ ተረኺቡ",
+          "multiple": "ስራሓት ተረኺቦም"
+        }
+      }
+    },
+    "job": {
+      "priority": "ቅድሚት",
+      "requiredSkills": "ዘድልዮም ብልክዕታት፡",
+      "moreSkills": "ዝያዳ",
+      "posted": "ተለጊጹ",
+      "applications": "ኣመልካትታት",
+      "actions": {
+        "viewDetails": "ዝርዝራት ርአ",
+        "applyNow": "ኣሁን ኣመልክት",
+        "save": "ዓቅም",
+        "saved": "ዝተዓቀመ",
+        "share": "ኣካፍል",
+        "loginToApply": "ንምመልካት እምነት ኣእትው"
+      }
+    },
+    "noResults": {
+      "title": "ስራሕ ኣይተረኽበን",
+      "description": "ናይ ድለዻ መለክዒታትካ ለውጢ ወይ ንሓድሽ ኣጋጣምታት ድሕሪ ግዜ ኣርኣይ።",
+      "button": "ኩሎም ፊልተራት ኣፅምር"
+    },
+    "pagination": {
+      "previous": "ቀዳማይ",
+      "page": "ገጽ",
+      "of": "ካብ",
+      "next": "ቀጺሉ"
+    },
+    "categories": {
+      "1": "ዳቨሎፕመንት ወብሳይት",
+      "2": "ዳቨሎፕመንት ሞባይል",
+      "3": "ዲዛይን",
+      "4": "ጽሑፍ",
+      "5": "ግብይት",
+      "6": "ኣእታው ዳታ",
+      "7": "ኣገልግሎት ደንበኛ",
+      "8": "ሽያጭ",
+      "9": "ኮንሳልቲንግ",
+      "10": "ካልእ"
+    }
+  },
+  "ContactPage": {
+    "hero": {
+      "title": "ርኸቡና",
+      "subtitle": "ካኣታ ንምስማዕ ኣዝዩ ንሕጐስ። መልእኽቲ ስደዱልና እሞ ቅልጡፍ ከም እንመልስ ኢና።"
+    },
+    "form": {
+      "title": "መልእኽቲ ስደዱ",
+      "fields": {
+        "name": "ምሉእ ስም",
+        "email": "ኢ-መይል",
+        "phone": "ተሌፎን",
+        "subject": "ኣርእስቲ",
+        "message": "መልእኽቲ"
+      },
+      "button": {
+        "sending": "እተደይቡ...",
+        "send": "መልእኽቲ ስደዱ"
+      },
+      "status": {
+        "success": "መልእኽቲኹም ተደይቡ። የቅንየለይ!",
+        "error": "ኣይተደይበን። ደጊምኩም ፈትኑ።"
+      }
+    },
+    "office": {
+      "title": "ቤት ጽሕፈት",
+      "address": "ካብ ቦሌ መድሃኒዓለም ናብ ሃያሁለት ጎዳና፣ ኣፍ ኒው ስታዲየም፣ ኣናት ንግዲ ማእከል፣ 4ርዲ ፎቅ ቤት ጽሕፈት ቁጽሪ 402",
+      "contact": {
+        "email": "ኢ-መይል",
+        "phone": "ተሌፎን",
+        "pobox": "ፖ.ሳ.ቁ",
+        "website": "ወብሳይት"
+      }
+    }
+  },
+  "WorkerDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ሰራሕተኛ",
+      "subtitle": "ስራሓትካ ኣስተድሕን ከምኡውን እታኻ ኣሰልጣን"
+    },
+    "buttons": {
+      "notifications": "መንበርሂ",
+      "wallet": "ዋሌት",
+      "viewAll": "ኩሉ ርኢ",
+      "cancel": "ኣትርፍ",
+      "submit": "ኣመልካቺ ኣረክብ",
+      "withdrawFunds": "ገንዘብ ኣውጽእ",
+      "markAllRead": "ኩሉ ከም እተንበበ ምልክት ግበር",
+      "send": "ላክ"
+    },
+    "stats": {
+      "activeJobs": {
+        "title": "ንቑሓት ስራሓት",
+        "label": "ንቑሓት ስራሓት"
+      },
+      "completedJobs": {
+        "title": "ዝተፈጸመ",
+        "label": "ዝተፈጸመ"
+      },
+      "earnings": {
+        "title": "ጠቕላላ እታኻ",
+        "label": "ጠቕላላ እታኻ"
+      },
+      "rating": {
+        "title": "ደረጃ",
+        "label": "ደረጃ"
+      },
+      "applications": {
+        "title": "ኣመልካቺታት",
+        "label": "ኣመልካቺታት"
+      },
+      "pending": {
+        "title": "ጸግማት",
+        "label": "ጸግማት"
+      }
+    },
+    "sections": {
+      "availableJobs": {
+        "title": "ተግባራት ተዳልዩ",
+        "applications": "መተግበርታት",
+        "due": "ዕለት መዛግብቲ",
+        "details": "ዝርዝራት",
+        "view": "ርኢ",
+        "applied": "ተመደበ",
+        "apply": "ኣመልክት"
+      },
+      "activeJobs": {
+        "title": "ንቑሓት ስራሓተይ",
+        "pendingApplications": {
+          "title": "ጸግማት ኣመልካቺታት",
+          "empty": "ጸግማት ኣመልካቺታት የለን።",
+          "applied": "ተመደበ",
+          "status": "ጸግማት"
+        },
+        "actions": {
+          "decline": "ኣትርፍ",
+          "accept": "ተቐበል",
+          "markComplete": "ከም ዝተፈጸመ ምልክት ግበር",
+          "resubmit": "ዳግም ኣረክብ",
+          "rateClient": "ደንበኛ ደረጃ ሃብ"
+        }
+      }
+    },
+    "modals": {
+      "application": {
+        "title": "ናብ ስራሕ ኣመልክት",
+        "applyTo": "ናብ ስራሕ ኣመልክት",
+        "fields": {
+          "budget": "በጀት",
+          "deadline": "ዕለት መዛግብቲ",
+          "category": "መደብ",
+          "region": "ክልል",
+          "proposal": {
+            "label": "እትዋ",
+            "placeholder": "ኣገባብካ፡ ኣገዳስነት ተመክሮካ፡ እትወጽእ ነገራትን ግዜ መወዳእታን ግለጽ...",
+            "hint": "ንጹር፡ ቅሩጻ እትዋ ኣጋጣሚ ተቐባልነት የዕብይ።"
+          },
+          "proposedBudget": {
+            "label": "ዝተመክረ በጀት (ብር)",
+            "placeholder": "ንኣብነት 4500",
+            "hint": "በጀት ደንበኛ፡ ብር"
+          },
+          "duration": {
+            "label": "ዝተገመተ ቆጸራ",
+            "placeholder": "ንኣብነት 5 መዓልታት",
+            "hint": "ኣማራጺ - ንደንበኛ ግዜ መወዳእታ ንምግምጋም ይሕግዝ።"
+          }
+        }
+      },
+      "wallet": {
+        "title": "ዋሌት ሰራሕተኛ",
+        "balance": {
+          "title": "ዘሎ ሚዛን",
+          "label": "ዘሎ ሚዛን"
+        },
+        "recentEarnings": {
+          "title": "ቀረባ እታኻ",
+          "jobPayment": "ክፍሊት ስራሕ",
+          "recently": "ቀረባ ግዜ",
+          "status": "ዝተፈጸመ"
+        },
+        "withdrawalFeature": "ባህሪ ስርዓት ገንዘብ ኣውጽእ ቀሪቡ ይመጽእ!"
+      },
+      "rating": {
+        "title": "ደንበኛ ደረጃ ሃብ",
+        "subtitle": "ደንበኛ ከመይ እዩ ነይሩ?",
+        "description": "ነዚ ስራሕ ምስ ወድእካ ተመክሮኻ ደረጃ ሃብ።",
+        "outOf": "ካብ 5",
+        "feedback": {
+          "label": "ርኢቶ (ኣማራጺ)",
+          "placeholder": "ዉልቃዉ ርክብ፡ ቅኑዕነት፡ ከምኡውን ፕሮፌሽናልነት ዝምልከት ዝርዝራት ኣካፍል።"
+        }
+      },
+      "notifications": {
+        "title": "መንበርሂ",
+        "empty": {
+          "title": "መንበርሂ የለን",
+          "message": "ኩሉ ኣጋጢምካ ኣለኻ!"
+        }
+      },
+      "chat": {
+        "title": "ውይይት ስራሕ",
+        "guidance": "ብፕሮፌሽናላዊ መንገዲ ተባርኽ። ርክብ ግልጽን ኣኽብሮትን ዘለዎ ድርጉም ግበር።",
+        "empty": "ገና መልእኽቲ የለን።",
+        "attachments": {
+          "title": "ተቆራኛታት",
+          "button": "ኣጣቅቕ",
+          "placeholder": "መልእኽቲ ጽሓፍ"
+        }
+      }
+    }
+  },
+  "ClientDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ደንበኛ",
+      "subtitle": "ስራሓት ኣለግፍ ከምኡውን ፕሮጀክትካ ኣስተድሕን",
+      "postJob": "ሓድሽ ስራሕ ኣለግፍ"
+    },
+    "stats": {
+      "totalJobs": {
+        "title": "ጠቕላላ ስራሓት",
+        "label": "ጠቕላላ ስራሓት"
+      },
+      "activeJobs": {
+        "title": "ንቑሓት",
+        "label": "ንቑሓት"
+      },
+      "completedJobs": {
+        "title": "ዝተፈጸመ",
+        "label": "ዝተፈጸመ"
+      },
+      "totalSpent": {
+        "title": "ጠቕላላ ዝተኸፍለ",
+        "label": "ጠቕላላ ዝተኸፍለ"
+      },
+      "rating": {
+        "title": "ኣማካይ ደረጃ",
+        "label": "ኣማካይ ደረጃ"
+      },
+      "applications": {
+        "title": "ኣመልካቺታት",
+        "label": "ኣመልካቺታት"
+      }
+    },
+    "sections": {
+      "jobs": {
+        "title": "ስራሓተይ",
+        "due": "ዕለት መዛግብቲ",
+        "applications": "ኣመልካቺታት",
+        "worker": "ሰራሕተኛ",
+        "actions": {
+          "viewDetails": "ዝርዝራት ርኢ",
+          "applications": "ኣመልካቺታት",
+          "requestRevision": "ምምሕርሻር ሕተት",
+          "payAndRate": "ክፍሊትን ደረጃን"
+        }
+      },
+      "recentApplications": {
+        "title": "ቀረባ ኣመልካቺታት",
+        "actions": {
+          "reject": "ኣትርፍ",
+          "accept": "ተቐበል"
+        }
+      }
+    },
+    "modals": {
+      "jobDetails": {
+        "title": "ዝርዝራት ስራሕ",
+        "fields": {
+          "description": "ገለጻ",
+          "budget": "በጀት",
+          "deadline": "ዕለት መዛግብቲ",
+          "category": "መደብ",
+          "status": "ሁኔታ",
+          "requirements": "ሕቶታት"
+        }
+      },
+      "payment": {
+        "title": "ክፍሊት በቻፓ ኣካይድ",
+        "summary": {
+          "title": "ጽማቝ ስራሕ",
+          "fields": {
+            "jobTitle": "ርእሲ ስራሕ",
+            "worker": "ሰራሕተኛ",
+            "amount": "መጠን",
+            "status": "ሁኔታ",
+            "readyForPayment": "ንክፍሊት ድሉው"
+          }
+        },
+        "chapa": {
+          "title": "ውሑስ ክፍሊት በቻፓ",
+          "description": "ክፍሊትካ በቻፓ ክፍሊት መግቢያ ብውሑስነት ክካየድ እዩ",
+          "security": {
+            "encrypted": "SSL ተመስጢሩ",
+            "bankGrade": "ባንካዊ ደረጃ ውሑስነት"
+          }
+        },
+        "actions": {
+          "cancel": "ኣትርፍ",
+          "process": "ክፍሊት ኣካይድ"
+        }
+      },
+      "rating": {
+        "title": "ኣፈጻጸም ሰራሕተኛ ደረጃ ሃብ",
+        "subtitle": "ምስዚ ናጻ ሰራሕተኛ ዝነበርካዮ ተመክሮ ከመይ እዩ ነይሩ?",
+        "rating": {
+          "label": "ደረጃ",
+          "outOf": "ካብ 5 ኮኾብ"
+        },
+        "review": {
+          "label": "ርኢቶ (ኣማራጺ)",
+          "placeholder": "ምስዚ ናጻ ሰራሕተኛ ዝነበርካዮ ተመክሮ ኣካፍል..."
+        },
+        "actions": {
+          "skip": "ደረጃ ምሃብ ስጠላ",
+          "submit": "ደረጃ ኣረክብ"
+        }
+      }
+    }
+  },
+  "LoginPage": {
+    "header": {
+      "title": "እንቋዕ ብደሓን መጻእኩም",
+      "subtitle": "ናብ",
+      "brandName": "ቤሊሙኖ ዮብስ",
+      "noAccount": {
+        "text": "ሕሳብ የለካን?",
+        "link": "ሓድሽ ፍጠር"
+      }
+    },
+    "tabs": {
+      "login": "እምነት ኣእትው",
+      "signup": "ተመዝገብ"
+    },
+    "form": {
+      "fields": {
+        "email": "ናይ ኢ-መይል ኣድራሻ",
+        "password": "የይለፍ ቃል"
+      },
+      "buttons": {
+        "submit": {
+          "default": "ናብ ሕሳብካ እምነት ኣእትው",
+          "loading": "እምነት ኣእትዉ ኣሎ..."
+        }
+      },
+      "divider": "ወይ ብምቅጻል"
+    },
+    "testAccounts": {
+      "title": "ናይ ፈተና ሕሳባት",
+      "info": {
+        "title": "ቅልጡፍ እምነት ኣእትው:",
+        "description": "ብኡብኡ ናይ ፈተና ምልክታት ንምምላእ ካብ ላዕሊ ዘሎ ነንሕድሕድ ናይ ፈተና ሕሳብ ጠውቑ። ኣረጋግጹ",
+        "command": "node seedTestData.js",
+        "location": "ቀዳምነት ኣብ ማውጫ ሰርቨር ከተፍጽሙ።"
+      }
+    },
+    "errors": {
+      "default": "እምነት ኣእትው ኣይተኻኽለን",
+      "googleSignIn": "ብጉግል እምነት ኣእትው ኣይተኻኽለን። ሓድሽ እንተድኣኻ በጃኻ ተመዝገብ።"
+    }
+  },
+  "RegisterPage": {
+    "header": {
+      "title": "ሕሳብካ ፍጠር",
+      "subtitle": {
+        "text": "ወይ",
+        "link": "ናብ እቲ ዘሎካ ሕሳብ እምነት ኣእትው"
+      }
+    },
+    "tabs": {
+      "login": "እምነት ኣእትው",
+      "signup": "ተመዝገብ"
+    },
+    "form": {
+      "fields": {
+        "name": "ምሉእ ስም",
+        "email": "ናይ ኢ-መይል ኣድራሻ",
+        "role": {
+          "label": "ሚና",
+          "options": {
+            "worker": "ሰራሕተኛ",
+            "client": "ደንበኛ"
+          }
+        },
+        "phone": "ተሌፎን",
+        "location": "ኣድራሻ",
+        "bio": {
+          "label": "ዳርጋ ብዛዕባኻ",
+          "placeholder": "ብዛዕባኻ ንገረና..."
+        },
+        "worker": {
+          "skills": {
+            "label": "ብልክዕታት (ብኮማ ዝተፈላለየ)",
+            "placeholder": "ንኣብነት: JavaScript, React, Node.js"
+          },
+          "experience": "ተመክሮ ስራሕ (ብዓመታት)",
+          "hourlyRate": "ዋጋ ሰዓት (ብር)"
+        },
+        "client": {
+          "company": "ስም ኩባንያ",
+          "industry": "ኢንዱስትሪ",
+          "website": "ወብሳይት"
+        },
+        "password": "የይለፍ ቃል",
+        "confirmPassword": "የይለፍ ቃል ኣረጋግጽ"
+      },
+      "buttons": {
+        "submit": {
+          "default": "ሕሳብ ፍጠር",
+          "loading": "ሕሳብ እናፈጠርና ኣሎ..."
+        }
+      }
+    },
+    "errors": {
+      "passwordMismatch": "የይለፍ ቃላት ኣይመሳሰሉን",
+      "default": "ምዝገባ ኣይተኻኽለን",
+      "googleSignUp": "ብጉግል ምዝገባ ኣይተኻኽለን። በዚ ኢ-መይል ሕሳብ እንተለካ፡ በጃኻ እምነት ኣእትው።"
+    }
+  },
+  "OutsourceAdminDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ኣስተዳደሪ ኣውትሶርሲንግ",
+      "subtitle": "ፕሮጀክትታት፣ ደንበኛታትን ንግዳዊ ንጥፈታትን ኣስተድሕን",
+      "buttons": {
+        "manageProjects": "ፕሮጀክትታት ኣስተድሕን",
+        "clientManagement": "ኣስተዳደር ደንበኛ"
+      }
+    },
+    "stats": {
+      "totalClients": {
+        "title": "ጠቕላላ ደንበኛታት",
+        "label": "ጠቕላላ ደንበኛታት"
+      },
+      "activeProjects": {
+        "title": "ንቑሓት ፕሮጀክትታት",
+        "label": "ንቑሓት ፕሮጀክትታት"
+      },
+      "totalRevenue": {
+        "title": "ጠቕላላ እታኻ",
+        "label": "ጠቕላላ እታኻ"
+      },
+      "monthlyRevenue": {
+        "title": "ወርሓዊ እታኻ",
+        "label": "ወርሓዊ እታኻ"
+      }
+    },
+    "metrics": {
+      "clientSatisfaction": {
+        "title": "ርእሚ ደንበኛ",
+        "rating": "ካብ 5"
+      },
+      "projectSuccess": {
+        "title": "ናብ ስኬት ዝወስድ መጠን ፕሮጀክት"
+      },
+      "revenueGrowth": {
+        "title": "ዕብየት እታኻ"
+      }
+    },
+    "projects": {
+      "title": "ቀረባ ፕሮጀክትታት",
+      "viewAll": "ኩሉ ርኢ",
+      "details": {
+        "client": "ደንበኛ",
+        "progress": "ምዕባለ",
+        "title": "ዝርዝራት ፕሮጀክት",
+        "assignedWorker": "ዝተመደበ ሰራሕተኛ",
+        "deadline": "ዕለት መዛግብቲ",
+        "budget": "በጀት",
+        "buttons": {
+          "viewDetails": "ዝርዝራት ርኢ",
+          "contactClient": "ምስ ደንበኛ ተራኸብ",
+          "generateReport": "ሪፖርት ፍጠር"
+        }
+      },
+      "status": {
+        "completed": "ተፈጺሙ",
+        "inProgress": "ኣብ ምስራሕ ኣሎ",
+        "assigned": "ተመዲቡ",
+        "posted": "ተለጊጹ"
+      }
+    },
+    "clients": {
+      "title": "ልዑላት ደንበኛታት",
+      "viewAll": "ኩሉ ርኢ",
+      "metrics": {
+        "projects": "ፕሮጀክትታት"
+      }
+    },
+    "operations": {
+      "title": "ንግዳዊ ንጥፈታት",
+      "buttons": {
+        "clientManagement": "ኣስተዳደር ደንበኛ",
+        "projectOversight": "ቁጽጽር ፕሮጀክት",
+        "businessAnalytics": "ትንታነ ንግዲ",
+        "financialReports": "ፋይናንሻል ሪፖርት"
+      }
+    },
+    "keyMetrics": {
+      "title": "ኣገደስቲ መለክዒታት",
+      "metrics": {
+        "avgProjectValue": "ኣማካይ ዋጋ ፕሮጀክት",
+        "clientRetention": "ምዕጻው ደንበኛ",
+        "projectCompletionRate": "መጠን ምውዳእ ፕሮጀክት",
+        "avgProjectDuration": "ኣማካይ ንውሓት ፕሮጀክት"
+      }
+    },
+    "recentActivity": {
+      "title": "ቀረባ ንጥፈታት"
+    }
+  },
+  "HRAdminDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ኣስተዳደሪ ሰብኣዊ ሃብቲ",
+      "subtitle": "ሰራሕተኛታት፣ ግጭታትን ናይ ሰብኣዊ ሃብቲ ሂደታትን ኣስተድሕን",
+      "buttons": {
+        "sendAnnouncement": "መንበርሂ ላክ",
+        "manageWorkers": "ሰራሕተኛታት ኣስተድሕን"
+      }
+    },
+    "stats": {
+      "totalWorkers": {
+        "title": "ጠቕላላ ሰራሕተኛታት",
+        "label": "ጠቕላላ ሰራሕተኛታት"
+      },
+      "verifiedWorkers": {
+        "title": "ዝተረጋገጡ ሰራሕተኛታት",
+        "label": "ዝተረጋገጡ ሰራሕተኛታት"
+      },
+      "pendingVerification": {
+        "title": "ኣብ ሂደት ዘለዉ ምርግጋጽ",
+        "label": "ኣብ ሂደት ዘለዉ ምርግጋጽ"
+      },
+      "openDisputes": {
+        "title": "ክፍቲ ግጭታት",
+        "label": "ክፍቲ ግጭታት"
+      }
+    },
+    "verifications": {
+      "title": "ኣብ ሂደት ዘለዉ ምርግጋጽ",
+      "empty": "ኣብ ሂደት ዘለዉ ምርግጋጽ የለን"
+    },
+    "disputes": {
+      "title": "ዝተኸፍቱ ግጭታት",
+      "empty": "ዝተኸፍቱ ግጭታት የለን",
+      "priority": {
+        "high": "ልዑል",
+        "medium": "መንጎኛ",
+        "low": "ትሑት"
+      },
+      "details": {
+        "title": "ዝርዝራት ግጭት",
+        "priority": "ቅድሚት ዝህቡ",
+        "partiesInvolved": "ተሳቲፎም ወገናት",
+        "fields": {
+          "worker": "ሰራሕተኛ",
+          "client": "ደንበኛ",
+          "job": "ስራሕ",
+          "description": "ገለጻ"
+        },
+        "buttons": {
+          "investigate": "ምርመራ",
+          "contactParties": "ምስ ወገናት ተራኸብ",
+          "resolve": "ፍታሕ"
+        }
+      }
+    },
+    "actions": {
+      "title": "እማዞም ሰብኣዊ ሃብቲ",
+      "buttons": {
+        "workerManagement": "ኣስተዳደር ሰራሕተኛ",
+        "disputeResolution": "ፍታሕ ግጭት",
+        "performanceReviews": "ግምገማ ኣፈጻጸም"
+      }
+    },
+    "metrics": {
+      "performance": {
+        "title": "መለክዒታት ኣፈጻጸም",
+        "workerSatisfaction": "ርእሚ ሰራሕተኛ",
+        "verificationRate": "መጠን ምርግጋጽ",
+        "disputeResolution": "ፍታሕ ግጭት"
+      },
+      "monthly": {
+        "title": "እዚ ወርሒ",
+        "fields": {
+          "newWorkers": "ሓደሽቲ ሰራሕተኛታት",
+          "verifications": "ምርግጋጽ",
+          "disputesResolved": "ዝተፈቱ ግጭታት",
+          "trainingCompleted": "ዝተውድኡ ስልጠናታት"
+        }
+      }
+    },
+    "worker": {
+      "status": {
+        "inactive": "ዘይንቑሓት",
+        "pending": "ኣብ ሂደት",
+        "verified": "ተረጋጊጹ"
+      },
+      "verification": {
+        "title": "ምርግጋጽ ሰራሕተኛ",
+        "profile": {
+          "title": "መገለጺ ሰራሕተኛ",
+          "fields": {
+            "experience": "ተመክሮ",
+            "rating": "ደረጃ",
+            "jobsCompleted": "ዝተውድኡ ስራሓት",
+            "skills": "ብልክዕታት"
+          }
+        },
+        "buttons": {
+          "verify": "ሰራሕተኛ ኣረጋግጽ",
+          "reject": "ኣትርፍ"
+        }
+      }
+    },
+    "announcement": {
+      "title": "መንበርሂ ሲስተም ላክ",
+      "fields": {
+        "title": {
+          "label": "ርእሲ",
+          "placeholder": "ርእሲ መንበርሂ..."
+        },
+        "message": {
+          "label": "መልእኽቲ",
+          "placeholder": "መልእኽቲ መንበርሂኻ..."
+        },
+        "targetAudience": {
+          "label": "ዕላማ",
+          "options": {
+            "workers": "ሰራሕተኛታት",
+            "clients": "ደንበኛታት",
+            "both": "ክልቲኦም ሰራሕተኛታትን ደንበኛታትን"
+          }
+        },
+        "priority": {
+          "label": "ቅድሚት ዝህቡ",
+          "options": {
+            "low": "ትሑት",
+            "medium": "መንጎኛ",
+            "high": "ልዑል",
+            "urgent": "እንጡፍ"
+          }
+        }
+      },
+      "buttons": {
+        "send": "መንበርሂ ላክ",
+        "cancel": "ኣትርፍ"
+      }
+    }
+  },
+  "AdminDashboard": {
+    "header": {
+      "title": "ዳሽቦርድ ኣስተዳደሪ ልዑል",
+      "subtitle": "ኩሉ መተግበሪ ስራሓት ቤሊሙኖ ኣስተድሕንን ኣስተዳድርን",
+      "buttons": {
+        "generateReports": "ሪፖርት ፍጠር",
+        "resolveDisputes": "ግጭታት ፍታሕ"
+      }
+    },
+    "stats": {
+      "totalUsers": {
+        "title": "ጠቕላላ ተጠቃምቲ",
+        "label": "ጠቕላላ ተጠቃምቲ"
+      },
+      "totalJobs": {
+        "title": "ጠቕላላ ስራሓት",
+        "label": "ጠቕላላ ስራሓት"
+      },
+      "totalRevenue": {
+        "title": "ጠቕላላ እታኻ",
+        "label": "ጠቕላላ እታኻ"
+      },
+      "monthlyGrowth": {
+        "title": "ወርሓዊ ዕብየት",
+        "label": "ወርሓዊ ዕብየት"
+      }
+    },
+    "activity": {
+      "activeJobs": {
+        "title": "ንቑሓት ስራሓት",
+        "label": "ንቑሓት ስራሓት"
+      },
+      "completedJobs": {
+        "title": "ዝተፈጸሙ ስራሓት",
+        "label": "ዝተፈጸሙ ስራሓት"
+      },
+      "pendingVerifications": {
+        "title": "ኣብ ጸግማት ዘለዉ ምርግጋጽ",
+        "label": "ኣብ ጸግማት ዘለዉ ምርግጋጽ"
+      }
+    },
+    "recentUsers": {
+      "title": "ቀረባ ተጠቃምቲ",
+      "viewAll": "ኩሉ ርኢ",
+      "buttons": {
+        "verify": "ኣረጋግጽ"
+      }
+    },
+    "recentJobs": {
+      "title": "ቀረባ ስራሓት",
+      "viewAll": "ኩሉ ርኢ",
+      "fields": {
+        "amount": "ብር",
+        "posted": "ተለጊጹ"
+      }
+    },
+    "quickActions": {
+      "title": "ቅልጡፍ እማዓት",
+      "buttons": {
+        "manageUsers": "ተጠቃምቲ ኣስተድሕን",
+        "manageJobs": "ስራሓት ኣስተድሕን",
+        "paymentDisputes": "ግጭታት ክፍሊት"
+      }
+    },
+    "reports": {
+      "title": "ሪፖርት ፍጠር",
+      "fields": {
+        "type": {
+          "label": "ዓይነት ሪፖርት",
+          "options": {
+            "revenue": "ሪፖርት እታኻ",
+            "completion": "መጠን ምውዳእ",
+            "users": "ትንታነ ተጠቃምቲ",
+            "performance": "መለክዒታት ኣፈጻጸም"
+          }
+        }
+      },
+      "preview": {
+        "title": "ኣስቀድሞ ርኢ ሪፖርት",
+        "fields": {
+          "totalUsers": "ጠቕላላ ተጠቃምቲ",
+          "totalJobs": "ጠቕላላ ስራሓት",
+          "totalRevenue": "ጠቕላላ እታኻ",
+          "monthlyGrowth": "ወርሓዊ ዕብየት"
+        }
+      },
+      "buttons": {
+        "cancel": "ኣትርፍ",
+        "download": "ሪፖርት ልዘብ"
+      }
+    },
+    "disputes": {
+      "title": "ግጭታት ክፍሊት",
+      "fields": {
+        "paymentId": "መንነት ክፍሊት",
+        "amount": "መጠን",
+        "date": "ዕለት",
+        "status": "ኣብ ግጭት"
+      },
+      "empty": {
+        "title": "ንቑሓት ግጭታት የለን",
+        "message": "ኩሉ ክፍልታት ብሰናይ እዩ እናተካይዱ!"
+      },
+      "buttons": {
+        "refundClient": "ደንበኛ መልስ",
+        "payWorker": "ሰራሕተኛ ክፈል",
+        "investigate": "ምርመራ"
+      }
+    }
+  }
+}
