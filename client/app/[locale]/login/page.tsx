@@ -77,7 +77,7 @@ const LoginPage: React.FC = () => {
       ) {
         setError(
           (error.response as { data: { message?: string } }).data.message ||
-            t("errors.default")
+            t("errors.default"),
         );
       } else {
         setError(t("errors.default"));
@@ -136,7 +136,7 @@ const LoginPage: React.FC = () => {
         logo_alignment: "left",
       });
     }
-  }, [googleReady, router]);
+  }, [googleReady, router, t]);
 
   // Test accounts (seeded) - aligned with server/seedTestData.js
   const testAccounts = [
