@@ -25,11 +25,12 @@ import { useTranslations } from "next-intl";
 
 interface ClientStats {
   totalJobs: number;
-  activeJobs: number;
+  activeJobs: object[];
   completedJobs: number;
   totalSpent: number;
   averageRating: number;
   pendingApplications: number;
+  totalApplications: number;
 }
 
 const ClientDashboard: React.FC = () => {
@@ -96,7 +97,8 @@ const ClientDashboard: React.FC = () => {
         clientAPI.getJobs(),
       ]);
 
-      setStats(dashboardResponse.data);
+      setStats(dashboardResponse.data.data);
+      console.log(dashboardResponse.data.data);
       setJobs(jobsResponse.data.data || []);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
@@ -288,7 +290,7 @@ const ClientDashboard: React.FC = () => {
                 {t("stats.activeJobs.label")}
               </p>
               <p className="text-2xl font-bold text-yellow-900">
-                {stats?.activeJobs || 0}
+                {stats?.activeJobs.length || 0}
               </p>
             </div>
           </Card>
@@ -336,7 +338,7 @@ const ClientDashboard: React.FC = () => {
                 {t("stats.applications.label")}
               </p>
               <p className="text-2xl font-bold text-orange-900">
-                {stats?.pendingApplications || 0}
+                {stats?.totalApplications || 0}
               </p>
             </div>
           </Card>
