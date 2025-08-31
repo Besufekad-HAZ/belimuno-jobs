@@ -29,6 +29,7 @@ interface OutsourceStats {
   ongoingJobs: number;
   clientSatisfaction: number;
   projectSuccessRate: number;
+  averageProjectDuration: number;
 }
 
 interface Client {
@@ -41,8 +42,9 @@ interface Client {
   clientProfile?: {
     companySize: string;
     industry: string;
-    totalSpent: number;
-    projectsCompleted: number;
+    totalAmountSpent: number;
+    totalJobsPosted: number;
+    rating: number;
   };
 }
 
@@ -108,6 +110,8 @@ const OutsourceAdminDashboard: React.FC = () => {
         usersResponse.data?.users ||
         usersResponse.data ||
         [];
+      console.log("clientsData", clientsData);
+
       const jobsData =
         jobsResponse.data?.data ||
         jobsResponse.data?.jobs ||
@@ -168,19 +172,46 @@ const OutsourceAdminDashboard: React.FC = () => {
 
       const outsourceStats: OutsourceStats = {
         totalClients: clientsData.length,
+        totalRevenue,
+        monthlyRevenue,
+
+        // active projects
         activeProjects: projectsData.filter((p) =>
           ["posted", "assigned", "in_progress"].includes(p.status),
         ).length,
-        totalRevenue,
-        monthlyRevenue,
+
+        // completed jobs
         completedJobs: projectsData.filter((p) => p.status === "completed")
           .length,
+
+        // ongoing jobs
         ongoingJobs: projectsData.filter((p) => p.status === "in_progress")
           .length,
-        clientSatisfaction: 4.2, // Mock data
-        projectSuccessRate: 87, // Mock data
-      };
 
+        clientSatisfaction: Math.round(
+          clientsData.reduce(
+            (sum: number, client: Client) =>
+              sum + (client.clientProfile?.rating || 0),
+            0,
+          ) / Math.max(clientsData.length, 1),
+        ),
+
+        // project success rate
+        projectSuccessRate: Math.round(
+          (projectsData.filter((p) => p.status === "completed").length /
+            Math.max(projectsData.length, 1)) *
+            100,
+        ),
+
+        // average project duration
+        averageProjectDuration: Math.round(
+          projectsData.reduce(
+            (sum, project) => sum + (project.progress || 0),
+            0,
+          ) / Math.max(projectsData.length, 1),
+        ),
+      };
+      console.log("outsourceStats", outsourceStats);
       setStats(outsourceStats);
 
       // Mock revenue data for charts
@@ -505,10 +536,12 @@ const OutsourceAdminDashboard: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-gray-900">
-                      {formatCurrency(client.clientProfile?.totalSpent || 0)}
+                      {formatCurrency(
+                        client.clientProfile?.totalAmountSpent || 0,
+                      )}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {client.clientProfile?.projectsCompleted || 0}{" "}
+                      {client.clientProfile?.totalJobsPosted || 0}{" "}
                       {t("clients.metrics.projects")}
                     </p>
                   </div>
@@ -574,7 +607,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                 <span className="font-semibold text-gray-900">
                   {formatCurrency(
                     (stats?.totalRevenue || 0) /
-                      Math.max(stats?.completedJobs || 1, 1)
+                      Math.max(stats?.completedJobs || 1, 1),
                   )}
                 </span>
               </div>
@@ -583,7 +616,12 @@ const OutsourceAdminDashboard: React.FC = () => {
                   {t("keyMetrics.metrics.clientRetention")}
                 </span>
                 <span className="font-semibold text-gray-900">
-                  {stats?.clientSatisfaction || 0}%
+                  {Math.round(
+                    (clients.filter((c) => c.isActive).length /
+                      Math.max(clients.length, 1)) *
+                      100,
+                  )}
+                  %
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -591,14 +629,38 @@ const OutsourceAdminDashboard: React.FC = () => {
                   {t("keyMetrics.metrics.projectCompletionRate")}
                 </span>
                 <span className="font-semibold text-gray-900">
-                  {stats?.projectSuccessRate || 0}%
+                  {Math.round(
+                    (projects.filter((p) => p.status === "completed").length /
+                      Math.max(projects.length, 1)) *
+                      100,
+                  )}
+                  %
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">
                   {t("keyMetrics.metrics.avgProjectDuration")}
                 </span>
-                <span className="font-semibold text-gray-900">2.5 weeks</span>
+                <span className="font-semibold text-gray-900">
+                  {Math.round(
+                    projects
+                      .filter((p) => p.status === "completed")
+                      .reduce((sum, p) => {
+                        const start = new Date(p.createdAt);
+                        const end = new Date(p.deadline);
+                        const weeks = Math.ceil(
+                          (end.getTime() - start.getTime()) /
+                            (7 * 24 * 60 * 60 * 1000),
+                        );
+                        return sum + weeks;
+                      }, 0) /
+                      Math.max(
+                        projects.filter((p) => p.status === "completed").length,
+                        1,
+                      ),
+                  )}{" "}
+                  weeks
+                </span>
               </div>
             </div>
           </Card>
@@ -609,30 +671,73 @@ const OutsourceAdminDashboard: React.FC = () => {
               {t("recentActivity.title")}
             </h2>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">
-                  Project &quot;E-commerce Platform&quot; completed
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">
-                  New client &quot;TechCorp Inc&quot; onboarded
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">
-                  Payment of $2,500 processed
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="h-2 w-2 bg-purple-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">
-                  Weekly report generated
-                </span>
-              </div>
+              {/* Completed Projects */}
+              {projects
+                .filter((p) => p.status === "completed")
+                .slice(0, 1)
+                .map((project) => (
+                  <div
+                    key={project._id}
+                    className="flex items-center space-x-3"
+                  >
+                    <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">
+                      Project &quot;{project.title}&quot; completed
+                    </span>
+                  </div>
+                ))}
+
+              {/* Recently Added Clients */}
+              {clients
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime(),
+                )
+                .slice(0, 1)
+                .map((client) => (
+                  <div key={client._id} className="flex items-center space-x-3">
+                    <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">
+                      New client &quot;{client.company || client.name}&quot;
+                      onboarded
+                    </span>
+                  </div>
+                ))}
+
+              {/* Latest Payments */}
+              {projects
+                .filter((p) => p.status === "completed")
+                .slice(0, 1)
+                .map((project) => (
+                  <div
+                    key={`payment-${project._id}`}
+                    className="flex items-center space-x-3"
+                  >
+                    <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">
+                      Payment of {formatCurrency(project.budget)} processed for
+                      &quot;{project.title}&quot;
+                    </span>
+                  </div>
+                ))}
+
+              {/* In Progress Projects */}
+              {projects
+                .filter((p) => p.status === "in_progress")
+                .slice(0, 1)
+                .map((project) => (
+                  <div
+                    key={`progress-${project._id}`}
+                    className="flex items-center space-x-3"
+                  >
+                    <div className="h-2 w-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">
+                      Project &quot;{project.title}&quot; is {project.progress}%
+                      complete
+                    </span>
+                  </div>
+                ))}
             </div>
           </Card>
         </div>
