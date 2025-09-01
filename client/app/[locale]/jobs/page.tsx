@@ -160,7 +160,9 @@ const JobsPage: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             {t("header.title")}
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">{t("header.subtitle")}</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">
+            {t("header.subtitle")}
+          </p>
         </div>
 
         {/* Search and Filters */}
@@ -233,11 +235,19 @@ const JobsPage: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-                <Button variant="outline" onClick={handleSearch} className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  onClick={handleSearch}
+                  className="w-full sm:w-auto"
+                >
                   <Filter className="h-4 w-4 mr-2" />
                   {t("search.filters.apply")}
                 </Button>
-                <Button variant="ghost" onClick={clearFilters} className="w-full sm:w-auto">
+                <Button
+                  variant="ghost"
+                  onClick={clearFilters}
+                  className="w-full sm:w-auto"
+                >
                   {t("search.filters.clear")}
                 </Button>
               </div>
@@ -339,7 +349,7 @@ const JobsPage: React.FC = () => {
                           {t("job.posted")}{" "}
                           {job.createdAt
                             ? new Date(
-                                job.createdAt as string | number | Date
+                                job.createdAt as string | number | Date,
                               ).toLocaleDateString()
                             : "—"}
                         </span>
@@ -356,7 +366,11 @@ const JobsPage: React.FC = () => {
                           href={`/jobs/${job._id}`}
                           className="inline-block w-full sm:w-auto"
                         >
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full sm:w-auto"
+                          >
                             <span className="text-xs sm:text-sm">
                               {t("job.actions.viewDetails")}
                             </span>
@@ -403,8 +417,9 @@ const JobsPage: React.FC = () => {
                           <Bookmark className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />{" "}
                           <span className="text-xs sm:text-sm">
                             {savedJobIds.has(job._id)
-                            ? t("job.actions.saved")
-                            : t("job.actions.save")}
+                              ? t("job.actions.saved")
+                              : t("job.actions.save")}
+                          </span>
                         </Button>
                         <Button
                           variant="ghost"

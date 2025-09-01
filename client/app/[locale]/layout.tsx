@@ -23,6 +23,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
+  icons: {
+    icon: [
+      { url: "/belimuno.png?v=2", type: "image/png", sizes: "32x32" },
+      { url: "/belimuno.png?v=2", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: [
+      { url: "/belimuno.png?v=2", type: "image/png" },
+    ],
+    apple: [
+      { url: "/belimuno.png?v=2", type: "image/png", sizes: "180x180" },
+    ],
+  },
 };
 
 export default async function RootLayout({
