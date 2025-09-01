@@ -386,24 +386,26 @@ const WorkerDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>
-              <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{t("header.subtitle")}</p>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 onClick={() => setShowNotificationsModal(true)}
-                className="relative"
+                className="relative w-full sm:w-auto"
+                size="sm"
               >
                 <Bell className="h-4 w-4 mr-2" />
-                {t("buttons.notifications")}
+                <span className="hidden sm:inline">{t("buttons.notifications")}</span>
+                <span className="sm:hidden">Notifications</span>
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     {unreadCount}
@@ -413,23 +415,26 @@ const WorkerDashboard: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowWalletModal(true)}
+                className="w-full sm:w-auto"
+                size="sm"
               >
                 <Wallet className="h-4 w-4 mr-2" />
-                {t("buttons.wallet")}
+                <span className="hidden sm:inline">{t("buttons.wallet")}</span>
+                <span className="sm:hidden">Wallet</span>
               </Button>
             </div>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Card className="bg-blue-50 border-blue-200">
             <div className="text-center">
-              <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-blue-600">
+              <Briefcase className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-blue-600">
                 {t("stats.activeJobs.label")}
               </p>
-              <p className="text-2xl font-bold text-blue-900">
+              <p className="text-lg sm:text-2xl font-bold text-blue-900">
                 {stats?.activeJobs ?? 0}
               </p>
             </div>
@@ -437,11 +442,11 @@ const WorkerDashboard: React.FC = () => {
 
           <Card className="bg-green-50 border-green-200">
             <div className="text-center">
-              <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-green-600">
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-green-600">
                 {t("stats.completedJobs.label")}
               </p>
-              <p className="text-2xl font-bold text-green-900">
+              <p className="text-lg sm:text-2xl font-bold text-green-900">
                 {stats?.completedJobs ?? 0}
               </p>
             </div>
@@ -449,11 +454,11 @@ const WorkerDashboard: React.FC = () => {
 
           <Card className="bg-yellow-50 border-yellow-200">
             <div className="text-center">
-              <DollarSign className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-yellow-600">
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-yellow-600">
                 {t("stats.earnings.label")}
               </p>
-              <p className="text-xl font-bold text-yellow-900">
+              <p className="text-sm sm:text-xl font-bold text-yellow-900">
                 ETB {(stats?.totalEarnings || 0).toLocaleString()}
               </p>
             </div>
@@ -461,11 +466,11 @@ const WorkerDashboard: React.FC = () => {
 
           <Card className="bg-purple-50 border-purple-200">
             <div className="text-center">
-              <Star className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-purple-600">
+              <Star className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-purple-600">
                 {t("stats.rating.label")}
               </p>
-              <p className="text-2xl font-bold text-purple-900">
+              <p className="text-lg sm:text-2xl font-bold text-purple-900">
                 {stats?.averageRating !== undefined
                   ? stats.averageRating.toFixed(1)
                   : "N/A"}
@@ -475,11 +480,11 @@ const WorkerDashboard: React.FC = () => {
 
           <Card className="bg-indigo-50 border-indigo-200">
             <div className="text-center">
-              <Send className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-indigo-600">
+              <Send className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-indigo-600">
                 {t("stats.applications.label")}
               </p>
-              <p className="text-2xl font-bold text-indigo-900">
+              <p className="text-lg sm:text-2xl font-bold text-indigo-900">
                 {stats?.totalApplications ?? 0}
               </p>
             </div>
@@ -487,80 +492,88 @@ const WorkerDashboard: React.FC = () => {
 
           <Card className="bg-orange-50 border-orange-200">
             <div className="text-center">
-              <Clock className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-orange-600">
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-orange-600">
                 {t("stats.pending.label")}
               </p>
-              <p className="text-2xl font-bold text-orange-900">
+              <p className="text-lg sm:text-2xl font-bold text-orange-900">
                 {stats?.pendingApplications ?? 0}
               </p>
             </div>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Available Jobs */}
           <Card>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                 {t("sections.availableJobs.title")}
               </h3>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => router.push("/jobs")}
+                className="w-full sm:w-auto"
               >
                 {t("buttons.viewAll")}
               </Button>
             </div>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="space-y-3 sm:space-y-4 max-h-80 sm:max-h-96 overflow-y-auto">
               {availableJobs.map((job) => (
-                <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium text-gray-900">{job.title}</h4>
-                    <div className="text-right">
+                <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
+                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">{job.title}</h4>
+                    <div className="text-left sm:text-right">
                       <span className="text-sm font-semibold text-green-600 block">
                         ETB {job.budget?.toLocaleString()}
                       </span>
                       {job.applicationCount !== undefined && (
-                        <span className="text-[11px] text-gray-500">
+                        <span className="text-[10px] sm:text-[11px] text-gray-500">
                           {job.applicationCount}{" "}
                           {t("sections.availableJobs.applications")}
                         </span>
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">
                     {job.description}
                   </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-xs text-gray-500">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-gray-500">
                       <span>
                         {t("sections.availableJobs.due")}:{" "}
                         {new Date(job.deadline).toLocaleDateString()}
                       </span>
-                      <span>•</span>
-                      <span>{job.category}</span>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="sm:hidden block">{job.category}</span>
+                      <span className="hidden sm:inline">{job.category}</span>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedJob(job)}
+                        className="w-full sm:w-auto"
                       >
-                        <Eye className="h-4 w-4 mr-1" />
-                        {appliedJobIds.has(job._id)
-                          ? t("sections.availableJobs.details")
-                          : t("sections.availableJobs.view")}
+                        <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="text-xs sm:text-sm">
+                          {appliedJobIds.has(job._id)
+                            ? t("sections.availableJobs.details")
+                            : t("sections.availableJobs.view")}
+                        </span>
                       </Button>
                       <Button
                         size="sm"
                         onClick={() => setSelectedJob(job)}
                         disabled={appliedJobIds.has(job._id)}
+                        className="w-full sm:w-auto"
                       >
-                        {appliedJobIds.has(job._id)
-                          ? t("sections.availableJobs.applied")
-                          : t("sections.availableJobs.apply")}
+                        <span className="text-xs sm:text-sm">
+                          {appliedJobIds.has(job._id)
+                            ? t("sections.availableJobs.applied")
+                            : t("sections.availableJobs.apply")}
+                        </span>
                       </Button>
                     </div>
                   </div>
@@ -571,26 +584,26 @@ const WorkerDashboard: React.FC = () => {
 
           {/* My Active Jobs */}
           <Card>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                 {t("sections.activeJobs.title")}
               </h3>
             </div>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="space-y-3 sm:space-y-4 max-h-80 sm:max-h-96 overflow-y-auto">
               {/* Pending Applications Snapshot */}
-              <Card className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              <Card className="mt-4 sm:mt-8">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                   {t("sections.activeJobs.pendingApplications.title")}
                 </h3>
                 {stats?.pendingApplicationsList?.length ? (
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                  <div className="space-y-2 sm:space-y-3 max-h-48 sm:max-h-64 overflow-y-auto">
                     {stats.pendingApplicationsList.map((app) => (
                       <div
                         key={app._id}
-                        className="p-3 bg-gray-50 rounded border flex items-center justify-between"
+                        className="p-2 sm:p-3 bg-gray-50 rounded border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
                       >
-                        <div className="mr-4">
-                          <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-gray-900 line-clamp-1">
                             {app.job?.title || "Job"}
                           </p>
                           <p className="text-xs text-gray-500">
@@ -600,14 +613,14 @@ const WorkerDashboard: React.FC = () => {
                             {new Date(app.appliedAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                        <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 self-start sm:self-auto">
                           {t("sections.activeJobs.pendingApplications.status")}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     {t("sections.activeJobs.pendingApplications.empty")}
                   </p>
                 )}
@@ -624,11 +637,11 @@ const WorkerDashboard: React.FC = () => {
                     ].includes(job.status),
                 )
                 .map((job) => (
-                  <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-medium text-gray-900">{job.title}</h4>
+                  <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
+                      <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">{job.title}</h4>
                       <span
-                        className={`px-2 py-1 text-xs rounded-full ${
+                        className={`px-2 py-1 text-xs rounded-full self-start sm:self-auto ${
                           job.status === "in_progress"
                             ? "bg-blue-100 text-blue-800"
                             : job.status === "assigned"
@@ -652,28 +665,34 @@ const WorkerDashboard: React.FC = () => {
                         }
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
+                    <div className="flex flex-col gap-3">
+                      <span className="text-xs sm:text-sm text-gray-600">
                         ETB{" "}
                         {job.acceptedApplication?.proposedBudget?.toLocaleString()}
                       </span>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-wrap gap-2">
                         {job.status === "assigned" && (
                           <>
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => declineAssignment(job._id)}
+                              className="flex-1 sm:flex-none"
                             >
-                              <ThumbsDown className="h-4 w-4 mr-1" />
-                              {t("sections.activeJobs.actions.decline")}
+                              <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="text-xs sm:text-sm">
+                                {t("sections.activeJobs.actions.decline")}
+                              </span>
                             </Button>
                             <Button
                               size="sm"
                               onClick={() => acceptAssignment(job._id)}
+                              className="flex-1 sm:flex-none"
                             >
-                              <ThumbsUp className="h-4 w-4 mr-1" />
-                              {t("sections.activeJobs.actions.accept")}
+                              <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="text-xs sm:text-sm">
+                                {t("sections.activeJobs.actions.accept")}
+                              </span>
                             </Button>
                           </>
                         )}
@@ -683,8 +702,11 @@ const WorkerDashboard: React.FC = () => {
                             onClick={() =>
                               handleUpdateJobStatus(job._id, "completed")
                             }
+                            className="w-full sm:w-auto"
                           >
-                            {t("sections.activeJobs.actions.markComplete")}
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.activeJobs.actions.markComplete")}
+                            </span>
                           </Button>
                         )}
                         {job.status === "revision_requested" && (
@@ -694,16 +716,20 @@ const WorkerDashboard: React.FC = () => {
                             onClick={() =>
                               handleUpdateJobStatus(job._id, "in_progress")
                             }
+                            className="w-full sm:w-auto"
                           >
-                            {t("sections.activeJobs.actions.resubmit")}
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.activeJobs.actions.resubmit")}
+                            </span>
                           </Button>
                         )}
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => openChat(job._id)}
+                          className="flex-1 sm:flex-none"
                         >
-                          <MessageCircle className="h-4 w-4" />
+                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                         {job.status === "completed" &&
                           !job.review?.workerReview?.rating && (
@@ -713,8 +739,10 @@ const WorkerDashboard: React.FC = () => {
                                 setRateJobId(job._id);
                                 setShowRateModal(true);
                               }}
+                              className="flex-1 sm:flex-none"
                             >
-                              <Star className="h-4 w-4 mr-1" /> Rate Client
+                              <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="text-xs sm:text-sm">Rate Client</span>
                             </Button>
                           )}
                       </div>
@@ -727,26 +755,26 @@ const WorkerDashboard: React.FC = () => {
 
         {/* Enhanced Application Modal */}
         {selectedJob && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
             <div
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setSelectedJob(null)}
             />
-            <div className="relative w-full max-w-lg animate-[fadeIn_0.25s_ease]">
+            <div className="relative w-full max-w-lg animate-[fadeIn_0.25s_ease] max-h-[90vh] overflow-y-auto">
               <Card className="p-0 overflow-hidden shadow-2xl border border-gray-200">
                 {/* Header */}
-                <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex items-start justify-between">
-                  <div>
+                <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs uppercase tracking-wide opacity-80 mb-1">
                       Apply to Job
                     </p>
-                    <h3 className="text-lg font-semibold leading-snug line-clamp-2 pr-4">
+                    <h3 className="text-base sm:text-lg font-semibold leading-snug line-clamp-2 pr-4">
                       {selectedJob.title}
                     </h3>
                   </div>
                   <button
                     onClick={() => setSelectedJob(null)}
-                    className="text-white/70 hover:text-white transition-colors"
+                    className="text-white/70 hover:text-white transition-colors flex-shrink-0 ml-2"
                     aria-label="Close application form"
                   >
                     ×
@@ -754,7 +782,7 @@ const WorkerDashboard: React.FC = () => {
                 </div>
 
                 {/* Job Quick Summary */}
-                <div className="px-6 pt-5 pb-4 bg-gray-50 grid grid-cols-2 gap-4 text-sm">
+                <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-4 bg-gray-50 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
                     <p className="text-gray-500">Budget</p>
                     <p className="font-medium text-gray-900">
@@ -786,7 +814,7 @@ const WorkerDashboard: React.FC = () => {
                     e.preventDefault();
                     handleApplyToJob(selectedJob._id);
                   }}
-                  className="px-6 pb-6 pt-2 space-y-5"
+                  className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 space-y-4 sm:space-y-5"
                 >
                   {/* Proposal */}
                   <div>
@@ -820,7 +848,7 @@ const WorkerDashboard: React.FC = () => {
                   </div>
 
                   {/* Budget & Duration */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Proposed Budget (ETB)
@@ -867,7 +895,7 @@ const WorkerDashboard: React.FC = () => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center justify-between pt-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between pt-2 gap-3">
                     <Button
                       type="button"
                       variant="outline"
@@ -878,6 +906,7 @@ const WorkerDashboard: React.FC = () => {
                           proposedBudget: "",
                         });
                       }}
+                      className="w-full sm:w-auto"
                     >
                       Cancel
                     </Button>
@@ -887,7 +916,7 @@ const WorkerDashboard: React.FC = () => {
                         !applicationData.proposal ||
                         !applicationData.proposedBudget
                       }
-                      className="min-w-[160px]"
+                      className="w-full sm:min-w-[160px]"
                     >
                       Submit Application
                     </Button>

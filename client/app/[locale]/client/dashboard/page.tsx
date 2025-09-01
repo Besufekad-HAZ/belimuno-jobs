@@ -252,30 +252,33 @@ const ClientDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {t("header.title")}
             </h1>
-            <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{t("header.subtitle")}</p>
           </div>
-          <Button onClick={() => router.push("/client/jobs/new")}>
+          <Button
+            onClick={() => router.push("/client/jobs/new")}
+            className="w-full sm:w-auto"
+          >
             <Plus className="h-4 w-4 mr-2" />
             {t("header.postJob")}
           </Button>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Card className="bg-blue-50 border-blue-200">
             <div className="text-center">
-              <Briefcase className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-blue-600">
+              <Briefcase className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-blue-600">
                 {t("stats.totalJobs.label")}
               </p>
-              <p className="text-2xl font-bold text-blue-900">
+              <p className="text-lg sm:text-2xl font-bold text-blue-900">
                 {stats?.totalJobs || 0}
               </p>
             </div>
@@ -283,11 +286,11 @@ const ClientDashboard: React.FC = () => {
 
           <Card className="bg-yellow-50 border-yellow-200">
             <div className="text-center">
-              <Clock className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-yellow-600">
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-yellow-600">
                 {t("stats.activeJobs.label")}
               </p>
-              <p className="text-2xl font-bold text-yellow-900">
+              <p className="text-lg sm:text-2xl font-bold text-yellow-900">
                 {stats?.activeJobs || 0}
               </p>
             </div>
@@ -295,11 +298,11 @@ const ClientDashboard: React.FC = () => {
 
           <Card className="bg-green-50 border-green-200">
             <div className="text-center">
-              <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-green-600">
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-green-600">
                 {t("stats.completedJobs.label")}
               </p>
-              <p className="text-2xl font-bold text-green-900">
+              <p className="text-lg sm:text-2xl font-bold text-green-900">
                 {stats?.completedJobs || 0}
               </p>
             </div>
@@ -307,11 +310,11 @@ const ClientDashboard: React.FC = () => {
 
           <Card className="bg-purple-50 border-purple-200">
             <div className="text-center">
-              <DollarSign className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-purple-600">
+              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-purple-600">
                 {t("stats.totalSpent.label")}
               </p>
-              <p className="text-xl font-bold text-purple-900">
+              <p className="text-sm sm:text-xl font-bold text-purple-900">
                 ETB {stats?.totalSpent?.toLocaleString() || 0}
               </p>
             </div>
@@ -319,11 +322,11 @@ const ClientDashboard: React.FC = () => {
 
           <Card className="bg-indigo-50 border-indigo-200">
             <div className="text-center">
-              <Star className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-indigo-600">
+              <Star className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-indigo-600">
                 {t("stats.rating.label")}
               </p>
-              <p className="text-2xl font-bold text-indigo-900">
+              <p className="text-lg sm:text-2xl font-bold text-indigo-900">
                 {stats?.averageRating?.toFixed(1) || "N/A"}
               </p>
             </div>
@@ -331,11 +334,11 @@ const ClientDashboard: React.FC = () => {
 
           <Card className="bg-orange-50 border-orange-200">
             <div className="text-center">
-              <Users className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-orange-600">
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-orange-600">
                 {t("stats.applications.label")}
               </p>
-              <p className="text-2xl font-bold text-orange-900">
+              <p className="text-lg sm:text-2xl font-bold text-orange-900">
                 {stats?.pendingApplications || 0}
               </p>
             </div>
@@ -344,17 +347,17 @@ const ClientDashboard: React.FC = () => {
 
         {/* Jobs List */}
         <Card>
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
               {t("sections.jobs.title")}
             </h3>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {jobs.map((job) => (
-              <div key={job._id} className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-medium text-gray-900">{job.title}</h4>
+              <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">{job.title}</h4>
                     {/* Payment Proof Modal */}
                     <Modal
                       isOpen={showProofModal}
@@ -446,21 +449,26 @@ const ClientDashboard: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setSelectedJob(job)}
+                      className="w-full sm:w-auto"
                     >
-                      <Eye className="h-4 w-4 mr-1" />
-                      {t("sections.jobs.actions.viewDetails")}
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="text-xs sm:text-sm">
+                        {t("sections.jobs.actions.viewDetails")}
+                      </span>
                     </Button>
                     <Link
                       href={`/client/jobs/${job._id}/applications`}
-                      className="inline-block"
+                      className="inline-block w-full sm:w-auto"
                     >
-                      <Button size="sm" variant="outline">
-                        {t("sections.jobs.actions.applications")}
+                      <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                        <span className="text-xs sm:text-sm">
+                          {t("sections.jobs.actions.applications")}
+                        </span>
                       </Button>
                     </Link>
                     {job.status === "awaiting_completion" && (
@@ -469,15 +477,21 @@ const ClientDashboard: React.FC = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleRequestRevision(job._id)}
+                          className="w-full sm:w-auto"
                         >
-                          {t("sections.jobs.actions.requestRevision")}
+                          <span className="text-xs sm:text-sm">
+                            {t("sections.jobs.actions.requestRevision")}
+                          </span>
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => handlePaymentAndRating(job)}
+                          className="w-full sm:w-auto"
                         >
-                          <CreditCard className="h-4 w-4 mr-1" />
-                          {t("sections.jobs.actions.payAndRate")}
+                          <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          <span className="text-xs sm:text-sm">
+                            {t("sections.jobs.actions.payAndRate")}
+                          </span>
                         </Button>
                       </>
                     )}
@@ -488,32 +502,32 @@ const ClientDashboard: React.FC = () => {
                 {job.status === "open" &&
                   job.recentApplications &&
                   job.recentApplications.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <h5 className="font-medium text-gray-900 mb-3">
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                      <h5 className="font-medium text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">
                         {t("sections.recentApplications.title")} (
                         {job.applicationCount || job.recentApplications.length})
                       </h5>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {job.recentApplications
                           .slice(0, 3)
                           .map((application: ApplicationPreview) => (
                             <div
                               key={application._id}
-                              className="flex items-center justify-between p-3 bg-white rounded border"
+                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 bg-white rounded border gap-3"
                             >
-                              <div>
-                                <p className="font-medium text-gray-900">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900 text-sm sm:text-base">
                                   {application.worker.name}
                                 </p>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
                                   {application.proposal}
                                 </p>
-                                <p className="text-sm font-semibold text-green-600">
+                                <p className="text-xs sm:text-sm font-semibold text-green-600">
                                   ETB{" "}
                                   {application.proposedBudget?.toLocaleString()}
                                 </p>
                               </div>
-                              <div className="flex space-x-2">
+                              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -523,10 +537,13 @@ const ClientDashboard: React.FC = () => {
                                       application._id,
                                     )
                                   }
+                                  className="w-full sm:w-auto"
                                 >
-                                  {t(
-                                    "sections.recentApplications.actions.reject",
-                                  )}
+                                  <span className="text-xs sm:text-sm">
+                                    {t(
+                                      "sections.recentApplications.actions.reject",
+                                    )}
+                                  </span>
                                 </Button>
                                 <Button
                                   size="sm"
@@ -536,10 +553,13 @@ const ClientDashboard: React.FC = () => {
                                       application._id,
                                     )
                                   }
+                                  className="w-full sm:w-auto"
                                 >
-                                  {t(
-                                    "sections.recentApplications.actions.accept",
-                                  )}
+                                  <span className="text-xs sm:text-sm">
+                                    {t(
+                                      "sections.recentApplications.actions.accept",
+                                    )}
+                                  </span>
                                 </Button>
                               </div>
                             </div>

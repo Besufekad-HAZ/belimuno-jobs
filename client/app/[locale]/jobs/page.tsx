@@ -154,20 +154,20 @@ const JobsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             {t("header.title")}
           </h1>
-          <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">{t("header.subtitle")}</p>
         </div>
 
         {/* Search and Filters */}
-        <Card className="mb-8">
+        <Card className="mb-6 sm:mb-8">
           <div className="space-y-4">
             {/* Search Bar */}
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <div className="flex-1">
                 <Input
                   placeholder={t("search.placeholder")}
@@ -175,14 +175,14 @@ const JobsPage: React.FC = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button onClick={handleSearch}>
+              <Button onClick={handleSearch} className="w-full sm:w-auto">
                 <Search className="h-4 w-4 mr-2" />
                 {t("search.button")}
               </Button>
             </div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t("search.filters.category.label")}
@@ -231,17 +231,17 @@ const JobsPage: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button variant="outline" onClick={handleSearch}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                <Button variant="outline" onClick={handleSearch} className="w-full sm:w-auto">
                   <Filter className="h-4 w-4 mr-2" />
                   {t("search.filters.apply")}
                 </Button>
-                <Button variant="ghost" onClick={clearFilters}>
+                <Button variant="ghost" onClick={clearFilters} className="w-full sm:w-auto">
                   {t("search.filters.clear")}
                 </Button>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-right">
                 {jobs.length} job{jobs.length !== 1 ? "s" : ""} found
               </p>
             </div>
@@ -254,40 +254,40 @@ const JobsPage: React.FC = () => {
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
           </div>
         ) : jobs.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {jobs.map((job) => (
               <Card key={job._id} className="hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
                           {job.title}
                         </h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 mb-3">
                           <div className="flex items-center">
-                            <Briefcase className="h-4 w-4 mr-1" />
+                            <Briefcase className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             {job.category}
                           </div>
                           {job.location && (
                             <div className="flex items-center">
-                              <MapPin className="h-4 w-4 mr-1" />
+                              <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                               {job.location}
                             </div>
                           )}
                           <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1" />
+                            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             Due: {new Date(job.deadline).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="flex items-center text-green-600 font-bold text-xl mb-2">
-                          <DollarSign className="h-5 w-5" />
+                      <div className="text-left sm:text-right">
+                        <div className="flex items-center text-green-600 font-bold text-lg sm:text-xl mb-2">
+                          <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
                           ETB {job.budget?.toLocaleString()}
                         </div>
                         <span
-                          className={`px-3 py-1 text-sm rounded-full ${
+                          className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full ${
                             job.priority === "urgent"
                               ? "bg-red-100 text-red-800"
                               : job.priority === "high"
@@ -351,22 +351,26 @@ const JobsPage: React.FC = () => {
                         <span>•</span>
                         <span className="capitalize">{job.workType}</span>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                         <Link
                           href={`/jobs/${job._id}`}
-                          className="inline-block"
+                          className="inline-block w-full sm:w-auto"
                         >
-                          <Button variant="outline" size="sm">
-                            {t("job.actions.viewDetails")}
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                            <span className="text-xs sm:text-sm">
+                              {t("job.actions.viewDetails")}
+                            </span>
                           </Button>
                         </Link>
                         {user && user.role === "worker" && (
                           <Link
                             href={`/jobs/${job._id}/apply`}
-                            className="inline-block"
+                            className="inline-block w-full sm:w-auto"
                           >
-                            <Button size="sm">
-                              {t("job.actions.applyNow")}
+                            <Button size="sm" className="w-full sm:w-auto">
+                              <span className="text-xs sm:text-sm">
+                                {t("job.actions.applyNow")}
+                              </span>
                             </Button>
                           </Link>
                         )}
@@ -375,6 +379,7 @@ const JobsPage: React.FC = () => {
                             savedJobIds.has(job._id) ? "outline" : "ghost"
                           }
                           size="sm"
+                          className="w-full sm:w-auto"
                           onClick={async () => {
                             if (user?.role !== "worker") return;
                             // Optimistically update saved jobs set
@@ -395,8 +400,9 @@ const JobsPage: React.FC = () => {
                             }
                           }}
                         >
-                          <Bookmark className="h-4 w-4 mr-1" />{" "}
-                          {savedJobIds.has(job._id)
+                          <Bookmark className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />{" "}
+                          <span className="text-xs sm:text-sm">
+                            {savedJobIds.has(job._id)
                             ? t("job.actions.saved")
                             : t("job.actions.save")}
                         </Button>

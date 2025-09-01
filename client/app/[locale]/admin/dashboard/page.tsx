@@ -191,31 +191,37 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>
-              <p className="text-gray-600 mt-2">{t("header.subtitle")}</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{t("header.subtitle")}</p>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button
                 variant="outline"
                 onClick={() => setShowReportsModal(true)}
+                className="w-full sm:w-auto"
+                size="sm"
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
-                {t("header.buttons.generateReports")}
+                <span className="hidden sm:inline">{t("header.buttons.generateReports")}</span>
+                <span className="sm:hidden">Reports</span>
               </Button>
               {disputes.length > 0 && (
                 <Button
                   variant="outline"
                   onClick={() => setShowDisputeModal(true)}
+                  className="w-full sm:w-auto"
+                  size="sm"
                 >
                   <AlertTriangle className="h-4 w-4 mr-2" />
-                  {t("header.buttons.resolveDisputes")} ({disputes.length})
+                  <span className="hidden sm:inline">{t("header.buttons.resolveDisputes")} ({disputes.length})</span>
+                  <span className="sm:hidden">Disputes ({disputes.length})</span>
                 </Button>
               )}
             </div>
@@ -223,17 +229,17 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-blue-50 border-blue-200">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-8 w-8 text-blue-600" />
+              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-blue-600">
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-blue-600">
                   {t("stats.totalUsers.label")}
                 </p>
-                <p className="text-2xl font-bold text-blue-900">
+                <p className="text-lg sm:text-2xl font-bold text-blue-900">
                   {stats?.totalUsers || 0}
                 </p>
               </div>
@@ -242,14 +248,14 @@ const AdminDashboard: React.FC = () => {
 
           <Card className="bg-green-50 border-green-200">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Briefcase className="h-8 w-8 text-green-600" />
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
+                <Briefcase className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-green-600">
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-green-600">
                   {t("stats.totalJobs.label")}
                 </p>
-                <p className="text-2xl font-bold text-green-900">
+                <p className="text-lg sm:text-2xl font-bold text-green-900">
                   {stats?.totalJobs || 0}
                 </p>
               </div>
@@ -258,14 +264,14 @@ const AdminDashboard: React.FC = () => {
 
           <Card className="bg-yellow-50 border-yellow-200">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <DollarSign className="h-8 w-8 text-yellow-600" />
+              <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-lg">
+                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-yellow-600">
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-yellow-600">
                   {t("stats.totalRevenue.label")}
                 </p>
-                <p className="text-2xl font-bold text-yellow-900">
+                <p className="text-sm sm:text-2xl font-bold text-yellow-900">
                   ETB {stats?.totalRevenue?.toLocaleString() || 0}
                 </p>
               </div>
@@ -274,14 +280,14 @@ const AdminDashboard: React.FC = () => {
 
           <Card className="bg-purple-50 border-purple-200">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <TrendingUp className="h-8 w-8 text-purple-600" />
+              <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg">
+                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-purple-600">
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-purple-600">
                   {t("stats.monthlyGrowth.label")}
                 </p>
-                <p className="text-2xl font-bold text-purple-900">
+                <p className="text-lg sm:text-2xl font-bold text-purple-900">
                   +{stats?.monthlyGrowth || 0}%
                 </p>
               </div>
@@ -290,55 +296,55 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Activity Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">
                   {t("activity.activeJobs.label")}
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-xl sm:text-3xl font-bold text-gray-900">
                   {stats?.activeJobs || 0}
                 </p>
               </div>
-              <Clock className="h-8 w-8 text-blue-500" />
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
             </div>
           </Card>
 
           <Card>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">
                   {t("activity.completedJobs.label")}
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-xl sm:text-3xl font-bold text-gray-900">
                   {stats?.completedJobs || 0}
                 </p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
             </div>
           </Card>
 
           <Card>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">
                   {t("activity.pendingVerifications.label")}
                 </p>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-xl sm:text-3xl font-bold text-gray-900">
                   {stats?.pendingVerifications || 0}
                 </p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-yellow-500" />
+              <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
             </div>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Recent Users */}
           <Card>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                 {t("recentUsers.title")}
               </h3>
               <Button
