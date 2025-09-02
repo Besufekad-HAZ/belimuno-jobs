@@ -129,16 +129,18 @@ const Navbar: React.FC = () => {
             </Link>
 
             {/* Desktop navigation */}
-            <nav className="hidden lg:flex space-x-6">
+            <nav className="hidden lg:flex space-x-6" aria-label="Primary">
               <Link
                 href="/"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                aria-current={pathname === "/" ? "page" : undefined}
               >
                 {t("navigation.home")}
               </Link>
               <Link
                 href="/about"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                aria-current={pathname === "/about" ? "page" : undefined}
               >
                 {t("navigation.about")}
               </Link>
@@ -176,6 +178,8 @@ const Navbar: React.FC = () => {
                 className="hidden max-[900px]:inline-flex p-2 text-cyan-100 hover:text-white"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-menu"
               >
                 {mobileOpen ? (
                   <X className="h-7 w-7" />
@@ -277,7 +281,13 @@ const Navbar: React.FC = () => {
 
       {/* Mobile menu (<= 900px) */}
       {mobileOpen && (
-        <div className="hidden max-[900px]:block">
+        <div
+          className="hidden max-[900px]:block"
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile menu"
+        >
           {/* Backdrop */}
           <div
             className="fixed inset-0 z-40 bg-black/40"
@@ -286,12 +296,16 @@ const Navbar: React.FC = () => {
           />
           {/* Sliding sheet below navbar */}
           <div className="fixed top-16 inset-x-0 z-50 border-t border-cyan-300/40 bg-gradient-to-b from-cyan-700 to-cyan-600 shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1">
+            <div
+              className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1"
+              role="menu"
+            >
               {/* Primary nav links */}
               <Link
                 href="/"
                 onClick={() => setMobileOpen(false)}
                 className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                role="menuitem"
               >
                 {t("navigation.home")}
               </Link>
@@ -332,7 +346,10 @@ const Navbar: React.FC = () => {
               </Link>
 
               {/* Divider */}
-              <div className="border-t border-white/20 my-3" />
+              <div
+                className="border-t border-white/20 my-3"
+                aria-hidden="true"
+              />
 
               {/* Secondary actions (moved from header on small screens) */}
               {user ? (

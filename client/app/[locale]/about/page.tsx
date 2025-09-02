@@ -322,7 +322,7 @@ const AboutPage: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
             <Link href="/contact">
-              <Button className="bg-white text-blue-800 hover:bg-cyan-50 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
+              <Button className="bg-black text-blue-800 hover:bg-cyan-50 hover:scale-105 hover:text-black transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
                 {t("cta.buttons.contact")}
               </Button>
             </Link>

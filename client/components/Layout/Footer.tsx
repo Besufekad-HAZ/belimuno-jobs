@@ -111,6 +111,14 @@ const Footer = () => {
             >
               <Twitter className="h-5 w-5" />
             </a>
+            <a
+              href="https://t.me/belimunojobs"
+              target="_blank"
+              className="hover:text-white"
+              aria-label={t("social.telegram")}
+            >
+              <Send className="h-5 w-5" />
+            </a>
           </div>
         </div>
       </div>

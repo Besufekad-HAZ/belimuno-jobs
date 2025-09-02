@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "sm" | "md" | "lg";
   loading?: boolean;
   children: React.ReactNode;
+  ariaLabel?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -14,6 +15,7 @@ const Button: React.FC<ButtonProps> = ({
   children,
   className = "",
   disabled,
+  ariaLabel,
   ...props
 }) => {
   const baseClasses =
@@ -37,13 +39,22 @@ const Button: React.FC<ButtonProps> = ({
   const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`;
 
   return (
-    <button className={classes} disabled={disabled || loading} {...props}>
+    <button
+      className={classes}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      aria-live={loading ? "polite" : undefined}
+      aria-label={ariaLabel}
+      {...props}
+    >
       {loading && (
         <svg
           className="animate-spin -ml-1 mr-2 h-4 w-4"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
+          role="img"
+          aria-label="Loading"
         >
           <circle
             className="opacity-25"
@@ -60,7 +71,9 @@ const Button: React.FC<ButtonProps> = ({
           ></path>
         </svg>
       )}
-      {children}
+      <span className="inline-flex items-center gap-2 whitespace-nowrap">
+        {children}
+      </span>
     </button>
   );
 };

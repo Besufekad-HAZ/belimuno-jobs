@@ -5,6 +5,7 @@ import "./fonts.css";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import ChatbotComponent from "@/chatbot/ChatbotComponent";
@@ -28,12 +29,8 @@ export const metadata: Metadata = {
       { url: "/belimuno.png?v=2", type: "image/png", sizes: "32x32" },
       { url: "/belimuno.png?v=2", type: "image/png", sizes: "192x192" },
     ],
-    shortcut: [
-      { url: "/belimuno.png?v=2", type: "image/png" },
-    ],
-    apple: [
-      { url: "/belimuno.png?v=2", type: "image/png", sizes: "180x180" },
-    ],
+    shortcut: [{ url: "/belimuno.png?v=2", type: "image/png" }],
+    apple: [{ url: "/belimuno.png?v=2", type: "image/png", sizes: "180x180" }],
   },
 };
 
@@ -50,14 +47,22 @@ export default async function RootLayout({
     notFound();
   }
 
+  // Load messages for this locale on the server
+  const messages = await getMessages();
+
   return (
     <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextIntlClientProvider>
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+        <NextIntlClientProvider messages={messages} locale={locale}>
           <Navbar />
-          {children}
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
           <ChatbotComponent />
           <Footer />
         </NextIntlClientProvider>
