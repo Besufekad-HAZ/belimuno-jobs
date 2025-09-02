@@ -28,7 +28,10 @@ interface HRStats {
   activeWorkers: number;
   workersThisMonth: number;
   disputesOpen: number;
+  disputesResolved: number;
+  totalDisputes: number;
   performanceReviews: number;
+  trainingCompleted: number;
 }
 
 interface Worker {
@@ -44,6 +47,7 @@ interface Worker {
     rating: number;
     totalJobs: number;
     completedJobs: number;
+    education?: Array<any>;
   };
   profile?: {
     verified: boolean;
@@ -115,29 +119,8 @@ const HRAdminDashboard: React.FC = () => {
         usersResponse.data?.users ||
         usersResponse.data ||
         [];
+      console.log("workersData", workersData);
       setWorkers(workersData);
-
-      // Calculate HR-specific stats
-      const hrStats: HRStats = {
-        totalWorkers: workersData.length,
-        verifiedWorkers: workersData.filter(
-          (w: Worker) => w.isVerified || w.profile?.verified,
-        ).length,
-        pendingVerifications: workersData.filter(
-          (w: Worker) => !w.isVerified && !w.profile?.verified,
-        ).length,
-        activeWorkers: workersData.filter((w: Worker) => w.isActive).length,
-        workersThisMonth: workersData.filter((w: Worker) => {
-          const createdDate = new Date(w.createdAt);
-          const thisMonth = new Date();
-          thisMonth.setDate(1);
-          return createdDate >= thisMonth;
-        }).length,
-        disputesOpen: 0, // Will be populated from actual disputes data
-        performanceReviews: 0, // Placeholder
-      };
-
-      setStats(hrStats);
 
       // Mock disputes for now - in real implementation, fetch from API
       const mockDisputes: Dispute[] = [
@@ -162,8 +145,46 @@ const HRAdminDashboard: React.FC = () => {
           priority: "medium",
           createdAt: new Date(Date.now() - 86400000).toISOString(),
         },
+        {
+          _id: "3",
+          worker: { _id: "w3", name: "John Doe" },
+          client: { _id: "c3", name: "ABC Company" },
+          description: "Worker is not responding to messages",
+          status: "resolved",
+          priority: "low",
+          createdAt: new Date().toISOString(),
+        },
       ];
+
       setDisputes(mockDisputes);
+
+      // Calculate HR-specific stats
+      const hrStats: HRStats = {
+        totalWorkers: workersData.length,
+        verifiedWorkers: workersData.filter((w: Worker) => w.isVerified).length,
+        pendingVerifications: workersData.filter((w: Worker) => !w.isVerified)
+          .length,
+        activeWorkers: workersData.filter((w: Worker) => w.isActive).length,
+        workersThisMonth: workersData.filter((w: Worker) => {
+          const createdDate = new Date(w.createdAt);
+          const thisMonth = new Date();
+          thisMonth.setDate(1);
+          return createdDate >= thisMonth;
+        }).length,
+        disputesOpen: mockDisputes.filter((d) => d.status === "open").length,
+        disputesResolved: mockDisputes.filter((d) => d.status === "resolved")
+          .length,
+        totalDisputes: mockDisputes.length,
+        performanceReviews: 0, // Placeholder
+        trainingCompleted: workersData.reduce(
+          (total: number, worker: Worker) =>
+            total + (worker.workerProfile?.education?.length || 0),
+          0,
+        ),
+      };
+
+      setStats(hrStats);
+
       setStats((prev) =>
         prev
           ? {
@@ -243,6 +264,16 @@ const HRAdminDashboard: React.FC = () => {
       return <Badge variant="warning">{t("worker.status.pending")}</Badge>;
     return <Badge variant="success">{t("worker.status.verified")}</Badge>;
   };
+
+  const workerSatisfactionRate = stats
+    ? Math.round((stats.activeWorkers / stats.totalWorkers) * 100)
+    : 0;
+  const verificationRate = stats
+    ? Math.round((stats.verifiedWorkers / stats.totalWorkers) * 100)
+    : 0;
+  const disputeResolutionRate = stats
+    ? Math.round((stats.disputesResolved / stats.totalDisputes) * 100)
+    : 0;
 
   if (loading) {
     return (
@@ -423,9 +454,7 @@ const HRAdminDashboard: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900">
                 {t("disputes.title")}
               </h2>
-              <Badge variant="danger">
-                {disputes.filter((d) => d.status === "open").length}
-              </Badge>
+              <Badge variant="danger">{disputes.length}</Badge>
             </div>
             <div className="space-y-3">
               {disputes.slice(0, 5).map((dispute) => (
@@ -530,12 +559,12 @@ const HRAdminDashboard: React.FC = () => {
                   <span className="text-gray-900">
                     {t("metrics.performance.workerSatisfaction")}
                   </span>
-                  <span className="text-gray-900">85%</span>
+                  <span className="text-gray-900">{`${workerSatisfactionRate}%`}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-green-600 h-2 rounded-full"
-                    style={{ width: "85%" }}
+                    style={{ width: `${workerSatisfactionRate}%` }}
                   ></div>
                 </div>
               </div>
@@ -544,12 +573,12 @@ const HRAdminDashboard: React.FC = () => {
                   <span className="text-gray-900">
                     {t("metrics.performance.verificationRate")}
                   </span>
-                  <span className="text-gray-900">92%</span>
+                  <span className="text-gray-900">{`${verificationRate}%`}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: "92%" }}
+                    style={{ width: `${verificationRate}%` }}
                   ></div>
                 </div>
               </div>
@@ -558,12 +587,12 @@ const HRAdminDashboard: React.FC = () => {
                   <span className="text-gray-900">
                     {t("metrics.performance.disputeResolution")}
                   </span>
-                  <span className="text-gray-900">78%</span>
+                  <span className="text-gray-900">{`${disputeResolutionRate}%`}</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-orange-600 h-2 rounded-full"
-                    style={{ width: "78%" }}
+                    style={{ width: `${disputeResolutionRate}%` }}
                   ></div>
                 </div>
               </div>
@@ -596,13 +625,17 @@ const HRAdminDashboard: React.FC = () => {
                 <span className="text-gray-600">
                   {t("metrics.monthly.fields.disputesResolved")}
                 </span>
-                <span className="font-semibold text-gray-900">12</span>
+                <span className="font-semibold text-gray-900">
+                  {stats?.disputesResolved || 0}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">
                   {t("metrics.monthly.fields.trainingCompleted")}
                 </span>
-                <span className="font-semibold text-gray-900">45</span>
+                <span className="font-semibold text-gray-900">
+                  {stats?.trainingCompleted || 0}
+                </span>
               </div>
             </div>
           </Card>
