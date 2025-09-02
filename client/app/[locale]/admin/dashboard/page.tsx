@@ -40,6 +40,7 @@ interface RecentUser {
   role: string;
   isVerified?: boolean;
   profile?: { verified?: boolean };
+  createdAt: string;
 }
 interface RecentJob {
   _id: string;
@@ -88,10 +89,46 @@ const AdminDashboard: React.FC = () => {
           adminAPI.getPayments(),
         ]);
 
+      setRecentUsers(usersResponse.data.data || []);
+      setRecentJobs(jobsResponse.data.data?.slice(0, 5) || []);
+
       const overview =
         dashboardResponse.data?.data?.overview ||
         dashboardResponse.data?.overview ||
         null;
+      console.log("overview", overview);
+
+      // Calculate monthly growth based on users and jobs
+      const now = new Date();
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const users = usersResponse.data.data || [];
+      const jobs = jobsResponse.data.data || [];
+
+      const thisMonthUsers = users.filter(
+        (u: RecentUser) => new Date(u.createdAt) >= thisMonth,
+      ).length;
+      const lastMonthUsers = users.filter((u: RecentUser) => {
+        const date = new Date(u.createdAt);
+        return date >= lastMonth && date < thisMonth;
+      }).length;
+
+      const thisMonthJobs = jobs.filter(
+        (j: RecentJob) => new Date(j.createdAt) >= thisMonth,
+      ).length;
+      const lastMonthJobs = jobs.filter((j: RecentJob) => {
+        const date = new Date(j.createdAt);
+        return date >= lastMonth && date < thisMonth;
+      }).length;
+
+      // Calculate growth percentage for both users and jobs
+      const userGrowth = lastMonthUsers
+        ? ((thisMonthUsers - lastMonthUsers) / lastMonthUsers) * 100
+        : 0;
+      const jobGrowth = lastMonthJobs
+        ? ((thisMonthJobs - lastMonthJobs) / lastMonthJobs) * 100
+        : 0;
+
       setStats(
         overview
           ? {
@@ -102,12 +139,11 @@ const AdminDashboard: React.FC = () => {
               completedJobs: overview.completedJobs,
               pendingVerifications: overview.pendingVerifications,
               disputedPayments: 0,
-              monthlyGrowth: 0,
+              monthlyGrowth: Math.round((userGrowth + jobGrowth) / 2),
             }
           : null,
       );
-      setRecentUsers(usersResponse.data.data || []);
-      setRecentJobs(jobsResponse.data.data?.slice(0, 5) || []);
+
       const payments: PaymentDispute[] = (paymentsResponse.data.data ||
         paymentsResponse.data.payments ||
         []) as PaymentDispute[];
@@ -282,7 +318,7 @@ const AdminDashboard: React.FC = () => {
                   {t("stats.monthlyGrowth.label")}
                 </p>
                 <p className="text-2xl font-bold text-purple-900">
-                  +{stats?.monthlyGrowth || 0}%
+                  {stats?.monthlyGrowth || 0}%
                 </p>
               </div>
             </div>
