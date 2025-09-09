@@ -84,20 +84,26 @@ export default function Home() {
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               {t("hero.description")}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row sm:flex-nowrap gap-4 justify-center items-center">
               <Button
                 size="lg"
                 onClick={handleGetStarted}
-                className="bg-gradient-to-r from-blue-800 to-cyan-600 hover:from-blue-900 hover:to-cyan-700 shadow-lg text-white"
+                className="group bg-gradient-to-r from-blue-700 to-cyan-600 hover:from-blue-800 hover:to-cyan-700 text-white shadow-lg focus:ring-blue-600"
               >
-                {user ? t("hero.goToDashboard") : t("hero.getStarted")}
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <span className="inline-flex items-center">
+                  <span className="mr-3">
+                    {user ? t("hero.goToDashboard") : t("hero.getStarted")}
+                  </span>
+                  <span className="ml-1 flex h-8 w-8 items-center justify-center rounded-md bg-cyan-600 text-white shadow-sm transition-colors group-hover:bg-cyan-700">
+                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  </span>
+                </span>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 onClick={() => router.push("/jobs")}
-                className="border-2 border-blue-800 text-blue-800 hover:bg-gradient-to-r hover:from-blue-800 hover:to-cyan-600 hover:text-white transition-all duration-300"
+                className="shadow-sm"
               >
                 {t("hero.browseJobs")}
               </Button>

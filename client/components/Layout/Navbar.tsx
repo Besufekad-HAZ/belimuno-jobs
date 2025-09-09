@@ -22,14 +22,12 @@ const Navbar: React.FC = () => {
   const menuRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("Navbar");
 
-  // Listen for login/logout events across tabs and on auth changes
+  // Sync user and notifications
   useEffect(() => {
     const updateUser = () => {
       const currentUser = getStoredUser();
       setUser(currentUser);
-      if (currentUser) {
-        fetchNotifications();
-      }
+      if (currentUser) fetchNotifications();
     };
     updateUser();
     window.addEventListener("authChanged", updateUser);
@@ -39,7 +37,24 @@ const Navbar: React.FC = () => {
       window.removeEventListener("storage", updateUser);
     };
   }, []);
-  // Close user menu when clicking outside
+
+  // Close mobile on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Lock scroll when mobile menu is open and close via ESC
+  useEffect(() => {
+    if (mobileOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
+  // Close user menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -56,27 +71,22 @@ const Navbar: React.FC = () => {
 
   const fetchNotifications = async () => {
     try {
+      type NotificationItem = { isRead?: boolean; read?: boolean };
       const response = await notificationsAPI.getAll();
-      const notif =
-        response.data?.data ||
-        response.data?.notifications ||
-        ([] as unknown[]);
+      const notif = ((response?.data as { notifications?: NotificationItem[] })
+        ?.notifications ?? []) as NotificationItem[];
       const count = Array.isArray(notif)
-        ? notif.filter((n: unknown) => {
-            const x = n as { isRead?: boolean; read?: boolean };
-            return !x?.isRead && !x?.read;
-          }).length
+        ? notif.filter((n: NotificationItem) => !n?.isRead && !n?.read).length
         : 0;
       setUnreadCount(count);
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
     }
   };
 
   const handleLogout = () => {
     clearAuth();
     setUser(null);
-    // Notify all tabs
     window.dispatchEvent(new Event("authChanged"));
     router.push("/login");
   };
@@ -118,17 +128,19 @@ const Navbar: React.FC = () => {
               </h1>
             </Link>
 
-            {/* Navigation Links (desktop) */}
-            <nav className="hidden lg:flex space-x-6">
+            {/* Desktop navigation */}
+            <nav className="hidden lg:flex space-x-6" aria-label="Primary">
               <Link
                 href="/"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                aria-current={pathname === "/" ? "page" : undefined}
               >
                 {t("navigation.home")}
               </Link>
               <Link
                 href="/about"
                 className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                aria-current={pathname === "/about" ? "page" : undefined}
               >
                 {t("navigation.about")}
               </Link>
@@ -166,6 +178,8 @@ const Navbar: React.FC = () => {
                 className="hidden max-[900px]:inline-flex p-2 text-cyan-100 hover:text-white"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-menu"
               >
                 {mobileOpen ? (
                   <X className="h-7 w-7" />
@@ -173,14 +187,17 @@ const Navbar: React.FC = () => {
                   <Menu className="h-7 w-7" />
                 )}
               </button>
-              {/* Notifications */}
-              <NotificationDropdown
-                unreadCount={unreadCount}
-                onNotificationUpdate={fetchNotifications}
-              />
 
-              {/* User Menu */}
-              <div className="relative" ref={menuRef}>
+              {/* Notifications - hide on very small screens to avoid clashes */}
+              <div className="hidden sm:block">
+                <NotificationDropdown
+                  unreadCount={unreadCount}
+                  onNotificationUpdate={fetchNotifications}
+                />
+              </div>
+
+              {/* User Menu - hide name/role on small screens */}
+              <div className="relative hidden sm:block" ref={menuRef}>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="flex items-center space-x-2 p-2 text-cyan-100 hover:text-white"
@@ -193,7 +210,6 @@ const Navbar: React.FC = () => {
                     ({getRoleDisplayName(user.role)})
                   </span>
                 </button>
-
                 {isMenuOpen && (
                   <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-cyan-200 transition ease-out duration-200">
                     <Link
@@ -220,7 +236,9 @@ const Navbar: React.FC = () => {
                   </div>
                 )}
               </div>
-              <LanguageSelector />
+              <div className="hidden sm:block">
+                <LanguageSelector />
+              </div>
             </div>
           ) : (
             <div className="flex items-center space-x-4">
@@ -236,81 +254,154 @@ const Navbar: React.FC = () => {
                   <Menu className="h-7 w-7" />
                 )}
               </button>
-              <div className="flex items-center gap-2 rounded-lg p-1 bg-cyan-800/40 border border-cyan-300/60">
+              {/* Hide auth buttons on small screens to avoid crowding */}
+              <div className="hidden sm:flex items-center gap-2 rounded-lg p-1 bg-cyan-800/40 border border-cyan-300/60">
                 <Link href="/login" className="relative">
                   <span
-                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${
-                      pathname === "/login"
-                        ? "bg-white text-cyan-900 shadow-sm"
-                        : "text-cyan-100 hover:text-white"
-                    }`}
+                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname === "/login" ? "bg-white text-cyan-900 shadow-sm" : "text-cyan-100 hover:text-white"}`}
                   >
                     {t("auth.login")}
                   </span>
                 </Link>
                 <Link href="/register" className="relative">
                   <span
-                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${
-                      pathname === "/register"
-                        ? "bg-white text-cyan-900 shadow-sm"
-                        : "text-cyan-100 hover:text-white"
-                    }`}
+                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname === "/register" ? "bg-white text-cyan-900 shadow-sm" : "text-cyan-100 hover:text-white"}`}
                   >
                     {t("auth.signup")}
                   </span>
                 </Link>
               </div>
-              <LanguageSelector />
+              <div className="hidden sm:block">
+                <LanguageSelector />
+              </div>
             </div>
           )}
         </div>
       </div>
+
       {/* Mobile menu (<= 900px) */}
       {mobileOpen && (
-        <div className="hidden max-[900px]:block border-t border-cyan-300/40 bg-gradient-to-b from-cyan-700 to-cyan-600">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1">
-            <Link
-              href="/"
-              onClick={() => setMobileOpen(false)}
-              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+        <div
+          className="hidden max-[900px]:block"
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile menu"
+        >
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/40"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden
+          />
+          {/* Sliding sheet below navbar */}
+          <div className="fixed top-16 inset-x-0 z-50 border-t border-cyan-300/40 bg-gradient-to-b from-cyan-700 to-cyan-600 shadow-lg">
+            <div
+              className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1"
+              role="menu"
             >
-              {t("navigation.home")}
-            </Link>
-            <Link
-              href="/about"
-              onClick={() => setMobileOpen(false)}
-              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
-            >
-              {t("navigation.about")}
-            </Link>
-            <Link
-              href="/services"
-              onClick={() => setMobileOpen(false)}
-              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
-            >
-              {t("navigation.services")}
-            </Link>
-            <Link
-              href="/clients"
-              onClick={() => setMobileOpen(false)}
-              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
-            >
-              {t("navigation.clients")}
-            </Link>
-            <Link
-              href="/jobs"
-              onClick={() => setMobileOpen(false)}
-              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
-            >
-              {t("navigation.jobs")}
-            </Link>
-            <Link
-              href="/contact"
-              onClick={() => setMobileOpen(false)}
-              className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
-            >
-              {t("navigation.contact")}
-            </Link>
+              {/* Primary nav links */}
+              <Link
+                href="/"
+                onClick={() => setMobileOpen(false)}
+                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                role="menuitem"
+              >
+                {t("navigation.home")}
+              </Link>
+              <Link
+                href="/about"
+                onClick={() => setMobileOpen(false)}
+                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+              >
+                {t("navigation.about")}
+              </Link>
+              <Link
+                href="/services"
+                onClick={() => setMobileOpen(false)}
+                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+              >
+                {t("navigation.services")}
+              </Link>
+              <Link
+                href="/clients"
+                onClick={() => setMobileOpen(false)}
+                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+              >
+                {t("navigation.clients")}
+              </Link>
+              <Link
+                href="/jobs"
+                onClick={() => setMobileOpen(false)}
+                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+              >
+                {t("navigation.jobs")}
+              </Link>
+              <Link
+                href="/contact"
+                onClick={() => setMobileOpen(false)}
+                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+              >
+                {t("navigation.contact")}
+              </Link>
+
+              {/* Divider */}
+              <div
+                className="border-t border-white/20 my-3"
+                aria-hidden="true"
+              />
+
+              {/* Secondary actions (moved from header on small screens) */}
+              {user ? (
+                <div className="space-y-1">
+                  <Link
+                    href={getRoleDashboardPath(user.role)}
+                    onClick={() => setMobileOpen(false)}
+                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                  >
+                    {t("auth.dashboard")}
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                  >
+                    {t("auth.profile")}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                  >
+                    {t("auth.logout")}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                  >
+                    {t("auth.login")}
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileOpen(false)}
+                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                  >
+                    {t("auth.signup")}
+                  </Link>
+                </div>
+              )}
+
+              {/* Language selector (mobile) */}
+              <div className="pt-2">
+                <LanguageSelector />
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -45,9 +45,13 @@ const LanguageSelector = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <div
+      <button
+        type="button"
         className="flex items-center bg-white text-cyan-700 px-2 py-1 rounded-lg cursor-pointer"
         onClick={toggleDropdown}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-controls="language-menu"
       >
         <span>{languages[locale as keyof typeof languages]}</span>
         <svg
@@ -56,6 +60,7 @@ const LanguageSelector = () => {
           viewBox="0 0 24 24"
           stroke="currentColor"
           className="ml-2 h-[18px] w-[18px] border rounded-full"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -64,15 +69,27 @@ const LanguageSelector = () => {
             d="M19 9l-7 7-7-7"
           />
         </svg>
-      </div>
+      </button>
 
       {isOpen && (
-        <ul className="absolute mt-2 bg-cyan-700 text-white rounded-lg shadow-lg">
+        <ul
+          id="language-menu"
+          role="listbox"
+          tabIndex={-1}
+          className="absolute mt-2 bg-cyan-700 text-white rounded-lg shadow-lg"
+        >
           {Object.entries(languages).map(([code, name]) => (
             <li
               key={code}
+              role="option"
+              tabIndex={0}
+              aria-selected={locale === code}
               className="px-4 py-2 hover:bg-cyan-800 cursor-pointer border-b border-cyan-800 last:border-b-0"
               onClick={() => handleLanguageChange(code)}
+              onKeyDown={(e) =>
+                (e.key === "Enter" || e.key === " ") &&
+                handleLanguageChange(code)
+              }
             >
               {name}
             </li>
