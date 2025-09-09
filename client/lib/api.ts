@@ -201,6 +201,51 @@ export const adminAPI = {
       isPublic?: boolean;
     },
   ) => api.put(`/admin/reviews/${id}`, payload),
+
+  // Disputes management
+  getDisputes: (params?: {
+    status?: "open" | "investigating" | "resolved" | "closed";
+    priority?: "low" | "medium" | "high" | "urgent";
+    type?:
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other";
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) => api.get("/admin/disputes", { params }),
+  getDispute: (id: string) => api.get(`/admin/disputes/${id}`),
+  createDispute: (payload: {
+    title: string;
+    description: string;
+    type:
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other";
+    priority: "low" | "medium" | "high" | "urgent";
+    worker: string;
+    client: string;
+    job?: string;
+    evidence?: Array<{
+      type: "image" | "document" | "message";
+      url: string;
+      description?: string;
+    }>;
+  }) => api.post("/admin/disputes", payload),
+  updateDispute: (
+    id: string,
+    payload: {
+      status?: "investigating" | "resolved" | "closed";
+      resolution?: string;
+      hrNotes?: string;
+    },
+  ) => api.put(`/admin/disputes/${id}`, payload),
 };
 
 // Notifications API

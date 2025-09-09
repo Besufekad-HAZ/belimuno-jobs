@@ -525,7 +525,9 @@ const AdminPaymentsPage: React.FC = () => {
           <div className="p-4">
             <div className="flex items-center mb-3">
               <ShieldAlert className="h-5 w-5 text-orange-600 mr-2" />
-              <h2 className="text-lg font-semibold text-blue-800">Resolve Dispute</h2>
+              <h2 className="text-lg font-semibold text-blue-800">
+                Resolve Dispute
+              </h2>
             </div>
             <div className="text-sm text-gray-600 mb-3">
               Choose an action and provide a short resolution note.
