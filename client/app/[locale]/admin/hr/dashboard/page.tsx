@@ -107,10 +107,9 @@ const HRAdminDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [usersResponse, dashboardResponse] = await Promise.all([
+      const [usersResponse, disputesResponse] = await Promise.all([
         adminAPI.getUsers({ role: "worker", limit: 100 }),
-        adminAPI.getDashboard(),
+        adminAPI.getDisputes(),
       ]);
 
       // Handle different API response structures
@@ -122,41 +121,9 @@ const HRAdminDashboard: React.FC = () => {
       console.log("workersData", workersData);
       setWorkers(workersData);
 
-      // Mock disputes for now - in real implementation, fetch from API
-      const mockDisputes: Dispute[] = [
-        {
-          _id: "1",
-          worker: { _id: "w1", name: "John Worker" },
-          client: { _id: "c1", name: "ABC Company" },
-          job: { _id: "j1", title: "Web Development Project" },
-          description:
-            "Client is unsatisfied with work quality and requesting refund",
-          status: "open",
-          priority: "high",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          _id: "2",
-          worker: { _id: "w2", name: "Jane Designer" },
-          client: { _id: "c2", name: "XYZ Corp" },
-          description:
-            "Worker claims project scope was expanded without compensation",
-          status: "investigating",
-          priority: "medium",
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          _id: "3",
-          worker: { _id: "w3", name: "John Doe" },
-          client: { _id: "c3", name: "ABC Company" },
-          description: "Worker is not responding to messages",
-          status: "resolved",
-          priority: "low",
-          createdAt: new Date().toISOString(),
-        },
-      ];
-
-      setDisputes(mockDisputes);
+      // Set real disputes data
+      const disputesData = disputesResponse.data?.data || [];
+      setDisputes(disputesData);
 
       // Calculate HR-specific stats
       const hrStats: HRStats = {
@@ -171,10 +138,12 @@ const HRAdminDashboard: React.FC = () => {
           thisMonth.setDate(1);
           return createdDate >= thisMonth;
         }).length,
-        disputesOpen: mockDisputes.filter((d) => d.status === "open").length,
-        disputesResolved: mockDisputes.filter((d) => d.status === "resolved")
+        disputesOpen: disputesData.filter((d: Dispute) => d.status === "open")
           .length,
-        totalDisputes: mockDisputes.length,
+        disputesResolved: disputesData.filter(
+          (d: Dispute) => d.status === "resolved",
+        ).length,
+        totalDisputes: disputesData.length,
         performanceReviews: 0, // Placeholder
         trainingCompleted: workersData.reduce(
           (total: number, worker: Worker) =>
@@ -189,8 +158,9 @@ const HRAdminDashboard: React.FC = () => {
         prev
           ? {
               ...prev,
-              disputesOpen: mockDisputes.filter((d) => d.status === "open")
-                .length,
+              disputesOpen: disputesData.filter(
+                (d: Dispute) => d.status === "open",
+              ).length,
             }
           : null,
       );
@@ -472,9 +442,6 @@ const HRAdminDashboard: React.FC = () => {
                         size="sm"
                       >
                         {t(`disputes.priority.${dispute.priority}`)}
-                      </Badge>
-                      <Badge variant="secondary" size="sm">
-                        {dispute.status}
                       </Badge>
                       <Badge variant="secondary" size="sm">
                         {dispute.status}

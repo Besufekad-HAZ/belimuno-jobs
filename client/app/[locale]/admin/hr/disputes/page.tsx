@@ -405,7 +405,9 @@ const DisputeResolution: React.FC = () => {
                           {dispute.worker.workerProfile && (
                             <div className="flex items-center space-x-2 mt-1">
                               <span className="text-xs text-gray-500">
-                                ⭐ {dispute.worker.workerProfile.rating}/5
+                                ⭐{" "}
+                                {dispute.worker.workerProfile.rating.toFixed(1)}
+                                /5
                               </span>
                               <span className="text-xs text-gray-500">
                                 {dispute.worker.workerProfile.completedJobs}{" "}
