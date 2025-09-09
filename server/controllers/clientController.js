@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Application = require("../models/Application");
 const Notification = require("../models/Notification");
 const Payment = require("../models/Payment");
+const Dispute = require("../models/Dispute");
 const NotificationService = require("../utils/notificationService");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
@@ -279,12 +280,10 @@ exports.getJobMessages = asyncHandler(async (req, res) => {
 exports.sendJobMessage = asyncHandler(async (req, res) => {
   const { content, attachments } = req.body || {};
   if (!content && (!attachments || !attachments.length)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Message content or attachments required",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Message content or attachments required",
+    });
   }
 
   const job = await Job.findOne({ _id: req.params.id, client: req.user._id });
@@ -597,12 +596,10 @@ exports.uploadPaymentProof = asyncHandler(async (req, res) => {
 
   // Only the client/payer can upload proof
   if (String(payment.payer) !== String(req.user._id)) {
-    return res
-      .status(403)
-      .json({
-        success: false,
-        message: "Not authorized to upload proof for this payment",
-      });
+    return res.status(403).json({
+      success: false,
+      message: "Not authorized to upload proof for this payment",
+    });
   }
 
   payment.proof = {
@@ -704,5 +701,168 @@ exports.getPayments = asyncHandler(async (req, res) => {
       pages: Math.ceil(total / limit),
     },
     data: payments,
+  });
+});
+
+// @desc    Create a new dispute
+// @route   POST /api/client/disputes
+// @access  Private/Client
+exports.createDispute = asyncHandler(async (req, res) => {
+  const { title, description, type, priority, job: jobId, evidence } = req.body;
+
+  // Verify job exists and client owns it
+  const job = await Job.findOne({ _id: jobId, client: req.user._id });
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: "Job not found or you are not the owner",
+    });
+  }
+
+  // Create dispute
+  const dispute = await Dispute.create({
+    title,
+    description,
+    type,
+    priority,
+    client: req.user._id,
+    worker: job.worker,
+    job: job._id,
+    evidence,
+  });
+
+  // Update job status to disputed
+  job.status = "disputed";
+  job.dispute = {
+    isDisputed: true,
+    raisedBy: req.user._id,
+    reason: description,
+    raisedAt: new Date(),
+    status: "open",
+  };
+  await job.save();
+
+  // Notify worker and admins
+  await Notification.create({
+    recipient: job.worker,
+    title: "New Dispute Created",
+    message: `A dispute has been raised for job "${job.title}": ${title}`,
+    type: "dispute",
+    priority: "high",
+    relatedJob: job._id,
+  });
+
+  // Also notify HR admins
+  const hrAdmins = await User.find({ role: "admin_hr" }).select("_id");
+  if (hrAdmins.length > 0) {
+    await Notification.create({
+      recipients: hrAdmins.map((admin) => admin._id),
+      title: "New Client Dispute",
+      message: `Client ${req.user.name} has raised a dispute for job "${job.title}"`,
+      type: "dispute",
+      priority: "high",
+      relatedJob: job._id,
+    });
+  }
+
+  res.status(201).json({
+    success: true,
+    data: dispute,
+  });
+});
+
+// @desc    Get all disputes for client
+// @route   GET /api/client/disputes
+// @access  Private/Client
+exports.getDisputes = asyncHandler(async (req, res) => {
+  const { status, page = 1, limit = 10 } = req.query;
+
+  const query = { client: req.user._id };
+  if (status) query.status = status;
+
+  const disputes = await Dispute.find(query)
+    .populate("job", "title budget status")
+    .populate("worker", "name email profile")
+    .sort({ createdAt: -1 })
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
+
+  const total = await Dispute.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: disputes.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit),
+    },
+    data: disputes,
+  });
+});
+
+// @desc    Get single dispute details
+// @route   GET /api/client/disputes/:id
+// @access  Private/Client
+exports.getDispute = asyncHandler(async (req, res) => {
+  const dispute = await Dispute.findOne({
+    _id: req.params.id,
+    client: req.user._id,
+  })
+    .populate("job", "title budget status")
+    .populate("worker", "name email profile")
+    .populate("resolvedBy", "name");
+
+  if (!dispute) {
+    return res.status(404).json({
+      success: false,
+      message: "Dispute not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: dispute,
+  });
+});
+
+// @desc    Update dispute details
+// @route   PUT /api/client/disputes/:id
+// @access  Private/Client
+exports.updateDispute = asyncHandler(async (req, res) => {
+  const { description, evidence } = req.body;
+
+  const dispute = await Dispute.findOne({
+    _id: req.params.id,
+    client: req.user._id,
+  });
+
+  if (!dispute) {
+    return res.status(404).json({
+      success: false,
+      message: "Dispute not found",
+    });
+  }
+
+  // Only allow updates if dispute is not resolved
+  if (dispute.status === "resolved" || dispute.status === "closed") {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot update a resolved or closed dispute",
+    });
+  }
+
+  if (description) dispute.description = description;
+  if (evidence) {
+    // Append new evidence
+    dispute.evidence = [...(dispute.evidence || []), ...evidence];
+  }
+
+  await dispute.save();
+
+  res.status(200).json({
+    success: true,
+    data: dispute,
   });
 });

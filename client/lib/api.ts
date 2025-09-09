@@ -129,6 +129,46 @@ export const clientAPI = {
   getJobMessages: (jobId: string) => api.get(`/client/jobs/${jobId}/messages`),
   sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
     api.post(`/client/jobs/${jobId}/messages`, { content, attachments }),
+
+  // Disputes
+  createDispute: (payload: {
+    title: string;
+    description: string;
+    type:
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other";
+    priority: "low" | "medium" | "high" | "urgent";
+    job: string;
+    evidence?: Array<{
+      type: "image" | "document" | "message";
+      url: string;
+      description?: string;
+    }>;
+  }) => api.post("/client/disputes", payload),
+
+  getDisputes: (params?: {
+    status?: "open" | "investigating" | "resolved" | "closed";
+    page?: number;
+    limit?: number;
+  }) => api.get("/client/disputes", { params }),
+
+  getDispute: (id: string) => api.get(`/client/disputes/${id}`),
+
+  updateDispute: (
+    id: string,
+    payload: {
+      description?: string;
+      evidence?: Array<{
+        type: "image" | "document" | "message";
+        url: string;
+        description?: string;
+      }>;
+    },
+  ) => api.put(`/client/disputes/${id}`, payload),
 };
 
 // Worker API
