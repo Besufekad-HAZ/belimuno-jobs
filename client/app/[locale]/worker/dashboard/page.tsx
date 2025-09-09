@@ -21,6 +21,7 @@ import {
   Smile,
   FileText,
   X,
+  AlertTriangle,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { workerAPI, jobsAPI, notificationsAPI } from "@/lib/api";
@@ -139,6 +140,43 @@ const WorkerDashboard: React.FC = () => {
   const [rateJobId, setRateJobId] = useState<string | null>(null);
   const [clientRating, setClientRating] = useState(5);
   const [clientReview, setClientReview] = useState("");
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [selectedJobForDispute, setSelectedJobForDispute] =
+    useState<SimpleJob | null>(null);
+  const [disputeData, setDisputeData] = useState({
+    title: "",
+    description: "",
+    type: "payment" as
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other",
+    priority: "medium" as "low" | "medium" | "high" | "urgent",
+    evidence: [] as Array<{
+      type: "image" | "document" | "message";
+      url: string;
+      description?: string;
+    }>,
+  });
+  const [disputes, setDisputes] = useState<
+    Array<{
+      _id: string;
+      title: string;
+      description: string;
+      status: string;
+      priority: string;
+      type: string;
+      job?: {
+        title: string;
+        budget: number;
+      };
+      createdAt: string;
+      updatedAt: string;
+      resolution?: string;
+    }>
+  >([]);
   const router = useRouter();
   const PROPOSAL_MAX = 1200;
   const t = useTranslations("WorkerDashboard");
@@ -172,12 +210,14 @@ const WorkerDashboard: React.FC = () => {
         myJobsResponse,
         applicationsResponse,
         earningsResponse,
+        disputesResponse,
       ] = await Promise.all([
         workerAPI.getDashboard(),
         jobsAPI.getAll({ status: "open", limit: 10 }),
         workerAPI.getJobs(),
         workerAPI.getApplications(),
         workerAPI.getEarnings(),
+        workerAPI.getDisputes(),
       ]);
 
       setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
@@ -189,6 +229,7 @@ const WorkerDashboard: React.FC = () => {
         new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]),
       );
       setEarnings(earningsResponse.data);
+      setDisputes(disputesResponse.data.data || []);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
@@ -705,6 +746,19 @@ const WorkerDashboard: React.FC = () => {
                         >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
+                        {job.status !== "completed" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedJobForDispute(job);
+                              setShowDisputeModal(true);
+                            }}
+                          >
+                            <AlertTriangle className="h-4 w-4 mr-1" />
+                            Raise Dispute
+                          </Button>
+                        )}
                         {job.status === "completed" &&
                           !job.review?.workerReview?.rating && (
                             <Button
@@ -721,6 +775,76 @@ const WorkerDashboard: React.FC = () => {
                     </div>
                   </div>
                 ))}
+            </div>
+          </Card>
+
+          {/* Active Disputes */}
+          <Card>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Active Disputes
+              </h3>
+            </div>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {disputes
+                .filter((d) => d.status !== "resolved" && d.status !== "closed")
+                .map((dispute) => (
+                  <div key={dispute._id} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium text-gray-900">
+                          {dispute.title}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {dispute.job?.title}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge
+                          variant={
+                            dispute.priority === "urgent"
+                              ? "danger"
+                              : dispute.priority === "high"
+                                ? "warning"
+                                : "info"
+                          }
+                        >
+                          {dispute.priority}
+                        </Badge>
+                        <Badge
+                          variant={
+                            dispute.status === "open"
+                              ? "danger"
+                              : dispute.status === "investigating"
+                                ? "warning"
+                                : "success"
+                          }
+                        >
+                          {dispute.status}
+                        </Badge>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      {dispute.description}
+                    </p>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>
+                        Created{" "}
+                        {formatDistanceToNow(new Date(dispute.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                      <span>Type: {dispute.type}</span>
+                    </div>
+                  </div>
+                ))}
+              {disputes.filter(
+                (d) => d.status !== "resolved" && d.status !== "closed",
+              ).length === 0 && (
+                <p className="text-center text-gray-500 py-4">
+                  No active disputes
+                </p>
+              )}
             </div>
           </Card>
         </div>
@@ -1187,6 +1311,225 @@ const WorkerDashboard: React.FC = () => {
             )}
           </div>
         </Modal>
+        {/* Dispute Modal */}
+        <Modal
+          isOpen={showDisputeModal}
+          onClose={() => {
+            setShowDisputeModal(false);
+            setSelectedJobForDispute(null);
+            setDisputeData({
+              title: "",
+              description: "",
+              type: "payment",
+              priority: "medium",
+              evidence: [],
+            });
+          }}
+          title="Raise a Dispute"
+          size="lg"
+        >
+          {selectedJobForDispute && (
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
+                <p className="text-gray-700">{selectedJobForDispute.title}</p>
+                <p className="text-sm text-gray-500">
+                  Budget: ETB {selectedJobForDispute.budget?.toLocaleString()}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Dispute Title
+                  </label>
+                  <input
+                    type="text"
+                    value={disputeData.title}
+                    onChange={(e) =>
+                      setDisputeData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    placeholder="Brief title describing the issue"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={disputeData.description}
+                    onChange={(e) =>
+                      setDisputeData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    placeholder="Detailed description of the issue..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Type
+                    </label>
+                    <select
+                      value={disputeData.type}
+                      onChange={(e) =>
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          type: e.target.value as typeof disputeData.type,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="payment">Payment Issue</option>
+                      <option value="quality">Quality Issue</option>
+                      <option value="communication">Communication Issue</option>
+                      <option value="deadline">Deadline Issue</option>
+                      <option value="scope">Scope Issue</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Priority
+                    </label>
+                    <select
+                      value={disputeData.priority}
+                      onChange={(e) =>
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          priority: e.target
+                            .value as typeof disputeData.priority,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Evidence
+                  </label>
+                  <div className="space-y-2">
+                    {disputeData.evidence.map((evidence, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">
+                            {evidence.description}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {evidence.type}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setDisputeData((prev) => ({
+                              ...prev,
+                              evidence: prev.evidence.filter(
+                                (_, i) => i !== index,
+                              ),
+                            }))
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Here you would typically open a file picker or evidence upload modal
+                        // For now, we'll just add a dummy evidence item
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          evidence: [
+                            ...prev.evidence,
+                            {
+                              type: "document",
+                              url: "https://example.com/evidence.pdf",
+                              description: "Supporting document",
+                            },
+                          ],
+                        }));
+                      }}
+                    >
+                      Add Evidence
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDisputeModal(false);
+                    setSelectedJobForDispute(null);
+                    setDisputeData({
+                      title: "",
+                      description: "",
+                      type: "payment",
+                      priority: "medium",
+                      evidence: [],
+                    });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      await workerAPI.createDispute({
+                        ...disputeData,
+                        job: selectedJobForDispute._id,
+                      });
+                      setShowDisputeModal(false);
+                      setSelectedJobForDispute(null);
+                      setDisputeData({
+                        title: "",
+                        description: "",
+                        type: "payment",
+                        priority: "medium",
+                        evidence: [],
+                      });
+                      fetchDashboardData(); // Refresh the dashboard data
+                      alert("Dispute created successfully");
+                    } catch (error) {
+                      console.error("Failed to create dispute:", error);
+                      alert("Failed to create dispute. Please try again.");
+                    }
+                  }}
+                  disabled={!disputeData.title || !disputeData.description}
+                >
+                  Submit Dispute
+                </Button>
+              </div>
+            </div>
+          )}
+        </Modal>
+
         {/* Chat Modal */}
         <Modal
           isOpen={!!chatJobId}

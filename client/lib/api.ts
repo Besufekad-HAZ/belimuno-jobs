@@ -161,6 +161,46 @@ export const workerAPI = {
     jobId: string,
     payload: { rating: number; comment: string; title?: string },
   ) => api.post(`/worker/jobs/${jobId}/review`, payload),
+
+  // Disputes
+  createDispute: (payload: {
+    title: string;
+    description: string;
+    type:
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other";
+    priority: "low" | "medium" | "high" | "urgent";
+    job: string;
+    evidence?: Array<{
+      type: "image" | "document" | "message";
+      url: string;
+      description?: string;
+    }>;
+  }) => api.post("/worker/disputes", payload),
+
+  getDisputes: (params?: {
+    status?: "open" | "investigating" | "resolved" | "closed";
+    page?: number;
+    limit?: number;
+  }) => api.get("/worker/disputes", { params }),
+
+  getDispute: (id: string) => api.get(`/worker/disputes/${id}`),
+
+  updateDispute: (
+    id: string,
+    payload: {
+      description?: string;
+      evidence?: Array<{
+        type: "image" | "document" | "message";
+        url: string;
+        description?: string;
+      }>;
+    },
+  ) => api.put(`/worker/disputes/${id}`, payload),
 };
 
 // Admin API
