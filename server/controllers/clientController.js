@@ -747,22 +747,27 @@ exports.createDispute = asyncHandler(async (req, res) => {
     recipient: job.worker,
     title: "New Dispute Created",
     message: `A dispute has been raised for job "${job.title}": ${title}`,
-    type: "dispute",
-    priority: "high",
+    type: "dispute_raised",
+    priority: priority,
     relatedJob: job._id,
   });
 
   // Also notify HR admins
   const hrAdmins = await User.find({ role: "admin_hr" }).select("_id");
   if (hrAdmins.length > 0) {
-    await Notification.create({
-      recipients: hrAdmins.map((admin) => admin._id),
-      title: "New Client Dispute",
-      message: `Client ${req.user.name} has raised a dispute for job "${job.title}"`,
-      type: "dispute",
-      priority: "high",
-      relatedJob: job._id,
-    });
+    // Create separate notifications for each admin
+    await Promise.all(
+      hrAdmins.map((admin) =>
+        Notification.create({
+          recipient: admin._id,
+          title: "New Client Dispute",
+          message: `Client ${req.user.name} has raised a dispute for job "${job.title}"`,
+          type: "dispute_raised",
+          priority: priority,
+          relatedJob: job._id,
+        })
+      )
+    );
   }
 
   res.status(201).json({

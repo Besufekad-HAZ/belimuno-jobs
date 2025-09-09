@@ -229,6 +229,7 @@ const WorkerDashboard: React.FC = () => {
         new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]),
       );
       setEarnings(earningsResponse.data);
+      console.log("disputes", disputesResponse.data.data);
       setDisputes(disputesResponse.data.data || []);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
@@ -662,6 +663,7 @@ const WorkerDashboard: React.FC = () => {
                       "in_progress",
                       "revision_requested",
                       "completed",
+                      "disputed",
                     ].includes(job.status),
                 )
                 .map((job) => (
@@ -746,7 +748,10 @@ const WorkerDashboard: React.FC = () => {
                         >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
-                        {job.status !== "completed" && (
+                        {(job.status === "in_progress" ||
+                          job.status === "submitted" ||
+                          job.status === "revision_requested" ||
+                          job.status === "completed") && (
                           <Button
                             size="sm"
                             variant="outline"
@@ -1508,11 +1513,11 @@ const WorkerDashboard: React.FC = () => {
                       setShowDisputeModal(false);
                       setSelectedJobForDispute(null);
                       setDisputeData({
-                        title: "",
-                        description: "",
-                        type: "payment",
-                        priority: "medium",
-                        evidence: [],
+                        title: disputeData.title,
+                        description: disputeData.description,
+                        type: disputeData.type,
+                        priority: disputeData.priority,
+                        evidence: disputeData.evidence,
                       });
                       fetchDashboardData(); // Refresh the dashboard data
                       alert("Dispute created successfully");

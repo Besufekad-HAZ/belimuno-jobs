@@ -506,36 +506,46 @@ const ClientDashboard: React.FC = () => {
                         {t("sections.jobs.actions.applications")}
                       </Button>
                     </Link>
-                    {job.status === "awaiting_completion" ||
-                      (job.status === "assigned" && (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleRequestRevision(job._id)}
-                          >
-                            {t("sections.jobs.actions.requestRevision")}
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handlePaymentAndRating(job)}
-                          >
-                            <CreditCard className="h-4 w-4 mr-1" />
-                            {t("sections.jobs.actions.payAndRate")}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedJobForDispute(job);
-                              setShowDisputeModal(true);
-                            }}
-                          >
-                            <AlertTriangle className="h-4 w-4 mr-1" />
-                            Raise Dispute
-                          </Button>
-                        </>
-                      ))}
+
+                    {/* Show Request Revision button for submitted jobs */}
+                    {job.status === "submitted" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRequestRevision(job._id)}
+                      >
+                        {t("sections.jobs.actions.requestRevision")}
+                      </Button>
+                    )}
+
+                    {/* Show Pay & Rate button for completed jobs */}
+                    {job.status === "completed" && (
+                      <Button
+                        size="sm"
+                        onClick={() => handlePaymentAndRating(job)}
+                      >
+                        <CreditCard className="h-4 w-4 mr-1" />
+                        {t("sections.jobs.actions.payAndRate")}
+                      </Button>
+                    )}
+
+                    {/* Show Raise Dispute button for in_progress, submitted, or completed jobs */}
+                    {(job.status === "assigned" ||
+                      job.status === "in_progress" ||
+                      job.status === "submitted" ||
+                      job.status === "completed") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedJobForDispute(job);
+                          setShowDisputeModal(true);
+                        }}
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-1" />
+                        Raise Dispute
+                      </Button>
+                    )}
                   </div>
                 </div>
 
