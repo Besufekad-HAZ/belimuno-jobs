@@ -24,7 +24,7 @@ const AboutPage: React.FC = () => {
     {
       name: "Managing Director",
       department: "Management",
-      role: "ANALYST ASSETS",
+      role: "MULUSEW ASRES",
     },
     {
       name: "Human Resource Department Head",
@@ -39,18 +39,27 @@ const AboutPage: React.FC = () => {
     {
       name: "Outsourced Service Management Dept",
       department: "Operations",
-      role: "FIRST TADESSE",
+      role: "ASSAMINEW HAREGEWOIN",
     },
-    { name: "Finance Division", department: "Finance", role: "MAMDOUH ABEBE" },
+    {
+      name: "Outsourced Service Management Dept",
+      department: "Operations",
+      role: "FIKIR TADESSE",
+    },
+    {
+      name: "Finance Division",
+      department: "Finance",
+      role: "W/MARIYAM BEREHE",
+    },
     {
       name: "Other Crew Division",
       department: "Operations",
-      role: "C.T. ALEMAYEHU MESFASH",
+      role: "C.T. ALEMAYEHU NEGASH",
     },
     {
       name: "Admin & Finance Department",
       department: "Administration",
-      role: "HONEYWEST TEKA",
+      role: "WONDWOSSEN TEKA",
     },
   ];
 
@@ -369,11 +378,7 @@ const AboutPage: React.FC = () => {
               </div>
             </a>
 
-            <a
-              href="tel:+251118697880"
-              className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 group"
-              aria-label="Call Belimuno Jobs"
-            >
+            <div className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 text-white">
                 <Phone className="h-5 w-5" />
               </div>
@@ -381,9 +386,23 @@ const AboutPage: React.FC = () => {
                 <p className="font-semibold text-white">
                   {t("cta.contact.phone.title")}
                 </p>
-                <p className="text-cyan-200 text-sm">+251 118 69 78 80</p>
+                {[
+                  "+251 930 014 332",
+                  "+251 978 009 084",
+                  "+251 935 402 673",
+                  "+251 913 064 948",
+                ].map((phone) => (
+                  <a
+                    key={phone}
+                    href={`tel:${phone.replace(/\s/g, "")}`}
+                    className="block hover:bg-white/20 transition-all duration-300"
+                    aria-label={`Call Belimuno Jobs at ${phone}`}
+                  >
+                    <p className="text-cyan-200 text-sm">{phone}</p>
+                  </a>
+                ))}
               </div>
-            </a>
+            </div>
           </div>
         </div>
       </section>

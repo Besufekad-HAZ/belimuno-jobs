@@ -15,11 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Belimuno Jobs",
-    template: "%s | Belimuno Jobs",
-  },
+  title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({

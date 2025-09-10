@@ -57,15 +57,6 @@ const Footer = () => {
               <MapPin className="h-4 w-4 mt-0.5" /> {t("contact.address")}
             </li>
             <li className="flex items-center gap-2">
-              <Phone className="h-4 w-4" />
-              <a
-                href="tel:+251118697880"
-                className="hover:text-white transition-colors"
-              >
-                +251 0118 69 78 80
-              </a>
-            </li>
-            <li className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
               <a
                 href="mailto:info@belimunojobs.com"
@@ -84,6 +75,25 @@ const Footer = () => {
               >
                 @belimunojobs
               </a>
+            </li>
+            <li className="flex items-start gap-2">
+              <Phone className="h-4 w-4 mt-1" />
+              <div className="flex flex-col space-y-1">
+                {[
+                  "+251 930 014 332",
+                  "+251 978 009 084",
+                  "+251 935 402 673",
+                  "+251 913 064 948",
+                ].map((phone) => (
+                  <a
+                    key={phone}
+                    href={`tel:${phone.replace(/\s/g, "")}`}
+                    className="hover:text-white transition-colors"
+                  >
+                    {phone}
+                  </a>
+                ))}
+              </div>
             </li>
           </ul>
         </div>
