@@ -1,0 +1,188 @@
+const nodemailer = require('nodemailer');
+
+// Create reusable transporter object using SMTP transport
+const createTransporter = () => {
+  // For development or when SMTP credentials are not configured, use console logging
+  if (process.env.NODE_ENV === 'development' || !process.env.SMTP_USER || process.env.SMTP_USER === 'your-email@gmail.com' || !process.env.SMTP_PASS || process.env.SMTP_PASS === 'your-app-password') {
+    return {
+      sendMail: async (options) => {
+        console.log('📧 Email would be sent:', {
+          to: options.to,
+          subject: options.subject,
+          text: options.text,
+          html: options.html
+        });
+        return { messageId: 'dev-' + Date.now() };
+      }
+    };
+  }
+
+  // Production email configuration
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: process.env.SMTP_PORT || 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  });
+
+  return transporter;
+};
+
+const transporter = createTransporter();
+
+// Send password reset email
+const sendPasswordResetEmail = async (email, resetToken, userName) => {
+  const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+
+  const mailOptions = {
+    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+    to: email,
+    subject: 'Password Reset Request - Belimuno Jobs',
+    text: `
+Hello ${userName},
+
+You have requested to reset your password for your Belimuno Jobs account.
+
+Click the link below to reset your password:
+${resetUrl}
+
+This link will expire in 10 minutes for security reasons.
+
+If you did not request this password reset, please ignore this email.
+
+Best regards,
+The Belimuno Jobs Team
+    `,
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset - Belimuno Jobs</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+        .button { display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+        .button:hover { background: #2563eb; }
+        .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+        .warning { background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Password Reset Request</h1>
+            <p>Belimuno Jobs Platform</p>
+        </div>
+        <div class="content">
+            <h2>Hello ${userName},</h2>
+            <p>You have requested to reset your password for your Belimuno Jobs account.</p>
+            <p>Click the button below to reset your password:</p>
+            <div style="text-align: center;">
+                <a href="${resetUrl}" class="button">Reset My Password</a>
+            </div>
+            <div class="warning">
+                <strong>⚠️ Important:</strong> This link will expire in 10 minutes for security reasons.
+            </div>
+            <p>If the button doesn't work, copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; background: #e5e7eb; padding: 10px; border-radius: 4px; font-family: monospace;">
+                ${resetUrl}
+            </p>
+            <p>If you did not request this password reset, please ignore this email. Your password will remain unchanged.</p>
+        </div>
+        <div class="footer">
+            <p>Best regards,<br>The Belimuno Jobs Team</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
+    `
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Password reset email sent:', result.messageId);
+    return result;
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    throw error;
+  }
+};
+
+// Send password reset success email
+const sendPasswordResetSuccessEmail = async (email, userName) => {
+  const mailOptions = {
+    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+    to: email,
+    subject: 'Password Reset Successful - Belimuno Jobs',
+    text: `
+Hello ${userName},
+
+Your password has been successfully reset for your Belimuno Jobs account.
+
+If you did not make this change, please contact our support team immediately.
+
+Best regards,
+The Belimuno Jobs Team
+    `,
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset Successful - Belimuno Jobs</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+        .success { background: #d1fae5; border: 1px solid #10b981; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Password Reset Successful</h1>
+            <p>Belimuno Jobs Platform</p>
+        </div>
+        <div class="content">
+            <h2>Hello ${userName},</h2>
+            <div class="success">
+                <strong>✅ Success:</strong> Your password has been successfully reset for your Belimuno Jobs account.
+            </div>
+            <p>You can now log in to your account with your new password.</p>
+            <p>If you did not make this change, please contact our support team immediately.</p>
+        </div>
+        <div class="footer">
+            <p>Best regards,<br>The Belimuno Jobs Team</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
+    `
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Password reset success email sent:', result.messageId);
+    return result;
+  } catch (error) {
+    console.error('Error sending password reset success email:', error);
+    throw error;
+  }
+};
+
+module.exports = {
+  sendPasswordResetEmail,
+  sendPasswordResetSuccessEmail
+};

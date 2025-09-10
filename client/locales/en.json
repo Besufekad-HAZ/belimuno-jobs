@@ -700,6 +700,92 @@
       "googleSignUp": "Google sign-up failed. If you already have an account with this email, please use Login."
     }
   },
+  "ForgotPasswordPage": {
+    "header": {
+      "title": "Forgot Password?",
+      "subtitle": "No worries! Enter your email address and we'll send you a link to reset your password.",
+      "backToLogin": "Remember your password? Back to Login"
+    },
+    "form": {
+      "fields": {
+        "email": "Email Address"
+      },
+      "buttons": {
+        "submit": {
+          "default": "Send Reset Link",
+          "loading": "Sending..."
+        }
+      }
+    },
+    "success": {
+      "title": "Check Your Email",
+      "subtitle": "We've sent password reset instructions to",
+      "instructions": {
+        "title": "What's next?",
+        "steps": [
+          "Check your email inbox (and spam folder)",
+          "Click the reset link in the email",
+          "Create a new password",
+          "The link expires in 10 minutes"
+        ]
+      },
+      "buttons": {
+        "sendAnother": "Send Another Email",
+        "backToLogin": "Back to Login"
+      }
+    },
+    "errors": {
+      "default": "An error occurred. Please try again."
+    }
+  },
+  "ResetPasswordPage": {
+    "header": {
+      "title": "Reset Your Password",
+      "subtitle": "Enter your new password below. Make sure it's strong and secure."
+    },
+    "form": {
+      "fields": {
+        "password": "New Password",
+        "confirmPassword": "Confirm New Password"
+      },
+      "requirements": {
+        "title": "Password Requirements:",
+        "rules": [
+          "At least 8 characters long",
+          "One uppercase letter (A-Z)",
+          "One lowercase letter (a-z)",
+          "One number (0-9)",
+          "One special character (@$!%*?&)"
+        ]
+      },
+      "buttons": {
+        "submit": {
+          "default": "Reset Password",
+          "loading": "Resetting Password..."
+        }
+      },
+      "backToLogin": "Back to Login"
+    },
+    "success": {
+      "title": "Password Reset Successful!",
+      "subtitle": "Your password has been successfully updated. You can now log in with your new password.",
+      "buttons": {
+        "continueToLogin": "Continue to Login"
+      }
+    },
+    "invalidToken": {
+      "title": "Invalid Reset Link",
+      "subtitle": "This reset link is invalid or has expired. Please request a new password reset.",
+      "buttons": {
+        "requestNew": "Request New Reset Link"
+      }
+    },
+    "errors": {
+      "passwordMismatch": "Passwords do not match",
+      "passwordWeak": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      "default": "An error occurred. Please try again."
+    }
+  },
   "OutsourceAdminDashboard": {
     "header": {
       "title": "Outsourcing Admin Dashboard",

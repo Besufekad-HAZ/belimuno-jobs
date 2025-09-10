@@ -289,6 +289,16 @@ const LoginPage: React.FC = () => {
                   />
                 </div>
 
+                {/* Forgot Password Link */}
+                <div className="text-right">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
+                  >
+                    Forgot your password?
+                  </Link>
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
