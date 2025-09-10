@@ -19,6 +19,8 @@ import {
   FileText,
 } from "lucide-react";
 import Image from "next/image";
+import LoadingPage from "@/components/Layout/LoadingPage";
+import ErrorPage from "@/components/Layout/ErrorPage";
 
 interface WorkerInfo {
   _id: string;
@@ -220,8 +222,8 @@ const ApplicationsPage: React.FC = () => {
     if (el) el.scrollTop = el.scrollHeight;
   }, [chatMessages]);
 
-  if (loading) return <div className="p-8">Loading...</div>;
-  if (!job) return <div className="p-8">Job not found</div>;
+  if (loading) return <LoadingPage />;
+  if (!job) return <ErrorPage message="Job not found" />;
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
