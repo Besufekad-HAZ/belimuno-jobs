@@ -823,8 +823,8 @@
       "empty": "No pending verifications"
     },
     "disputes": {
-      "title": "Active Disputes",
-      "empty": "No active disputes",
+      "title": "Disputes",
+      "empty": "No disputes",
       "priority": {
         "high": "high",
         "medium": "medium",

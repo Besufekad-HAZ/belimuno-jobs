@@ -13,6 +13,7 @@ import {
   Star,
   Eye,
   CreditCard,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -22,14 +23,16 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import { useTranslations } from "next-intl";
+import { formatDistanceToNow } from "date-fns";
 
 interface ClientStats {
   totalJobs: number;
-  activeJobs: number;
+  activeJobs: object[];
   completedJobs: number;
   totalSpent: number;
   averageRating: number;
   pendingApplications: number;
+  totalApplications: number;
 }
 
 const ClientDashboard: React.FC = () => {
@@ -68,6 +71,43 @@ const ClientDashboard: React.FC = () => {
   } | null>(null);
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
+  const [showDisputeModal, setShowDisputeModal] = useState(false);
+  const [selectedJobForDispute, setSelectedJobForDispute] =
+    useState<EnrichedJob | null>(null);
+  const [disputeData, setDisputeData] = useState({
+    title: "",
+    description: "",
+    type: "payment" as
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other",
+    priority: "medium" as "low" | "medium" | "high" | "urgent",
+    evidence: [] as Array<{
+      type: "image" | "document" | "message";
+      url: string;
+      description?: string;
+    }>,
+  });
+  const [disputes, setDisputes] = useState<
+    Array<{
+      _id: string;
+      title: string;
+      description: string;
+      status: string;
+      priority: string;
+      type: string;
+      job?: {
+        title: string;
+        budget: number;
+      };
+      createdAt: string;
+      updatedAt: string;
+      resolution?: string;
+    }>
+  >([]);
 
   const t = useTranslations("ClientDashboard");
   const [pendingProof, setPendingProof] = useState<{
@@ -91,13 +131,16 @@ const ClientDashboard: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, jobsResponse] = await Promise.all([
-        clientAPI.getDashboard(),
-        clientAPI.getJobs(),
-      ]);
+      const [dashboardResponse, jobsResponse, disputesResponse] =
+        await Promise.all([
+          clientAPI.getDashboard(),
+          clientAPI.getJobs(),
+          clientAPI.getDisputes(),
+        ]);
 
-      setStats(dashboardResponse.data);
+      setStats(dashboardResponse.data.data);
       setJobs(jobsResponse.data.data || []);
+      setDisputes(disputesResponse.data.data || []);
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
@@ -259,7 +302,9 @@ const ClientDashboard: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {t("header.title")}
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{t("header.subtitle")}</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+              {t("header.subtitle")}
+            </p>
           </div>
           <Button
             onClick={() => router.push("/client/jobs/new")}
@@ -290,8 +335,8 @@ const ClientDashboard: React.FC = () => {
               <p className="text-xs sm:text-sm font-medium text-yellow-600">
                 {t("stats.activeJobs.label")}
               </p>
-              <p className="text-lg sm:text-2xl font-bold text-yellow-900">
-                {stats?.activeJobs || 0}
+              <p className="text-2xl font-bold text-yellow-900">
+                {stats?.activeJobs.length || 0}
               </p>
             </div>
           </Card>
@@ -338,8 +383,8 @@ const ClientDashboard: React.FC = () => {
               <p className="text-xs sm:text-sm font-medium text-orange-600">
                 {t("stats.applications.label")}
               </p>
-              <p className="text-lg sm:text-2xl font-bold text-orange-900">
-                {stats?.pendingApplications || 0}
+              <p className="text-2xl font-bold text-orange-900">
+                {stats?.totalApplications || 0}
               </p>
             </div>
           </Card>
@@ -357,7 +402,9 @@ const ClientDashboard: React.FC = () => {
               <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">{job.title}</h4>
+                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
+                      {job.title}
+                    </h4>
                     {/* Payment Proof Modal */}
                     <Modal
                       isOpen={showProofModal}
@@ -465,35 +512,55 @@ const ClientDashboard: React.FC = () => {
                       href={`/client/jobs/${job._id}/applications`}
                       className="inline-block w-full sm:w-auto"
                     >
-                      <Button size="sm" variant="outline" className="w-full sm:w-auto">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                      >
                         <span className="text-xs sm:text-sm">
                           {t("sections.jobs.actions.applications")}
                         </span>
                       </Button>
                     </Link>
-                    {job.status === "awaiting_completion" && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleRequestRevision(job._id)}
-                          className="w-full sm:w-auto"
-                        >
-                          <span className="text-xs sm:text-sm">
-                            {t("sections.jobs.actions.requestRevision")}
-                          </span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handlePaymentAndRating(job)}
-                          className="w-full sm:w-auto"
-                        >
-                          <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          <span className="text-xs sm:text-sm">
-                            {t("sections.jobs.actions.payAndRate")}
-                          </span>
-                        </Button>
-                      </>
+
+                    {/* Show Request Revision button for submitted jobs */}
+                    {job.status === "submitted" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRequestRevision(job._id)}
+                      >
+                        {t("sections.jobs.actions.requestRevision")}
+                      </Button>
+                    )}
+
+                    {/* Show Pay & Rate button for completed jobs */}
+                    {job.status === "completed" && (
+                      <Button
+                        size="sm"
+                        onClick={() => handlePaymentAndRating(job)}
+                      >
+                        <CreditCard className="h-4 w-4 mr-1" />
+                        {t("sections.jobs.actions.payAndRate")}
+                      </Button>
+                    )}
+
+                    {/* Show Raise Dispute button for in_progress, submitted, or completed jobs */}
+                    {(job.status === "assigned" ||
+                      job.status === "in_progress" ||
+                      job.status === "submitted" ||
+                      job.status === "completed") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedJobForDispute(job);
+                          setShowDisputeModal(true);
+                        }}
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-1" />
+                        Raise Dispute
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -572,12 +639,84 @@ const ClientDashboard: React.FC = () => {
           </div>
         </Card>
 
+        {/* Active Disputes */}
+        <Card className="mt-8">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Active Disputes
+            </h3>
+          </div>
+          <div className="space-y-4">
+            {disputes
+              .filter((d) => d.status !== "resolved" && d.status !== "closed")
+              .map((dispute) => (
+                <div key={dispute._id} className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {dispute.title}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {dispute.job?.title}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        variant={
+                          dispute.priority === "urgent"
+                            ? "danger"
+                            : dispute.priority === "high"
+                              ? "warning"
+                              : "info"
+                        }
+                      >
+                        {dispute.priority}
+                      </Badge>
+                      <Badge
+                        variant={
+                          dispute.status === "open"
+                            ? "danger"
+                            : dispute.status === "investigating"
+                              ? "warning"
+                              : "success"
+                        }
+                      >
+                        {dispute.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {dispute.description}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>
+                      Created{" "}
+                      {formatDistanceToNow(new Date(dispute.createdAt), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                    <span>Type: {dispute.type}</span>
+                  </div>
+                </div>
+              ))}
+            {disputes.filter(
+              (d) => d.status !== "resolved" && d.status !== "closed",
+            ).length === 0 && (
+              <p className="text-center text-gray-500 py-4">
+                No active disputes
+              </p>
+            )}
+          </div>
+        </Card>
+
         {/* Job Details Modal */}
         {selectedJob && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-96 overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">{selectedJob.title}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {selectedJob.title}
+                </h3>
                 <Button variant="ghost" onClick={() => setSelectedJob(null)}>
                   ×
                 </Button>
@@ -812,6 +951,225 @@ const ClientDashboard: React.FC = () => {
               </>
             )}
           </div>
+        </Modal>
+
+        {/* Dispute Modal */}
+        <Modal
+          isOpen={showDisputeModal}
+          onClose={() => {
+            setShowDisputeModal(false);
+            setSelectedJobForDispute(null);
+            setDisputeData({
+              title: "",
+              description: "",
+              type: "payment",
+              priority: "medium",
+              evidence: [],
+            });
+          }}
+          title="Raise a Dispute"
+          size="lg"
+        >
+          {selectedJobForDispute && (
+            <div className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
+                <p className="text-gray-700">{selectedJobForDispute.title}</p>
+                <p className="text-sm text-gray-500">
+                  Budget: ETB {selectedJobForDispute.budget?.toLocaleString()}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Dispute Title
+                  </label>
+                  <input
+                    type="text"
+                    value={disputeData.title}
+                    onChange={(e) =>
+                      setDisputeData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    placeholder="Brief title describing the issue"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={disputeData.description}
+                    onChange={(e) =>
+                      setDisputeData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    placeholder="Detailed description of the issue..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Type
+                    </label>
+                    <select
+                      value={disputeData.type}
+                      onChange={(e) =>
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          type: e.target.value as typeof disputeData.type,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="payment">Payment Issue</option>
+                      <option value="quality">Quality Issue</option>
+                      <option value="communication">Communication Issue</option>
+                      <option value="deadline">Deadline Issue</option>
+                      <option value="scope">Scope Issue</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Priority
+                    </label>
+                    <select
+                      value={disputeData.priority}
+                      onChange={(e) =>
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          priority: e.target
+                            .value as typeof disputeData.priority,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Evidence
+                  </label>
+                  <div className="space-y-2">
+                    {disputeData.evidence.map((evidence, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">
+                            {evidence.description}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {evidence.type}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setDisputeData((prev) => ({
+                              ...prev,
+                              evidence: prev.evidence.filter(
+                                (_, i) => i !== index,
+                              ),
+                            }))
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        // Here you would typically open a file picker or evidence upload modal
+                        // For now, we'll just add a dummy evidence item
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          evidence: [
+                            ...prev.evidence,
+                            {
+                              type: "document",
+                              url: "https://example.com/evidence.pdf",
+                              description: "Supporting document",
+                            },
+                          ],
+                        }));
+                      }}
+                    >
+                      Add Evidence
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDisputeModal(false);
+                    setSelectedJobForDispute(null);
+                    setDisputeData({
+                      title: "",
+                      description: "",
+                      type: "payment",
+                      priority: "medium",
+                      evidence: [],
+                    });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      await clientAPI.createDispute({
+                        ...disputeData,
+                        job: selectedJobForDispute._id,
+                      });
+                      setShowDisputeModal(false);
+                      setSelectedJobForDispute(null);
+                      setDisputeData({
+                        title: "",
+                        description: "",
+                        type: "payment",
+                        priority: "medium",
+                        evidence: [],
+                      });
+                      fetchDashboardData(); // Refresh the dashboard data
+                      alert("Dispute created successfully");
+                    } catch (error) {
+                      console.error("Failed to create dispute:", error);
+                      alert("Failed to create dispute. Please try again.");
+                    }
+                  }}
+                  disabled={!disputeData.title || !disputeData.description}
+                >
+                  Submit Dispute
+                </Button>
+              </div>
+            </div>
+          )}
         </Modal>
       </div>
     </div>

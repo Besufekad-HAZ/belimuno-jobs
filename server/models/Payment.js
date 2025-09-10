@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const PaymentSchema = new mongoose.Schema({
   // Transaction Basic Info
@@ -8,34 +8,42 @@ const PaymentSchema = new mongoose.Schema({
   chapaReferenceId: String,
 
   // Relationship
-  job: { type: mongoose.Schema.Types.ObjectId, ref: 'Job', required: true },
-  payer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  job: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+  payer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  recipient: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
   // Payment Details
   amount: { type: Number, required: true },
-  currency: { type: String, default: 'ETB' },
+  currency: { type: String, default: "ETB" },
   paymentMethod: {
     type: String,
-    enum: ['manual_check', 'admin_adjustment'],
+    enum: ["manual_check", "admin_adjustment"],
     required: true,
-    default: 'manual_check'
+    default: "manual_check",
   },
 
   // Payment Type and Purpose
   paymentType: {
     type: String,
-    enum: ['job_payment', 'adjustment'],
+    enum: ["job_payment", "adjustment"],
     required: true,
-    default: 'job_payment'
+    default: "job_payment",
   },
   description: String,
 
   // Status and Processing
   status: {
     type: String,
-    enum: ['pending', 'processing', 'completed', 'failed', 'cancelled', 'refunded', 'partially_refunded'],
-    default: 'pending'
+    enum: [
+      "pending",
+      "processing",
+      "completed",
+      "failed",
+      "cancelled",
+      "refunded",
+      "partially_refunded",
+    ],
+    default: "pending",
   },
 
   // Financial Breakdown
@@ -44,7 +52,7 @@ const PaymentSchema = new mongoose.Schema({
     platformFee: { type: Number, default: 0 },
     processingFee: { type: Number, default: 0 },
     tax: { type: Number, default: 0 },
-    netAmount: Number
+    netAmount: Number,
   },
 
   // Chapa Integration Details
@@ -59,21 +67,21 @@ const PaymentSchema = new mongoose.Schema({
   error: {
     code: String,
     message: String,
-    details: mongoose.Schema.Types.Mixed
+    details: mongoose.Schema.Types.Mixed,
   },
 
   // Admin dispute resolution record
   adminResolution: {
-    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     resolution: String,
-    action: { type: String, enum: ['refund', 'release', 'partial'] },
-    resolvedAt: Date
+    action: { type: String, enum: ["refund", "release", "partial"] },
+    resolvedAt: Date,
   },
 
   // Reconciliation
   isReconciled: { type: Boolean, default: false },
   reconciledAt: Date,
-  reconciledBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  reconciledBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
   // Manual payment proof (client uploads check image)
   proof: {
@@ -82,7 +90,7 @@ const PaymentSchema = new mongoose.Schema({
     mimeType: String,
     note: String,
     uploadedAt: Date,
-    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
 
   // Metadata
@@ -90,7 +98,7 @@ const PaymentSchema = new mongoose.Schema({
   userAgent: String,
   notes: String,
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // Indexes for performance
@@ -104,9 +112,9 @@ PaymentSchema.index({ status: 1, createdAt: -1 });
 PaymentSchema.index({ paymentType: 1, status: 1 });
 
 // Pre-save middleware
-PaymentSchema.pre('save', function(next) {
+PaymentSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-module.exports = mongoose.model('Payment', PaymentSchema);
+module.exports = mongoose.model("Payment", PaymentSchema);

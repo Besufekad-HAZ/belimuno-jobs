@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -17,7 +17,7 @@ import {
   Award,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
-import { notificationsAPI } from "@/lib/api";
+import { adminAPI, notificationsAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -81,7 +81,6 @@ type ResolutionStatus = "investigating" | "resolved" | "closed";
 
 const DisputeResolution: React.FC = () => {
   const [disputes, setDisputes] = useState<Dispute[]>([]);
-  const [filteredDisputes, setFilteredDisputes] = useState<Dispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -104,185 +103,22 @@ const DisputeResolution: React.FC = () => {
     }
 
     fetchDisputes();
-  }, [router]);
-
-  const filterDisputes = useCallback(() => {
-    let filtered = [...disputes];
-
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (dispute) =>
-          dispute.title.toLowerCase().includes(q) ||
-          dispute.description.toLowerCase().includes(q) ||
-          dispute.worker.name.toLowerCase().includes(q) ||
-          dispute.client.name.toLowerCase().includes(q) ||
-          (dispute.job?.title?.toLowerCase().includes(q) ?? false),
-      );
-    }
-
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((d) => d.status === statusFilter);
-    }
-    if (priorityFilter !== "all") {
-      filtered = filtered.filter((d) => d.priority === priorityFilter);
-    }
-
-    setFilteredDisputes(filtered);
-  }, [disputes, searchQuery, statusFilter, priorityFilter]);
-
-  useEffect(() => {
-    filterDisputes();
-  }, [filterDisputes]);
+  }, [router, statusFilter, priorityFilter, searchQuery]);
 
   const fetchDisputes = async () => {
     try {
       setLoading(true);
-      // Mock data for now - in real implementation, fetch from API
-      const mockDisputes: Dispute[] = [
-        {
-          _id: "1",
-          title: "Payment dispute for web development project",
-          description:
-            "Client is refusing to pay the final installment claiming the work is not up to standard. Worker claims all requirements were met as per the original specification.",
-          status: "open",
-          priority: "high",
-          type: "payment",
-          worker: {
-            _id: "w1",
-            name: "John Smith",
-            email: "john.smith@email.com",
-            phone: "+1234567890",
-            workerProfile: {
-              rating: 4.2,
-              completedJobs: 15,
-            },
-          },
-          client: {
-            _id: "c1",
-            name: "Sarah Johnson",
-            email: "sarah.johnson@company.com",
-            phone: "+1987654321",
-            clientProfile: {
-              company: "Tech Solutions Inc",
-              totalProjects: 8,
-            },
-          },
-          job: {
-            _id: "j1",
-            title: "E-commerce Website Development",
-            budget: 2500,
-            status: "completed",
-          },
-          createdAt: new Date(
-            Date.now() - 2 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          updatedAt: new Date(
-            Date.now() - 1 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          evidence: [
-            {
-              type: "document",
-              url: "/evidence/requirements.pdf",
-              description: "Original project requirements",
-            },
-            {
-              type: "image",
-              url: "/evidence/final-website.png",
-              description: "Screenshot of completed website",
-            },
-          ],
-        },
-        {
-          _id: "2",
-          title: "Work quality dispute",
-          description:
-            "Client claims the delivered graphic design work does not match the brief and is requesting a full refund.",
-          status: "investigating",
-          priority: "medium",
-          type: "quality",
-          worker: {
-            _id: "w2",
-            name: "Maria Garcia",
-            email: "maria.garcia@email.com",
-            workerProfile: {
-              rating: 4.8,
-              completedJobs: 32,
-            },
-          },
-          client: {
-            _id: "c2",
-            name: "David Wilson",
-            email: "david@startup.com",
-            clientProfile: {
-              company: "Startup Ventures",
-              totalProjects: 3,
-            },
-          },
-          job: {
-            _id: "j2",
-            title: "Logo and Brand Identity Design",
-            budget: 800,
-            status: "completed",
-          },
-          createdAt: new Date(
-            Date.now() - 5 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          updatedAt: new Date(
-            Date.now() - 3 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          hrNotes:
-            "Initial investigation started. Reviewing project brief and delivered work.",
-        },
-        {
-          _id: "3",
-          title: "Scope expansion dispute",
-          description:
-            "Worker claims client added additional requirements beyond the original scope without agreeing to additional compensation.",
-          status: "resolved",
-          priority: "medium",
-          type: "scope",
-          worker: {
-            _id: "w3",
-            name: "Alex Chen",
-            email: "alex.chen@email.com",
-            workerProfile: {
-              rating: 4.5,
-              completedJobs: 28,
-            },
-          },
-          client: {
-            _id: "c3",
-            name: "Lisa Brown",
-            email: "lisa@enterprise.com",
-            clientProfile: {
-              company: "Enterprise Corp",
-              totalProjects: 12,
-            },
-          },
-          job: {
-            _id: "j3",
-            title: "Mobile App Development",
-            budget: 4000,
-            status: "completed",
-          },
-          createdAt: new Date(
-            Date.now() - 10 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          updatedAt: new Date(
-            Date.now() - 1 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          resolvedAt: new Date(
-            Date.now() - 1 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-          resolution:
-            "Dispute resolved in favor of worker. Client agreed to pay additional 20% for extra features. Both parties satisfied with outcome.",
-          hrNotes:
-            "Clear evidence of scope creep. Original contract reviewed and additional work confirmed.",
-        },
-      ];
-
-      setDisputes(mockDisputes);
+      const response = await adminAPI.getDisputes({
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        priority: priorityFilter !== "all" ? priorityFilter : undefined,
+        search: searchQuery || undefined,
+        page: 1,
+        limit: 20,
+      });
+      setDisputes(response.data.data);
+    } catch (error) {
+      console.error("Failed to fetch disputes:", error);
+      alert("Failed to load disputes. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -292,21 +128,17 @@ const DisputeResolution: React.FC = () => {
     if (!selectedDispute || !resolutionData.resolution) return;
 
     try {
-      // In real implementation, call API to update dispute
-      const updatedDispute = {
-        ...selectedDispute,
+      const response = await adminAPI.updateDispute(selectedDispute._id, {
         status: resolutionData.status,
         resolution: resolutionData.resolution,
         hrNotes: resolutionData.hrNotes,
-        resolvedAt:
-          resolutionData.status === "resolved"
-            ? new Date().toISOString()
-            : undefined,
-        updatedAt: new Date().toISOString(),
-      };
+      });
 
+      // Update local state
       setDisputes((prev) =>
-        prev.map((d) => (d._id === selectedDispute._id ? updatedDispute : d)),
+        prev.map((d) =>
+          d._id === selectedDispute._id ? response.data.data : d,
+        ),
       );
 
       // Send notifications to involved parties
@@ -519,7 +351,7 @@ const DisputeResolution: React.FC = () => {
 
         {/* Disputes List */}
         <div className="space-y-4">
-          {filteredDisputes.length === 0 ? (
+          {disputes.length === 0 ? (
             <Card className="p-12 text-center">
               <AlertTriangle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -532,7 +364,7 @@ const DisputeResolution: React.FC = () => {
               </p>
             </Card>
           ) : (
-            filteredDisputes.map((dispute) => (
+            disputes.map((dispute) => (
               <Card
                 key={dispute._id}
                 className="p-6 hover:shadow-md transition-shadow"
@@ -573,7 +405,9 @@ const DisputeResolution: React.FC = () => {
                           {dispute.worker.workerProfile && (
                             <div className="flex items-center space-x-2 mt-1">
                               <span className="text-xs text-gray-500">
-                                ⭐ {dispute.worker.workerProfile.rating}/5
+                                ⭐{" "}
+                                {dispute.worker.workerProfile.rating.toFixed(1)}
+                                /5
                               </span>
                               <span className="text-xs text-gray-500">
                                 {dispute.worker.workerProfile.completedJobs}{" "}
