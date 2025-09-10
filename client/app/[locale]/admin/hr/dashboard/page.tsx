@@ -47,7 +47,7 @@ interface Worker {
     rating: number;
     totalJobs: number;
     completedJobs: number;
-    education?: Array<any>;
+    education?: object[];
   };
   profile?: {
     verified: boolean;
