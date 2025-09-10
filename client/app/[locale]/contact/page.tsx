@@ -114,9 +114,27 @@ const ContactPage: React.FC = () => {
             <p className="text-gray-700">{t("office.address")}</p>
             <div className="mt-4 text-gray-700 space-y-1">
               <p>{t("office.contact.email")}: info@belimunojobs.com</p>
-              <p>{t("office.contact.phone")}: +251 0118 69 78 80</p>
               <p>{t("office.contact.pobox")}: 100144, Addis Ababa</p>
               <p>{t("office.contact.website")}: www.belimunojobs.com</p>
+              <div className="flex gap-2">
+                <p className="font-medium">{t("office.contact.phone")}:</p>
+                <div className="flex flex-col gap-y-1">
+                  {[
+                    "+251 930 014 332",
+                    "+251 978 009 084",
+                    "+251 935 402 673",
+                    "+251 913 064 948",
+                  ].map((phone) => (
+                    <a
+                      key={phone}
+                      href={`tel:${phone.replace(/\s/g, "")}`}
+                      className="hover:text-blue-600 transition-colors"
+                    >
+                      {phone}
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
           </Card>
         </div>
