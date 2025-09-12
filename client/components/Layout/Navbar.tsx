@@ -38,9 +38,20 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
+  // Reset menu state when user changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [user]);
+
+  // Ensure menu is closed on component mount
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, []);
+
   // Close mobile on route change
   useEffect(() => {
     setMobileOpen(false);
+    setIsMenuOpen(false); // Also close user menu on route change
   }, [pathname]);
 
   // Lock scroll when mobile menu is open and close via ESC
@@ -65,7 +76,11 @@ const Navbar: React.FC = () => {
         setIsMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMenuOpen]);
 
@@ -199,7 +214,11 @@ const Navbar: React.FC = () => {
               {/* User Menu - hide name/role on small screens */}
               <div className="relative hidden sm:block" ref={menuRef}>
                 <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsMenuOpen(!isMenuOpen);
+                  }}
                   className="flex items-center space-x-2 p-2 text-cyan-100 hover:text-white"
                 >
                   <UserIcon className="h-6 w-6" />
