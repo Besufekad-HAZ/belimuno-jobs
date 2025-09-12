@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
@@ -95,17 +95,7 @@ const DisputeResolution: React.FC = () => {
   });
   const router = useRouter();
 
-  useEffect(() => {
-    const user = getStoredUser();
-    if (!user || !hasRole(user, ["admin_hr"])) {
-      router.push("/login");
-      return;
-    }
-
-    fetchDisputes();
-  }, [router, statusFilter, priorityFilter, searchQuery]);
-
-  const fetchDisputes = async () => {
+  const fetchDisputes = useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminAPI.getDisputes({
@@ -122,7 +112,17 @@ const DisputeResolution: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, priorityFilter, searchQuery]);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (!user || !hasRole(user, ["admin_hr"])) {
+      router.push("/login");
+      return;
+    }
+
+    fetchDisputes();
+  }, [router, fetchDisputes]);
 
   const handleResolveDispute = async () => {
     if (!selectedDispute || !resolutionData.resolution) return;

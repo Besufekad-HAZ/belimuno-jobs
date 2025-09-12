@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { useTranslations } from "next-intl";
 
 // Type definitions for API responses
 interface ForgotPasswordResponse {
@@ -30,8 +28,6 @@ const ForgotPasswordPage: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const [resetToken, setResetToken] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
-  const router = useRouter();
-  const t = useTranslations("ForgotPasswordPage");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -97,7 +93,7 @@ const ForgotPasswordPage: React.FC = () => {
               Check Your Email
             </h2>
             <p className="text-base sm:text-lg text-gray-600 mb-6">
-              We've sent password reset instructions to{" "}
+              We&apos;ve sent password reset instructions to{" "}
               <span className="font-semibold text-blue-700">{email}</span>
             </p>
 
@@ -115,7 +111,7 @@ const ForgotPasswordPage: React.FC = () => {
                   />
                 </svg>
                 <div className="text-sm text-blue-700">
-                  <p className="font-medium mb-1">What's next?</p>
+                  <p className="font-medium mb-1">What&apos;s next?</p>
                   <ul className="space-y-1 text-left">
                     <li>• Check your email inbox (and spam folder)</li>
                     <li>• Click the reset link in the email</li>
@@ -204,7 +200,7 @@ const ForgotPasswordPage: React.FC = () => {
             Forgot Password?
           </h2>
           <p className="text-base sm:text-lg text-gray-600 mb-2">
-            No worries! Enter your email address and we'll send you a link to reset your password.
+            No worries! Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
           <p className="text-xs sm:text-sm text-gray-500">
             Remember your password?{" "}

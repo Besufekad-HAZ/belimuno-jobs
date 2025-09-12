@@ -6,14 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { authAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import { useTranslations } from "next-intl";
 
 // Type definitions for API responses
-interface ResetPasswordResponse {
-  success: boolean;
-  message: string;
-}
-
 interface ApiError {
   response?: {
     data?: {
@@ -33,7 +27,6 @@ const ResetPasswordPage: React.FC = () => {
   const [token, setToken] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useTranslations("ResetPasswordPage");
 
   useEffect(() => {
     const tokenParam = searchParams.get("token");
@@ -203,7 +196,7 @@ const ResetPasswordPage: React.FC = () => {
             Reset Your Password
           </h2>
           <p className="text-base sm:text-lg text-gray-600 mb-2">
-            Enter your new password below. Make sure it's strong and secure.
+            Enter your new password below. Make sure it&apos;s strong and secure.
           </p>
         </div>
 
