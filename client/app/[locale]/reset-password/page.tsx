@@ -8,6 +8,20 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useTranslations } from "next-intl";
 
+// Type definitions for API responses
+interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const ResetPasswordPage: React.FC = () => {
   const [formData, setFormData] = useState({
     password: "",
@@ -61,21 +75,9 @@ const ResetPasswordPage: React.FC = () => {
       await authAPI.resetPassword(token, formData.password, formData.confirmPassword);
       setSuccess(true);
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error &&
-        error.response &&
-        typeof error.response === "object" &&
-        "data" in error.response &&
-        error.response.data &&
-        typeof error.response.data === "object" &&
-        "message" in error.response.data
-      ) {
-        setError(
-          (error.response as { data: { message?: string } }).data.message ||
-            "An error occurred. Please try again."
-        );
+      const apiError = error as ApiError;
+      if (apiError.response?.data?.message) {
+        setError(apiError.response.data.message);
       } else {
         setError("An error occurred. Please try again.");
       }

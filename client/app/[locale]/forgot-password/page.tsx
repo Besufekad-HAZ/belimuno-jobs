@@ -8,6 +8,21 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useTranslations } from "next-intl";
 
+// Type definitions for API responses
+interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+  resetToken?: string;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,27 +46,17 @@ const ForgotPasswordPage: React.FC = () => {
 
     try {
       const response = await authAPI.forgotPassword(email);
+      const responseData = response.data as ForgotPasswordResponse;
+
       setSuccess(true);
       // Store reset token if provided (for development testing)
-      if (response.data.resetToken) {
-        setResetToken(response.data.resetToken);
+      if (responseData.resetToken) {
+        setResetToken(responseData.resetToken);
       }
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error &&
-        error.response &&
-        typeof error.response === "object" &&
-        "data" in error.response &&
-        error.response.data &&
-        typeof error.response.data === "object" &&
-        "message" in error.response.data
-      ) {
-        setError(
-          (error.response as { data: { message?: string } }).data.message ||
-            "An error occurred. Please try again."
-        );
+      const apiError = error as ApiError;
+      if (apiError.response?.data?.message) {
+        setError(apiError.response.data.message);
       } else {
         setError("An error occurred. Please try again.");
       }
