@@ -2,16 +2,24 @@ const nodemailer = require('nodemailer');
 
 // Create reusable transporter object using SMTP transport
 const createTransporter = () => {
+  // Check if SMTP credentials are properly configured
+  const isEmailConfigured = process.env.SMTP_USER &&
+                           process.env.SMTP_USER !== 'your-email@gmail.com' &&
+                           process.env.SMTP_PASS &&
+                           process.env.SMTP_PASS !== 'your-app-password';
+
   // For development or when SMTP credentials are not configured, use console logging
-  if (process.env.NODE_ENV === 'development' || !process.env.SMTP_USER || process.env.SMTP_USER === 'your-email@gmail.com' || !process.env.SMTP_PASS || process.env.SMTP_PASS === 'your-app-password') {
+  if (!isEmailConfigured) {
+    console.log('⚠️  Email not configured - using console logging mode');
+    console.log('📧 To enable real email sending, configure SMTP credentials in .env file');
     return {
       sendMail: async (options) => {
-        console.log('📧 Email would be sent:', {
-          to: options.to,
-          subject: options.subject,
-          text: options.text,
-          html: options.html
-        });
+        console.log('\n📧 ===== EMAIL WOULD BE SENT =====');
+        console.log('To:', options.to);
+        console.log('Subject:', options.subject);
+        console.log('Text Content:', options.text);
+        console.log('HTML Content:', options.html);
+        console.log('=====================================\n');
         return { messageId: 'dev-' + Date.now() };
       }
     };
@@ -108,10 +116,10 @@ The Belimuno Jobs Team
 
   try {
     const result = await transporter.sendMail(mailOptions);
-    console.log('Password reset email sent:', result.messageId);
+    console.log('✅ Password reset email sent successfully:', result.messageId);
     return result;
   } catch (error) {
-    console.error('Error sending password reset email:', error);
+    console.error('❌ Error sending password reset email:', error);
     throw error;
   }
 };
@@ -182,7 +190,34 @@ The Belimuno Jobs Team
   }
 };
 
+// Test email functionality
+const testEmail = async (testEmail) => {
+  const mailOptions = {
+    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+    to: testEmail,
+    subject: 'Test Email - Belimuno Jobs',
+    text: 'This is a test email from Belimuno Jobs to verify email configuration.',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2>✅ Test Email Successful</h2>
+        <p>This is a test email from Belimuno Jobs to verify email configuration.</p>
+        <p>If you received this email, the email service is working correctly!</p>
+      </div>
+    `
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Test email sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error('❌ Error sending test email:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   sendPasswordResetEmail,
-  sendPasswordResetSuccessEmail
+  sendPasswordResetSuccessEmail,
+  testEmail
 };

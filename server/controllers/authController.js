@@ -323,7 +323,7 @@ const forgotPassword = async (req, res, next) => {
 
     // Generate reset token using crypto for better security
     const resetToken = crypto.randomBytes(32).toString('hex');
-    
+
     // Hash the token and set expiration (10 minutes from now)
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     const resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
@@ -336,26 +336,40 @@ const forgotPassword = async (req, res, next) => {
     try {
       // Send password reset email
       await sendPasswordResetEmail(email, resetToken, user.name);
-      
+
       res.status(200).json({
         success: true,
         message: 'Password reset instructions sent to your email',
-        // Only return token in development for testing
-        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+        // Always return token in development for testing
+        resetToken: resetToken
       });
     } catch (emailError) {
-      console.error('Email sending failed:', emailError);
+      console.error('❌ Email sending failed:', emailError);
+
+      // Check if it's a configuration issue
+      const isEmailConfigured = process.env.SMTP_USER &&
+                               process.env.SMTP_USER !== 'your-email@gmail.com' &&
+                               process.env.SMTP_PASS &&
+                               process.env.SMTP_PASS !== 'your-app-password';
+
       // Clear the reset token if email fails
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save();
-      
-      res.status(500).json({
-        success: false,
-        message: 'Error sending password reset email. Please try again later.',
-        // In development, still return the token for testing
-        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
-      });
+
+      if (!isEmailConfigured) {
+        res.status(500).json({
+          success: false,
+          message: 'Email service not configured. Please contact support or check console for reset link.',
+          // In development, return the reset token for testing
+          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to send password reset email. Please try again later.'
+        });
+      }
     }
 
   } catch (error) {

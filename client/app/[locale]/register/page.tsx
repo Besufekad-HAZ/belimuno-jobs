@@ -49,20 +49,200 @@ const RegisterPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("RegisterPage");
+
+  const getPasswordStrength = (password: string) => {
+    if (!password) return { score: 0, text: "" };
+
+    let score = 0;
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      number: /\d/.test(password),
+      special: /[@$!%*?&]/.test(password),
+    };
+
+    score = Object.values(checks).filter(Boolean).length;
+
+    const strengthText = {
+      0: "Very Weak",
+      1: "Weak",
+      2: "Fair",
+      3: "Good",
+      4: "Strong",
+      5: "Very Strong"
+    }[score] || "";
+
+    return { score, text: strengthText, checks };
+  };
+
+  const validateField = (name: string, value: string) => {
+    const errors: string[] = [];
+
+    switch (name) {
+      case "name":
+        if (!value || value.trim().length < 2) {
+          errors.push("Name must be at least 2 characters long");
+        }
+        if (value && value.trim().length > 50) {
+          errors.push("Name must be no more than 50 characters long");
+        }
+        break;
+
+      case "email":
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!value || !emailRegex.test(value)) {
+          errors.push("Please provide a valid email address");
+        }
+        break;
+
+      case "password":
+        if (!value || value.length < 8) {
+          errors.push("Password must be at least 8 characters long");
+        }
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+        if (value && !passwordRegex.test(value)) {
+          errors.push("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)");
+        }
+        break;
+
+      case "confirmPassword":
+        if (value !== formData.password) {
+          errors.push("Passwords do not match");
+        }
+        break;
+
+      case "phone":
+        const phoneRegex = /^(\+251|0)[1-9]\d{8}$/;
+        if (value && !phoneRegex.test(value)) {
+          errors.push("Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)");
+        }
+        break;
+
+      case "skills":
+        if (formData.role === "worker" && (!value || value.trim().length === 0)) {
+          errors.push("Skills are required for workers");
+        }
+        break;
+
+      case "company":
+        if (formData.role === "client" && (!value || value.trim().length === 0)) {
+          errors.push("Company name is required for clients");
+        }
+        break;
+
+      case "industry":
+        if (formData.role === "client" && (!value || value.trim().length === 0)) {
+          errors.push("Industry is required for clients");
+        }
+        break;
+    }
+
+    return errors;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => {
+    const { name, value } = e.target;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    // Validate field in real-time (with debounce for better UX)
+    if (name === "password" || name === "confirmPassword" || name === "email") {
+      setTimeout(() => {
+        const errors = validateField(name, value);
+        if (errors.length > 0) {
+          setFieldErrors(prev => ({ ...prev, [name]: errors[0] }));
+        }
+      }, 500);
+    }
+  };
+
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    // Name validation
+    if (!formData.name || formData.name.trim().length < 2) {
+      errors.push("Name must be at least 2 characters long");
+    }
+    if (formData.name && formData.name.trim().length > 50) {
+      errors.push("Name must be no more than 50 characters long");
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      errors.push("Please provide a valid email address");
+    }
+
+    // Password validation
+    if (!formData.password || formData.password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (formData.password && !passwordRegex.test(formData.password)) {
+      errors.push("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)");
+    }
+
+    // Password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      errors.push("Passwords do not match");
+    }
+
+    // Role validation
+    const validRoles = ['super_admin', 'admin_hr', 'admin_outsource', 'client', 'worker'];
+    if (!formData.role || !validRoles.includes(formData.role)) {
+      errors.push("Please select a valid role");
+    }
+
+    // Phone validation (Ethiopian phone format)
+    const phoneRegex = /^(\+251|0)[1-9]\d{8}$/;
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      errors.push("Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)");
+    }
+
+    // Role-specific validation
+    if (formData.role === "worker") {
+      if (!formData.skills || formData.skills.trim().length === 0) {
+        errors.push("Skills are required for workers");
+      }
+      if (formData.experience && isNaN(parseInt(formData.experience))) {
+        errors.push("Experience must be a valid number");
+      }
+      if (formData.hourlyRate && isNaN(parseFloat(formData.hourlyRate))) {
+        errors.push("Hourly rate must be a valid number");
+      }
+    } else if (formData.role === "client") {
+      if (!formData.company || formData.company.trim().length === 0) {
+        errors.push("Company name is required for clients");
+      }
+      if (!formData.industry || formData.industry.trim().length === 0) {
+        errors.push("Industry is required for clients");
+      }
+    }
+
+    return errors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,8 +250,10 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
     setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError(t("errors.passwordMismatch"));
+    // Client-side validation
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join(". "));
       setLoading(false);
       return;
     }
@@ -79,15 +261,11 @@ const RegisterPage: React.FC = () => {
     try {
       // Prepare registration data based on role
       interface RegistrationProfile {
-        phone: string;
-        location: string;
-        bio: string;
-        skills?: string[];
-        experience?: number;
-        hourlyRate?: number;
-        company?: string;
-        industry?: string;
-        website?: string;
+        bio?: string;
+        address?: {
+          city?: string;
+          country?: string;
+        };
       }
 
       interface RegistrationData {
@@ -95,7 +273,18 @@ const RegisterPage: React.FC = () => {
         email: string;
         password: string;
         role: string;
+        phone: string;
         profile: RegistrationProfile;
+        workerProfile?: {
+          skills: string[];
+          experience: string;
+          hourlyRate: number;
+        };
+        clientProfile?: {
+          companyName: string;
+          industry: string;
+          website: string;
+        };
       }
 
       const registrationData: RegistrationData = {
@@ -103,27 +292,32 @@ const RegisterPage: React.FC = () => {
         email: formData.email,
         password: formData.password,
         role: formData.role,
+        phone: formData.phone,
         profile: {
-          phone: formData.phone,
-          location: formData.location,
           bio: formData.bio,
+          address: {
+            city: formData.location,
+            country: 'Ethiopia'
+          }
         },
       };
 
       // Add role-specific fields
       if (formData.role === "worker") {
-        registrationData.profile.skills = formData.skills
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter(Boolean);
-        registrationData.profile.experience =
-          parseInt(formData.experience) || 0;
-        registrationData.profile.hourlyRate =
-          parseFloat(formData.hourlyRate) || 0;
+        registrationData.workerProfile = {
+          skills: formData.skills
+            .split(",")
+            .map((s: string) => s.trim())
+            .filter(Boolean),
+          experience: formData.experience,
+          hourlyRate: parseFloat(formData.hourlyRate) || 0,
+        };
       } else if (formData.role === "client") {
-        registrationData.profile.company = formData.company;
-        registrationData.profile.industry = formData.industry;
-        registrationData.profile.website = formData.website;
+        registrationData.clientProfile = {
+          companyName: formData.company,
+          industry: formData.industry,
+          website: formData.website,
+        };
       }
 
       const response = await authAPI.register(
@@ -252,23 +446,35 @@ const RegisterPage: React.FC = () => {
               </div>
             )}
 
-            <Input
-              label={t("form.fields.name")}
-              name="name"
-              type="text"
-              required
-              value={formData.name}
-              onChange={handleChange}
-            />
+            <div>
+              <Input
+                label={t("form.fields.name")}
+                name="name"
+                type="text"
+                required
+                value={formData.name}
+                onChange={handleChange}
+                className={fieldErrors.name ? "border-red-500" : ""}
+              />
+              {fieldErrors.name && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+              )}
+            </div>
 
-            <Input
-              label={t("form.fields.email")}
-              name="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-            />
+            <div>
+              <Input
+                label={t("form.fields.email")}
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className={fieldErrors.email ? "border-red-500" : ""}
+              />
+              {fieldErrors.email && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+              )}
+            </div>
 
             <div>
               <label
@@ -298,13 +504,19 @@ const RegisterPage: React.FC = () => {
               <div ref={googleBtnRef} />
             </div>
 
-            <Input
-              label={t("form.fields.phone")}
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={handleChange}
-            />
+            <div>
+              <Input
+                label={t("form.fields.phone")}
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                className={fieldErrors.phone ? "border-red-500" : ""}
+              />
+              {fieldErrors.phone && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
+              )}
+            </div>
 
             <Input
               label={t("form.fields.location")}
@@ -335,14 +547,20 @@ const RegisterPage: React.FC = () => {
             {/* Worker-specific fields */}
             {formData.role === "worker" && (
               <>
-                <Input
-                  label={t("form.fields.worker.skills.label")}
-                  name="skills"
-                  type="text"
-                  value={formData.skills}
-                  onChange={handleChange}
-                  placeholder={t("form.fields.worker.skills.placeholder")}
-                />
+                <div>
+                  <Input
+                    label={t("form.fields.worker.skills.label")}
+                    name="skills"
+                    type="text"
+                    value={formData.skills}
+                    onChange={handleChange}
+                    placeholder={t("form.fields.worker.skills.placeholder")}
+                    className={fieldErrors.skills ? "border-red-500" : ""}
+                  />
+                  {fieldErrors.skills && (
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.skills}</p>
+                  )}
+                </div>
 
                 <Input
                   label={t("form.fields.worker.experience")}
@@ -368,21 +586,33 @@ const RegisterPage: React.FC = () => {
             {/* Client-specific fields */}
             {formData.role === "client" && (
               <>
-                <Input
-                  label={t("form.fields.client.company")}
-                  name="company"
-                  type="text"
-                  value={formData.company}
-                  onChange={handleChange}
-                />
+                <div>
+                  <Input
+                    label={t("form.fields.client.company")}
+                    name="company"
+                    type="text"
+                    value={formData.company}
+                    onChange={handleChange}
+                    className={fieldErrors.company ? "border-red-500" : ""}
+                  />
+                  {fieldErrors.company && (
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.company}</p>
+                  )}
+                </div>
 
-                <Input
-                  label={t("form.fields.client.industry")}
-                  name="industry"
-                  type="text"
-                  value={formData.industry}
-                  onChange={handleChange}
-                />
+                <div>
+                  <Input
+                    label={t("form.fields.client.industry")}
+                    name="industry"
+                    type="text"
+                    value={formData.industry}
+                    onChange={handleChange}
+                    className={fieldErrors.industry ? "border-red-500" : ""}
+                  />
+                  {fieldErrors.industry && (
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.industry}</p>
+                  )}
+                </div>
 
                 <Input
                   label={t("form.fields.client.website")}
@@ -394,23 +624,98 @@ const RegisterPage: React.FC = () => {
               </>
             )}
 
-            <Input
-              label={t("form.fields.password")}
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-            />
+            <div>
+              <Input
+                label={t("form.fields.password")}
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                className={fieldErrors.password ? "border-red-500" : ""}
+              />
+              {fieldErrors.password && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
+              )}
 
-            <Input
-              label={t("form.fields.confirmPassword")}
-              name="confirmPassword"
-              type="password"
-              required
-              value={formData.confirmPassword}
-              onChange={handleChange}
-            />
+              {/* Password Strength Indicator */}
+              {formData.password && (
+                <div className="mt-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      {[1, 2, 3, 4, 5].map((level) => {
+                        const passwordStrength = getPasswordStrength(formData.password);
+                        return (
+                          <div
+                            key={level}
+                            className={`h-2 w-8 rounded ${
+                              level <= passwordStrength.score
+                                ? passwordStrength.score <= 2
+                                  ? "bg-red-500"
+                                  : passwordStrength.score <= 3
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
+                                : "bg-gray-200"
+                            }`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <span className={`text-sm font-medium ${
+                      getPasswordStrength(formData.password).score <= 2
+                        ? "text-red-600"
+                        : getPasswordStrength(formData.password).score <= 3
+                        ? "text-yellow-600"
+                        : "text-green-600"
+                    }`}>
+                      {getPasswordStrength(formData.password).text}
+                    </span>
+                  </div>
+
+                  {/* Password Requirements */}
+                  <div className="mt-2 text-xs text-gray-600">
+                    <p className="font-medium">Password must contain:</p>
+                    <ul className="mt-1 space-y-1">
+                      <li className={`flex items-center ${formData.password.length >= 8 ? "text-green-600" : "text-gray-500"}`}>
+                        <span className="mr-2">{formData.password.length >= 8 ? "✓" : "○"}</span>
+                        At least 8 characters
+                      </li>
+                      <li className={`flex items-center ${/[a-z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
+                        <span className="mr-2">{/[a-z]/.test(formData.password) ? "✓" : "○"}</span>
+                        One lowercase letter
+                      </li>
+                      <li className={`flex items-center ${/[A-Z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
+                        <span className="mr-2">{/[A-Z]/.test(formData.password) ? "✓" : "○"}</span>
+                        One uppercase letter
+                      </li>
+                      <li className={`flex items-center ${/\d/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
+                        <span className="mr-2">{/\d/.test(formData.password) ? "✓" : "○"}</span>
+                        One number
+                      </li>
+                      <li className={`flex items-center ${/[@$!%*?&]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
+                        <span className="mr-2">{/[@$!%*?&]/.test(formData.password) ? "✓" : "○"}</span>
+                        One special character (@$!%*?&)
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Input
+                label={t("form.fields.confirmPassword")}
+                name="confirmPassword"
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={fieldErrors.confirmPassword ? "border-red-500" : ""}
+              />
+              {fieldErrors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.confirmPassword}</p>
+              )}
+            </div>
 
             <Button type="submit" className="w-full" loading={loading}>
               {loading
