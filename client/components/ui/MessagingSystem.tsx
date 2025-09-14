@@ -3,20 +3,16 @@ import {
   MessageSquare,
   Send,
   Search,
-  Filter,
   User2,
   MoreVertical,
   Paperclip,
-  Image as ImageIcon,
   X,
   Check,
   CheckCheck,
-  Clock,
   Phone,
   Video,
   Info
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 
 interface Message {
   id: string;
@@ -73,13 +69,11 @@ const MessagingSystem: React.FC<MessagingSystemProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
 
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const t = useTranslations("MessagingSystem");
 
   const currentConversation = conversations.find(c => c.id === currentConversationId);
 
@@ -90,10 +84,10 @@ const MessagingSystem: React.FC<MessagingSystemProps> = ({
 
   // Mark conversation as read when selected
   useEffect(() => {
-    if (currentConversationId && currentConversation?.unreadCount > 0) {
+    if (currentConversationId && currentConversation && currentConversation.unreadCount > 0) {
       onMarkAsRead(currentConversationId);
     }
-  }, [currentConversationId, currentConversation?.unreadCount, onMarkAsRead]);
+  }, [currentConversationId, currentConversation, onMarkAsRead]);
 
   // Focus message input when conversation changes
   useEffect(() => {

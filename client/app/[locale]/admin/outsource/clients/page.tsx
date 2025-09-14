@@ -23,7 +23,6 @@ import { adminAPI, notificationsAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
-import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import MessageModal from "@/components/ui/MessageModal";
 import BackToDashboard from "@/components/ui/BackToDashboard";
@@ -76,10 +75,6 @@ interface ClientStats {
 }
 
 type StatusFilter = "all" | "active" | "inactive";
-interface MessageContent {
-  title: string;
-  message: string;
-}
 type ApiClient = Partial<Client> & {
   _id: string;
   name: string;
@@ -106,10 +101,6 @@ const ClientManagement: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showClientModal, setShowClientModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageContent, setMessageContent] = useState<MessageContent>({
-    title: "",
-    message: "",
-  });
   const router = useRouter();
 
   useEffect(() => {
@@ -241,28 +232,6 @@ const ClientManagement: React.FC = () => {
   };
 
   // Filtering logic moved into useCallback above
-
-  const handleSendMessage = async () => {
-    if (!selectedClient || !messageContent.title || !messageContent.message)
-      return;
-
-    try {
-      await notificationsAPI.create({
-        recipients: [selectedClient._id],
-        title: messageContent.title,
-        message: messageContent.message,
-        type: "general",
-        priority: "medium",
-      });
-
-      setShowMessageModal(false);
-      setMessageContent({ title: "", message: "" });
-      alert("Message sent successfully!");
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
-    }
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {

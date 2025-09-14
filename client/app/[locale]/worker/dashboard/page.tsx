@@ -22,7 +22,6 @@ import {
   FileText,
   X,
   AlertTriangle,
-  User,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { workerAPI, jobsAPI, notificationsAPI } from "@/lib/api";

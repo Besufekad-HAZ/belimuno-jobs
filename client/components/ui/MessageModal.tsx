@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Send, X, User, MessageSquare, Paperclip, Smile } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { Send, X, User, MessageSquare } from "lucide-react";
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -17,7 +16,6 @@ const MessageModal: React.FC<MessageModalProps> = ({
   onSend,
   recipientName,
   title = "Send Message",
-  loading = false,
 }) => {
   const [messageContent, setMessageContent] = useState({
     title: "",
@@ -31,7 +29,6 @@ const MessageModal: React.FC<MessageModalProps> = ({
   const messageTextareaRef = useRef<HTMLTextAreaElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const t = useTranslations("MessageModal");
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -84,7 +81,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
     return isValid;
   }, [messageContent]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if (!validateInputs() || sending) return;
 
     setSending(true);
@@ -98,7 +95,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
     } finally {
       setSending(false);
     }
-  };
+  }, [validateInputs, sending, onSend, messageContent.title, messageContent.message, onClose]);
 
   const handleClose = useCallback(() => {
     if (!sending) {
