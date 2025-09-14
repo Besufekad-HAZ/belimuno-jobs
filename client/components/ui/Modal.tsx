@@ -78,7 +78,7 @@ const Modal: React.FC<ModalProps> = ({
 
   return isOpen ? (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4"
       aria-hidden="true"
       onClick={preventCloseOnOutsideClick ? undefined : onClose}
     >

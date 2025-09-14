@@ -443,7 +443,9 @@ const WorkerDashboard: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{t("header.subtitle")}</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+                {t("header.subtitle")}
+              </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button
@@ -453,7 +455,9 @@ const WorkerDashboard: React.FC = () => {
                 size="sm"
               >
                 <Bell className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">{t("buttons.notifications")}</span>
+                <span className="hidden sm:inline">
+                  {t("buttons.notifications")}
+                </span>
                 <span className="sm:hidden">Notifications</span>
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
@@ -572,7 +576,9 @@ const WorkerDashboard: React.FC = () => {
               {availableJobs.map((job) => (
                 <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
-                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">{job.title}</h4>
+                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
+                      {job.title}
+                    </h4>
                     <div className="text-left sm:text-right">
                       <span className="text-sm font-semibold text-green-600 block">
                         ETB {job.budget?.toLocaleString()}
@@ -687,9 +693,14 @@ const WorkerDashboard: React.FC = () => {
                     ].includes(job.status),
                 )
                 .map((job) => (
-                  <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                  <div
+                    key={job._id}
+                    className="p-3 sm:p-4 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
-                      <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">{job.title}</h4>
+                      <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
+                        {job.title}
+                      </h4>
                       <span
                         className={`px-2 py-1 text-xs rounded-full self-start sm:self-auto ${
                           job.status === "in_progress"
@@ -808,7 +819,9 @@ const WorkerDashboard: React.FC = () => {
                               className="flex-1 sm:flex-none"
                             >
                               <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                              <span className="text-xs sm:text-sm">Rate Client</span>
+                              <span className="text-xs sm:text-sm">
+                                Rate Client
+                              </span>
                             </Button>
                           )}
                       </div>
@@ -893,7 +906,7 @@ const WorkerDashboard: React.FC = () => {
         {selectedJob && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
             <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
               onClick={() => setSelectedJob(null)}
             />
             <div className="relative w-full max-w-lg animate-[fadeIn_0.25s_ease] max-h-[90vh] overflow-y-auto">
@@ -1177,6 +1190,7 @@ const WorkerDashboard: React.FC = () => {
             </div>
           </div>
         </Modal>
+
         {/* Rate Client Modal */}
         <Modal
           isOpen={showRateModal}
@@ -1352,6 +1366,7 @@ const WorkerDashboard: React.FC = () => {
             )}
           </div>
         </Modal>
+
         {/* Dispute Modal */}
         <Modal
           isOpen={showDisputeModal}
