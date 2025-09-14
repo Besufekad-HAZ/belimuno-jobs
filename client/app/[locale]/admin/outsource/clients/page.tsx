@@ -24,7 +24,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
-import MessageModal from "@/components/ui/MessageModal";
+import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 import BackToDashboard from "@/components/ui/BackToDashboard";
 import { formatDistanceToNow } from "date-fns";
 
@@ -765,32 +765,41 @@ const ClientManagement: React.FC = () => {
           )}
         </Modal>
 
-        {/* Message Modal */}
-        <MessageModal
-          isOpen={showMessageModal}
-          onClose={() => {
-            setShowMessageModal(false);
-            setSelectedClient(null);
-          }}
-          onSend={async (title, message) => {
-            if (!selectedClient) return;
-            try {
-              await notificationsAPI.create({
-                recipients: [selectedClient._id],
-                title: title,
-                message: message,
-                type: "general",
-                priority: "medium",
-              });
-              alert("Message sent successfully!");
-            } catch (error) {
-              console.error("Failed to send message:", error);
-              alert("Failed to send message. Please try again.");
-            }
-          }}
-          recipientName={selectedClient?.name || "Select a client"}
-          title="Send Message to Client"
-        />
+        {/* Universal Chat System for Outsource Admin */}
+        {selectedClient && (
+          <UniversalChatSystem
+            isOpen={showMessageModal}
+            onClose={() => {
+              setShowMessageModal(false);
+              setSelectedClient(null);
+            }}
+            onSendMessage={async (content: string, attachments?: File[]) => {
+              if (!selectedClient || !content.trim()) return;
+
+              try {
+                await notificationsAPI.create({
+                  recipients: [selectedClient._id],
+                  title: "Message from Outsource Admin",
+                  message: content,
+                  type: "general",
+                  priority: "medium",
+                });
+                alert("Message sent successfully!");
+              } catch (error) {
+                console.error("Failed to send message:", error);
+                throw error;
+              }
+            }}
+            messages={[]} // No conversation history for admin messages
+            currentUserId={getStoredUser()?._id || 'admin'}
+            recipientName={selectedClient.name}
+            recipientRole="client"
+            recipientId={selectedClient._id}
+            mode="compose"
+            title={`Send Message to ${selectedClient.name}`}
+            placeholder="Type your message to the client..."
+          />
+        )}
       </div>
     </div>
   );

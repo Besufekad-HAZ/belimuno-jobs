@@ -24,6 +24,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 import { formatDistanceToNow } from "date-fns";
 
 interface Worker {
@@ -231,6 +232,26 @@ const WorkerManagement: React.FC = () => {
     } catch (error) {
       console.error("Failed to send message:", error);
       alert("Failed to send message. Please try again.");
+    }
+  };
+
+  const sendUniversalMessage = async (content: string, attachments?: File[]) => {
+    if (!selectedWorker || !content.trim()) return;
+
+    try {
+      // Create a notification for the worker
+      await notificationsAPI.create({
+        recipients: [selectedWorker._id],
+        title: "Message from HR Admin",
+        message: content,
+        type: "general",
+        priority: "medium",
+      });
+
+      alert("Message sent successfully!");
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      throw error;
     }
   };
 
@@ -1010,6 +1031,27 @@ const WorkerManagement: React.FC = () => {
             </div>
           )}
         </Modal>
+
+        {/* Universal Chat System for HR Admin */}
+        {selectedWorker && (
+          <UniversalChatSystem
+            isOpen={showMessageModal}
+            onClose={() => {
+              setShowMessageModal(false);
+              setSelectedWorker(null);
+              setMessageContent({ title: "", message: "" });
+            }}
+            onSendMessage={sendUniversalMessage}
+            messages={[]} // No conversation history for admin messages
+            currentUserId={getStoredUser()?._id || 'admin'}
+            recipientName={selectedWorker.name}
+            recipientRole="worker"
+            recipientId={selectedWorker._id}
+            mode="compose"
+            title={`Send Message to ${selectedWorker.name}`}
+            placeholder="Type your message to the worker..."
+          />
+        )}
       </div>
     </div>
   );

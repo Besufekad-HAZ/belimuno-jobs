@@ -199,6 +199,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
             <div className="relative">
               <input
                 ref={titleInputRef}
+                key="message-modal-title"
                 id="message-subject"
                 type="text"
                 value={messageContent.title}
@@ -209,7 +210,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
                   w-full px-4 py-3 bg-white border rounded-lg shadow-sm
                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
                   disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
-                  transition-all duration-200 text-gray-900 placeholder-gray-400
+                  transition-all duration-200 text-gray-900 placeholder-gray-400 outline-none
                   ${errors.title ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'}
                 `}
                 autoComplete="off"
@@ -232,6 +233,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
             <div className="relative">
               <textarea
                 ref={messageTextareaRef}
+                key="message-modal-content"
                 id="message-content"
                 value={messageContent.message}
                 onChange={handleTextareaInput}
@@ -242,7 +244,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
                   w-full px-4 py-3 bg-white border rounded-lg shadow-sm resize-none
                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
                   disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
-                  transition-all duration-200 text-gray-900 placeholder-gray-400
+                  transition-all duration-200 text-gray-900 placeholder-gray-400 outline-none
                   ${errors.message ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'}
                 `}
                 style={{ minHeight: '100px', maxHeight: '200px' }}

@@ -33,6 +33,7 @@ import Modal from "@/components/ui/Modal";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
+import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 
 interface WorkerStats {
   totalApplications: number;
@@ -123,6 +124,20 @@ const WorkerDashboard: React.FC = () => {
       sentAt: string;
     }[]
   >([]);
+  const [modernChatMessages, setModernChatMessages] = useState<Array<{
+    id: string;
+    senderId: string;
+    senderName: string;
+    content: string;
+    timestamp: string;
+    attachments?: Array<{
+      id: string;
+      name: string;
+      url: string;
+      type: string;
+    }>;
+  }>>([]);
+  const [currentJob, setCurrentJob] = useState<any>(null);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   type PendingAttachment = {
@@ -360,8 +375,26 @@ const WorkerDashboard: React.FC = () => {
   const openChat = async (jobId: string) => {
     try {
       setChatJobId(jobId);
+
+      // Find the job details for client info
+      const job = myJobs.find((j: SimpleJob) => j._id === jobId);
+      setCurrentJob(job);
+
       const res = await workerAPI.getJobMessages(jobId);
-      setChatMessages(res.data.data || []);
+      const messages = res.data.data || [];
+      setChatMessages(messages);
+
+      // Convert old messages to new format
+      const convertedMessages = messages.map((msg: any, index: number) => ({
+        id: msg._id || `msg-${index}-${Date.now()}`,
+        senderId: msg.sender?.role === 'worker' ? getStoredUser()?._id || 'worker' : 'client',
+        senderName: msg.sender?.name || (msg.sender?.role === 'worker' ? 'You' : 'Client'),
+        content: msg.content,
+        timestamp: msg.sentAt,
+        attachments: []
+      }));
+
+      setModernChatMessages(convertedMessages);
     } catch (e) {
       console.error(e);
     }
@@ -384,6 +417,36 @@ const WorkerDashboard: React.FC = () => {
       console.error(e);
     } finally {
       setSending(false);
+    }
+  };
+
+  const sendModernMessage = async (content: string, attachments?: File[]) => {
+    if (!chatJobId || !content.trim()) return;
+
+    try {
+      const attachmentUrls = attachments ? attachments.map(file => URL.createObjectURL(file)) : [];
+      const res = await workerAPI.sendJobMessage(chatJobId, content, attachmentUrls);
+
+      // Add the new message to the modern chat messages
+      const newMessage = {
+        id: `msg-${Date.now()}`,
+        senderId: getStoredUser()?._id || 'worker',
+        senderName: 'You',
+        content: content,
+        timestamp: new Date().toISOString(),
+        attachments: attachments ? attachments.map((file, index) => ({
+          id: `attachment-${index}`,
+          name: file.name,
+          url: URL.createObjectURL(file),
+          type: file.type
+        })) : []
+      };
+
+      setModernChatMessages(prev => [...prev, newMessage]);
+      return res.data;
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      throw error;
     }
   };
 
@@ -1585,300 +1648,28 @@ const WorkerDashboard: React.FC = () => {
           )}
         </Modal>
 
-        {/* Chat Modal */}
-        <Modal
-          isOpen={!!chatJobId}
-          onClose={() => setChatJobId(null)}
-          title={t("modals.chat.title")}
-          size="xl"
-          scrollContent={false}
-          preventCloseOnOutsideClick={true}
-        >
-          <div
-            className="flex flex-col h-[70vh] w-full max-w-[900px]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-3 px-2">
-              <div className="text-sm text-gray-500">
-                {t("modals.chat.guidance")}
-              </div>
-            </div>
-            <div
-              ref={chatScrollRef}
-              onDragOver={(e) => {
-                e.preventDefault();
-              }}
-              onDrop={async (e) => {
-                e.preventDefault();
-                const files = e.dataTransfer?.files;
-                if (!files) return;
-                const list = Array.from(files).slice(
-                  0,
-                  5 - chatAttachments.length,
-                );
-                const reads = await Promise.all(
-                  list.map(
-                    (f) =>
-                      new Promise<PendingAttachment>((res) => {
-                        const r = new FileReader();
-                        r.onload = () =>
-                          res({
-                            name: f.name,
-                            type: f.type,
-                            size: f.size,
-                            dataUrl: String(r.result),
-                          });
-                        r.readAsDataURL(f);
-                      }),
-                  ),
-                );
-                setChatAttachments((prev) => [...prev, ...reads]);
-              }}
-              className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-3 bg-gradient-to-b from-blue-50/40 to-white rounded-lg border px-4 py-3"
-              id="worker-chat-scroll"
-            >
-              {chatMessages.map((m, i) => (
-                <div
-                  key={i}
-                  className={`p-3 rounded-lg text-sm max-w-md ${m.sender?.role === "worker" ? "bg-blue-50 ml-auto border border-blue-200" : "bg-gray-100 border border-gray-200"}`}
-                >
-                  <p className="font-medium mb-1 text-blue-700">
-                    {m.sender?.name || "You"}
-                  </p>
-                  <p className="whitespace-pre-wrap text-gray-800">
-                    {m.content}
-                  </p>
-                  <p className="mt-1 text-[10px] text-gray-400">
-                    {new Date(m.sentAt).toLocaleTimeString()}
-                  </p>
-                </div>
-              ))}
-              {chatMessages.length === 0 && (
-                <div className="text-xs text-gray-400">
-                  {t("modals.chat.empty")}
-                </div>
-              )}
-            </div>
-            {chatAttachments.length > 0 && (
-              <div className="mt-2 border rounded bg-white p-2">
-                <div className="text-xs text-gray-500 mb-2">
-                  {t("modals.chat.attachments.title")} ({chatAttachments.length}
-                  /5)
-                </div>
-                <div className="grid grid-cols-5 gap-2">
-                  {chatAttachments.map((a, idx) => (
-                    <div key={idx} className="relative group">
-                      {a.type.startsWith("image") ? (
-                        <Image
-                          src={a.dataUrl}
-                          alt={a.name}
-                          width={80}
-                          height={80}
-                          className="h-20 w-full object-cover rounded"
-                          style={{ objectFit: "cover", borderRadius: "0.5rem" }}
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="h-20 rounded border bg-gray-50 flex items-center justify-center text-xs text-gray-600">
-                          <FileText className="h-4 w-4 mr-1" />
-                          {a.name.slice(0, 10)}
-                        </div>
-                      )}
-                      <button
-                        className="absolute -top-2 -right-2 bg-white border rounded-full p-0.5 shadow hidden group-hover:block"
-                        onClick={() =>
-                          setChatAttachments((prev) =>
-                            prev.filter((_, i) => i !== idx),
-                          )
-                        }
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div
-              className="mt-3 flex gap-2 items-center border-t pt-3 bg-white"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <label className="inline-flex items-center gap-1 px-2 py-1 border rounded cursor-pointer text-sm text-gray-600 hover:bg-gray-50">
-                <Paperclip className="h-4 w-4" />
-                {t("modals.chat.attachments.button")}
-                <input
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={async (e) => {
-                    const files = Array.from(e.target.files || []).slice(
-                      0,
-                      5 - chatAttachments.length,
-                    );
-                    const reads = await Promise.all(
-                      files.map(
-                        (f) =>
-                          new Promise<PendingAttachment>((res) => {
-                            const r = new FileReader();
-                            r.onload = () =>
-                              res({
-                                name: f.name,
-                                type: f.type,
-                                size: f.size,
-                                dataUrl: String(r.result),
-                              });
-                            r.readAsDataURL(f);
-                          }),
-                      ),
-                    );
-                    setChatAttachments((prev) => [...prev, ...reads]);
-                  }}
-                />
-              </label>
-              <div
-                className="flex-1 flex items-center gap-2"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <input
-                  ref={chatInputRef}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onFocus={(e) => e.stopPropagation()}
-                  onBlur={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      sendChat();
-                    }
-                  }}
-                  onPaste={(e) => {
-                    const items = e.clipboardData?.items;
-                    if (!items) return;
-                    const files: File[] = [];
-                    for (let i = 0; i < items.length; i++) {
-                      const it = items[i];
-                      if (it.kind === "file") {
-                        const f = it.getAsFile();
-                        if (f) files.push(f);
-                      }
-                    }
-                    if (files.length > 0) {
-                      const dt = new DataTransfer();
-                      files.forEach((f) => dt.items.add(f));
-                      (async () => {
-                        const list = Array.from(dt.files).slice(
-                          0,
-                          5 - chatAttachments.length,
-                        );
-                        const reads = await Promise.all(
-                          list.map(
-                            (f) =>
-                              new Promise<PendingAttachment>((res) => {
-                                const r = new FileReader();
-                                r.onload = () =>
-                                  res({
-                                    name: f.name,
-                                    type: f.type,
-                                    size: f.size,
-                                    dataUrl: String(r.result),
-                                  });
-                                r.readAsDataURL(f);
-                              }),
-                          ),
-                        );
-                        setChatAttachments((prev) => [...prev, ...reads]);
-                      })();
-                    }
-                  }}
-                  placeholder={t("modals.chat.attachments.placeholder")}
-                  className="flex-1 px-4 py-3 bg-gray-100 border-0 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-gray-900 placeholder-gray-500"
-                />
-                <div className="relative">
-                  <button
-                    type="button"
-                    className="p-2 text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowEmoji((v) => !v)}
-                  >
-                    <Smile className="h-5 w-5" />
-                  </button>
-                  {showEmoji && (
-                    <div className="absolute bottom-12 right-0 w-64 max-h-56 overflow-y-auto bg-white border rounded-xl shadow-2xl p-2 grid grid-cols-8 sm:grid-cols-10 gap-2 text-xl z-10">
-                      {[
-                        "😀",
-                        "😁",
-                        "😂",
-                        "🤣",
-                        "😊",
-                        "😍",
-                        "😘",
-                        "😇",
-                        "🙂",
-                        "😉",
-                        "😌",
-                        "😎",
-                        "🤩",
-                        "🫶",
-                        "👍",
-                        "🙏",
-                        "👏",
-                        "💪",
-                        "🎉",
-                        "🔥",
-                        "✨",
-                        "💡",
-                        "📌",
-                        "📎",
-                        "📷",
-                        "📝",
-                        "🤝",
-                        "🤔",
-                        "😅",
-                        "😴",
-                        "😢",
-                        "😤",
-                      ].map((e) => (
-                        <button
-                          key={e}
-                          className="p-1 hover:bg-gray-100 rounded"
-                          onClick={() => {
-                            const el = chatInputRef.current;
-                            const emoji = e as string;
-                            if (!el) {
-                              setNewMessage((p) => p + emoji);
-                              return;
-                            }
-                            const s = el.selectionStart || 0;
-                            const d = el.selectionEnd || 0;
-                            const next =
-                              newMessage.slice(0, s) +
-                              emoji +
-                              newMessage.slice(d);
-                            setNewMessage(next);
-                            requestAnimationFrame(() => {
-                              el.focus();
-                              const c = s + emoji.length;
-                              el.setSelectionRange(c, c);
-                            });
-                          }}
-                        >
-                          {e}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <Button
-                disabled={sending}
-                onClick={sendChat}
-                onFocus={(e) => e.stopPropagation()}
-                onBlur={(e) => e.stopPropagation()}
-              >
-                {t("buttons.send")}
-              </Button>
-            </div>
-          </div>
-        </Modal>
+        {/* OLD CHAT MODAL REMOVED - Using UniversalChatSystem instead */}
+
+        {/* Universal Chat System for Worker */}
+        {currentJob && (
+          <UniversalChatSystem
+            isOpen={!!chatJobId}
+            onClose={() => {
+              setChatJobId(null);
+              setCurrentJob(null);
+              setModernChatMessages([]);
+            }}
+            onSendMessage={sendModernMessage}
+            messages={modernChatMessages}
+            currentUserId={getStoredUser()?._id || 'worker'}
+            recipientName="Client"
+            recipientRole="client"
+            recipientId="client"
+            mode="chat"
+            title={`Job Chat - ${currentJob.title}`}
+            placeholder="Type your message to the client..."
+          />
+        )}
       </div>
     </div>
   );

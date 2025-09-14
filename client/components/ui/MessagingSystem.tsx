@@ -244,11 +244,13 @@ const MessagingSystem: React.FC<MessagingSystemProps> = ({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
+              key="messaging-system-search"
               type="text"
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none"
+              autoComplete="off"
             />
           </div>
         </div>
@@ -408,14 +410,17 @@ const MessagingSystem: React.FC<MessagingSystemProps> = ({
                 <div className="flex-1 relative">
                   <textarea
                     ref={messageInputRef}
+                    key="messaging-system-input"
                     value={newMessage}
                     onChange={handleMessageInput}
                     onKeyPress={handleKeyPress}
                     placeholder="Type a message..."
                     disabled={sending}
                     rows={1}
-                    className="w-full px-4 py-3 bg-gray-100 border-0 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-gray-900 placeholder-gray-500 disabled:opacity-50"
+                    className="w-full px-4 py-3 bg-gray-100 border-0 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-gray-900 placeholder-gray-500 disabled:opacity-50 outline-none"
                     style={{ minHeight: '44px', maxHeight: '120px' }}
+                    autoComplete="off"
+                    spellCheck="true"
                   />
                 </div>
 
