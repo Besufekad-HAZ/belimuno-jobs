@@ -8,6 +8,7 @@ const createTransporter = () => {
                            process.env.SMTP_PASS &&
                            process.env.SMTP_PASS !== 'your-app-password';
 
+
   // For development or when SMTP credentials are not configured, use console logging
   if (!isEmailConfigured) {
     console.log('⚠️  Email not configured - using console logging mode');
@@ -39,7 +40,15 @@ const createTransporter = () => {
   return transporter;
 };
 
-const transporter = createTransporter();
+// Create transporter lazily to ensure environment variables are loaded
+let transporter = null;
+
+const getTransporter = () => {
+  if (!transporter) {
+    transporter = createTransporter();
+  }
+  return transporter;
+};
 
 // Send password reset email
 const sendPasswordResetEmail = async (email, resetToken, userName) => {
@@ -115,7 +124,7 @@ The Belimuno Jobs Team
   };
 
   try {
-    const result = await transporter.sendMail(mailOptions);
+    const result = await getTransporter().sendMail(mailOptions);
     console.log('✅ Password reset email sent successfully:', result.messageId);
     return result;
   } catch (error) {
@@ -181,7 +190,7 @@ The Belimuno Jobs Team
   };
 
   try {
-    const result = await transporter.sendMail(mailOptions);
+    const result = await getTransporter().sendMail(mailOptions);
     console.log('Password reset success email sent:', result.messageId);
     return result;
   } catch (error) {
@@ -207,7 +216,7 @@ const testEmail = async (testEmail) => {
   };
 
   try {
-    const result = await transporter.sendMail(mailOptions);
+    const result = await getTransporter().sendMail(mailOptions);
     console.log('✅ Test email sent successfully:', result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {

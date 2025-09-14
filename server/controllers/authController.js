@@ -341,7 +341,7 @@ const forgotPassword = async (req, res, next) => {
         success: true,
         message: 'Password reset instructions sent to your email',
         // Always return token in development for testing
-        resetToken: resetToken
+        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
       });
     } catch (emailError) {
       console.error('❌ Email sending failed:', emailError);
@@ -367,7 +367,9 @@ const forgotPassword = async (req, res, next) => {
       } else {
         res.status(500).json({
           success: false,
-          message: 'Failed to send password reset email. Please try again later.'
+          message: 'Failed to send password reset email. Please try again later.',
+          // In development, return the reset token for testing even on email failure
+          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
         });
       }
     }

@@ -25,6 +25,7 @@ const ResetPasswordPage: React.FC = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [token, setToken] = useState("");
+  const [isValidatingToken, setIsValidatingToken] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -32,9 +33,11 @@ const ResetPasswordPage: React.FC = () => {
     const tokenParam = searchParams.get("token");
     if (!tokenParam) {
       setError("Invalid or missing reset token. Please request a new password reset.");
+      setIsValidatingToken(false);
       return;
     }
     setToken(tokenParam);
+    setIsValidatingToken(false);
   }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,6 +125,39 @@ const ResetPasswordPage: React.FC = () => {
                 Continue to Login
               </Button>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while validating token
+  if (isValidatingToken) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="relative z-10 w-full">
+          <div className="mx-auto w-full max-w-md text-center">
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+              <svg
+                className="w-8 h-8 sm:w-10 sm:h-10 text-white animate-spin"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+              Validating Reset Link
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 mb-6">
+              Please wait while we validate your password reset link...
+            </p>
           </div>
         </div>
       </div>
