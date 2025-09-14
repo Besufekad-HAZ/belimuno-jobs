@@ -22,6 +22,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 
@@ -299,6 +300,11 @@ const ClientDashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
           <div>
+            <BackToDashboard
+              currentRole="client"
+              variant="breadcrumb"
+              className="mb-2"
+            />
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {t("header.title")}
             </h1>
@@ -306,13 +312,20 @@ const ClientDashboard: React.FC = () => {
               {t("header.subtitle")}
             </p>
           </div>
-          <Button
-            onClick={() => router.push("/client/jobs/new")}
-            className="w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t("header.postJob")}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <BackToDashboard
+              currentRole="client"
+              variant="button"
+              className="w-full sm:w-auto"
+            />
+            <Button
+              onClick={() => router.push("/client/jobs/new")}
+              className="w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t("header.postJob")}
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -479,7 +492,7 @@ const ClientDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <span>
                       {t("sections.jobs.due")}:{" "}
                       {new Date(job.deadline).toLocaleDateString()}
@@ -688,7 +701,7 @@ const ClientDashboard: React.FC = () => {
                   <p className="text-sm text-gray-600 mb-3">
                     {dispute.description}
                   </p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-gray-600">
                     <span>
                       Created{" "}
                       {formatDistanceToNow(new Date(dispute.createdAt), {
@@ -702,7 +715,7 @@ const ClientDashboard: React.FC = () => {
             {disputes.filter(
               (d) => d.status !== "resolved" && d.status !== "closed",
             ).length === 0 && (
-              <p className="text-center text-gray-500 py-4">
+              <p className="text-center text-gray-600 py-4">
                 No active disputes
               </p>
             )}
@@ -797,19 +810,19 @@ const ClientDashboard: React.FC = () => {
                     </h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-500">
+                        <p className="text-gray-600">
                           {t("modals.payment.summary.fields.jobTitle")}
                         </p>
                         <p className="font-medium">{selectedJob.title}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">
+                        <p className="text-gray-600">
                           {t("modals.payment.summary.fields.worker")}
                         </p>
                         <p className="font-medium">{selectedWorker.name}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">
+                        <p className="text-gray-600">
                           {t("modals.payment.summary.fields.amount")}
                         </p>
                         <p className="font-semibold text-green-600">
@@ -821,7 +834,7 @@ const ClientDashboard: React.FC = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-500">
+                        <p className="text-gray-600">
                           {t("modals.payment.summary.fields.status")}
                         </p>
                         <Badge variant="success">
@@ -842,7 +855,7 @@ const ClientDashboard: React.FC = () => {
                     <p className="text-sm text-gray-600 mb-4">
                       {t("modals.payment.chapa.description")}
                     </p>
-                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span>
                         {t("modals.payment.chapa.security.encrypted")}

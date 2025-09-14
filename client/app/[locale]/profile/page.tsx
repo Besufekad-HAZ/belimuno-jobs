@@ -9,6 +9,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import {
   Camera,
   User2,
@@ -656,6 +657,13 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
+        <div className="mb-4">
+          <BackToDashboard
+            currentRole={user?.role || "worker"}
+            variant="breadcrumb"
+            className="mb-4"
+          />
+        </div>
         <div className="flex items-start gap-6 mb-8">
           <Card className="flex-1">
             <div className="flex items-start gap-4">

@@ -23,7 +23,10 @@ import { adminAPI, notificationsAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import MessageModal from "@/components/ui/MessageModal";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import { formatDistanceToNow } from "date-fns";
 
 interface Client {
@@ -317,6 +320,11 @@ const ClientManagement: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
+            <BackToDashboard
+              currentRole="admin_outsource"
+              variant="breadcrumb"
+              className="mb-2"
+            />
             <h1 className="text-3xl font-bold text-gray-900">
               Client Management
             </h1>
@@ -325,12 +333,10 @@ const ClientManagement: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
-            <Button
-              onClick={() => router.push("/admin/outsource/dashboard")}
-              variant="outline"
-            >
-              Back to Dashboard
-            </Button>
+            <BackToDashboard
+              currentRole="admin_outsource"
+              variant="button"
+            />
           </div>
         </div>
 
@@ -791,79 +797,31 @@ const ClientManagement: React.FC = () => {
         </Modal>
 
         {/* Message Modal */}
-        <Modal
+        <MessageModal
           isOpen={showMessageModal}
           onClose={() => {
             setShowMessageModal(false);
             setSelectedClient(null);
-            setMessageContent({ title: "", message: "" });
           }}
+          onSend={async (title, message) => {
+            if (!selectedClient) return;
+            try {
+              await notificationsAPI.create({
+                recipients: [selectedClient._id],
+                title: title,
+                message: message,
+                type: "general",
+                priority: "medium",
+              });
+              alert("Message sent successfully!");
+            } catch (error) {
+              console.error("Failed to send message:", error);
+              alert("Failed to send message. Please try again.");
+            }
+          }}
+          recipientName={selectedClient?.name || "Select a client"}
           title="Send Message to Client"
-          size="md"
-        >
-          {selectedClient && (
-            <div className="space-y-4">
-              <p className="text-gray-700">
-                Send a message to {selectedClient.name}
-              </p>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  value={messageContent.title}
-                  onChange={(e) =>
-                    setMessageContent((prev) => ({
-                      ...prev,
-                      title: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  placeholder="Message subject..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <textarea
-                  value={messageContent.message}
-                  onChange={(e) =>
-                    setMessageContent((prev) => ({
-                      ...prev,
-                      message: e.target.value,
-                    }))
-                  }
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  placeholder="Your message..."
-                />
-              </div>
-
-              <div className="flex space-x-3">
-                <Button
-                  onClick={handleSendMessage}
-                  variant="primary"
-                  disabled={!messageContent.title || !messageContent.message}
-                >
-                  Send Message
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowMessageModal(false);
-                    setMessageContent({ title: "", message: "" });
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-        </Modal>
+        />
       </div>
     </div>
   );

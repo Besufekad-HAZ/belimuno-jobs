@@ -22,12 +22,14 @@ import {
   FileText,
   X,
   AlertTriangle,
+  User,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { workerAPI, jobsAPI, notificationsAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import Modal from "@/components/ui/Modal";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatDistanceToNow } from "date-fns";
@@ -433,6 +435,11 @@ const WorkerDashboard: React.FC = () => {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
+              <BackToDashboard
+                currentRole="worker"
+                variant="breadcrumb"
+                className="mb-2"
+              />
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>
@@ -1571,8 +1578,12 @@ const WorkerDashboard: React.FC = () => {
           title={t("modals.chat.title")}
           size="xl"
           scrollContent={false}
+          preventCloseOnOutsideClick={true}
         >
-          <div className="flex flex-col h-[70vh] w-full max-w-[900px]">
+          <div
+            className="flex flex-col h-[70vh] w-full max-w-[900px]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-3 px-2">
               <div className="text-sm text-gray-500">
                 {t("modals.chat.guidance")}
@@ -1674,7 +1685,10 @@ const WorkerDashboard: React.FC = () => {
                 </div>
               </div>
             )}
-            <div className="mt-3 flex gap-2 items-center border-t pt-3 bg-white">
+            <div
+              className="mt-3 flex gap-2 items-center border-t pt-3 bg-white"
+              onClick={(e) => e.stopPropagation()}
+            >
               <label className="inline-flex items-center gap-1 px-2 py-1 border rounded cursor-pointer text-sm text-gray-600 hover:bg-gray-50">
                 <Paperclip className="h-4 w-4" />
                 {t("modals.chat.attachments.button")}
@@ -1707,11 +1721,22 @@ const WorkerDashboard: React.FC = () => {
                   }}
                 />
               </label>
-              <div className="flex-1 flex items-center gap-2">
+              <div
+                className="flex-1 flex items-center gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <input
                   ref={chatInputRef}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
+                  onFocus={(e) => e.stopPropagation()}
+                  onBlur={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      sendChat();
+                    }
+                  }}
                   onPaste={(e) => {
                     const items = e.clipboardData?.items;
                     if (!items) return;
@@ -1752,7 +1777,7 @@ const WorkerDashboard: React.FC = () => {
                     }
                   }}
                   placeholder={t("modals.chat.attachments.placeholder")}
-                  className="flex-1 border rounded-full px-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 px-4 py-3 bg-gray-100 border-0 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-gray-900 placeholder-gray-500"
                 />
                 <div className="relative">
                   <button
@@ -1829,7 +1854,12 @@ const WorkerDashboard: React.FC = () => {
                   )}
                 </div>
               </div>
-              <Button disabled={sending} onClick={sendChat}>
+              <Button
+                disabled={sending}
+                onClick={sendChat}
+                onFocus={(e) => e.stopPropagation()}
+                onBlur={(e) => e.stopPropagation()}
+              >
                 {t("buttons.send")}
               </Button>
             </div>

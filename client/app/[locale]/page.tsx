@@ -69,44 +69,101 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-background">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse-glow"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-orange-400/20 to-yellow-400/20 rounded-full blur-3xl animate-pulse-glow delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse-glow delay-500"></div>
+        </div>
+
+        {/* Floating Icons */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 animate-float delay-300">
+            <Briefcase className="h-8 w-8 text-blue-400/30" />
+          </div>
+          <div className="absolute top-32 right-20 animate-float delay-700">
+            <Users className="h-6 w-6 text-cyan-400/30" />
+          </div>
+          <div className="absolute bottom-32 left-20 animate-float delay-1000">
+            <TrendingUp className="h-7 w-7 text-orange-400/30" />
+          </div>
+          <div className="absolute bottom-20 right-10 animate-float delay-500">
+            <CheckCircle className="h-6 w-6 text-green-400/30" />
+          </div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              {t("hero.title.part1")}
-              <span className="bg-gradient-to-r from-blue-800 to-cyan-600 bg-clip-text text-transparent">
-                {" "}
-                {t("hero.title.part2")}
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            {/* Main Heading with Enhanced Animation */}
+            <div className="mb-8">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+                <span className="block text-gray-900 animate-fade-in-up">
+                  {t("hero.title.part1")}
+                </span>
+                <span className="block bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-700 bg-clip-text text-transparent animate-fade-in-up delay-300">
+                  {t("hero.title.part2")}
+                </span>
+              </h1>
+
+              {/* Decorative Line */}
+              <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-cyan-500 mx-auto rounded-full animate-fade-in-up delay-500"></div>
+            </div>
+
+            {/* Description with Animation */}
+            <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed animate-fade-in-up delay-700">
               {t("hero.description")}
             </p>
-            <div className="flex flex-col sm:flex-row sm:flex-nowrap gap-4 justify-center items-center">
+
+            {/* CTA Buttons with Enhanced Animation */}
+            <div className="flex flex-col sm:flex-row sm:flex-nowrap gap-6 justify-center items-center animate-fade-in-up delay-1000">
               <Button
                 size="lg"
                 onClick={handleGetStarted}
-                className="group bg-gradient-to-r from-blue-700 to-cyan-600 hover:from-blue-800 hover:to-cyan-700 text-white shadow-lg focus:ring-blue-600"
+                className="group bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-2xl hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold"
               >
                 <span className="inline-flex items-center">
                   <span className="mr-3">
                     {user ? t("hero.goToDashboard") : t("hero.getStarted")}
                   </span>
-                  <span className="ml-1 flex h-8 w-8 items-center justify-center rounded-md bg-cyan-600 text-white shadow-sm transition-colors group-hover:bg-cyan-700">
-                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  <span className="ml-1 flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white shadow-sm transition-all duration-300 group-hover:bg-white/30 group-hover:scale-110">
+                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                   </span>
                 </span>
               </Button>
+
               <Button
                 size="lg"
                 variant="outline"
                 onClick={() => router.push("/jobs")}
-                className="shadow-sm"
+                className="group border-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white shadow-lg hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold"
               >
-                {t("hero.browseJobs")}
+                <span className="flex items-center">
+                  <Briefcase className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:rotate-12" />
+                  {t("hero.browseJobs")}
+                </span>
               </Button>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="mt-16 animate-fade-in-up delay-1200">
+              <p className="text-sm text-gray-500 mb-6 font-medium">Trusted by thousands of professionals</p>
+              <div className="flex justify-center items-center space-x-8 opacity-60">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-sm text-gray-600">Verified Companies</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-sm text-gray-600">Secure Payments</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span className="text-sm text-gray-600">24/7 Support</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -124,7 +124,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-blue-900 via-cyan-700 to-cyan-500 shadow-md border-b border-cyan-200">
+    <nav className="sticky top-0 z-50 bg-gradient-primary shadow-md border-b border-blue-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-4 lg:space-x-8">
@@ -138,7 +138,7 @@ const Navbar: React.FC = () => {
                   className="object-contain"
                 />
               </div>
-              <h1 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
+              <h1 className="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent tracking-tight drop-shadow-sm">
                 {t("brand")}
               </h1>
             </Link>
@@ -147,39 +147,39 @@ const Navbar: React.FC = () => {
             <nav className="hidden lg:flex space-x-6" aria-label="Primary">
               <Link
                 href="/"
-                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
                 aria-current={pathname === "/" ? "page" : undefined}
               >
                 {t("navigation.home")}
               </Link>
               <Link
                 href="/about"
-                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
                 aria-current={pathname === "/about" ? "page" : undefined}
               >
                 {t("navigation.about")}
               </Link>
               <Link
                 href="/services"
-                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
                 {t("navigation.services")}
               </Link>
               <Link
                 href="/clients"
-                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
                 {t("navigation.clients")}
               </Link>
               <Link
                 href="/jobs"
-                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
                 {t("navigation.jobs")}
               </Link>
               <Link
                 href="/contact"
-                className="text-white hover:text-gray-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
               >
                 {t("navigation.contact")}
               </Link>
@@ -190,7 +190,7 @@ const Navbar: React.FC = () => {
             <div className="flex items-center space-x-4">
               {/* Mobile menu toggle */}
               <button
-                className="hidden max-[900px]:inline-flex p-2 text-cyan-100 hover:text-white"
+                className="hidden max-[900px]:inline-flex p-2 text-blue-100 hover:text-white"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
                 aria-expanded={mobileOpen}
@@ -219,35 +219,35 @@ const Navbar: React.FC = () => {
                     e.stopPropagation();
                     setIsMenuOpen(!isMenuOpen);
                   }}
-                  className="flex items-center space-x-2 p-2 text-cyan-100 hover:text-white"
+                  className="flex items-center space-x-2 p-2 text-blue-100 hover:text-white"
                 >
                   <UserIcon className="h-6 w-6" />
                   <span className="hidden md:block font-semibold">
                     {user.name}
                   </span>
-                  <span className="hidden md:block text-xs text-cyan-200">
+                  <span className="hidden md:block text-xs text-blue-200">
                     ({getRoleDisplayName(user.role)})
                   </span>
                 </button>
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-cyan-200 transition ease-out duration-200">
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-blue-200 transition ease-out duration-200">
                     <Link
                       href={getRoleDashboardPath(user.role)}
-                      className="block px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
+                      className="block px-4 py-2 text-sm text-blue-900 hover:bg-blue-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {t("auth.dashboard")}
                     </Link>
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
+                      className="block px-4 py-2 text-sm text-blue-900 hover:bg-blue-50"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {t("auth.profile")}
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-cyan-900 hover:bg-cyan-50"
+                      className="block w-full text-left px-4 py-2 text-sm text-blue-900 hover:bg-blue-50"
                     >
                       <LogOut className="inline h-4 w-4 mr-2" />
                       {t("auth.logout")}
@@ -263,7 +263,7 @@ const Navbar: React.FC = () => {
             <div className="flex items-center space-x-4">
               {/* Mobile menu toggle */}
               <button
-                className="hidden max-[900px]:inline-flex p-2 text-cyan-100 hover:text-white"
+                className="hidden max-[900px]:inline-flex p-2 text-blue-100 hover:text-white"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle menu"
               >
@@ -274,17 +274,17 @@ const Navbar: React.FC = () => {
                 )}
               </button>
               {/* Hide auth buttons on small screens to avoid crowding */}
-              <div className="hidden sm:flex items-center gap-2 rounded-lg p-1 bg-cyan-800/40 border border-cyan-300/60">
+              <div className="hidden sm:flex items-center gap-2 rounded-lg p-1 bg-blue-800/40 border border-blue-300/60">
                 <Link href="/login" className="relative">
                   <span
-                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname === "/login" ? "bg-white text-cyan-900 shadow-sm" : "text-cyan-100 hover:text-white"}`}
+                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname === "/login" ? "bg-white text-blue-900 shadow-sm" : "text-blue-100 hover:text-white"}`}
                   >
                     {t("auth.login")}
                   </span>
                 </Link>
                 <Link href="/register" className="relative">
                   <span
-                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname === "/register" ? "bg-white text-cyan-900 shadow-sm" : "text-cyan-100 hover:text-white"}`}
+                    className={`px-3 py-2 text-sm font-semibold rounded-md transition-all ${pathname === "/register" ? "bg-white text-blue-900 shadow-sm" : "text-blue-100 hover:text-white"}`}
                   >
                     {t("auth.signup")}
                   </span>
@@ -314,7 +314,7 @@ const Navbar: React.FC = () => {
             aria-hidden
           />
           {/* Sliding sheet below navbar */}
-          <div className="fixed top-16 inset-x-0 z-50 border-t border-cyan-300/40 bg-gradient-to-b from-cyan-700 to-cyan-600 shadow-lg">
+          <div className="fixed top-16 inset-x-0 z-50 border-t border-blue-300/40 bg-gradient-primary shadow-lg">
             <div
               className="max-w-7xl mx-auto px-4 sm:px-6 py-4 space-y-1"
               role="menu"
@@ -323,7 +323,7 @@ const Navbar: React.FC = () => {
               <Link
                 href="/"
                 onClick={() => setMobileOpen(false)}
-                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
                 role="menuitem"
               >
                 {t("navigation.home")}
@@ -331,35 +331,35 @@ const Navbar: React.FC = () => {
               <Link
                 href="/about"
                 onClick={() => setMobileOpen(false)}
-                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
               >
                 {t("navigation.about")}
               </Link>
               <Link
                 href="/services"
                 onClick={() => setMobileOpen(false)}
-                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
               >
                 {t("navigation.services")}
               </Link>
               <Link
                 href="/clients"
                 onClick={() => setMobileOpen(false)}
-                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
               >
                 {t("navigation.clients")}
               </Link>
               <Link
                 href="/jobs"
                 onClick={() => setMobileOpen(false)}
-                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
               >
                 {t("navigation.jobs")}
               </Link>
               <Link
                 href="/contact"
                 onClick={() => setMobileOpen(false)}
-                className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
               >
                 {t("navigation.contact")}
               </Link>
@@ -376,14 +376,14 @@ const Navbar: React.FC = () => {
                   <Link
                     href={getRoleDashboardPath(user.role)}
                     onClick={() => setMobileOpen(false)}
-                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                    className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
                   >
                     {t("auth.dashboard")}
                   </Link>
                   <Link
                     href="/profile"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                    className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
                   >
                     {t("auth.profile")}
                   </Link>
@@ -402,14 +402,14 @@ const Navbar: React.FC = () => {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                    className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
                   >
                     {t("auth.login")}
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="block text-white px-3 py-2 rounded hover:bg-cyan-500/30"
+                    className="block text-white px-3 py-2 rounded hover:bg-blue-500/30"
                   >
                     {t("auth.signup")}
                   </Link>

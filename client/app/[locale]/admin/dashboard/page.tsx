@@ -20,6 +20,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import { useTranslations } from "next-intl";
 
 interface DashboardStats {
@@ -232,6 +233,11 @@ const AdminDashboard: React.FC = () => {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
+              <BackToDashboard
+                currentRole="admin_hr"
+                variant="breadcrumb"
+                className="mb-2"
+              />
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>

@@ -1,4 +1,4 @@
-import React, { useState, useId } from "react";
+import React, { useState, useId, forwardRef } from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -7,7 +7,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   showPasswordToggle?: boolean;
 }
 
-const Input: React.FC<InputProps> = ({
+const Input = forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   helperText,
@@ -16,7 +16,7 @@ const Input: React.FC<InputProps> = ({
   showPasswordToggle,
   type,
   ...props
-}) => {
+}, ref) => {
   const uniqueId = useId();
   const inputId = id || `input-${uniqueId}`;
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -26,7 +26,7 @@ const Input: React.FC<InputProps> = ({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-900 mb-1"
         >
           {label}
         </label>
@@ -34,6 +34,7 @@ const Input: React.FC<InputProps> = ({
       {showPasswordToggle && (type === "password" || !type) ? (
         <div className="relative">
           <input
+            ref={ref}
             id={inputId}
             type={passwordVisible ? "text" : "password"}
             className={`
@@ -89,6 +90,7 @@ const Input: React.FC<InputProps> = ({
         </div>
       ) : (
         <input
+          ref={ref}
           id={inputId}
           type={type}
           className={`
@@ -104,10 +106,12 @@ const Input: React.FC<InputProps> = ({
       )}
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       {helperText && !error && (
-        <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+        <p className="mt-1 text-sm text-gray-600">{helperText}</p>
       )}
     </div>
   );
-};
+});
+
+Input.displayName = "Input";
 
 export default Input;

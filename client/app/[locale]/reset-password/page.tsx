@@ -84,7 +84,7 @@ const ResetPasswordPage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-background flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-40 sm:w-80 h-40 sm:h-80 rounded-full bg-gradient-to-br from-green-100 to-green-200 opacity-20"></div>
@@ -94,7 +94,7 @@ const ResetPasswordPage: React.FC = () => {
         <div className="relative z-10 w-full">
           <div className="mx-auto w-full max-w-md text-center">
             {/* Success Icon */}
-            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-success rounded-full flex items-center justify-center mb-6 shadow-lg">
               <svg
                 className="w-8 h-8 sm:w-10 sm:h-10 text-white"
                 fill="none"
@@ -120,7 +120,7 @@ const ResetPasswordPage: React.FC = () => {
             <div className="space-y-4">
               <Button
                 onClick={() => router.push("/login")}
-                className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
+                className="w-full bg-gradient-success hover:from-green-500 hover:to-green-600 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
               >
                 Continue to Login
               </Button>
@@ -134,10 +134,10 @@ const ResetPasswordPage: React.FC = () => {
   // Show loading state while validating token
   if (isValidatingToken) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-background flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="relative z-10 w-full">
           <div className="mx-auto w-full max-w-md text-center">
-            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-primary rounded-full flex items-center justify-center mb-6 shadow-lg">
               <svg
                 className="w-8 h-8 sm:w-10 sm:h-10 text-white animate-spin"
                 fill="none"
@@ -166,10 +166,10 @@ const ResetPasswordPage: React.FC = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-background flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="relative z-10 w-full">
           <div className="mx-auto w-full max-w-md text-center">
-            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
               <svg
                 className="w-8 h-8 sm:w-10 sm:h-10 text-white"
                 fill="none"
@@ -192,7 +192,7 @@ const ResetPasswordPage: React.FC = () => {
             </p>
             <Link
               href="/forgot-password"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="inline-block bg-gradient-primary hover:from-blue-800 hover:to-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors shadow-md hover:shadow-lg"
             >
               Request New Reset Link
             </Link>
@@ -203,7 +203,7 @@ const ResetPasswordPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-background flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-40 sm:w-80 h-40 sm:h-80 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 opacity-20"></div>
@@ -213,7 +213,7 @@ const ResetPasswordPage: React.FC = () => {
       <div className="relative z-10 w-full">
         {/* Header Section */}
         <div className="mx-auto w-full max-w-md text-center">
-          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
+          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-gradient-primary rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
             <svg
               className="w-6 h-6 sm:w-8 sm:h-8 text-white"
               fill="none"
@@ -238,7 +238,7 @@ const ResetPasswordPage: React.FC = () => {
 
         {/* Main Form Card */}
         <div className="mt-6 sm:mt-10 mx-auto w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="bg-card rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {error && (
@@ -304,7 +304,7 @@ const ResetPasswordPage: React.FC = () => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
+                  className="w-full bg-gradient-cta hover:from-yellow-500 hover:to-orange-500 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
                   loading={loading}
                 >
                   {loading ? "Resetting Password..." : "Reset Password"}

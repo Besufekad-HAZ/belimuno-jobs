@@ -1,17 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F8F9FA;
+  --foreground: #374151;
 
-  /* Belimuno Brand Colors */
-  --belimuno-primary: #2e4b8b; /* Navy Blue from logo */
-  --belimuno-secondary: #4a90e2; /* Light Blue from logo */
-  --belimuno-accent: #5bb3e8; /* Sky Blue from logo */
-  --belimuno-purple: #7b68b6; /* Purple from company materials */
-  --belimuno-cyan: #2bbae8; /* Cyan from company materials */
-  --belimuno-dark: #1a2b5c; /* Dark navy */
-  --belimuno-light: #e8f3ff; /* Light blue background */
+  /* Modern Belimuno Brand Colors */
+  --belimuno-primary: #1E3A8A; /* Deep Navy Primary brand color */
+  --belimuno-secondary: #4D84FF; /* Bright Blue - Accent and interactive elements */
+  --belimuno-accent: #7AA9FF; /* Soft Sky Blue - Hover states and secondary interactions */
+  --belimuno-light: #D6E4FF; /* Light Blue - Background cards and sections */
+  --belimuno-cta: #ff9437; /* Vibrant Yellow - Call-to-action buttons */
+  --belimuno-error: #FF6B6B; /* Coral Red - Alerts and error states */
+  --belimuno-success: #10B981; /* Success Green - Positive feedback */
+  --belimuno-warning: #720000; /* Warning Orange - Caution states */
+  --belimuno-dark: #1E3A8A; /* Deep navy for consistency */
+  --belimuno-neutral: #F3F4F6; /* Light gray for card backgrounds */
+  --belimuno-text-primary: #374151; /* Dark gray for primary text */
+  --belimuno-text-secondary: #6B7280; /* Medium gray for secondary text */
+  --belimuno-text-inverse: #FFFFFF; /* White for text on dark backgrounds */
 }
 
 @theme inline {
@@ -25,7 +31,42 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --belimuno-text-primary: #F9FAFB;
+    --belimuno-text-secondary: #D1D5DB;
   }
+}
+
+/* Additional utility classes for the new color system */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--belimuno-primary), var(--belimuno-secondary));
+}
+
+.bg-gradient-cta {
+  background: linear-gradient(135deg, var(--belimuno-cta), #F59E0B);
+}
+
+.bg-gradient-success {
+  background: linear-gradient(135deg, var(--belimuno-success), #34D399);
+}
+
+.bg-gradient-background {
+  background: linear-gradient(135deg, var(--belimuno-light), var(--background));
+}
+
+.text-primary {
+  color: var(--belimuno-text-primary);
+}
+
+.text-secondary {
+  color: var(--belimuno-text-secondary);
+}
+
+.bg-card {
+  background-color: var(--belimuno-neutral);
+}
+
+.bg-section {
+  background-color: var(--belimuno-light);
 }
 
 body {
@@ -116,4 +157,70 @@ option {
 }
 :where(a, button, [role="button"]) :focus-visible {
   outline: 2px solid #60a5fa; /* blue-400 */
+}
+
+/* Custom Animations for Hero Section */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Delay classes for staggered animations */
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.delay-700 {
+  animation-delay: 0.7s;
+}
+
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+.delay-1200 {
+  animation-delay: 1.2s;
 }

@@ -18,6 +18,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import { useTranslations } from "next-intl";
 
 interface OutsourceStats {
@@ -278,6 +279,11 @@ const OutsourceAdminDashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
+            <BackToDashboard
+              currentRole="admin_outsource"
+              variant="breadcrumb"
+              className="mb-2"
+            />
             <h1 className="text-3xl font-bold text-gray-900">
               {t("header.title")}
             </h1>

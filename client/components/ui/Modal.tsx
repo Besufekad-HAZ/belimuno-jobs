@@ -15,6 +15,8 @@ interface ModalProps {
   // Optional custom classes for the modal container and content area
   containerClassName?: string;
   contentClassName?: string;
+  // Prevent closing modal when clicking outside
+  preventCloseOnOutsideClick?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -27,6 +29,7 @@ const Modal: React.FC<ModalProps> = ({
   scrollContent = true,
   containerClassName = "",
   contentClassName = "",
+  preventCloseOnOutsideClick = false,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
@@ -77,7 +80,7 @@ const Modal: React.FC<ModalProps> = ({
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
       aria-hidden="true"
-      onClick={onClose}
+      onClick={preventCloseOnOutsideClick ? undefined : onClose}
     >
       <div
         className={`bg-white rounded-lg shadow-xl w-full ${sizes[size]} max-h-[90vh] overflow-hidden ${containerClassName}`}
