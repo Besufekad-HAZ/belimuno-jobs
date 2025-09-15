@@ -302,10 +302,7 @@ const ClientManagement: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
-            <BackToDashboard
-              currentRole="admin_outsource"
-              variant="button"
-            />
+            <BackToDashboard currentRole="admin_outsource" variant="button" />
           </div>
         </div>
 
@@ -773,7 +770,7 @@ const ClientManagement: React.FC = () => {
               setShowMessageModal(false);
               setSelectedClient(null);
             }}
-            onSendMessage={async (content: string, attachments?: File[]) => {
+            onSendMessage={async (content: string) => {
               if (!selectedClient || !content.trim()) return;
 
               try {
@@ -791,10 +788,9 @@ const ClientManagement: React.FC = () => {
               }
             }}
             messages={[]} // No conversation history for admin messages
-            currentUserId={getStoredUser()?._id || 'admin'}
+            currentUserId={getStoredUser()?._id || "admin"}
             recipientName={selectedClient.name}
             recipientRole="client"
-            recipientId={selectedClient._id}
             mode="compose"
             title={`Send Message to ${selectedClient.name}`}
             placeholder="Type your message to the client..."

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   MessageSquare,
   Send,
@@ -11,7 +11,7 @@ import {
   Phone,
   Video,
   MoreVertical,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -35,10 +35,9 @@ interface UniversalChatSystemProps {
   currentUserId: string;
   recipientName: string;
   recipientRole?: string;
-  recipientId?: string;
   title?: string;
   isLoading?: boolean;
-  mode?: 'chat' | 'compose'; // chat = full conversation, compose = send message only
+  mode?: "chat" | "compose"; // chat = full conversation, compose = send message only
   placeholder?: string;
   showAttachments?: boolean;
   showEmoji?: boolean;
@@ -51,14 +50,13 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
   messages,
   currentUserId,
   recipientName,
-  recipientRole = 'user',
-  recipientId,
+  recipientRole = "user",
   title,
   isLoading = false,
-  mode = 'chat',
-  placeholder = 'Type a message...',
+  mode = "chat",
+  placeholder = "Type a message...",
   showAttachments = true,
-  showEmoji = true,
+  showEmoji = false,
 }) => {
   const [newMessage, setNewMessage] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -73,8 +71,8 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (messagesEndRef.current && isOpen && mode === 'chat') {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current && isOpen && mode === "chat") {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen, mode]);
 
@@ -93,11 +91,14 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
     e.stopPropagation();
   }, []);
 
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && !sending) {
-      onClose();
-    }
-  }, [onClose, sending]);
+  const handleBackdropClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target === e.currentTarget && !sending) {
+        onClose();
+      }
+    },
+    [onClose, sending],
+  );
 
   const handleSendMessage = useCallback(async () => {
     if ((!newMessage.trim() && attachments.length === 0) || sending) {
@@ -122,16 +123,19 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
     }
   }, [newMessage, attachments, sending, onSendMessage]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-    // Handle escape to close chat
-    if (e.key === 'Escape') {
-      onClose();
-    }
-  }, [handleSendMessage, onClose]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+      // Handle escape to close chat
+      if (e.key === "Escape") {
+        onClose();
+      }
+    },
+    [handleSendMessage, onClose],
+  );
 
   const handleAttachFile = useCallback(() => {
     if (showAttachments) {
@@ -139,103 +143,134 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
     }
   }, [showAttachments]);
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setAttachments(prev => [...prev, ...files].slice(0, 5)); // Max 5 files
-  }, []);
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || []);
+      setAttachments((prev) => [...prev, ...files].slice(0, 5)); // Max 5 files
+    },
+    [],
+  );
 
   const removeAttachment = useCallback((index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   // Auto-resize textarea with stable key and focus management
-  const handleMessageInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const textarea = e.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
-    setNewMessage(e.target.value);
-  }, []);
+  const handleMessageInput = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const textarea = e.target;
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
+      setNewMessage(e.target.value);
+    },
+    [],
+  );
 
-  const insertEmoji = useCallback((emoji: string) => {
-    const textarea = messageInputRef.current;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const newValue = newMessage.slice(0, start) + emoji + newMessage.slice(end);
-      setNewMessage(newValue);
+  const insertEmoji = useCallback(
+    (emoji: string) => {
+      const textarea = messageInputRef.current;
+      if (textarea) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newValue =
+          newMessage.slice(0, start) + emoji + newMessage.slice(end);
+        setNewMessage(newValue);
 
-      // Restore cursor position
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + emoji.length, start + emoji.length);
-      }, 0);
-    }
-    setShowEmojiPicker(false);
-  }, [newMessage]);
+        // Restore cursor position
+        setTimeout(() => {
+          textarea.focus();
+          textarea.setSelectionRange(
+            start + emoji.length,
+            start + emoji.length,
+          );
+        }, 0);
+      }
+      setShowEmojiPicker(false);
+    },
+    [newMessage],
+  );
 
   const formatTime = useCallback((timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }, []);
 
-  const renderMessage = useCallback((message: ChatMessage) => {
-    const isSent = message.senderId === currentUserId;
+  const renderMessage = useCallback(
+    (message: ChatMessage) => {
+      const isSent = message.senderId === currentUserId;
 
-    return (
-      <div
-        key={message.id}
-        className={`flex ${isSent ? 'justify-end' : 'justify-start'} mb-4 animate-in slide-in-from-bottom-2 duration-200`}
-      >
-        <div className={`max-w-xs lg:max-w-md ${isSent ? 'order-2' : 'order-1'}`}>
-          {!isSent && (
-            <div className="flex items-center mb-1">
-              <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mr-2">
-                <User2 className="w-3 h-3 text-white" />
-              </div>
-              <span className="text-xs text-gray-500 font-medium">{message.senderName}</span>
-            </div>
-          )}
-
+      return (
+        <div
+          key={message.id}
+          className={`flex ${isSent ? "justify-end" : "justify-start"} mb-4 animate-in slide-in-from-bottom-2 duration-200`}
+        >
           <div
-            className={`
-              px-4 py-2 rounded-2xl shadow-sm transition-all duration-200
-              ${isSent
-                ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                : 'bg-white border border-gray-200 text-gray-900'
-              }
-            `}
+            className={`max-w-xs lg:max-w-md ${isSent ? "order-2" : "order-1"}`}
           >
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-
-            {message.attachments && message.attachments.length > 0 && (
-              <div className="mt-2 space-y-1">
-                {message.attachments.map((attachment) => (
-                  <div
-                    key={attachment.id}
-                    className={`
-                      flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:opacity-80
-                      ${isSent ? 'bg-white/20' : 'bg-gray-50'}
-                    `}
-                  >
-                    <Paperclip className="w-3 h-3" />
-                    <span className="text-xs truncate">{attachment.name}</span>
-                  </div>
-                ))}
+            {!isSent && (
+              <div className="flex items-center mb-1">
+                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mr-2">
+                  <User2 className="w-3 h-3 text-white" />
+                </div>
+                <span className="text-xs text-gray-500 font-medium">
+                  {message.senderName}
+                </span>
               </div>
             )}
-          </div>
 
-          <div className={`flex items-center mt-1 ${isSent ? 'justify-end' : 'justify-start'}`}>
-            <span className="text-xs text-gray-400">{formatTime(message.timestamp)}</span>
+            <div
+              className={`
+              px-4 py-2 rounded-2xl shadow-sm transition-all duration-200
+              ${
+                isSent
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "bg-white border border-gray-200 text-gray-900"
+              }
+            `}
+            >
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {message.content}
+              </p>
+
+              {message.attachments && message.attachments.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {message.attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className={`
+                      flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:opacity-80
+                      ${isSent ? "bg-white/20" : "bg-gray-50"}
+                    `}
+                    >
+                      <Paperclip className="w-3 h-3" />
+                      <span className="text-xs truncate">
+                        {attachment.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div
+              className={`flex items-center mt-1 ${isSent ? "justify-end" : "justify-start"}`}
+            >
+              <span className="text-xs text-gray-400">
+                {formatTime(message.timestamp)}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }, [currentUserId, formatTime]);
+      );
+    },
+    [currentUserId, formatTime],
+  );
 
   if (!isOpen) return null;
 
-  const displayTitle = title || `${mode === 'compose' ? 'Send Message to' : 'Chat with'} ${recipientName}`;
+  const displayTitle =
+    title ||
+    `${mode === "compose" ? "Send Message to" : "Chat with"} ${recipientName}`;
 
   return (
     <div
@@ -245,7 +280,7 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
       <div
         ref={chatContainerRef}
         className={`relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 transform transition-all duration-300 ease-out ${
-          mode === 'compose' ? 'h-auto' : 'h-[80vh]'
+          mode === "compose" ? "h-auto" : "h-[80vh]"
         }`}
         onClick={handleContainerClick}
       >
@@ -256,23 +291,35 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
               <MessageSquare className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">{displayTitle}</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {displayTitle}
+              </h2>
               <p className="text-sm text-gray-500">
-                {recipientRole && `${recipientRole.charAt(0).toUpperCase() + recipientRole.slice(1)}`}
+                {recipientRole &&
+                  `${recipientRole.charAt(0).toUpperCase() + recipientRole.slice(1)}`}
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
-            {mode === 'chat' && (
+            {mode === "chat" && (
               <>
-                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title="Voice call">
+                <button
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                  title="Voice call"
+                >
                   <Phone className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title="Video call">
+                <button
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                  title="Video call"
+                >
                   <Video className="w-4 h-4" />
                 </button>
-                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors" title="More options">
+                <button
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                  title="More options"
+                >
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </>
@@ -289,8 +336,11 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
         </div>
 
         {/* Messages - Only show in chat mode */}
-        {mode === 'chat' && (
-          <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-white" style={{ height: 'calc(80vh - 200px)' }}>
+        {mode === "chat" && (
+          <div
+            className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-white"
+            style={{ height: "calc(80vh - 200px)" }}
+          >
             {isLoading ? (
               <div className="flex justify-center items-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
@@ -298,8 +348,12 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
                 <MessageSquare className="w-16 h-16 mb-4 opacity-30" />
-                <h3 className="text-lg font-medium mb-2">Start a conversation</h3>
-                <p className="text-sm text-center">Send a message to begin chatting with {recipientName}</p>
+                <h3 className="text-lg font-medium mb-2">
+                  Start a conversation
+                </h3>
+                <p className="text-sm text-center">
+                  Send a message to begin chatting with {recipientName}
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -321,7 +375,9 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                   className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200"
                 >
                   <Paperclip className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm text-blue-800 truncate max-w-[120px]">{file.name}</span>
+                  <span className="text-sm text-blue-800 truncate max-w-[120px]">
+                    {file.name}
+                  </span>
                   <button
                     onClick={() => removeAttachment(index)}
                     className="text-blue-600 hover:text-blue-800 transition-colors"
@@ -356,7 +412,7 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                 disabled={sending}
                 rows={1}
                 className="w-full px-4 py-3 bg-gray-100 border-0 rounded-2xl resize-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-gray-900 placeholder-gray-500 disabled:opacity-50 outline-none"
-                style={{ minHeight: '44px', maxHeight: '120px' }}
+                style={{ minHeight: "44px", maxHeight: "120px" }}
                 autoComplete="off"
                 spellCheck="true"
               />
@@ -376,9 +432,36 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                 {showEmojiPicker && (
                   <div className="absolute bottom-12 right-0 w-64 max-h-56 overflow-y-auto bg-white border rounded-xl shadow-2xl p-2 grid grid-cols-8 sm:grid-cols-10 gap-2 text-xl z-10">
                     {[
-                      "😀", "😁", "😂", "🤣", "😊", "😍", "😘", "😇", "🙂", "😉",
-                      "😌", "😎", "🤩", "🫶", "👍", "🙏", "👏", "💪", "🎉", "🔥",
-                      "✨", "💡", "📌", "📎", "📷", "📝", "🤝", "🤔", "😅", "😴"
+                      "😀",
+                      "😁",
+                      "😂",
+                      "🤣",
+                      "😊",
+                      "😍",
+                      "😘",
+                      "😇",
+                      "🙂",
+                      "😉",
+                      "😌",
+                      "😎",
+                      "🤩",
+                      "🫶",
+                      "👍",
+                      "🙏",
+                      "👏",
+                      "💪",
+                      "🎉",
+                      "🔥",
+                      "✨",
+                      "💡",
+                      "📌",
+                      "📎",
+                      "📷",
+                      "📝",
+                      "🤝",
+                      "🤔",
+                      "😅",
+                      "😴",
                     ].map((emoji) => (
                       <button
                         key={emoji}
@@ -395,7 +478,9 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
 
             <button
               onClick={handleSendMessage}
-              disabled={sending || (!newMessage.trim() && attachments.length === 0)}
+              disabled={
+                sending || (!newMessage.trim() && attachments.length === 0)
+              }
               className="p-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full hover:from-blue-600 hover:to-cyan-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               title="Send message"
             >

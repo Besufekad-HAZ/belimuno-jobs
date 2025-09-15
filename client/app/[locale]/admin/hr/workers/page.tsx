@@ -235,7 +235,7 @@ const WorkerManagement: React.FC = () => {
     }
   };
 
-  const sendUniversalMessage = async (content: string, attachments?: File[]) => {
+  const sendUniversalMessage = async (content: string) => {
     if (!selectedWorker || !content.trim()) return;
 
     try {
@@ -1043,10 +1043,9 @@ const WorkerManagement: React.FC = () => {
             }}
             onSendMessage={sendUniversalMessage}
             messages={[]} // No conversation history for admin messages
-            currentUserId={getStoredUser()?._id || 'admin'}
+            currentUserId={getStoredUser()?._id || "admin"}
             recipientName={selectedWorker.name}
             recipientRole="worker"
-            recipientId={selectedWorker._id}
             mode="compose"
             title={`Send Message to ${selectedWorker.name}`}
             placeholder="Type your message to the worker..."

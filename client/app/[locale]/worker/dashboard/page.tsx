@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
   Briefcase,
   DollarSign,
@@ -17,10 +16,7 @@ import {
   MessageCircle,
   ThumbsUp,
   ThumbsDown,
-  Paperclip,
-  Smile,
   FileText,
-  X,
   AlertTriangle,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -124,33 +120,22 @@ const WorkerDashboard: React.FC = () => {
       sentAt: string;
     }[]
   >([]);
-  const [modernChatMessages, setModernChatMessages] = useState<Array<{
-    id: string;
-    senderId: string;
-    senderName: string;
-    content: string;
-    timestamp: string;
-    attachments?: Array<{
+  const [modernChatMessages, setModernChatMessages] = useState<
+    Array<{
       id: string;
-      name: string;
-      url: string;
-      type: string;
-    }>;
-  }>>([]);
-  const [currentJob, setCurrentJob] = useState<any>(null);
-  const [newMessage, setNewMessage] = useState("");
-  const [sending, setSending] = useState(false);
-  type PendingAttachment = {
-    name: string;
-    type: string;
-    size: number;
-    dataUrl: string;
-  };
-  const [chatAttachments, setChatAttachments] = useState<PendingAttachment[]>(
-    [],
-  );
-  const [showEmoji, setShowEmoji] = useState(false);
-  const chatInputRef = React.useRef<HTMLInputElement>(null);
+      senderId: string;
+      senderName: string;
+      content: string;
+      timestamp: string;
+      attachments?: Array<{
+        id: string;
+        name: string;
+        url: string;
+        type: string;
+      }>;
+    }>
+  >([]);
+  const [currentJob, setCurrentJob] = useState<SimpleJob | null>(null);
   const chatScrollRef = React.useRef<HTMLDivElement>(null);
   const [showRateModal, setShowRateModal] = useState(false);
   const [rateJobId, setRateJobId] = useState<string | null>(null);
@@ -378,21 +363,44 @@ const WorkerDashboard: React.FC = () => {
 
       // Find the job details for client info
       const job = myJobs.find((j: SimpleJob) => j._id === jobId);
-      setCurrentJob(job);
+      setCurrentJob(job ?? null);
 
       const res = await workerAPI.getJobMessages(jobId);
       const messages = res.data.data || [];
       setChatMessages(messages);
 
       // Convert old messages to new format
-      const convertedMessages = messages.map((msg: any, index: number) => ({
-        id: msg._id || `msg-${index}-${Date.now()}`,
-        senderId: msg.sender?.role === 'worker' ? getStoredUser()?._id || 'worker' : 'client',
-        senderName: msg.sender?.name || (msg.sender?.role === 'worker' ? 'You' : 'Client'),
-        content: msg.content,
-        timestamp: msg.sentAt,
-        attachments: []
-      }));
+      const convertedMessages = messages.map((msg: unknown, index: number) => {
+        if (typeof msg === "object" && msg !== null) {
+          const m = msg as {
+            _id?: string;
+            sender?: { name?: string; role?: string };
+            content: string;
+            sentAt: string;
+          };
+          return {
+            id: m._id || `msg-${index}-${Date.now()}`,
+            senderId:
+              m.sender?.role === "worker"
+                ? getStoredUser()?._id || "worker"
+                : "client",
+            senderName:
+              m.sender?.name ||
+              (m.sender?.role === "worker" ? "You" : "Client"),
+            content: m.content,
+            timestamp: m.sentAt,
+            attachments: [],
+          };
+        }
+        return {
+          id: `msg-${index}-${Date.now()}`,
+          senderId: "unknown",
+          senderName: "Unknown",
+          content: "",
+          timestamp: "",
+          attachments: [],
+        };
+      });
 
       setModernChatMessages(convertedMessages);
     } catch (e) {
@@ -400,52 +408,42 @@ const WorkerDashboard: React.FC = () => {
     }
   };
 
-  const sendChat = async () => {
-    if (!chatJobId || (!newMessage.trim() && chatAttachments.length === 0))
-      return;
-    setSending(true);
-    try {
-      const res = await workerAPI.sendJobMessage(
-        chatJobId,
-        newMessage.trim(),
-        chatAttachments.map((a) => a.dataUrl),
-      );
-      setChatMessages((prev) => [...prev, res.data.data]);
-      setNewMessage("");
-      setChatAttachments([]);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSending(false);
-    }
-  };
+  // Removed legacy sendChat handler; modern chat uses sendModernMessage
 
   const sendModernMessage = async (content: string, attachments?: File[]) => {
     if (!chatJobId || !content.trim()) return;
 
     try {
-      const attachmentUrls = attachments ? attachments.map(file => URL.createObjectURL(file)) : [];
-      const res = await workerAPI.sendJobMessage(chatJobId, content, attachmentUrls);
+      const attachmentUrls = attachments
+        ? attachments.map((file) => URL.createObjectURL(file))
+        : [];
+      const res = await workerAPI.sendJobMessage(
+        chatJobId,
+        content,
+        attachmentUrls,
+      );
 
       // Add the new message to the modern chat messages
       const newMessage = {
         id: `msg-${Date.now()}`,
-        senderId: getStoredUser()?._id || 'worker',
-        senderName: 'You',
+        senderId: getStoredUser()?._id || "worker",
+        senderName: "You",
         content: content,
         timestamp: new Date().toISOString(),
-        attachments: attachments ? attachments.map((file, index) => ({
-          id: `attachment-${index}`,
-          name: file.name,
-          url: URL.createObjectURL(file),
-          type: file.type
-        })) : []
+        attachments: attachments
+          ? attachments.map((file, index) => ({
+              id: `attachment-${index}`,
+              name: file.name,
+              url: URL.createObjectURL(file),
+              type: file.type,
+            }))
+          : [],
       };
 
-      setModernChatMessages(prev => [...prev, newMessage]);
+      setModernChatMessages((prev) => [...prev, newMessage]);
       return res.data;
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
       throw error;
     }
   };
@@ -471,7 +469,7 @@ const WorkerDashboard: React.FC = () => {
     if (el) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [chatMessages, chatAttachments]);
+  }, [chatMessages]);
 
   const acceptAssignment = async (jobId: string) => {
     await workerAPI.acceptAssignedJob(jobId);
@@ -1661,10 +1659,9 @@ const WorkerDashboard: React.FC = () => {
             }}
             onSendMessage={sendModernMessage}
             messages={modernChatMessages}
-            currentUserId={getStoredUser()?._id || 'worker'}
+            currentUserId={getStoredUser()?._id || "worker"}
             recipientName="Client"
             recipientRole="client"
-            recipientId="client"
             mode="chat"
             title={`Job Chat - ${currentJob.title}`}
             placeholder="Type your message to the client..."
