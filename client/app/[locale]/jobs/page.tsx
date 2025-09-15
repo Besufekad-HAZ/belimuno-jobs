@@ -19,6 +19,7 @@ import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
 import BackToDashboard from "@/components/ui/BackToDashboard";
 import { useTranslations } from "next-intl";
+import { toast } from "@/components/ui/sonner";
 
 const JobsPage: React.FC = () => {
   type JobListItem = {
@@ -444,7 +445,7 @@ const JobsPage: React.FC = () => {
                                 await navigator.share(shareData);
                               } else if (navigator.clipboard) {
                                 await navigator.clipboard.writeText(url);
-                                alert("Link copied to clipboard");
+                                toast.success("Link copied to clipboard");
                               }
                             } catch (e) {
                               console.error(e);

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/sonner";
 import {
   AlertTriangle,
   Search,
@@ -108,7 +109,7 @@ const DisputeResolution: React.FC = () => {
       setDisputes(response.data.data);
     } catch (error) {
       console.error("Failed to fetch disputes:", error);
-      alert("Failed to load disputes. Please try again.");
+      toast.error("Failed to load disputes. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -152,10 +153,10 @@ const DisputeResolution: React.FC = () => {
 
       setShowResolutionModal(false);
       setResolutionData({ status: "resolved", resolution: "", hrNotes: "" });
-      alert("Dispute updated successfully!");
+      toast.success("Dispute updated successfully");
     } catch (error) {
       console.error("Failed to resolve dispute:", error);
-      alert("Failed to update dispute. Please try again.");
+      toast.error("Failed to update dispute. Please try again.");
     }
   };
 

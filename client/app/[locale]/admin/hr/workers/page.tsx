@@ -26,6 +26,7 @@ import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "@/components/ui/sonner";
 
 interface Worker {
   _id: string;
@@ -228,10 +229,10 @@ const WorkerManagement: React.FC = () => {
 
       setShowMessageModal(false);
       setMessageContent({ title: "", message: "" });
-      alert("Message sent successfully!");
+      toast.success("Message sent successfully");
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
+      toast.error("Failed to send message. Please try again.");
     }
   };
 
@@ -248,9 +249,10 @@ const WorkerManagement: React.FC = () => {
         priority: "medium",
       });
 
-      alert("Message sent successfully!");
+      toast.success("Message sent successfully");
     } catch (error) {
       console.error("Failed to send message:", error);
+      toast.error("Failed to send message. Please try again.");
       throw error;
     }
   };

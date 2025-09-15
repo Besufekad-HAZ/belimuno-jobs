@@ -27,6 +27,7 @@ import Modal from "@/components/ui/Modal";
 import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 import BackToDashboard from "@/components/ui/BackToDashboard";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "@/components/ui/sonner";
 
 interface Client {
   _id: string;
@@ -781,9 +782,10 @@ const ClientManagement: React.FC = () => {
                   type: "general",
                   priority: "medium",
                 });
-                alert("Message sent successfully!");
+                toast.success("Message sent successfully");
               } catch (error) {
                 console.error("Failed to send message:", error);
+                toast.error("Failed to send message. Please try again.");
                 throw error;
               }
             }}

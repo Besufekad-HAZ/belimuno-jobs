@@ -22,6 +22,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "@/components/ui/sonner";
 
 interface FinancialData {
   totalRevenue: number;
@@ -355,7 +356,7 @@ const FinancialReports: React.FC = () => {
 
   const generateReport = (type: string) => {
     // Mock report generation
-    alert(`Generating ${type} report. You will be notified when it's ready.`);
+    toast(`Generating ${type} report. You will be notified when it's ready.`);
   };
 
   if (loading) {
@@ -508,7 +509,9 @@ const FinancialReports: React.FC = () => {
                     {getStatusBadge(report.status)}
                     {report.status === "ready" && (
                       <Button
-                        onClick={() => alert(`Downloading ${report.name}...`)}
+                        onClick={() =>
+                          toast.success(`Downloading ${report.name}...`)
+                        }
                         variant="outline"
                         size="sm"
                       >

@@ -29,6 +29,7 @@ import Modal from "@/components/ui/Modal";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
+import { toast } from "@/components/ui/sonner";
 import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 
 interface WorkerStats {
@@ -1242,7 +1243,7 @@ const WorkerDashboard: React.FC = () => {
             <div className="pt-4 border-t border-gray-200">
               <Button
                 className="w-full"
-                onClick={() => alert(t("modals.wallet.withdrawalFeature"))}
+                onClick={() => toast(t("modals.wallet.withdrawalFeature"))}
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
                 {t("buttons.withdrawFunds")}
@@ -1631,10 +1632,12 @@ const WorkerDashboard: React.FC = () => {
                         evidence: disputeData.evidence,
                       });
                       fetchDashboardData(); // Refresh the dashboard data
-                      alert("Dispute created successfully");
+                      toast.success("Dispute created successfully");
                     } catch (error) {
                       console.error("Failed to create dispute:", error);
-                      alert("Failed to create dispute. Please try again.");
+                      toast.error(
+                        "Failed to create dispute. Please try again.",
+                      );
                     }
                   }}
                   disabled={!disputeData.title || !disputeData.description}

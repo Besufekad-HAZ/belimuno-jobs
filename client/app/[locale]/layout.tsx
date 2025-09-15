@@ -9,6 +9,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import ChatbotComponent from "@/chatbot/ChatbotComponent";
+import { Toaster } from "@/components/ui/sonner";
 import "react-chatbot-kit/build/main.css";
 
 const geistSans = Geist({
@@ -62,6 +63,7 @@ export default async function RootLayout({
           </main>
           <ChatbotComponent />
           <Footer />
+          <Toaster position="top-right" toastOptions={{ duration: 3500 }} />
         </NextIntlClientProvider>
       </body>
     </html>

@@ -23,6 +23,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import BackToDashboard from "@/components/ui/BackToDashboard";
+import { toast } from "@/components/ui/sonner";
 import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 
@@ -279,10 +280,10 @@ const ClientDashboard: React.FC = () => {
       setSelectedJob(null);
       setSelectedWorker(null);
       fetchDashboardData();
-      alert("Payment proof uploaded. Admin will verify and mark paid.");
+      toast.success("Payment proof uploaded. Admin will verify and mark paid.");
     } catch (e) {
       console.error(e);
-      alert("Failed to upload proof.");
+      toast.error("Failed to upload proof.");
     }
   };
 
@@ -1170,10 +1171,12 @@ const ClientDashboard: React.FC = () => {
                         evidence: [],
                       });
                       fetchDashboardData(); // Refresh the dashboard data
-                      alert("Dispute created successfully");
+                      toast.success("Dispute created successfully");
                     } catch (error) {
                       console.error("Failed to create dispute:", error);
-                      alert("Failed to create dispute. Please try again.");
+                      toast.error(
+                        "Failed to create dispute. Please try again.",
+                      );
                     }
                   }}
                   disabled={!disputeData.title || !disputeData.description}

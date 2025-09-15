@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import {
   MessageSquare,
   Send,
@@ -62,6 +68,10 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
   const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [optimisticMessages, setOptimisticMessages] = useState<ChatMessage[]>(
+    [],
+  );
+  const [showAll, setShowAll] = useState(false);
 
   // Refs for focus management
   const messageInputRef = useRef<HTMLTextAreaElement>(null);
@@ -69,12 +79,25 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Only render a window of the latest messages for performance
+  const baseMessages = useMemo(() => {
+    const MAX = 50; // render last 50 messages for speed
+    if (!messages) return [] as typeof messages;
+    if (showAll) return messages;
+    return messages.length > MAX ? messages.slice(-MAX) : messages;
+  }, [messages, showAll]);
+
+  const visibleMessages = useMemo(() => {
+    return [...baseMessages, ...optimisticMessages];
+  }, [baseMessages, optimisticMessages]);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && isOpen && mode === "chat") {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      // use auto scroll for snappier feel
+      messagesEndRef.current.scrollIntoView({ behavior: "auto" });
     }
-  }, [messages, isOpen, mode]);
+  }, [visibleMessages, isOpen, mode]);
 
   // Focus management - maintain focus on message input
   useEffect(() => {
@@ -100,14 +123,100 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
     [onClose, sending],
   );
 
+  // naive compression for images (canvas resize to max 1600px)
+  const compressImage = (
+    file: File,
+    maxDim = 1600,
+    quality = 0.8,
+  ): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        let { width, height } = img;
+        const scale = Math.min(1, maxDim / Math.max(width, height));
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          URL.revokeObjectURL(url);
+          reject(new Error("Canvas context not available"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            URL.revokeObjectURL(url);
+            if (!blob) return reject(new Error("Compression failed"));
+            const compressed = new File([blob], file.name, { type: file.type });
+            resolve(compressed);
+          },
+          file.type,
+          quality,
+        );
+      };
+      img.onerror = (e) => {
+        URL.revokeObjectURL(url);
+        reject(e as unknown as Error);
+      };
+      img.src = url;
+    });
+  };
+
+  const compressFilesIfNeeded = useCallback(
+    async (files: File[]): Promise<File[]> => {
+      const processed: File[] = [];
+      for (const file of files) {
+        if (file.type.startsWith("image/") && file.size > 500 * 1024) {
+          try {
+            const compressed = await compressImage(file, 1600, 0.8);
+            processed.push(compressed);
+          } catch {
+            processed.push(file);
+          }
+        } else {
+          processed.push(file);
+        }
+      }
+      return processed;
+    },
+    [],
+  );
+
   const handleSendMessage = useCallback(async () => {
     if ((!newMessage.trim() && attachments.length === 0) || sending) {
       return;
     }
-
     setSending(true);
     try {
-      await onSendMessage(newMessage.trim(), attachments);
+      // optimistic: show pending bubble immediately
+      const optimisticId = `pending-${Date.now()}`;
+      const pending: ChatMessage = {
+        id: optimisticId,
+        senderId: currentUserId,
+        senderName: "You",
+        content: newMessage.trim(),
+        timestamp: new Date().toISOString(),
+        attachments: attachments.map((f, i) => ({
+          id: `${optimisticId}-${i}`,
+          name: f.name,
+          url: "",
+          type: f.type,
+        })),
+      };
+      if (newMessage.trim() || attachments.length > 0) {
+        setOptimisticMessages((prev) => [...prev, pending]);
+      }
+
+      // attempt lightweight compression for image attachments
+      const maybeCompressed = await compressFilesIfNeeded(attachments);
+
+      await onSendMessage(newMessage.trim(), maybeCompressed);
+
       setNewMessage("");
       setAttachments([]);
       setShowEmojiPicker(false);
@@ -116,12 +225,27 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
       setTimeout(() => {
         messageInputRef.current?.focus();
       }, 50);
+      // remove optimistic item once server confirms (parent messages should include the real one)
+      setOptimisticMessages((prev) =>
+        prev.filter((m) => m.id !== optimisticId),
+      );
     } catch (error) {
       console.error("Failed to send message:", error);
+      // remove optimistic on error as well
+      setOptimisticMessages((prev) =>
+        prev.filter((m) => !m.id.startsWith("pending-")),
+      );
     } finally {
       setSending(false);
     }
-  }, [newMessage, attachments, sending, onSendMessage]);
+  }, [
+    newMessage,
+    attachments,
+    sending,
+    onSendMessage,
+    compressFilesIfNeeded,
+    currentUserId,
+  ]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -223,7 +347,9 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
               px-4 py-2 rounded-2xl shadow-sm transition-all duration-200
               ${
                 isSent
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  ? message.id.startsWith("pending-")
+                    ? "bg-gradient-to-r from-blue-400 to-cyan-400 text-white opacity-80"
+                    : "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
                   : "bg-white border border-gray-200 text-gray-900"
               }
             `}
@@ -255,7 +381,10 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
             <div
               className={`flex items-center mt-1 ${isSent ? "justify-end" : "justify-start"}`}
             >
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400 flex items-center gap-2">
+                {message.id.startsWith("pending-") && (
+                  <span className="inline-block animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-transparent"></span>
+                )}
                 {formatTime(message.timestamp)}
               </span>
             </div>
@@ -341,11 +470,21 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
             className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-gray-50 to-white"
             style={{ height: "calc(80vh - 200px)" }}
           >
+            {messages.length > 50 && !showAll && (
+              <div className="flex justify-center mb-2">
+                <button
+                  className="text-xs text-blue-600 hover:underline"
+                  onClick={() => setShowAll(true)}
+                >
+                  Load older messages
+                </button>
+              </div>
+            )}
             {isLoading ? (
               <div className="flex justify-center items-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
               </div>
-            ) : messages.length === 0 ? (
+            ) : visibleMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
                 <MessageSquare className="w-16 h-16 mb-4 opacity-30" />
                 <h3 className="text-lg font-medium mb-2">
@@ -357,7 +496,7 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
               </div>
             ) : (
               <div className="space-y-4">
-                {messages.map(renderMessage)}
+                {visibleMessages.map(renderMessage)}
                 <div ref={messagesEndRef} />
               </div>
             )}
