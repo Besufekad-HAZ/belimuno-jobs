@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "@/components/ui/sonner";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -273,7 +274,7 @@ const AdminPaymentsPage: React.FC = () => {
       load();
     } catch (e: unknown) {
       console.error(e);
-      alert(
+      toast.error(
         "Failed to mark as paid. Please ensure the payment is valid and try again.",
       );
     }

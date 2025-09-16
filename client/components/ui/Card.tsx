@@ -20,7 +20,7 @@ const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 text-blue-600 ${paddingClasses[padding]} ${className}`}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 text-gray-900 ${paddingClasses[padding]} ${className}`}
     >
       {children}
     </div>

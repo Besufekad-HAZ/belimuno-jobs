@@ -6,18 +6,9 @@ import { getStoredUser, hasRole } from "@/lib/auth";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
-import Modal from "@/components/ui/Modal";
-import {
-  Search,
-  Filter,
-  User,
-  Check,
-  X,
-  MessageCircle,
-  Paperclip,
-  Smile,
-  FileText,
-} from "lucide-react";
+import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
+import { toast } from "@/components/ui/sonner";
+import { Search, Filter, Check, X, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import LoadingPage from "@/components/Layout/LoadingPage";
 import ErrorPage from "@/components/Layout/ErrorPage";
@@ -58,22 +49,23 @@ const ApplicationsPage: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [search, setSearch] = useState("");
-  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  // Removed unused selectedApp state
   const [loading, setLoading] = useState(true);
-  const [messageModal, setMessageModal] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  type PendingAttachment = {
-    name: string;
-    type: string;
-    size: number;
-    dataUrl: string;
+  const [showChat, setShowChat] = useState(false);
+  type ModernMessage = {
+    id: string;
+    senderId: string;
+    senderName: string;
+    content: string;
+    timestamp: string;
+    attachments?: Array<{
+      id: string;
+      name: string;
+      url: string;
+      type: string;
+    }>;
   };
-  const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
-  const [showEmoji, setShowEmoji] = useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const chatRef = React.useRef<HTMLDivElement>(null);
-  const [sending, setSending] = useState(false);
+  const [modernMessages, setModernMessages] = useState<ModernMessage[]>([]);
 
   const load = useCallback(async () => {
     try {
@@ -122,105 +114,82 @@ const ApplicationsPage: React.FC = () => {
 
   const openMessages = async () => {
     try {
-      setMessageModal(true);
+      setShowChat(true);
       const res = await clientAPI.getJobMessages(jobId);
-      setChatMessages(res.data.data || []);
+      const messages = (res.data.data || []) as ChatMessage[];
+      const converted: ModernMessage[] = messages.map((m, index) => ({
+        id: `msg-${index}-${Date.now()}`,
+        senderId:
+          m.sender?.role === "client"
+            ? getStoredUser()?._id || "client"
+            : "worker",
+        senderName:
+          m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
+        content: m.content,
+        timestamp: m.sentAt,
+        attachments: [],
+      }));
+      setModernMessages(converted);
     } catch (e) {
       console.error(e);
     }
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() && attachments.length === 0) return;
-    setSending(true);
+  const sendModernMessage = async (content: string, files?: File[]) => {
+    if (!content.trim()) return;
     try {
-      const res = await clientAPI.sendJobMessage(
-        jobId,
-        newMessage.trim(),
-        attachments.map((a) => a.dataUrl),
-      );
-      setChatMessages((prev) => [...prev, res.data.data]);
-      setNewMessage("");
-      setAttachments([]);
-      setShowEmoji(false);
+      const attachmentUrls = files
+        ? files.map((f) => URL.createObjectURL(f))
+        : [];
+      await clientAPI.sendJobMessage(jobId, content, attachmentUrls);
+      const newMsg: ModernMessage = {
+        id: `msg-${Date.now()}`,
+        senderId: getStoredUser()?._id || "client",
+        senderName: "You",
+        content,
+        timestamp: new Date().toISOString(),
+        attachments:
+          files?.map((f, i) => ({
+            id: `a-${i}`,
+            name: f.name,
+            url: URL.createObjectURL(f),
+            type: f.type,
+          })) || [],
+      };
+      setModernMessages((prev) => [...prev, newMsg]);
+      toast.success("Message sent");
     } catch (e) {
       console.error(e);
-    } finally {
-      setSending(false);
+      toast.error("Failed to send message");
+      throw e;
     }
   };
-
-  const addFiles = async (files: FileList | null) => {
-    const list = Array.from(files || []).slice(0, 5 - attachments.length);
-    if (list.length === 0) return;
-    const reads = await Promise.all(
-      list.map(
-        (f) =>
-          new Promise<PendingAttachment>((res) => {
-            const r = new FileReader();
-            r.onload = () =>
-              res({
-                name: f.name,
-                type: f.type,
-                size: f.size,
-                dataUrl: String(r.result),
-              });
-            r.readAsDataURL(f);
-          }),
-      ),
-    );
-    setAttachments((prev) => [...prev, ...reads]);
-  };
-
-  const insertEmoji = (emoji: string) => {
-    const el = inputRef.current;
-    if (!el) {
-      setNewMessage((prev) => prev + emoji);
-      return;
-    }
-    const start = el.selectionStart || 0;
-    const end = el.selectionEnd || 0;
-    const next = newMessage.slice(0, start) + emoji + newMessage.slice(end);
-    setNewMessage(next);
-    requestAnimationFrame(() => {
-      el.focus();
-      const caret = start + emoji.length;
-      el.setSelectionRange(caret, caret);
-    });
-  };
-
-  // Auto-scroll to bottom when opening and whenever messages change
-  const scrollToBottom = () => {
-    const el = chatRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-  };
+  // Poll chat while chat is open
   useEffect(() => {
-    if (messageModal) scrollToBottom();
-  }, [messageModal]);
-  useEffect(() => {
-    if (messageModal) scrollToBottom();
-  }, [chatMessages, attachments, messageModal]);
-
-  // Poll chat while modal open
-  useEffect(() => {
-    if (!messageModal) return;
+    if (!showChat) return;
     const interval = setInterval(async () => {
       try {
         const res = await clientAPI.getJobMessages(jobId);
-        setChatMessages(res.data.data || []);
+        const messages = (res.data.data || []) as ChatMessage[];
+        const converted: ModernMessage[] = messages.map((m, index) => ({
+          id: `msg-${index}-${Date.now()}`,
+          senderId:
+            m.sender?.role === "client"
+              ? getStoredUser()?._id || "client"
+              : "worker",
+          senderName:
+            m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
+          content: m.content,
+          timestamp: m.sentAt,
+          attachments: [],
+        }));
+        setModernMessages(converted);
       } catch {
         /* ignore */
       }
     }, 4000);
     return () => clearInterval(interval);
-  }, [messageModal, jobId]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    const el = document.getElementById("client-chat-scroll");
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [chatMessages]);
+  }, [showChat, jobId]);
 
   if (loading) return <LoadingPage />;
   if (!job) return <ErrorPage message="Job not found" />;
@@ -259,369 +228,102 @@ const ApplicationsPage: React.FC = () => {
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
-              className={`text-xs px-2 py-1 rounded border ${filterStatus === s ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700"}`}
+              className={`px-3 py-1 rounded text-sm ${
+                filterStatus === s ? "bg-blue-600 text-white" : "border"
+              }`}
             >
-              {s}
+              {s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>
-        <div className="ml-auto text-sm text-gray-500">
-          {filtered.length} / {applications.length} shown
-        </div>
       </Card>
 
-      <div className="grid grid-cols-1 gap-4">
-        {filtered.map((app) => (
-          <Card key={app._id} className="p-4 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <span className="font-medium text-gray-900">
-                    {app.worker.name}
-                  </span>
-                  <Badge
-                    variant={
-                      app.status === "accepted"
-                        ? "success"
-                        : app.status === "rejected"
-                          ? "danger"
-                          : "secondary"
-                    }
-                  >
-                    {app.status}
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-700 bg-gray-50 border border-gray-100 rounded p-2 line-clamp-2">
-                  {app.proposal}
-                </p>
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="font-semibold text-green-600">
-                    ETB {app.proposedBudget.toLocaleString()}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    Applied {new Date(app.appliedAt).toLocaleString()}
-                  </span>
+      <div className="space-y-4">
+        {filtered.length === 0 ? (
+          <p className="text-sm text-gray-500">No applications found.</p>
+        ) : (
+          filtered.map((app) => (
+            <Card
+              key={app._id}
+              className="p-4 flex items-start justify-between gap-4"
+            >
+              <div className="flex items-center gap-3">
+                {app.worker.profile?.avatar ? (
+                  <Image
+                    src={app.worker.profile.avatar}
+                    alt={app.worker.name}
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-200" />
+                )}
+                <div>
+                  <div className="font-medium">{app.worker.name}</div>
+                  <div className="text-sm text-gray-500">
+                    Budget: ${app.proposedBudget.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-gray-500 flex items-center gap-2">
+                    Status: <Badge>{app.status}</Badge>
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2">
-                {app.status === "pending" && (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => reject(app._id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" onClick={() => accept(app._id)}>
-                      <Check className="h-4 w-4" />
-                    </Button>
-                  </>
-                )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setSelectedApp(app)}
-                >
-                  View
+                <Button onClick={openMessages}>
+                  <MessageCircle className="h-4 w-4 mr-1" /> Message
                 </Button>
+                {app.status !== "accepted" && (
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await accept(app._id);
+                        toast.success("Application accepted");
+                      } catch (e) {
+                        console.error(e);
+                        toast.error("Failed to accept application");
+                      }
+                    }}
+                  >
+                    <Check className="h-4 w-4 mr-1" /> Accept
+                  </Button>
+                )}
+                {app.status !== "rejected" && (
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await reject(app._id);
+                        toast.success("Application rejected");
+                      } catch (e) {
+                        console.error(e);
+                        toast.error("Failed to reject application");
+                      }
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" /> Reject
+                  </Button>
+                )}
               </div>
-            </div>
-          </Card>
-        ))}
-        {filtered.length === 0 && (
-          <Card className="p-8 text-center text-gray-500">
-            No applications match your filters.
-          </Card>
+            </Card>
+          ))
         )}
       </div>
 
-      {/* Application detail modal */}
-      <Modal
-        isOpen={!!selectedApp}
-        onClose={() => setSelectedApp(null)}
-        title="Application Details"
-        size="md"
-      >
-        {selectedApp && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-gray-900">
-                {selectedApp.worker.name}
-              </h3>
-              <Badge
-                variant={
-                  selectedApp.status === "accepted"
-                    ? "success"
-                    : selectedApp.status === "rejected"
-                      ? "danger"
-                      : "secondary"
-                }
-              >
-                {selectedApp.status}
-              </Badge>
-            </div>
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-1">
-                Proposal
-              </h4>
-              <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                {selectedApp.proposal}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500">Budget</p>
-                <p className="font-semibold text-green-600">
-                  ETB {selectedApp.proposedBudget.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500">Applied</p>
-                <p className="text-gray-900">
-                  {new Date(selectedApp.appliedAt).toLocaleString()}
-                </p>
-              </div>
-            </div>
-            {selectedApp.status === "pending" && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => reject(selectedApp._id)}
-                  className="flex-1"
-                >
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => accept(selectedApp._id)}
-                  className="flex-1"
-                >
-                  Accept
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-      </Modal>
-
-      {/* Messaging modal */}
-      <Modal
-        isOpen={messageModal}
-        onClose={() => setMessageModal(false)}
-        title="Job Messages"
-        size="xl"
-      >
-        <div className="flex flex-col h-[72vh] max-h-[80vh] w-full max-w-[900px] overflow-hidden">
-          <div className="flex items-center justify-between mb-3 px-2">
-            <div className="text-sm text-gray-500">
-              Only the client and assigned worker can view this conversation.
-            </div>
-          </div>
-          <div
-            ref={chatRef}
-            onDragOver={(e) => {
-              e.preventDefault();
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              addFiles(e.dataTransfer?.files || null);
-            }}
-            className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 bg-gradient-to-b from-blue-50/40 to-white rounded-lg border px-4 py-3 custom-scroll"
-            id="client-chat-scroll"
-          >
-            {chatMessages.map((m, i: number) => (
-              <div
-                key={i}
-                className={`p-3 rounded-2xl text-sm break-words shadow-sm ${m.sender?.role === "client" ? "bg-blue-50/80 ml-auto border border-blue-200" : "bg-white border"} max-w-[65%]`}
-              >
-                <p className="font-medium mb-1 text-blue-600">
-                  {m.sender?.name || "You"}
-                </p>
-                <p className="whitespace-pre-wrap text-gray-800">{m.content}</p>
-                {"attachments" in m &&
-                  Array.isArray(
-                    (m as { attachments?: string[] }).attachments,
-                  ) &&
-                  (m as { attachments?: string[] }).attachments!.length > 0 && (
-                    <div className="mt-2 grid grid-cols-3 gap-2">
-                      {(m as { attachments: string[] }).attachments.map(
-                        (att: string, idx: number) =>
-                          att.startsWith("data:image") ? (
-                            <a
-                              key={idx}
-                              href={att}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <Image
-                                src={att}
-                                alt="attachment"
-                                width={200}
-                                height={200}
-                                className="h-24 w-full object-cover rounded-lg border"
-                              />
-                            </a>
-                          ) : (
-                            <a
-                              key={idx}
-                              href={att}
-                              download
-                              className="flex items-center gap-2 px-2 py-1 bg-white border rounded text-xs text-gray-700"
-                            >
-                              <FileText className="h-4 w-4" /> Download
-                            </a>
-                          ),
-                      )}
-                    </div>
-                  )}
-                <p className="mt-1 text-[10px] text-gray-400">
-                  {new Date(m.sentAt).toLocaleTimeString()}
-                </p>
-              </div>
-            ))}
-            {chatMessages.length === 0 && (
-              <div className="text-xs text-gray-400 p-4">
-                No messages yet. Start the conversation.
-              </div>
-            )}
-          </div>
-          {attachments.length > 0 && (
-            <div className="mt-2 border rounded-lg bg-white p-2 shadow-sm">
-              <div className="text-xs text-gray-500 mb-2">
-                Attachments ({attachments.length}/5)
-              </div>
-              <div className="grid grid-cols-5 gap-2">
-                {attachments.map((a, idx) => (
-                  <div key={idx} className="relative group">
-                    {a.type.startsWith("image") ? (
-                      <Image
-                        src={a.dataUrl}
-                        alt={a.name}
-                        width={200}
-                        height={200}
-                        className="h-20 w-full object-cover rounded-lg border"
-                      />
-                    ) : (
-                      <div className="h-20 rounded border bg-gray-50 flex items-center justify-center text-xs text-gray-600">
-                        <FileText className="h-4 w-4 mr-1" />
-                        {a.name.slice(0, 10)}
-                      </div>
-                    )}
-                    <button
-                      className="absolute -top-2 -right-2 bg-white border rounded-full p-0.5 shadow hidden group-hover:block"
-                      onClick={() =>
-                        setAttachments((prev) =>
-                          prev.filter((_, i) => i !== idx),
-                        )
-                      }
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="mt-3 flex gap-2 items-center border-t pt-3 bg-white">
-            <label className="inline-flex items-center gap-1 px-2 py-1 border rounded cursor-pointer text-sm text-gray-600 hover:bg-gray-50">
-              <Paperclip className="h-4 w-4" />
-              Attach
-              <input
-                type="file"
-                multiple
-                className="hidden"
-                onChange={(e) => addFiles(e.target.files)}
-              />
-            </label>
-            <div className="flex-1 flex items-center gap-2">
-              <input
-                ref={inputRef}
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onPaste={(e) => {
-                  const items = e.clipboardData?.items;
-                  if (!items) return;
-                  const files: File[] = [];
-                  for (let i = 0; i < items.length; i++) {
-                    const it = items[i];
-                    if (it.kind === "file") {
-                      const f = it.getAsFile();
-                      if (f) files.push(f);
-                    }
-                  }
-                  if (files.length > 0) {
-                    const dt = new DataTransfer();
-                    files.forEach((f) => dt.items.add(f));
-                    addFiles(dt.files);
-                  }
-                }}
-                placeholder="Type a message"
-                className="flex-1 border rounded-full px-4 py-2 text-sm text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <div className="relative">
-                <button
-                  type="button"
-                  aria-label="Choose emoji"
-                  className="p-2 text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowEmoji((v) => !v)}
-                >
-                  <Smile className="h-5 w-5" />
-                </button>
-                {showEmoji && (
-                  <div className="absolute bottom-12 right-0 w-64 max-h-56 overflow-y-auto bg-white border rounded-xl shadow-2xl p-2 grid grid-cols-8 sm:grid-cols-10 gap-2 text-xl z-10">
-                    {[
-                      "😀",
-                      "😁",
-                      "😂",
-                      "🤣",
-                      "😊",
-                      "😍",
-                      "😘",
-                      "😇",
-                      "🙂",
-                      "😉",
-                      "😌",
-                      "😎",
-                      "🤩",
-                      "🫶",
-                      "👍",
-                      "🙏",
-                      "👏",
-                      "💪",
-                      "🎉",
-                      "🔥",
-                      "✨",
-                      "💡",
-                      "📌",
-                      "📎",
-                      "📷",
-                      "📝",
-                      "🤝",
-                      "🤔",
-                      "😅",
-                      "😴",
-                      "😢",
-                      "😤",
-                    ].map((e) => (
-                      <button
-                        key={e}
-                        className="p-1 hover:bg-gray-100 rounded"
-                        onClick={() => insertEmoji(e)}
-                      >
-                        {e}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <Button disabled={sending} onClick={sendMessage}>
-              Send
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      {job && (
+        <UniversalChatSystem
+          isOpen={showChat}
+          onClose={() => setShowChat(false)}
+          onSendMessage={sendModernMessage}
+          messages={modernMessages}
+          currentUserId={getStoredUser()?._id || "client"}
+          recipientName={"Worker"}
+          recipientRole="worker"
+          mode="chat"
+          title={`Job Messages - ${job.title}`}
+          placeholder="Write your message..."
+        />
+      )}
     </div>
   );
 };

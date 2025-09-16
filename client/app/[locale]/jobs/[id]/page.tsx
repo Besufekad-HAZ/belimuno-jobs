@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 import { jobsAPI } from "@/lib/api";
 import { getStoredUser } from "@/lib/auth";
 import { workerAPI } from "@/lib/api";
+import { toast } from "@/components/ui/sonner";
 
 type Job = {
   _id: string;
@@ -89,7 +90,7 @@ const JobDetailPage: React.FC = () => {
         await navigator.share(shareData);
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url);
-        alert("Link copied to clipboard");
+        toast.success("Link copied to clipboard");
       }
     } catch (e) {
       console.error(e);

@@ -20,6 +20,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import { useTranslations } from "next-intl";
+import { toast } from "@/components/ui/sonner";
 
 interface HRStats {
   totalWorkers: number;
@@ -220,10 +221,10 @@ const HRAdminDashboard: React.FC = () => {
         priority: "medium",
       });
 
-      alert("Announcement sent successfully!");
+      toast.success("Announcement sent successfully");
     } catch (error) {
       console.error("Failed to send announcement:", error);
-      alert("Failed to send announcement. Please try again.");
+      toast.error("Failed to send announcement. Please try again.");
     }
   };
 

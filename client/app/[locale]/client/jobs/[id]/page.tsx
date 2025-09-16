@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "@/components/ui/sonner";
 import { useParams, useRouter } from "next/navigation";
 import { clientAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
@@ -153,7 +154,7 @@ const ClientJobDetailPage: React.FC = () => {
     if (!file.type.startsWith("image/")) return;
     const max = 8 * 1024 * 1024;
     if (file.size > max) {
-      alert("Image too large. Please select a file under 8MB.");
+      toast.error("Image too large. Please select a file under 8MB.");
       return;
     }
     const dataUrl = await readAsDataURL(file);

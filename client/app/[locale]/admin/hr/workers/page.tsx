@@ -24,7 +24,9 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "@/components/ui/sonner";
 
 interface Worker {
   _id: string;
@@ -227,10 +229,31 @@ const WorkerManagement: React.FC = () => {
 
       setShowMessageModal(false);
       setMessageContent({ title: "", message: "" });
-      alert("Message sent successfully!");
+      toast.success("Message sent successfully");
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
+      toast.error("Failed to send message. Please try again.");
+    }
+  };
+
+  const sendUniversalMessage = async (content: string) => {
+    if (!selectedWorker || !content.trim()) return;
+
+    try {
+      // Create a notification for the worker
+      await notificationsAPI.create({
+        recipients: [selectedWorker._id],
+        title: "Message from HR Admin",
+        message: content,
+        type: "general",
+        priority: "medium",
+      });
+
+      toast.success("Message sent successfully");
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      toast.error("Failed to send message. Please try again.");
+      throw error;
     }
   };
 
@@ -1010,6 +1033,26 @@ const WorkerManagement: React.FC = () => {
             </div>
           )}
         </Modal>
+
+        {/* Universal Chat System for HR Admin */}
+        {selectedWorker && (
+          <UniversalChatSystem
+            isOpen={showMessageModal}
+            onClose={() => {
+              setShowMessageModal(false);
+              setSelectedWorker(null);
+              setMessageContent({ title: "", message: "" });
+            }}
+            onSendMessage={sendUniversalMessage}
+            messages={[]} // No conversation history for admin messages
+            currentUserId={getStoredUser()?._id || "admin"}
+            recipientName={selectedWorker.name}
+            recipientRole="worker"
+            mode="compose"
+            title={`Send Message to ${selectedWorker.name}`}
+            placeholder="Type your message to the worker..."
+          />
+        )}
       </div>
     </div>
   );

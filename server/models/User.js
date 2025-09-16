@@ -101,6 +101,10 @@ const UserSchema = new mongoose.Schema({
     push: { type: Boolean, default: true }
   },
 
+  // Password Reset
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
+
   // Activity Tracking
   lastLogin: Date,
   createdAt: { type: Date, default: Date.now },

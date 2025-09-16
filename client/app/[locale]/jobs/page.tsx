@@ -17,7 +17,9 @@ import { jobsAPI, workerAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import { useTranslations } from "next-intl";
+import { toast } from "@/components/ui/sonner";
 
 const JobsPage: React.FC = () => {
   type JobListItem = {
@@ -157,6 +159,11 @@ const JobsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
+          <BackToDashboard
+            currentRole={user?.role || "worker"}
+            variant="breadcrumb"
+            className="mb-2"
+          />
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             {t("header.title")}
           </h1>
@@ -438,7 +445,7 @@ const JobsPage: React.FC = () => {
                                 await navigator.share(shareData);
                               } else if (navigator.clipboard) {
                                 await navigator.clipboard.writeText(url);
-                                alert("Link copied to clipboard");
+                                toast.success("Link copied to clipboard");
                               }
                             } catch (e) {
                               console.error(e);

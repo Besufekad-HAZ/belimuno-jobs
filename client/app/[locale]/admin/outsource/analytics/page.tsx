@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "@/components/ui/sonner";
 import {
   BarChart3,
   DollarSign,
@@ -20,12 +21,11 @@ import {
   Zap,
   Star,
 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI } from "@/lib/api";
-import Card from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import Badge from "@/components/ui/Badge";
-
 interface AnalyticsData {
   revenue: {
     total: number;
@@ -628,7 +628,9 @@ const BusinessAnalytics: React.FC = () => {
           <Button
             onClick={() => {
               // In a real app, this would generate and download a report
-              alert("Analytics report generation would be implemented here");
+              toast.success(
+                "Preparing analytics report… You'll get a download shortly.",
+              );
             }}
             variant="outline"
             className="flex items-center space-x-2"

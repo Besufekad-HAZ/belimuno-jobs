@@ -22,6 +22,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "@/components/ui/sonner";
 
 interface PerformanceReview {
   _id: string;
@@ -433,10 +434,10 @@ const PerformanceReviews: React.FC = () => {
         comments: "",
       });
 
-      alert("Performance review created successfully!");
+      toast.success("Performance review created successfully");
     } catch (error) {
       console.error("Failed to create review:", error);
-      alert("Failed to create review. Please try again.");
+      toast.error("Failed to create review. Please try again.");
     }
   };
 

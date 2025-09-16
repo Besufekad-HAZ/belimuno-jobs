@@ -24,7 +24,10 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
+import BackToDashboard from "@/components/ui/BackToDashboard";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "@/components/ui/sonner";
 
 interface Client {
   _id: string;
@@ -73,10 +76,6 @@ interface ClientStats {
 }
 
 type StatusFilter = "all" | "active" | "inactive";
-interface MessageContent {
-  title: string;
-  message: string;
-}
 type ApiClient = Partial<Client> & {
   _id: string;
   name: string;
@@ -103,10 +102,6 @@ const ClientManagement: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showClientModal, setShowClientModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageContent, setMessageContent] = useState<MessageContent>({
-    title: "",
-    message: "",
-  });
   const router = useRouter();
 
   useEffect(() => {
@@ -239,28 +234,6 @@ const ClientManagement: React.FC = () => {
 
   // Filtering logic moved into useCallback above
 
-  const handleSendMessage = async () => {
-    if (!selectedClient || !messageContent.title || !messageContent.message)
-      return;
-
-    try {
-      await notificationsAPI.create({
-        recipients: [selectedClient._id],
-        title: messageContent.title,
-        message: messageContent.message,
-        type: "general",
-        priority: "medium",
-      });
-
-      setShowMessageModal(false);
-      setMessageContent({ title: "", message: "" });
-      alert("Message sent successfully!");
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
-    }
-  };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -317,6 +290,11 @@ const ClientManagement: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
+            <BackToDashboard
+              currentRole="admin_outsource"
+              variant="breadcrumb"
+              className="mb-2"
+            />
             <h1 className="text-3xl font-bold text-gray-900">
               Client Management
             </h1>
@@ -325,12 +303,7 @@ const ClientManagement: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
-            <Button
-              onClick={() => router.push("/admin/outsource/dashboard")}
-              variant="outline"
-            >
-              Back to Dashboard
-            </Button>
+            <BackToDashboard currentRole="admin_outsource" variant="button" />
           </div>
         </div>
 
@@ -790,80 +763,41 @@ const ClientManagement: React.FC = () => {
           )}
         </Modal>
 
-        {/* Message Modal */}
-        <Modal
-          isOpen={showMessageModal}
-          onClose={() => {
-            setShowMessageModal(false);
-            setSelectedClient(null);
-            setMessageContent({ title: "", message: "" });
-          }}
-          title="Send Message to Client"
-          size="md"
-        >
-          {selectedClient && (
-            <div className="space-y-4">
-              <p className="text-gray-700">
-                Send a message to {selectedClient.name}
-              </p>
+        {/* Universal Chat System for Outsource Admin */}
+        {selectedClient && (
+          <UniversalChatSystem
+            isOpen={showMessageModal}
+            onClose={() => {
+              setShowMessageModal(false);
+              setSelectedClient(null);
+            }}
+            onSendMessage={async (content: string) => {
+              if (!selectedClient || !content.trim()) return;
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  value={messageContent.title}
-                  onChange={(e) =>
-                    setMessageContent((prev) => ({
-                      ...prev,
-                      title: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  placeholder="Message subject..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <textarea
-                  value={messageContent.message}
-                  onChange={(e) =>
-                    setMessageContent((prev) => ({
-                      ...prev,
-                      message: e.target.value,
-                    }))
-                  }
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  placeholder="Your message..."
-                />
-              </div>
-
-              <div className="flex space-x-3">
-                <Button
-                  onClick={handleSendMessage}
-                  variant="primary"
-                  disabled={!messageContent.title || !messageContent.message}
-                >
-                  Send Message
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowMessageModal(false);
-                    setMessageContent({ title: "", message: "" });
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-        </Modal>
+              try {
+                await notificationsAPI.create({
+                  recipients: [selectedClient._id],
+                  title: "Message from Outsource Admin",
+                  message: content,
+                  type: "general",
+                  priority: "medium",
+                });
+                toast.success("Message sent successfully");
+              } catch (error) {
+                console.error("Failed to send message:", error);
+                toast.error("Failed to send message. Please try again.");
+                throw error;
+              }
+            }}
+            messages={[]} // No conversation history for admin messages
+            currentUserId={getStoredUser()?._id || "admin"}
+            recipientName={selectedClient.name}
+            recipientRole="client"
+            mode="compose"
+            title={`Send Message to ${selectedClient.name}`}
+            placeholder="Type your message to the client..."
+          />
+        )}
       </div>
     </div>
   );

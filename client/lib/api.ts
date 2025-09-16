@@ -75,6 +75,10 @@ export const authAPI = {
   logout: () => api.post("/auth/logout"),
   updateProfile: (profileData: Record<string, unknown>) =>
     api.put("/auth/profile", profileData),
+  forgotPassword: (email: string) =>
+    api.post("/auth/forgot-password", { email }),
+  resetPassword: (token: string, password: string, confirmPassword: string) =>
+    api.post(`/auth/reset-password/${token}`, { password, confirmPassword }),
 };
 
 // Jobs API

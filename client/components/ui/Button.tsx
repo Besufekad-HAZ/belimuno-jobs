@@ -22,12 +22,14 @@ const Button: React.FC<ButtonProps> = ({
     "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500",
-    secondary: "bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500",
+    primary: "bg-gradient-cta hover:from-yellow-500 hover:to-orange-500 text-white focus:ring-yellow-400 shadow-lg hover:shadow-xl",
+    secondary: "bg-gradient-primary hover:from-blue-800 hover:to-blue-600 text-white focus:ring-blue-400 shadow-md hover:shadow-lg",
     outline:
-      "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 focus:ring-blue-500",
-    ghost: "hover:bg-gray-100 text-gray-700 focus:ring-gray-500",
-    danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500",
+      "border-2 border-blue-500 bg-white hover:bg-blue-50 text-blue-600 focus:ring-blue-400 hover:border-blue-600",
+    ghost: "hover:bg-blue-50 text-blue-600 focus:ring-blue-400 hover:text-blue-700",
+    danger: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white focus:ring-red-400 shadow-lg hover:shadow-xl",
+    success: "bg-gradient-success hover:from-green-500 hover:to-green-600 text-white focus:ring-green-400 shadow-lg hover:shadow-xl",
+    warning: "bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white focus:ring-orange-400 shadow-lg hover:shadow-xl",
   };
 
   const sizes = {

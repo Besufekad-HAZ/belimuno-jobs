@@ -6,6 +6,7 @@ const User = require('../models/User');
 const Region = require('../models/Region');
 const ErrorResponse = require('../utils/errorResponse');
 const { generateToken, generateShortToken } = require('../utils/jwtUtils');
+const { sendPasswordResetEmail, sendPasswordResetSuccessEmail } = require('../utils/emailService');
 const dns = require('dns');
 // Prefer IPv4 results first to avoid IPv6 connectivity issues in some environments (e.g., WSL)
 try { if (dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first'); } catch {}
@@ -320,19 +321,58 @@ const forgotPassword = async (req, res, next) => {
       });
     }
 
-    // Generate reset token (expires in 10 minutes)
-    const resetToken = generateShortToken({ id: user._id, email: user.email }, '10m');
+    // Generate reset token using crypto for better security
+    const resetToken = crypto.randomBytes(32).toString('hex');
 
-    // In a real application, you would send this token via email
-    // For now, we'll just return it in the response (for development)
-    console.log(`Password reset token for ${email}: ${resetToken}`);
+    // Hash the token and set expiration (10 minutes from now)
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    res.status(200).json({
-      success: true,
-      message: 'Password reset instructions sent to your email',
-      // Remove this in production - only for development
-      resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
-    });
+    // Save token and expiration to user
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = resetPasswordExpire;
+    await user.save();
+
+    try {
+      // Send password reset email
+      await sendPasswordResetEmail(email, resetToken, user.name);
+
+      res.status(200).json({
+        success: true,
+        message: 'Password reset instructions sent to your email',
+        // Always return token in development for testing
+        resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+      });
+    } catch (emailError) {
+      console.error('❌ Email sending failed:', emailError);
+
+      // Check if it's a configuration issue
+      const isEmailConfigured = process.env.SMTP_USER &&
+                               process.env.SMTP_USER !== 'your-email@gmail.com' &&
+                               process.env.SMTP_PASS &&
+                               process.env.SMTP_PASS !== 'your-app-password';
+
+      // Clear the reset token if email fails
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save();
+
+      if (!isEmailConfigured) {
+        res.status(500).json({
+          success: false,
+          message: 'Email service not configured. Please contact support or check console for reset link.',
+          // In development, return the reset token for testing
+          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to send password reset email. Please try again later.',
+          // In development, return the reset token for testing even on email failure
+          resetToken: process.env.NODE_ENV === 'development' ? resetToken : undefined
+        });
+      }
+    }
 
   } catch (error) {
     console.error('Forgot password error:', error);
@@ -352,25 +392,38 @@ const resetPassword = async (req, res, next) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    // Verify reset token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Hash the token to compare with stored token
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    // Find user
-    const user = await User.findById(decoded.id);
+    // Find user with valid reset token
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid reset token'
+        message: 'Invalid or expired reset token'
       });
     }
 
     // Hash new password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Update password
+    // Update password and clear reset token
     user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
     await user.save();
+
+    try {
+      // Send success email
+      await sendPasswordResetSuccessEmail(user.email, user.name);
+    } catch (emailError) {
+      console.error('Failed to send success email:', emailError);
+      // Don't fail the reset if email fails
+    }
 
     res.status(200).json({
       success: true,
@@ -379,14 +432,6 @@ const resetPassword = async (req, res, next) => {
 
   } catch (error) {
     console.error('Reset password error:', error);
-
-    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired reset token'
-      });
-    }
-
     res.status(500).json({
       success: false,
       message: 'Error resetting password',
