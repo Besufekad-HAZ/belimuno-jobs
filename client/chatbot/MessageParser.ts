@@ -18,30 +18,48 @@ class MessageParser {
   parse(message: string): void {
     const lowerCase = message.toLowerCase();
 
-    if (lowerCase.includes("hello") || lowerCase.includes("hi")) {
+    // Greetings
+    if (
+      lowerCase.includes("hello") ||
+      lowerCase.includes("hi") ||
+      lowerCase.includes("hey")
+    ) {
       this.actionProvider.handleGreeting();
       return;
     }
 
+    // Introduction and company info
     if (
       lowerCase.includes("who are you") ||
       lowerCase.includes("what is belimuno") ||
       lowerCase.includes("belimuno") ||
-      lowerCase.includes("belimuno jobs")
+      lowerCase.includes("belimuno jobs") ||
+      lowerCase.includes("tell me about") ||
+      lowerCase.includes("company info")
     ) {
       this.actionProvider.handleIntroduction();
       return;
     }
 
-    if (lowerCase.includes("help")) {
+    // Help and navigation
+    if (
+      lowerCase.includes("help") ||
+      lowerCase.includes("guide") ||
+      lowerCase.includes("what can you do") ||
+      lowerCase.includes("how to use")
+    ) {
       this.actionProvider.handleHelp();
       return;
     }
 
+    // Services and offerings
     if (
       lowerCase.includes("services") ||
       lowerCase.includes("what do you offer") ||
-      lowerCase.includes("what do you do")
+      lowerCase.includes("what do you do") ||
+      lowerCase.includes("hr solutions") ||
+      lowerCase.includes("workforce solutions") ||
+      lowerCase.includes("staffing")
     ) {
       this.actionProvider.handleServices();
       return;
@@ -104,15 +122,68 @@ class MessageParser {
       return;
     }
 
+    // Job search and applications
     if (
       lowerCase.includes("apply") ||
       lowerCase.includes("job") ||
       lowerCase.includes("jobs") ||
       lowerCase.includes("career") ||
       lowerCase.includes("opportunities") ||
-      lowerCase.includes("job opportunities")
+      lowerCase.includes("job opportunities") ||
+      lowerCase.includes("find work") ||
+      lowerCase.includes("find job")
     ) {
       this.actionProvider.handleApply();
+      return;
+    }
+
+    // Client specific queries
+    if (
+      lowerCase.includes("hire") ||
+      lowerCase.includes("post job") ||
+      lowerCase.includes("find workers") ||
+      lowerCase.includes("recruit") ||
+      lowerCase.includes("employer") ||
+      (lowerCase.includes("client") && lowerCase.includes("dashboard"))
+    ) {
+      this.actionProvider.handleClientInfo();
+      return;
+    }
+
+    // Worker/Freelancer specific
+    if (
+      lowerCase.includes("freelancer") ||
+      lowerCase.includes("worker dashboard") ||
+      lowerCase.includes("my applications") ||
+      lowerCase.includes("my jobs") ||
+      lowerCase.includes("earnings") ||
+      lowerCase.includes("work history")
+    ) {
+      this.actionProvider.handleWorkerInfo();
+      return;
+    }
+
+    // Payment and wallet
+    if (
+      lowerCase.includes("payment") ||
+      lowerCase.includes("wallet") ||
+      lowerCase.includes("earnings") ||
+      lowerCase.includes("withdraw") ||
+      lowerCase.includes("balance")
+    ) {
+      this.actionProvider.handlePaymentInfo();
+      return;
+    }
+
+    // Training programs
+    if (
+      lowerCase.includes("training program") ||
+      lowerCase.includes("skill development") ||
+      lowerCase.includes("learn") ||
+      lowerCase.includes("courses") ||
+      lowerCase.includes("certification")
+    ) {
+      this.actionProvider.handleTrainingPrograms();
       return;
     }
 

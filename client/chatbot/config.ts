@@ -27,10 +27,10 @@ const config: Config = {
   botName: "Belimuno Bot",
   customStyles: {
     botMessageBox: {
-      backgroundColor: "var(--belimuno-primary)",
+      backgroundColor: "var(--belimuno-secondary)",
     },
     chatButton: {
-      backgroundColor: "var(--belimuno-primary)",
+      backgroundColor: "var(--belimuno-secondary)",
     },
   },
   customComponents: {

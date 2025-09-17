@@ -47,7 +47,14 @@ class ActionProvider {
 
   handleIntroduction() {
     const message = this.createChatBotMessage(
-      "I am Belimuno Bot! We are Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country since 2011. How can I assist you today?",
+      "I am Belimuno Bot! 👋\n\n" +
+        "Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country since 2011. " +
+        "We help businesses scale with flexible, high-quality workforce solutions.\n\n" +
+        "Our company has:\n" +
+        "- An annual turnover of about 200 million birr\n" +
+        "- Over 3000 employees managed across 36 organizations\n" +
+        "- Partnerships with international NGOs and construction firms\n\n" +
+        "How can I assist you today?",
     );
     this.updateChatbotState(message);
   }
@@ -57,15 +64,18 @@ class ActionProvider {
       `Hello! I'm here to help you with information about Belimuno Jobs. Here are some topics I can assist you with:
     
           - 👥 Manpower Supply & Outsourcing
-          - 🎯 Recruitment Services
+          - 🎯 Recruitment & Hiring
           - 🎓 Training & Development
           - 🏢 HR Consultancy
+          - 📊 Project Management
           - 📞 Contact Information
           - ℹ️ About Belimuno
           - 🌟 Vision & Mission
           - 👔 Our Team
+          - 💼 Job Opportunities
+          - 📍 Office Location
     
-        Just type a keyword (e.g., "services" or "contact") for more information on a specific topic!`,
+        Just type a keyword (e.g., "services", "jobs", or "contact") for more information on a specific topic!`,
     );
 
     this.updateChatbotState(message);
@@ -75,11 +85,23 @@ class ActionProvider {
     const message = this.createChatBotMessage(
       "We offer comprehensive HR solutions including:\n\n" +
         "1. Professional Manpower Supply\n" +
+        "   - Professional and non‑professional staffing\n" +
+        "   - Deep candidate network and rigorous vetting\n\n" +
         "2. End-to-end Outsourcing Services\n" +
+        "   - Cleaners, security guards, construction crews\n" +
+        "   - Fleet management professionals\n\n" +
         "3. Recruitment for Employers\n" +
+        "   - Targeted hiring campaigns\n" +
+        "   - Assessments and onboarding coordination\n\n" +
         "4. HR Consultancy\n" +
+        "   - Policies and org design\n" +
+        "   - Performance systems and compliance\n\n" +
         "5. Training & Development\n" +
-        "6. Project-based Crews\n\n" +
+        "   - Soft skills and technical training\n" +
+        "   - HSE and customer service\n\n" +
+        "6. Project-based Crews\n" +
+        "   - Construction and logistics\n" +
+        "   - Facilities management\n\n" +
         "Would you like to know more about any specific service?",
     );
     this.updateChatbotState(message);
@@ -174,16 +196,111 @@ class ActionProvider {
 
   handleApply() {
     const message = this.createChatBotMessage(
-      "You can apply for a job by visiting our website at www.belimunojobs.com/jobs and find the perfect opportunity for your skills.",
+      "Looking for job opportunities? Here's how to get started:\n\n" +
+        "1. Browse Available Jobs:\n" +
+        "   - Visit www.belimunojobs.com/jobs\n" +
+        "   - Use filters for category, region, and budget\n" +
+        "   - View detailed job descriptions\n\n" +
+        "2. Application Process:\n" +
+        "   - Create/login to your account\n" +
+        "   - Submit your proposal\n" +
+        "   - Specify your budget and timeline\n\n" +
+        "3. Track Applications:\n" +
+        "   - Monitor status in your dashboard\n" +
+        "   - Receive notifications\n" +
+        "   - Communicate with clients\n\n" +
+        "Ready to start? Visit our jobs page or type 'help' for more information!",
+    );
+    this.updateChatbotState(message);
+  }
+
+  handleClientInfo() {
+    const message = this.createChatBotMessage(
+      "For Employers and Clients:\n\n" +
+        "📋 Post a Job:\n" +
+        "- Create detailed job listings\n" +
+        "- Set budget and requirements\n" +
+        "- Review applications\n\n" +
+        "👥 Find Workers:\n" +
+        "- Access our skilled worker database\n" +
+        "- Review worker profiles and ratings\n" +
+        "- Direct hiring or outsourcing options\n\n" +
+        "💼 Client Dashboard Features:\n" +
+        "- Manage active projects\n" +
+        "- Track worker performance\n" +
+        "- Process payments securely\n" +
+        "- Generate reports\n\n" +
+        "Need more information? Type 'services' or 'contact' for assistance!",
+    );
+    this.updateChatbotState(message);
+  }
+
+  handleWorkerInfo() {
+    const message = this.createChatBotMessage(
+      "For Workers and Freelancers:\n\n" +
+        "📊 Dashboard Features:\n" +
+        "- Track active jobs and applications\n" +
+        "- Monitor earnings and ratings\n" +
+        "- View job history\n\n" +
+        "💰 Earnings Management:\n" +
+        "- Secure payment processing\n" +
+        "- Track pending payments\n" +
+        "- Withdrawal options\n\n" +
+        "📈 Growth Opportunities:\n" +
+        "- Build your profile\n" +
+        "- Improve your skills\n" +
+        "- Get client ratings\n\n" +
+        "Want to get started? Type 'apply' to learn about job applications!",
+    );
+    this.updateChatbotState(message);
+  }
+
+  handlePaymentInfo() {
+    const message = this.createChatBotMessage(
+      "Payment and Wallet Information:\n\n" +
+        "💳 For Clients:\n" +
+        "- Secure payment via Chapa\n" +
+        "- Bank-grade security\n" +
+        "- Process payments for completed work\n" +
+        "- Track payment history\n\n" +
+        "💰 For Workers:\n" +
+        "- Track earnings in your wallet\n" +
+        "- View payment status\n" +
+        "- Secure withdrawal options\n" +
+        "- Transaction history\n\n" +
+        "Need help with payments? Contact our support team!",
+    );
+    this.updateChatbotState(message);
+  }
+
+  handleTrainingPrograms() {
+    const message = this.createChatBotMessage(
+      "Training & Development Programs:\n\n" +
+        "🎓 Available Programs:\n" +
+        "- Soft skills development\n" +
+        "- Security operations\n" +
+        "- Cleaning services\n" +
+        "- HSE (Health, Safety, Environment)\n" +
+        "- Site operations\n" +
+        "- Customer service excellence\n\n" +
+        "📚 Program Features:\n" +
+        "- Professional certification\n" +
+        "- Practical training\n" +
+        "- Industry-standard curriculum\n" +
+        "- Expert instructors\n\n" +
+        "Want to enhance your skills? Contact us for program details!",
     );
     this.updateChatbotState(message);
   }
 
   handleDefault() {
     const message = this.createChatBotMessage(
-      "I'm not sure I understand. Could you please rephrase that or type:-\n" +
-        "-'help' to see what information I can provide about our coffee export services.\n" +
-        "-'contact' if you have more questions about our website.",
+      "I'm not sure I understand. Could you please rephrase that or try one of these options:\n\n" +
+        "- Type 'help' to see all topics I can assist with\n" +
+        "- Type 'services' to learn about our HR solutions\n" +
+        "- Type 'jobs' to explore job opportunities\n" +
+        "- Type 'contact' to get our contact information\n\n" +
+        "I'm here to help you learn more about Belimuno Jobs and our services!",
       {
         withAvatar: true,
       },
