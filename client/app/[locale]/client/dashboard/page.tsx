@@ -570,7 +570,7 @@ const ClientDashboard: React.FC = () => {
                         }
                         className="text-red-600 hover:bg-red-50"
                       >
-                        Cancel Job
+                        {t("sections.jobs.actions.cancelJob")}
                       </Button>
                     )}
 
@@ -584,7 +584,7 @@ const ClientDashboard: React.FC = () => {
                         }
                         className="text-red-600 hover:bg-red-50"
                       >
-                        Cancel Assignment
+                        {t("sections.jobs.actions.cancelAssignment")}
                       </Button>
                     )}
 
@@ -596,7 +596,7 @@ const ClientDashboard: React.FC = () => {
                         onClick={() => handleRequestRevision(job._id)}
                       >
                         <RefreshCw className="h-4 w-4 mr-1" />
-                        Request Revision
+                        {t("sections.jobs.actions.requestRevision")}
                       </Button>
                     )}
 
@@ -609,7 +609,7 @@ const ClientDashboard: React.FC = () => {
                         }
                       >
                         <CheckCircle className="h-4 w-4 mr-1" />
-                        Approve Work
+                        {t("sections.jobs.actions.approveWork")}
                       </Button>
                     )}
 
@@ -640,7 +640,7 @@ const ClientDashboard: React.FC = () => {
                         className="text-red-600 hover:bg-red-50"
                       >
                         <AlertTriangle className="h-4 w-4 mr-1" />
-                        Raise Dispute
+                        {t("sections.jobs.actions.raiseDispute")}
                       </Button>
                     )}
                   </div>

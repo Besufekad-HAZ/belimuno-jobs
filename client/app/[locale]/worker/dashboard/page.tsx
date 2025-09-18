@@ -795,8 +795,8 @@ const WorkerDashboard: React.FC = () => {
                         {job.acceptedApplication?.proposedBudget?.toLocaleString()}
                       </span>
 
+                      {/* Status-based action buttons */}
                       <div className="flex flex-wrap gap-2">
-                        {/* Status-based action buttons */}
                         {/* Worker can Decline and Accept Assignment if job is assigned */}
                         {job.status === "assigned" && (
                           <>
@@ -851,7 +851,7 @@ const WorkerDashboard: React.FC = () => {
                           >
                             <Send className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="text-xs sm:text-sm">
-                              Submit Work
+                              {t("sections.activeJobs.actions.submitWork")}
                             </span>
                           </Button>
                         )}
@@ -868,7 +868,7 @@ const WorkerDashboard: React.FC = () => {
                           >
                             <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="text-xs sm:text-sm">
-                              Resubmit Work
+                              {t("sections.activeJobs.actions.resubmitWork")}
                             </span>
                           </Button>
                         )}
@@ -879,6 +879,7 @@ const WorkerDashboard: React.FC = () => {
                           variant="outline"
                           onClick={() => openChat(job._id)}
                           className="flex-1 sm:flex-none"
+                          title={t("sections.activeJobs.actions.viewMessages")}
                         >
                           <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
@@ -898,7 +899,7 @@ const WorkerDashboard: React.FC = () => {
                             className="text-red-600 hover:bg-red-50"
                           >
                             <AlertTriangle className="h-4 w-4 mr-1" />
-                            Raise Dispute
+                            {t("sections.activeJobs.actions.raiseDispute")}
                           </Button>
                         )}
 
@@ -915,7 +916,7 @@ const WorkerDashboard: React.FC = () => {
                             >
                               <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                               <span className="text-xs sm:text-sm">
-                                Rate Client
+                                {t("sections.activeJobs.actions.rateClient")}
                               </span>
                             </Button>
                           )}

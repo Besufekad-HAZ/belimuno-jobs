@@ -418,8 +418,11 @@
         "actions": {
           "decline": "Decline",
           "accept": "Accept",
-          "markComplete": "Mark Complete",
-          "resubmit": "Resubmit",
+          "startWork": "Start Work",
+          "submitWork": "Submit Work",
+          "resubmitWork": "Resubmit Work",
+          "viewMessages": "View Messages",
+          "raiseDispute": "Raise Dispute",
           "rateClient": "Rate Client"
         }
       }
@@ -535,7 +538,11 @@
           "viewDetails": "View Details",
           "applications": "Applications",
           "requestRevision": "Request Revision",
-          "payAndRate": "Pay & Rate"
+          "payAndRate": "Pay & Rate",
+          "cancelJob": "Cancel Job",
+          "cancelAssignment": "Cancel Assignment",
+          "approveWork": "Approve Work",
+          "raiseDispute": "Raise Dispute"
         }
       },
       "recentApplications": {

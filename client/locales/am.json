@@ -417,8 +417,11 @@
         "actions": {
           "decline": "ውደቅ አርግ",
           "accept": "ተቀበል",
-          "markComplete": "እንደተጠናቀቀ ምልክት ያድርጉ",
-          "resubmit": "እንደገና አስገባ",
+          "startWork": "ስራ አስጀምር",
+          "submitWork": "ስራ አስገባ",
+          "resubmitWork": "እንደገና አስገባ",
+          "viewMessages": "መልዕክቶች ይመልከቱ",
+          "raiseDispute": "ቅሬታ አለኝ",
           "rateClient": "ደንበኛን ደረጃ ይስጡ"
         }
       }
@@ -534,7 +537,11 @@
           "viewDetails": "ዝርዝሮችን ይመልከቱ",
           "applications": "ማመልከቻዎች",
           "requestRevision": "ማስተካከያ ይጠይቁ",
-          "payAndRate": "ይክፈሉ እና ደረጃ ይስጡ"
+          "payAndRate": "ይክፈሉ እና ደረጃ ይስጡ",
+          "cancelJob": "ስራ ሰርዝ",
+          "cancelAssignment": "ምደባ ሰርዝ",
+          "approveWork": "ስራ ያረጋግጡ",
+          "raiseDispute": "ቅሬታ አለኝ"
         }
       },
       "recentApplications": {
