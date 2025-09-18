@@ -176,13 +176,33 @@ const ClientDashboard: React.FC = () => {
 
   // Removed unused handleCompleteJob (handled via payment/rating flow)
 
+  const handleUpdateJobStatus = async (
+    jobId: string,
+    status: string,
+    message?: string,
+  ) => {
+    try {
+      await clientAPI.updateJobStatus(jobId, status);
+
+      // If this was a revision request, also send the revision reason
+      if (status === "revision_requested" && message) {
+        await clientAPI.requestRevision(jobId, message);
+      }
+
+      fetchDashboardData(); // Refresh data
+      toast.success(`Job status updated to ${status.replace("_", " ")}`);
+    } catch (error) {
+      console.error("Failed to update job status:", error);
+      toast.error("Failed to update job status");
+    }
+  };
+
   const handleRequestRevision = async (jobId: string) => {
     const reason = prompt("Please provide a reason for the revision request:");
     if (!reason) return;
 
     try {
-      await clientAPI.requestRevision(jobId, reason);
-      fetchDashboardData(); // Refresh data
+      await handleUpdateJobStatus(jobId, "revision_requested", reason);
     } catch (error) {
       console.error("Failed to request revision:", error);
     }
@@ -537,19 +557,49 @@ const ClientDashboard: React.FC = () => {
                       </Button>
                     </Link>
 
-                    {/* Show Request Revision button for submitted jobs */}
+                    {/* Status-based action buttons */}
+                    {(job.status === "posted" ||
+                      job.status === "in_progress" ||
+                      job.status === "revision_requested") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleUpdateJobStatus(job._id, "cancelled")
+                        }
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        Cancel Job
+                      </Button>
+                    )}
+
+                    {job.status === "assigned" && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleUpdateJobStatus(job._id, "cancelled")
+                          }
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          Cancel Assignment
+                        </Button>
+                      </>
+                    )}
+
                     {job.status === "submitted" && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleRequestRevision(job._id)}
                       >
-                        {t("sections.jobs.actions.requestRevision")}
+                        Request Revision
                       </Button>
                     )}
 
-                    {/* Show Pay & Rate button for completed jobs */}
-                    {job.status === "completed" && (
+                    {(job.status === "submitted" ||
+                      job.status === "completed") && (
                       <Button
                         size="sm"
                         onClick={() => handlePaymentAndRating(job)}
@@ -559,10 +609,11 @@ const ClientDashboard: React.FC = () => {
                       </Button>
                     )}
 
-                    {/* Show Raise Dispute button for in_progress, submitted, or completed jobs */}
+                    {/* Show Raise Dispute button for active jobs */}
                     {(job.status === "assigned" ||
                       job.status === "in_progress" ||
                       job.status === "submitted" ||
+                      job.status === "revision_requested" ||
                       job.status === "completed") && (
                       <Button
                         size="sm"

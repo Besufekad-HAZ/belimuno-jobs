@@ -5,6 +5,7 @@ const {
   createJob,
   getJob,
   updateJob,
+  updateJobStatus,
   acceptApplication,
   rejectApplication,
   markJobCompleted,
@@ -36,6 +37,7 @@ router.get("/jobs/:id", getJob);
 router.put("/jobs/:id", updateJob);
 router.get("/jobs/:id/messages", getJobMessages);
 router.post("/jobs/:id/messages", sendJobMessage);
+router.put("/jobs/:id/status", updateJobStatus);
 
 // Application management
 router.put(

@@ -871,3 +871,126 @@ exports.updateDispute = asyncHandler(async (req, res) => {
     data: dispute,
   });
 });
+
+// @desc    Update job status/progress by client
+// @route   PUT /api/client/jobs/:id/status
+// @access  Private/Client
+exports.updateJobStatus = asyncHandler(async (req, res) => {
+  const { status, progressPercentage, updateMessage, attachments } = req.body;
+
+  const job = await Job.findOne({
+    _id: req.params.id,
+    client: req.user._id,
+  }).populate("worker");
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: "Job not found",
+    });
+  }
+
+  // Validate status transitions for client
+  const validTransitions = {
+    posted: ["cancelled"],
+    assigned: ["cancelled"],
+    in_progress: ["cancelled"],
+    submitted: ["completed", "revision_requested"],
+    revision_requested: ["cancelled"],
+    disputed: ["completed", "cancelled"],
+  };
+
+  if (!validTransitions[job.status]?.includes(status)) {
+    return res.status(400).json({
+      success: false,
+      message: `Cannot change status from ${job.status} to ${status}`,
+    });
+  }
+
+  // Additional validation for specific transitions
+  if (status === "completed" && !job.worker) {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot complete job without assigned worker",
+    });
+  }
+
+  // Update job status
+  job.status = status;
+
+  // Handle specific status transitions
+  if (status === "cancelled") {
+    job.cancellation = {
+      cancelledBy: req.user._id,
+      cancelledAt: new Date(),
+      reason: updateMessage || "Cancelled by client",
+    };
+  }
+
+  // Update progress if provided
+  if (progressPercentage !== undefined) {
+    job.progress.percentage = Math.max(0, Math.min(100, progressPercentage));
+  }
+
+  // Add progress update
+  if (updateMessage) {
+    job.progress.updates.push({
+      message: updateMessage,
+      updatedBy: req.user._id,
+      attachments: attachments || [],
+    });
+  }
+
+  await job.save();
+
+  // Create notification for worker based on status change
+  if (job.worker) {
+    let notificationMessage = "";
+    let notificationType = "general";
+
+    switch (status) {
+      case "cancelled":
+        notificationMessage = `The job "${job.title}" has been cancelled by the client`;
+        notificationType = "job_cancelled";
+        break;
+      case "revision_requested":
+        notificationMessage = `Client has requested revisions for "${job.title}"`;
+        notificationType = "revision_requested";
+        break;
+      case "completed":
+        notificationMessage = `Client has marked "${job.title}" as completed`;
+        notificationType = "job_completed";
+        break;
+    }
+
+    if (notificationMessage) {
+      try {
+        await NotificationService.createNotification({
+          recipients: [job.worker._id],
+          sender: req.user._id,
+          title: "Job Status Update",
+          message: notificationMessage,
+          type: notificationType,
+          relatedJob: job._id,
+          actionButton: {
+            text: "View Job",
+            url: `/worker/jobs/${job._id}`,
+            action: "view_job",
+          },
+        });
+      } catch (error) {
+        console.error(
+          "Failed to create job status update notification:",
+          error
+        );
+        // Don't fail the status update if notification fails
+      }
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Job status updated successfully",
+    data: job,
+  });
+});
