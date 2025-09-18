@@ -216,6 +216,15 @@ const ClientDashboard: React.FC = () => {
     setShowPaymentModal(true);
   };
 
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      await clientAPI.deleteJob(jobId);
+      fetchDashboardData();
+    } catch (error) {
+      console.error("Failed to delete job:", error);
+    }
+  };
+
   const processPayment = async () => {
     try {
       // Mock Chapa payment integration
@@ -560,14 +569,12 @@ const ClientDashboard: React.FC = () => {
                     </Link>
 
                     {/* Status-based action buttons */}
-                    {/* Client can cancel while job is posted (before assignment) */}
+                    {/* Client can cancel/delete while job is posted (before assignment) */}
                     {job.status === "posted" && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() =>
-                          handleUpdateJobStatus(job._id, "cancelled")
-                        }
+                        onClick={() => handleDeleteJob(job._id)}
                         className="text-red-600 hover:bg-red-50"
                       >
                         {t("sections.jobs.actions.cancelJob")}
@@ -579,38 +586,36 @@ const ClientDashboard: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() =>
-                          handleUpdateJobStatus(job._id, "cancelled")
-                        }
+                        onClick={() => handleUpdateJobStatus(job._id, "posted")}
                         className="text-red-600 hover:bg-red-50"
                       >
                         {t("sections.jobs.actions.cancelAssignment")}
                       </Button>
                     )}
 
-                    {/* Client can request revisions after submission */}
+                    {/* Client can request revisions or approve work and mark as complete after submission */}
                     {job.status === "submitted" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRequestRevision(job._id)}
-                      >
-                        <RefreshCw className="h-4 w-4 mr-1" />
-                        {t("sections.jobs.actions.requestRevision")}
-                      </Button>
-                    )}
-
-                    {/* Client approves work and marks as complete */}
-                    {job.status === "submitted" && (
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          handleUpdateJobStatus(job._id, "completed")
-                        }
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        {t("sections.jobs.actions.approveWork")}
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleUpdateJobStatus(job._id, "revision_requested")
+                          }
+                        >
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.requestRevision")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            handleUpdateJobStatus(job._id, "completed")
+                          }
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.approveWork")}
+                        </Button>
+                      </>
                     )}
 
                     {/* Payment and rating happens after completion */}
@@ -626,8 +631,7 @@ const ClientDashboard: React.FC = () => {
                       )}
 
                     {/* Client can dispute during active phases */}
-                    {(job.status === "assigned" ||
-                      job.status === "in_progress" ||
+                    {(job.status === "in_progress" ||
                       job.status === "submitted" ||
                       job.status === "revision_requested") && (
                       <Button

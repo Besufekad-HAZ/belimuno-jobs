@@ -835,7 +835,7 @@ const WorkerDashboard: React.FC = () => {
                           >
                             <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="text-xs sm:text-sm">
-                              Start Work
+                              {t("sections.activeJobs.actions.startWork")}
                             </span>
                           </Button>
                         )}
@@ -873,20 +873,8 @@ const WorkerDashboard: React.FC = () => {
                           </Button>
                         )}
 
-                        {/* Worker can View Messages*/}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openChat(job._id)}
-                          className="flex-1 sm:flex-none"
-                          title={t("sections.activeJobs.actions.viewMessages")}
-                        >
-                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-
-                        {/* Worker can Raise Dispute if job is assigned, in progress, submitted, or revision requested */}
-                        {(job.status === "assigned" ||
-                          job.status === "in_progress" ||
+                        {/* Worker can Raise Dispute if in progress, submitted, or revision requested */}
+                        {(job.status === "in_progress" ||
                           job.status === "submitted" ||
                           job.status === "revision_requested") && (
                           <Button
@@ -920,6 +908,17 @@ const WorkerDashboard: React.FC = () => {
                               </span>
                             </Button>
                           )}
+
+                        {/* Chat button to view messages*/}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openChat(job._id)}
+                          className="flex-1 sm:flex-none"
+                          title={t("sections.activeJobs.actions.viewMessages")}
+                        >
+                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>

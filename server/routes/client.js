@@ -5,6 +5,7 @@ const {
   createJob,
   getJob,
   updateJob,
+  deleteJob,
   updateJobStatus,
   acceptApplication,
   rejectApplication,
@@ -35,6 +36,7 @@ router.get("/jobs", getJobs);
 router.post("/jobs", createJob);
 router.get("/jobs/:id", getJob);
 router.put("/jobs/:id", updateJob);
+router.delete("/jobs/:id", deleteJob);
 router.get("/jobs/:id/messages", getJobMessages);
 router.post("/jobs/:id/messages", sendJobMessage);
 router.put("/jobs/:id/status", updateJobStatus);

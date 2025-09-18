@@ -352,6 +352,16 @@ exports.updateJob = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Delete a job (client)
+// @route   DELETE /api/client/jobs/:id
+// @access  Private/Client
+exports.deleteJob = asyncHandler(async (req, res) => {
+  const job = await Job.findByIdAndDelete(req.params.id);
+  if (!job)
+    return res.status(404).json({ success: false, message: "Job not found" });
+  res.status(200).json({ success: true, message: "Job deleted" });
+});
+
 // @desc    Accept job application
 // @route   PUT /api/client/jobs/:jobId/applications/:applicationId/accept
 // @access  Private/Client
