@@ -14,6 +14,7 @@ import {
   Eye,
   CreditCard,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -60,6 +61,7 @@ const ClientDashboard: React.FC = () => {
     category?: string;
     requirements?: string[];
     acceptedApplication?: { proposedBudget?: number };
+    payment?: { paymentStatus?: string };
   }
   const [jobs, setJobs] = useState<EnrichedJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -558,9 +560,8 @@ const ClientDashboard: React.FC = () => {
                     </Link>
 
                     {/* Status-based action buttons */}
-                    {(job.status === "posted" ||
-                      job.status === "in_progress" ||
-                      job.status === "revision_requested") && (
+                    {/* Client can cancel while job is posted (before assignment) */}
+                    {job.status === "posted" && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -573,48 +574,62 @@ const ClientDashboard: React.FC = () => {
                       </Button>
                     )}
 
+                    {/* Client can cancel after assignment but before work starts */}
                     {job.status === "assigned" && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            handleUpdateJobStatus(job._id, "cancelled")
-                          }
-                          className="text-red-600 hover:bg-red-50"
-                        >
-                          Cancel Assignment
-                        </Button>
-                      </>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleUpdateJobStatus(job._id, "cancelled")
+                        }
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        Cancel Assignment
+                      </Button>
                     )}
 
+                    {/* Client can request revisions after submission */}
                     {job.status === "submitted" && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleRequestRevision(job._id)}
                       >
+                        <RefreshCw className="h-4 w-4 mr-1" />
                         Request Revision
                       </Button>
                     )}
 
-                    {(job.status === "submitted" ||
-                      job.status === "completed") && (
+                    {/* Client approves work and marks as complete */}
+                    {job.status === "submitted" && (
                       <Button
                         size="sm"
-                        onClick={() => handlePaymentAndRating(job)}
+                        onClick={() =>
+                          handleUpdateJobStatus(job._id, "completed")
+                        }
                       >
-                        <CreditCard className="h-4 w-4 mr-1" />
-                        {t("sections.jobs.actions.payAndRate")}
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Approve Work
                       </Button>
                     )}
 
-                    {/* Show Raise Dispute button for active jobs */}
+                    {/* Payment and rating happens after completion */}
+                    {job.status === "completed" &&
+                      job.payment?.paymentStatus !== "paid" && (
+                        <Button
+                          size="sm"
+                          onClick={() => handlePaymentAndRating(job)}
+                        >
+                          <CreditCard className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.payAndRate")}
+                        </Button>
+                      )}
+
+                    {/* Client can dispute during active phases */}
                     {(job.status === "assigned" ||
                       job.status === "in_progress" ||
                       job.status === "submitted" ||
-                      job.status === "revision_requested" ||
-                      job.status === "completed") && (
+                      job.status === "revision_requested") && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -622,6 +637,7 @@ const ClientDashboard: React.FC = () => {
                           setSelectedJobForDispute(job);
                           setShowDisputeModal(true);
                         }}
+                        className="text-red-600 hover:bg-red-50"
                       >
                         <AlertTriangle className="h-4 w-4 mr-1" />
                         Raise Dispute
