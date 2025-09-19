@@ -902,11 +902,11 @@ exports.updateJobStatus = asyncHandler(async (req, res) => {
 
   // Validate status transitions for client
   const validTransitions = {
-    posted: ["cancelled"],
-    assigned: ["cancelled"],
-    in_progress: ["cancelled"],
-    submitted: ["completed", "revision_requested"],
-    revision_requested: ["cancelled"],
+    posted: ["cancelled", "disputed"],
+    assigned: ["posted", "in_progress", "disputed"],
+    in_progress: ["submitted", "disputed"],
+    submitted: ["completed", "revision_requested", "disputed"],
+    revision_requested: ["submitted", "disputed"],
     disputed: ["completed", "cancelled"],
   };
 

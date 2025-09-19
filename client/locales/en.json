@@ -539,7 +539,7 @@
           "applications": "Applications",
           "requestRevision": "Request Revision",
           "payAndRate": "Pay & Rate",
-          "cancelJob": "Cancel Job",
+          "deleteJob": "Delete Job",
           "cancelAssignment": "Cancel Assignment",
           "approveWork": "Approve Work",
           "raiseDispute": "Raise Dispute"

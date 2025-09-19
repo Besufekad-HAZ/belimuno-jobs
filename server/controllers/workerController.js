@@ -158,9 +158,10 @@ exports.updateJobStatus = asyncHandler(async (req, res) => {
 
   // Validate status transitions with acceptance requirement
   const validTransitions = {
-    assigned: ["in_progress"],
-    in_progress: ["submitted"],
-    revision_requested: ["in_progress", "submitted"],
+    assigned: ["in_progress", "posted", "disputed"],
+    in_progress: ["submitted", "disputed"],
+    submitted: ["disputed"],
+    revision_requested: ["submitted", "disputed"],
   };
 
   if (!validTransitions[job.status]?.includes(status)) {

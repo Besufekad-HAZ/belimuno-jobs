@@ -15,6 +15,7 @@ import {
   CreditCard,
   AlertTriangle,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -569,15 +570,18 @@ const ClientDashboard: React.FC = () => {
                     </Link>
 
                     {/* Status-based action buttons */}
-                    {/* Client can cancel/delete while job is posted (before assignment) */}
+                    {/* Client can delete while job is posted (before assignment) */}
                     {job.status === "posted" && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleDeleteJob(job._id)}
-                        className="text-red-600 hover:bg-red-50"
+                        className="w-full sm:w-auto text-red-600 hover:bg-red-50"
                       >
-                        {t("sections.jobs.actions.cancelJob")}
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="text-xs sm:text-sm">
+                          {t("sections.jobs.actions.deleteJob")}
+                        </span>
                       </Button>
                     )}
 

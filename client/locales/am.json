@@ -538,7 +538,7 @@
           "applications": "ማመልከቻዎች",
           "requestRevision": "ማስተካከያ ይጠይቁ",
           "payAndRate": "ይክፈሉ እና ደረጃ ይስጡ",
-          "cancelJob": "ስራ ሰርዝ",
+          "deleteJob": "ስራ ሰርዝ",
           "cancelAssignment": "ምደባ ሰርዝ",
           "approveWork": "ስራ ያረጋግጡ",
           "raiseDispute": "ቅሬታ አለኝ"
