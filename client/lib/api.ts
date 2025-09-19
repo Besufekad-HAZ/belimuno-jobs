@@ -42,7 +42,6 @@ api.interceptors.response.use(
     // If unauthorized, clear auth and redirect
     if (error.response?.status === 401) {
       const url = (error.config && error.config.url) || "";
-      const method = (error.config && error.config.method) || "";
       // Do NOT auto-redirect on auth endpoints so forms can show field-level errors
       const isAuthEndpoint = typeof url === "string" && (
         url.includes("/auth/login") ||

@@ -8,7 +8,7 @@ import { setAuth, getRoleDashboardPath } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useTranslations } from "next-intl";
-import { Formik, Form, Field, FormikProps } from 'formik';
+import { Formik, Form, Field, FormikProps, FormikHelpers, FieldProps } from 'formik';
 import * as Yup from 'yup';
 
 type GoogleIdentity = {
@@ -37,7 +37,7 @@ const LoginPage: React.FC = () => {
   const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
-  const formikRef = useRef<FormikProps<{ email: string; password: string }>>(null);
+  const formikRef = useRef<FormikProps<LoginFormValues>>(null);
   const t = useTranslations("LoginPage");
 
   const LoginSchema = Yup.object().shape({
@@ -45,9 +45,14 @@ const LoginPage: React.FC = () => {
     password: Yup.string().required('Password is required'),
   });
 
+  interface LoginFormValues {
+    email: string;
+    password: string;
+  }
+
   const handleSubmit = async (
-    values: any,
-    { setSubmitting, setFieldError, setFieldTouched }: any
+    values: LoginFormValues,
+    { setSubmitting, setFieldError, setFieldTouched }: FormikHelpers<LoginFormValues>
   ) => {
     setLoading(true);
     setError("");
@@ -62,16 +67,30 @@ const LoginPage: React.FC = () => {
         window.dispatchEvent(new Event("authChanged"));
       }
       router.push(getRoleDashboardPath(user.role));
-    } catch (err: any) {
-      const status = err?.response?.status;
-      const url = err?.config?.url || err?.response?.config?.url;
-      const serverMsg = err?.response?.data?.message;
+    } catch (err: unknown) {
+      const error = err as {
+        response?: {
+          status?: number;
+          data?: {
+            message?: string;
+          };
+          config?: {
+            url?: string;
+          };
+        };
+        config?: {
+          url?: string;
+        };
+      };
+      const status = error.response?.status;
+      const url = error.config?.url || error.response?.config?.url;
+      const serverMsg = error.response?.data?.message;
       const msg = (typeof serverMsg === 'string' ? serverMsg : '') || t("errors.default");
       const lower = msg.toLowerCase();
 
       // Prefer field-level feedback for login endpoint
       if (typeof url === 'string' && url.includes('/auth/login')) {
-        if ([400, 401, 404, 422].includes(status)) {
+        if (status && [400, 401, 404, 422].includes(status)) {
           if (lower.includes('password')) {
             setFieldError('password', serverMsg || 'Incorrect password.');
             setFieldTouched('password', true, false);
@@ -288,7 +307,7 @@ const LoginPage: React.FC = () => {
                 onSubmit={handleSubmit}
               >
 
-                {({ isSubmitting, errors, touched }) => (
+                {({ isSubmitting }) => (
                   <Form className="space-y-6">
                     {error && (
                       <div role="alert" aria-live="polite" className="error-banner animate-shake">
@@ -317,7 +336,7 @@ const LoginPage: React.FC = () => {
                     <div className="space-y-5">
                       <div>
                         <Field name="email">
-                          {({ field, meta }: any) => (
+                          {({ field, meta }: FieldProps) => (
                             <Input
                               {...field}
                               label={t("form.fields.email")}
@@ -333,7 +352,7 @@ const LoginPage: React.FC = () => {
 
                       <div>
                         <Field name="password">
-                          {({ field, meta }: any) => (
+                          {({ field, meta }: FieldProps) => (
                             <Input
                               {...field}
                               label={t("form.fields.password")}
