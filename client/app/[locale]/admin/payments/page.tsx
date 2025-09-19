@@ -477,8 +477,29 @@ const AdminPaymentsPage: React.FC = () => {
                           {p.status}
                         </span>
                         {p.dispute && (
-                          <span className="text-xs bg-red-50 text-red-700 px-1.5 py-0.5 rounded">
-                            Dispute: {p.dispute.status}
+                          <div className="flex flex-col gap-0.5">
+                            <span
+                              className={`text-xs px-1.5 py-0.5 rounded ${
+                                p.dispute.priority === "urgent"
+                                  ? "bg-red-50 text-red-700"
+                                  : p.dispute.priority === "high"
+                                    ? "bg-orange-50 text-orange-700"
+                                    : "bg-yellow-50 text-yellow-700"
+                              }`}
+                            >
+                              Dispute: {p.dispute.status}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {p.dispute.type}
+                            </span>
+                          </div>
+                        )}
+                        {p.adminResolution && (
+                          <span className="text-xs bg-green-50 text-green-700 px-1.5 py-0.5 rounded">
+                            {p.adminResolution.action}:{" "}
+                            {new Date(
+                              p.adminResolution.resolvedAt || "",
+                            ).toLocaleDateString()}
                           </span>
                         )}
                       </div>
@@ -546,32 +567,50 @@ const AdminPaymentsPage: React.FC = () => {
           title="Resolve Dispute"
         >
           <div className="p-4">
-            <div className="flex items-center mb-3">
-              <ShieldAlert className="h-5 w-5 text-orange-600 mr-2" />
-              <h2 className="text-lg font-semibold text-blue-800">
-                {activePayment?.dispute
-                  ? "Update Dispute Resolution"
-                  : "Resolve Dispute"}
-              </h2>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center">
+                <ShieldAlert className="h-5 w-5 text-orange-600 mr-2" />
+                <h2 className="text-lg font-semibold text-blue-800">
+                  {activePayment?.dispute
+                    ? "Update Dispute Resolution"
+                    : "Resolve Dispute"}
+                </h2>
+              </div>
+              {activePayment?.dispute && (
+                <span
+                  className={`px-2 py-1 rounded text-sm ${
+                    activePayment.dispute.priority === "urgent"
+                      ? "bg-red-100 text-red-800"
+                      : activePayment.dispute.priority === "high"
+                        ? "bg-orange-100 text-orange-800"
+                        : "bg-blue-100 text-blue-800"
+                  }`}
+                >
+                  {activePayment.dispute.priority.toUpperCase()}
+                </span>
+              )}
             </div>
             {activePayment?.dispute && (
               <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-                <p className="font-medium text-gray-700">
-                  {activePayment.dispute.title}
-                </p>
-                <div className="mt-1 text-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h4 className="font-medium text-gray-700">
+                      {activePayment.dispute.title}
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Type: {activePayment.dispute.type}
+                    </p>
+                  </div>
                   <span
-                    className={`px-2 py-0.5 rounded ${
-                      activePayment.dispute.priority === "high" ||
-                      activePayment.dispute.priority === "urgent"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
+                    className={`px-2 py-0.5 rounded text-sm ${
+                      activePayment.dispute.status === "resolved"
+                        ? "bg-green-100 text-green-800"
+                        : activePayment.dispute.status === "investigating"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {activePayment.dispute.priority}
-                  </span>
-                  <span className="ml-2 text-gray-600">
-                    Type: {activePayment.dispute.type}
+                    {activePayment.dispute.status}
                   </span>
                 </div>
               </div>
@@ -579,33 +618,67 @@ const AdminPaymentsPage: React.FC = () => {
             <div className="text-sm text-gray-600 mb-3">
               Choose an action and provide a short resolution note.
             </div>
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="text-sm text-gray-700">Action</label>
-                <select
-                  value={disputeAction}
-                  onChange={(e) =>
-                    setDisputeAction(e.target.value as typeof disputeAction)
-                  }
-                  className="mt-1 w-full border rounded px-3 py-2"
-                >
-                  <option value="refund">Refund to client</option>
-                  <option value="release">Release to worker</option>
-                  <option value="partial">Partial refund</option>
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resolution Action
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDisputeAction("refund")}
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      disputeAction === "refund"
+                        ? "bg-red-100 text-red-800 border-2 border-red-300"
+                        : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    Refund to Client
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDisputeAction("release")}
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      disputeAction === "release"
+                        ? "bg-green-100 text-green-800 border-2 border-green-300"
+                        : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    Release to Worker
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDisputeAction("partial")}
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      disputeAction === "partial"
+                        ? "bg-purple-100 text-purple-800 border-2 border-purple-300"
+                        : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    Partial Refund
+                  </button>
+                </div>
               </div>
+
               <div>
-                <label className="text-sm text-gray-700">Resolution note</label>
-                <Input
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resolution Details
+                </label>
+                <textarea
                   value={resolution}
                   onChange={(e) => setResolution(e.target.value)}
-                  placeholder="e.g., Quality concerns validated; refund approved"
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder="Explain the payment resolution decision..."
                 />
               </div>
-              <div className="flex items-center text-xs text-gray-500">
-                <Info className="h-4 w-4 mr-1" /> Notifications will be sent to
-                both parties.
+
+              <div className="flex items-center text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                <Info className="h-4 w-4 mr-1" />
+                Resolution details will be sent to both parties and recorded in
+                the system.
               </div>
+
               <div className="flex justify-end gap-2 mt-2">
                 <Button
                   variant="outline"
@@ -613,7 +686,12 @@ const AdminPaymentsPage: React.FC = () => {
                 >
                   Cancel
                 </Button>
-                <Button onClick={resolveDispute}>Confirm</Button>
+                <Button
+                  onClick={resolveDispute}
+                  disabled={!resolution || !disputeAction}
+                >
+                  Confirm Resolution
+                </Button>
               </div>
             </div>
           </div>

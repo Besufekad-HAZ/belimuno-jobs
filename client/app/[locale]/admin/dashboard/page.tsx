@@ -148,6 +148,8 @@ const AdminDashboard: React.FC = () => {
       const payments: PaymentDispute[] = (paymentsResponse.data.data ||
         paymentsResponse.data.payments ||
         []) as PaymentDispute[];
+      console.log("payments", payments);
+
       setDisputes(payments.filter((p) => p.status === "disputed"));
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);

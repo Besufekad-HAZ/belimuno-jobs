@@ -76,6 +76,7 @@ interface Dispute {
   resolvedAt?: string;
   resolution?: string;
   hrNotes?: string;
+  paymentAction?: "refund" | "release" | "partial" | "";
   evidence?: {
     type: "image" | "document" | "message";
     url: string;
@@ -100,6 +101,7 @@ const DisputeResolution: React.FC = () => {
     status: "resolved" as ResolutionStatus,
     resolution: "",
     hrNotes: "",
+    paymentAction: "" as "refund" | "release" | "partial" | "",
   });
   const router = useRouter();
 
@@ -135,7 +137,32 @@ const DisputeResolution: React.FC = () => {
   const handleResolveDispute = async () => {
     if (!selectedDispute || !resolutionData.resolution) return;
 
+    // For payment disputes that are being resolved, require a payment action
+    if (
+      selectedDispute.type === "payment" &&
+      resolutionData.status === "resolved" &&
+      !resolutionData.paymentAction
+    ) {
+      toast.error("Please select a payment resolution action");
+      return;
+    }
+
     try {
+      // If this is a payment dispute being resolved, handle the payment first
+      if (
+        selectedDispute.payment &&
+        selectedDispute.type === "payment" &&
+        resolutionData.status === "resolved"
+      ) {
+        if (resolutionData.paymentAction) {
+          await adminAPI.handlePaymentDispute(
+            selectedDispute.payment._id,
+            resolutionData.paymentAction as "refund" | "release" | "partial",
+            resolutionData.resolution,
+          );
+        }
+      }
+
       const response = await adminAPI.updateDispute(selectedDispute._id, {
         status: resolutionData.status,
         resolution: resolutionData.resolution,
@@ -159,7 +186,12 @@ const DisputeResolution: React.FC = () => {
       });
 
       setShowResolutionModal(false);
-      setResolutionData({ status: "resolved", resolution: "", hrNotes: "" });
+      setResolutionData({
+        status: "resolved",
+        resolution: "",
+        hrNotes: "",
+        paymentAction: "",
+      });
       toast.success("Dispute updated successfully");
     } catch (error) {
       console.error("Failed to resolve dispute:", error);
@@ -507,6 +539,7 @@ const DisputeResolution: React.FC = () => {
                                   : "resolved",
                               resolution: dispute.resolution || "",
                               hrNotes: dispute.hrNotes || "",
+                              paymentAction: dispute.paymentAction || "",
                             });
                             setShowResolutionModal(true);
                           }}
@@ -731,6 +764,7 @@ const DisputeResolution: React.FC = () => {
               status: "resolved",
               resolution: "",
               hrNotes: "",
+              paymentAction: "",
             });
           }}
           title="Update Dispute"
@@ -738,10 +772,51 @@ const DisputeResolution: React.FC = () => {
         >
           {selectedDispute && (
             <div className="space-y-4">
-              <p className="text-gray-700">
-                Update the status and resolution for:{" "}
-                <strong>{selectedDispute.title}</strong>
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-gray-700">
+                  Update the status and resolution for:{" "}
+                  <strong>{selectedDispute.title}</strong>
+                </p>
+                <span
+                  className={`px-2 py-1 rounded text-sm ${
+                    selectedDispute.priority === "urgent"
+                      ? "bg-red-100 text-red-800"
+                      : selectedDispute.priority === "high"
+                        ? "bg-orange-100 text-orange-800"
+                        : "bg-blue-100 text-blue-800"
+                  }`}
+                >
+                  {selectedDispute.priority.toUpperCase()}
+                </span>
+              </div>
+
+              {selectedDispute.payment && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Payment Details
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <p>
+                      <span className="text-gray-600">Amount:</span> $
+                      {selectedDispute.payment.amount}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">Status:</span>{" "}
+                      <span className="px-2 py-0.5 rounded text-sm bg-gray-100 text-gray-800">
+                        {selectedDispute.payment.status}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="text-gray-600">Transaction:</span>{" "}
+                      {selectedDispute.payment.transactionId}
+                    </p>
+                    <p>
+                      <span className="text-gray-600">Method:</span>{" "}
+                      {selectedDispute.payment.paymentMethod.replace("_", " ")}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -753,6 +828,7 @@ const DisputeResolution: React.FC = () => {
                     setResolutionData((prev) => ({
                       ...prev,
                       status: e.target.value as ResolutionStatus,
+                      paymentAction: prev.paymentAction,
                     }))
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
@@ -762,6 +838,65 @@ const DisputeResolution: React.FC = () => {
                   <option value="closed">Closed</option>
                 </select>
               </div>
+
+              {selectedDispute.type === "payment" &&
+                resolutionData.status === "resolved" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Resolution Action
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setResolutionData((prev) => ({
+                            ...prev,
+                            paymentAction: "refund",
+                          }))
+                        }
+                        className={`px-3 py-2 rounded-md text-sm font-medium ${
+                          resolutionData.paymentAction === "refund"
+                            ? "bg-red-100 text-red-800 border-2 border-red-300"
+                            : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
+                        Refund to Client
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setResolutionData((prev) => ({
+                            ...prev,
+                            paymentAction: "release",
+                          }))
+                        }
+                        className={`px-3 py-2 rounded-md text-sm font-medium ${
+                          resolutionData.paymentAction === "release"
+                            ? "bg-green-100 text-green-800 border-2 border-green-300"
+                            : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
+                        Release to Worker
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setResolutionData((prev) => ({
+                            ...prev,
+                            paymentAction: "partial",
+                          }))
+                        }
+                        className={`px-3 py-2 rounded-md text-sm font-medium ${
+                          resolutionData.paymentAction === "partial"
+                            ? "bg-purple-100 text-purple-800 border-2 border-purple-300"
+                            : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                        }`}
+                      >
+                        Partial Refund
+                      </button>
+                    </div>
+                  </div>
+                )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -777,7 +912,11 @@ const DisputeResolution: React.FC = () => {
                   }
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                  placeholder="Describe the resolution or current status..."
+                  placeholder={
+                    selectedDispute.type === "payment"
+                      ? "Explain the payment resolution decision..."
+                      : "Describe the resolution or current status..."
+                  }
                 />
               </div>
 
@@ -814,6 +953,7 @@ const DisputeResolution: React.FC = () => {
                       status: "resolved",
                       resolution: "",
                       hrNotes: "",
+                      paymentAction: "",
                     });
                   }}
                   variant="outline"
