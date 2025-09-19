@@ -111,6 +111,12 @@ export const clientAPI = {
   getJob: (id: string) => api.get(`/client/jobs/${id}`),
   updateJob: (id: string, jobData: Record<string, unknown>) =>
     api.put(`/client/jobs/${id}`, jobData),
+  deleteJob: (id: string) => api.delete(`/client/jobs/${id}`),
+  updateJobStatus: (id: string, status: string, progress?: number) =>
+    api.put(`/client/jobs/${id}/status`, {
+      status,
+      progressPercentage: progress,
+    }),
   acceptApplication: (jobId: string, applicationId: string) =>
     api.put(`/client/jobs/${jobId}/applications/${applicationId}/accept`),
   rejectApplication: (jobId: string, applicationId: string) =>

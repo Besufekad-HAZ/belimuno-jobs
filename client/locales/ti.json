@@ -417,8 +417,11 @@
         "actions": {
           "decline": "ኣትርፍ",
           "accept": "ተቐበል",
-          "markComplete": "ከም ዝተፈጸመ ምልክት ግበር",
-          "resubmit": "ዳግም ኣረክብ",
+          "startWork": "ስራሕ ጀምር",
+          "submitWork": "ስራሕ ኣስገብር",
+          "resubmitWork": "ደጊምካ ኣስገብር",
+          "viewMessages": "መልእኽቲ ርአ",
+          "raiseDispute": "ፍርዲ ኣንተር",
           "rateClient": "ደንበኛ ደረጃ ሃብ"
         }
       }
@@ -534,7 +537,11 @@
           "viewDetails": "ዝርዝራት ርኢ",
           "applications": "ኣመልካቺታት",
           "requestRevision": "ምምሕርሻር ሕተት",
-          "payAndRate": "ክፍሊትን ደረጃን"
+          "payAndRate": "ክፍሊትን ደረጃን",
+          "deleteJob": "ስራሕ ኣቕርብ",
+          "cancelAssignment": "ምድላው ኣቕርብ",
+          "approveWork": "ስራሕ ኣረጋግጽ",
+          "raiseDispute": "ፍርዲ ኣንተር"
         }
       },
       "recentApplications": {

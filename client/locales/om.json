@@ -417,8 +417,11 @@
         "actions": {
           "decline": "Dhiisi",
           "accept": "Qeebali",
-          "markComplete": "Xumuramte Maarki",
-          "resubmit": "Irra Deebi'ii Ergame",
+          "startWork": "Hojii Eegala",
+          "submitWork": "Hojii Kenni",
+          "resubmitWork": "Irra Deebi'i Kenni",
+          "viewMessages": "Ergaa Ilaala",
+          "raiseDispute": "Faana Ka'i",
           "rateClient": "Maamilaa Sadarka'i"
         }
       }
@@ -534,7 +537,11 @@
           "viewDetails": "Faallaawwan Ilali",
           "applications": "Appliiwwan",
           "requestRevision": "Deebii Kadhadhu",
-          "payAndRate": "Kaffaltiifii Sadarkaa"
+          "payAndRate": "Kaffaltiifii Sadarkaa",
+          "deleteJob": "Hojii Dhiisi",
+          "cancelAssignment": "Sirna Hojii Dhiisi",
+          "approveWork": "Hojii Mirkaneessi",
+          "raiseDispute": "Faana Ka'i"
         }
       },
       "recentApplications": {

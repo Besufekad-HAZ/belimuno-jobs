@@ -8,6 +8,7 @@ import MessageParser from "@/chatbot/MessageParser";
 import ActionProvider from "@/chatbot/ActionProvider";
 import { XCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 function ChatbotComponent() {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
@@ -41,25 +42,23 @@ function ChatbotComponent() {
     showChatbot && (
       <div className="fixed z-50 bottom-[5px] md:right-[7px] w-[331px] text-black">
         <div
-          className="h-[65px] bg-gradient-to-r from-blue-900 via-cyan-700 to-cyan-500 rounded-t-2xl shadow-2xl flex justify-between items-center px-[20px] cursor-pointer hover:bg-cyan-600 transition-all"
+          className={`h-[65px] flex items-center justify-between px-4 cursor-pointer transition-all rounded-t-2xl ${
+            isChatbotOpen ? "bg-gray-200" : ""
+          }`}
           onClick={handleOpenChatbot}
         >
           <div className="flex items-center justify-center w-full">
-            <div>
-              <h3 className="text-white text-[20px] font-extrabold font-eb-garamond">
-                ChatBot
-              </h3>
-              <div className="flex items-center">
-                <span className="inline-block w-3 h-3 bg-[#43EE7D] rounded-full mr-2"></span>
-                <p className="text-white text-[12px] font-extrabold font-eb-garamond">
-                  Online
-                </p>
-              </div>
-            </div>
+            <Image
+              src="/belimuno.png"
+              alt="chatbot"
+              className="w-[150px] object-cover"
+              width={150}
+              height={150}
+            />
           </div>
           {isChatbotOpen && (
             <XCircle
-              className="text-white cursor-pointer w-[20px] h-[20px]"
+              className="text-[#4D84FF] cursor-pointer w-5 h-5 hover:text-[#1E3A8A] transition-colors"
               onClick={handleCloseChatbot}
             />
           )}

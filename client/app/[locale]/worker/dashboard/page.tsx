@@ -18,6 +18,8 @@ import {
   ThumbsDown,
   FileText,
   AlertTriangle,
+  Play,
+  RefreshCw,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { workerAPI, jobsAPI, notificationsAPI } from "@/lib/api";
@@ -792,14 +794,17 @@ const WorkerDashboard: React.FC = () => {
                         ETB{" "}
                         {job.acceptedApplication?.proposedBudget?.toLocaleString()}
                       </span>
+
+                      {/* Status-based action buttons */}
                       <div className="flex flex-wrap gap-2">
+                        {/* Worker can Decline and Accept Assignment if job is assigned */}
                         {job.status === "assigned" && (
                           <>
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => declineAssignment(job._id)}
-                              className="flex-1 sm:flex-none"
+                              className="flex-1 sm:flex-none text-red-600 hover:bg-red-50"
                             >
                               <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                               <span className="text-xs sm:text-sm">
@@ -818,45 +823,60 @@ const WorkerDashboard: React.FC = () => {
                             </Button>
                           </>
                         )}
+
+                        {/* Worker can Start Work if job is assigned */}
+                        {job.status === "assigned" && (
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleUpdateJobStatus(job._id, "in_progress")
+                            }
+                            className="flex-1 sm:flex-none"
+                          >
+                            <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.activeJobs.actions.startWork")}
+                            </span>
+                          </Button>
+                        )}
+
+                        {/* Worker can Submit Work if job is in progress */}
                         {job.status === "in_progress" && (
                           <Button
                             size="sm"
                             onClick={() =>
-                              handleUpdateJobStatus(job._id, "completed")
+                              handleUpdateJobStatus(job._id, "submitted")
                             }
                             className="w-full sm:w-auto"
                           >
+                            <Send className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="text-xs sm:text-sm">
-                              {t("sections.activeJobs.actions.markComplete")}
+                              {t("sections.activeJobs.actions.submitWork")}
                             </span>
                           </Button>
                         )}
+
+                        {/* Worker can Resubmit Work if job is revision requested */}
                         {job.status === "revision_requested" && (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() =>
-                              handleUpdateJobStatus(job._id, "in_progress")
+                              handleUpdateJobStatus(job._id, "submitted")
                             }
                             className="w-full sm:w-auto"
                           >
+                            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="text-xs sm:text-sm">
-                              {t("sections.activeJobs.actions.resubmit")}
+                              {t("sections.activeJobs.actions.resubmitWork")}
                             </span>
                           </Button>
                         )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openChat(job._id)}
-                          className="flex-1 sm:flex-none"
-                        >
-                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
+
+                        {/* Worker can Raise Dispute if in progress, submitted, or revision requested */}
                         {(job.status === "in_progress" ||
                           job.status === "submitted" ||
-                          job.status === "revision_requested" ||
-                          job.status === "completed") && (
+                          job.status === "revision_requested") && (
                           <Button
                             size="sm"
                             variant="outline"
@@ -864,11 +884,14 @@ const WorkerDashboard: React.FC = () => {
                               setSelectedJobForDispute(job);
                               setShowDisputeModal(true);
                             }}
+                            className="text-red-600 hover:bg-red-50"
                           >
                             <AlertTriangle className="h-4 w-4 mr-1" />
-                            Raise Dispute
+                            {t("sections.activeJobs.actions.raiseDispute")}
                           </Button>
                         )}
+
+                        {/* Worker can Rate Client if job is completed */}
                         {job.status === "completed" &&
                           !job.review?.workerReview?.rating && (
                             <Button
@@ -881,10 +904,21 @@ const WorkerDashboard: React.FC = () => {
                             >
                               <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                               <span className="text-xs sm:text-sm">
-                                Rate Client
+                                {t("sections.activeJobs.actions.rateClient")}
                               </span>
                             </Button>
                           )}
+
+                        {/* Chat button to view messages*/}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openChat(job._id)}
+                          className="flex-1 sm:flex-none"
+                          title={t("sections.activeJobs.actions.viewMessages")}
+                        >
+                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>

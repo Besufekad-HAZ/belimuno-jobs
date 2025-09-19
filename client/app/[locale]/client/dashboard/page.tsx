@@ -14,6 +14,8 @@ import {
   Eye,
   CreditCard,
   AlertTriangle,
+  RefreshCw,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -60,6 +62,7 @@ const ClientDashboard: React.FC = () => {
     category?: string;
     requirements?: string[];
     acceptedApplication?: { proposedBudget?: number };
+    payment?: { paymentStatus?: string };
   }
   const [jobs, setJobs] = useState<EnrichedJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -176,13 +179,33 @@ const ClientDashboard: React.FC = () => {
 
   // Removed unused handleCompleteJob (handled via payment/rating flow)
 
+  const handleUpdateJobStatus = async (
+    jobId: string,
+    status: string,
+    message?: string,
+  ) => {
+    try {
+      await clientAPI.updateJobStatus(jobId, status);
+
+      // If this was a revision request, also send the revision reason
+      if (status === "revision_requested" && message) {
+        await clientAPI.requestRevision(jobId, message);
+      }
+
+      fetchDashboardData(); // Refresh data
+      toast.success(`Job status updated to ${status.replace("_", " ")}`);
+    } catch (error) {
+      console.error("Failed to update job status:", error);
+      toast.error("Failed to update job status");
+    }
+  };
+
   const handleRequestRevision = async (jobId: string) => {
     const reason = prompt("Please provide a reason for the revision request:");
     if (!reason) return;
 
     try {
-      await clientAPI.requestRevision(jobId, reason);
-      fetchDashboardData(); // Refresh data
+      await handleUpdateJobStatus(jobId, "revision_requested", reason);
     } catch (error) {
       console.error("Failed to request revision:", error);
     }
@@ -192,6 +215,15 @@ const ClientDashboard: React.FC = () => {
     setSelectedJob(job);
     setSelectedWorker(job.assignedWorker || null);
     setShowPaymentModal(true);
+  };
+
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      await clientAPI.deleteJob(jobId);
+      fetchDashboardData();
+    } catch (error) {
+      console.error("Failed to delete job:", error);
+    }
   };
 
   const processPayment = async () => {
@@ -537,33 +569,75 @@ const ClientDashboard: React.FC = () => {
                       </Button>
                     </Link>
 
-                    {/* Show Request Revision button for submitted jobs */}
-                    {job.status === "submitted" && (
+                    {/* Status-based action buttons */}
+                    {/* Client can delete while job is posted (before assignment) */}
+                    {job.status === "posted" && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleRequestRevision(job._id)}
+                        onClick={() => handleDeleteJob(job._id)}
+                        className="w-full sm:w-auto text-red-600 hover:bg-red-50"
                       >
-                        {t("sections.jobs.actions.requestRevision")}
+                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                        <span className="text-xs sm:text-sm">
+                          {t("sections.jobs.actions.deleteJob")}
+                        </span>
                       </Button>
                     )}
 
-                    {/* Show Pay & Rate button for completed jobs */}
-                    {job.status === "completed" && (
+                    {/* Client can cancel after assignment but before work starts */}
+                    {job.status === "assigned" && (
                       <Button
                         size="sm"
-                        onClick={() => handlePaymentAndRating(job)}
+                        variant="outline"
+                        onClick={() => handleUpdateJobStatus(job._id, "posted")}
+                        className="text-red-600 hover:bg-red-50"
                       >
-                        <CreditCard className="h-4 w-4 mr-1" />
-                        {t("sections.jobs.actions.payAndRate")}
+                        {t("sections.jobs.actions.cancelAssignment")}
                       </Button>
                     )}
 
-                    {/* Show Raise Dispute button for in_progress, submitted, or completed jobs */}
-                    {(job.status === "assigned" ||
-                      job.status === "in_progress" ||
+                    {/* Client can request revisions or approve work and mark as complete after submission */}
+                    {job.status === "submitted" && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleUpdateJobStatus(job._id, "revision_requested")
+                          }
+                        >
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.requestRevision")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            handleUpdateJobStatus(job._id, "completed")
+                          }
+                        >
+                          <CheckCircle className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.approveWork")}
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Payment and rating happens after completion */}
+                    {job.status === "completed" &&
+                      job.payment?.paymentStatus !== "paid" && (
+                        <Button
+                          size="sm"
+                          onClick={() => handlePaymentAndRating(job)}
+                        >
+                          <CreditCard className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.payAndRate")}
+                        </Button>
+                      )}
+
+                    {/* Client can dispute during active phases */}
+                    {(job.status === "in_progress" ||
                       job.status === "submitted" ||
-                      job.status === "completed") && (
+                      job.status === "revision_requested") && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -571,9 +645,10 @@ const ClientDashboard: React.FC = () => {
                           setSelectedJobForDispute(job);
                           setShowDisputeModal(true);
                         }}
+                        className="text-red-600 hover:bg-red-50"
                       >
                         <AlertTriangle className="h-4 w-4 mr-1" />
-                        Raise Dispute
+                        {t("sections.jobs.actions.raiseDispute")}
                       </Button>
                     )}
                   </div>

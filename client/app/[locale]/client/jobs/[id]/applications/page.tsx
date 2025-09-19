@@ -195,7 +195,7 @@ const ApplicationsPage: React.FC = () => {
   if (!job) return <ErrorPage message="Job not found" />;
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-6 space-y-6 min-h-[41vh]">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Applications for: {job.title}</h1>
         <div className="flex gap-2">
