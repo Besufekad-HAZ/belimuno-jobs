@@ -40,6 +40,10 @@ const DisputeSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Job",
   },
+  payment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Payment",
+  },
   // Evidence
   evidence: [
     {

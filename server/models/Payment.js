@@ -70,6 +70,12 @@ const PaymentSchema = new mongoose.Schema({
     details: mongoose.Schema.Types.Mixed,
   },
 
+  // Dispute tracking
+  dispute: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Dispute",
+  },
+
   // Admin dispute resolution record
   adminResolution: {
     resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

@@ -856,22 +856,6 @@ const WorkerDashboard: React.FC = () => {
                           </>
                         )}
 
-                        {/* Worker can Start Work if job is assigned */}
-                        {job.status === "assigned" && (
-                          <Button
-                            size="sm"
-                            onClick={() =>
-                              handleUpdateJobStatus(job._id, "in_progress")
-                            }
-                            className="flex-1 sm:flex-none"
-                          >
-                            <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span className="text-xs sm:text-sm">
-                              {t("sections.activeJobs.actions.startWork")}
-                            </span>
-                          </Button>
-                        )}
-
                         {/* Worker can Submit Work if job is in progress */}
                         {job.status === "in_progress" && (
                           <Button

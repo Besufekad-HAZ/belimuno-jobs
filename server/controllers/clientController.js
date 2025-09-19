@@ -729,6 +729,15 @@ exports.createDispute = asyncHandler(async (req, res) => {
     });
   }
 
+  // If this is a payment dispute, find the relevant payment
+  let payment;
+  if (type === "payment") {
+    payment = await Payment.findOne({
+      job: job._id,
+      status: { $in: ["pending", "processing", "completed"] },
+    });
+  }
+
   // Create dispute
   const dispute = await Dispute.create({
     title,
@@ -738,8 +747,16 @@ exports.createDispute = asyncHandler(async (req, res) => {
     client: req.user._id,
     worker: job.worker,
     job: job._id,
+    payment: payment?._id,
     evidence,
   });
+
+  // Link dispute to payment if it exists
+  if (payment) {
+    payment.dispute = dispute._id;
+    payment.status = "disputed";
+    await payment.save();
+  }
 
   // Update job status to disputed
   job.status = "disputed";
