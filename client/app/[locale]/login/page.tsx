@@ -8,6 +8,8 @@ import { setAuth, getRoleDashboardPath } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useTranslations } from "next-intl";
+import { Formik, Form, Field, FormikProps, FormikHelpers, FieldProps } from 'formik';
+import * as Yup from 'yup';
 
 type GoogleIdentity = {
   accounts?: {
@@ -30,31 +32,33 @@ declare global {
 }
 
 const LoginPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
+  const formikRef = useRef<FormikProps<LoginFormValues>>(null);
   const t = useTranslations("LoginPage");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const LoginSchema = Yup.object().shape({
+    email: Yup.string().email('Invalid email').required('Email is required'),
+    password: Yup.string().required('Password is required'),
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  interface LoginFormValues {
+    email: string;
+    password: string;
+  }
+
+  const handleSubmit = async (
+    values: LoginFormValues,
+    { setSubmitting, setFieldError, setFieldTouched }: FormikHelpers<LoginFormValues>
+  ) => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await authAPI.login(formData.email, formData.password);
+      const response = await authAPI.login(values.email, values.password);
       const { token, user } = response.data;
 
       setAuth(token, user);
@@ -63,27 +67,67 @@ const LoginPage: React.FC = () => {
         window.dispatchEvent(new Event("authChanged"));
       }
       router.push(getRoleDashboardPath(user.role));
-    } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error &&
-        error.response &&
-        typeof error.response === "object" &&
-        "data" in error.response &&
-        error.response.data &&
-        typeof error.response.data === "object" &&
-        "message" in error.response.data
-      ) {
-        setError(
-          (error.response as { data: { message?: string } }).data.message ||
-            t("errors.default"),
-        );
+    } catch (err: unknown) {
+      const error = err as {
+        response?: {
+          status?: number;
+          data?: {
+            message?: string;
+          };
+          config?: {
+            url?: string;
+          };
+        };
+        config?: {
+          url?: string;
+        };
+      };
+      const status = error.response?.status;
+      const url = error.config?.url || error.response?.config?.url;
+      const serverMsg = error.response?.data?.message;
+      const msg = (typeof serverMsg === 'string' ? serverMsg : '') || t("errors.default");
+      const lower = msg.toLowerCase();
+
+      // Prefer field-level feedback for login endpoint
+      if (typeof url === 'string' && url.includes('/auth/login')) {
+        if (status && [400, 401, 404, 422].includes(status)) {
+          if (lower.includes('password')) {
+            setFieldError('password', serverMsg || 'Incorrect password.');
+            setFieldTouched('password', true, false);
+            setError('');
+            // Focus password field for convenience
+            const pwdEl = document.querySelector<HTMLInputElement>('input[name="password"]');
+            pwdEl?.focus();
+          } else if (lower.includes('email') || lower.includes('account')) {
+            setFieldError('email', serverMsg || 'No account found with this email.');
+            setFieldTouched('email', true, false);
+            setError('');
+            // Focus email field for convenience
+            const emailEl = document.querySelector<HTMLInputElement>('input[name="email"]');
+            emailEl?.focus();
+          } else if (lower.includes('deactivated')) {
+            // account state issues: show a banner
+            setError(msg);
+          } else {
+            // Generic unauthorized
+            setFieldError('email', ' ');
+            setFieldError('password', ' ');
+            setFieldTouched('email', true, false);
+            setFieldTouched('password', true, false);
+            setError(t('errors.default'));
+          }
+        } else {
+          // Non-401: show banner with server message
+          setError(msg);
+        }
+      } else if (serverMsg) {
+        setError(serverMsg);
       } else {
         setError(t("errors.default"));
       }
     } finally {
       setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -138,6 +182,13 @@ const LoginPage: React.FC = () => {
     }
   }, [googleReady, router, t]);
 
+  // Auto-dismiss top error banner after a short duration
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => setError(""), 5200);
+    return () => clearTimeout(timer);
+  }, [error]);
+
   // Test accounts (seeded) - aligned with server/seedTestData.js
   const testAccounts = [
     {
@@ -173,7 +224,12 @@ const LoginPage: React.FC = () => {
   ] as const;
 
   const fillTestAccount = (email: string, password: string) => {
-    setFormData({ email, password });
+    if (formikRef.current) {
+      formikRef.current.setValues({ email, password });
+      // Clear any previous errors/touched when selecting a test account
+      formikRef.current.setErrors({});
+      formikRef.current.setTouched({ email: false, password: false });
+    }
   };
 
   return (
@@ -244,70 +300,95 @@ const LoginPage: React.FC = () => {
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               {/* Email/Password Sign-In */}
 
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                {error && (
-                  <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded-r-lg">
-                    <div className="flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {error}
+              <Formik
+                innerRef={formikRef}
+                initialValues={{ email: '', password: '' }}
+                validationSchema={LoginSchema}
+                onSubmit={handleSubmit}
+              >
+
+                {({ isSubmitting }) => (
+                  <Form className="space-y-6">
+                    {error && (
+                      <div role="alert" aria-live="polite" className="error-banner animate-shake">
+                        <span aria-hidden="true" className="error-accent" />
+                        <button
+                          type="button"
+                          className="error-dismiss"
+                          aria-label="Dismiss"
+                          onClick={() => setError("")}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                            <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                          </svg>
+                          <span className="sr-only">Dismiss</span>
+                        </button>
+                        <div className="flex items-center">
+                          <svg className="w-5 h-5 mr-2 icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                          <span className="font-medium">{error}</span>
+                        </div>
+                        <span aria-hidden="true" className="error-progress" />
+                      </div>
+                    )}
+
+                    <div className="space-y-5">
+                      <div>
+                        <Field name="email">
+                          {({ field, meta }: FieldProps) => (
+                            <Input
+                              {...field}
+                              label={t("form.fields.email")}
+                              type="email"
+                              autoComplete="email"
+                              required
+                              error={meta.error}
+                              className={`transition-all duration-200 focus:scale-[1.02] ${meta.error ? 'animate-shake error-ring' : ''}`}
+                            />
+                          )}
+                        </Field>
+                      </div>
+
+                      <div>
+                        <Field name="password">
+                          {({ field, meta }: FieldProps) => (
+                            <Input
+                              {...field}
+                              label={t("form.fields.password")}
+                              type="password"
+                              showPasswordToggle
+                              autoComplete="current-password"
+                              required
+                              error={meta.error}
+                              className={`transition-all duration-200 focus:scale-[1.02] ${meta.error ? 'animate-shake error-ring' : ''}`}
+                            />
+                          )}
+                        </Field>
+                      </div>
                     </div>
-                  </div>
+
+                    <div className="text-right">
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
+                      >
+                        Forgot your password?
+                      </Link>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
+                      loading={loading || isSubmitting}
+                    >
+                      {loading || isSubmitting
+                        ? t("form.buttons.submit.loading")
+                        : t("form.buttons.submit.default")}
+                    </Button>
+                  </Form>
                 )}
-
-                <div className="space-y-5">
-                  <Input
-                    label={t("form.fields.email")}
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="transition-all duration-200 focus:scale-[1.02]"
-                  />
-
-                  <Input
-                    label={t("form.fields.password")}
-                    name="password"
-                    type="password"
-                    showPasswordToggle
-                    autoComplete="current-password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="transition-all duration-200 focus:scale-[1.02]"
-                  />
-                </div>
-
-                {/* Forgot Password Link */}
-                <div className="text-right">
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
-                  loading={loading}
-                >
-                  {loading
-                    ? t("form.buttons.submit.loading")
-                    : t("form.buttons.submit.default")}
-                </Button>
+              </Formik>
 
                 {/* OR Divider */}
                 <div className="relative my-6">
@@ -328,7 +409,6 @@ const LoginPage: React.FC = () => {
                 <div className="flex justify-center">
                   <div ref={googleBtnRef} />
                 </div>
-              </form>
             </div>
 
             {/* Test Accounts Section */}
