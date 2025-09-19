@@ -41,9 +41,23 @@ api.interceptors.response.use(
   (error) => {
     // If unauthorized, clear auth and redirect
     if (error.response?.status === 401) {
-      Cookies.remove("token");
-      Cookies.remove("user");
-      window.location.href = "/login";
+      const url = (error.config && error.config.url) || "";
+      const method = (error.config && error.config.method) || "";
+      // Do NOT auto-redirect on auth endpoints so forms can show field-level errors
+      const isAuthEndpoint = typeof url === "string" && (
+        url.includes("/auth/login") ||
+        url.includes("/auth/register") ||
+        url.includes("/auth/forgot-password") ||
+        url.includes("/auth/google")
+      );
+      const onLoginPage = typeof window !== "undefined" && window.location && window.location.pathname === "/login";
+      if (!isAuthEndpoint && !onLoginPage) {
+        Cookies.remove("token");
+        Cookies.remove("user");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      }
     }
 
     // If network error (no response), try next fallback base URL (dev convenience)
