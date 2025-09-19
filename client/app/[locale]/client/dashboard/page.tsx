@@ -63,6 +63,7 @@ const ClientDashboard: React.FC = () => {
     requirements?: string[];
     acceptedApplication?: { proposedBudget?: number };
     payment?: { paymentStatus?: string };
+    worker?: { name: string };
   }
   const [jobs, setJobs] = useState<EnrichedJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +79,13 @@ const ClientDashboard: React.FC = () => {
   const [review, setReview] = useState("");
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [selectedJobForDispute, setSelectedJobForDispute] =
+    useState<EnrichedJob | null>(null);
+  const [showDeleteJobModal, setShowDeleteJobModal] = useState(false);
+  const [selectedJobForDelete, setSelectedJobForDelete] =
+    useState<EnrichedJob | null>(null);
+  const [showCancelAssignmentModal, setShowCancelAssignmentModal] =
+    useState(false);
+  const [selectedJobForCancel, setSelectedJobForCancel] =
     useState<EnrichedJob | null>(null);
   const [disputeData, setDisputeData] = useState({
     title: "",
@@ -217,12 +225,43 @@ const ClientDashboard: React.FC = () => {
     setShowPaymentModal(true);
   };
 
-  const handleDeleteJob = async (jobId: string) => {
+  const handleDeleteJob = (job: EnrichedJob) => {
+    setSelectedJobForDelete(job);
+    setShowDeleteJobModal(true);
+  };
+
+  const confirmDeleteJob = async () => {
+    if (!selectedJobForDelete) return;
+
     try {
-      await clientAPI.deleteJob(jobId);
+      await clientAPI.deleteJob(selectedJobForDelete._id);
+      setShowDeleteJobModal(false);
+      setSelectedJobForDelete(null);
       fetchDashboardData();
+      toast.success("Job deleted successfully");
     } catch (error) {
       console.error("Failed to delete job:", error);
+      toast.error("Failed to delete job");
+    }
+  };
+
+  const handleCancelAssignment = (job: EnrichedJob) => {
+    setSelectedJobForCancel(job);
+    setShowCancelAssignmentModal(true);
+  };
+
+  const confirmCancelAssignment = async () => {
+    if (!selectedJobForCancel) return;
+
+    try {
+      await clientAPI.updateJobStatus(selectedJobForCancel._id, "posted");
+      setShowCancelAssignmentModal(false);
+      setSelectedJobForCancel(null);
+      fetchDashboardData();
+      toast.success("Assignment cancelled successfully");
+    } catch (error) {
+      console.error("Failed to cancel assignment:", error);
+      toast.error("Failed to cancel assignment");
     }
   };
 
@@ -575,7 +614,7 @@ const ClientDashboard: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDeleteJob(job._id)}
+                        onClick={() => handleDeleteJob(job)}
                         className="w-full sm:w-auto text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
@@ -590,7 +629,7 @@ const ClientDashboard: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleUpdateJobStatus(job._id, "posted")}
+                        onClick={() => handleCancelAssignment(job)}
                         className="text-red-600 hover:bg-red-50"
                       >
                         {t("sections.jobs.actions.cancelAssignment")}
@@ -1040,6 +1079,133 @@ const ClientDashboard: React.FC = () => {
               </>
             )}
           </div>
+        </Modal>
+
+        {/* Delete Job Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteJobModal}
+          onClose={() => {
+            setShowDeleteJobModal(false);
+            setSelectedJobForDelete(null);
+          }}
+          title="Delete Job"
+          size="md"
+        >
+          {selectedJobForDelete && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <Trash2 className="h-5 w-5 text-red-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Are you sure you want to delete this job?
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
+                <p className="text-gray-700">{selectedJobForDelete.title}</p>
+                <p className="text-sm text-gray-500">
+                  Budget: ETB {selectedJobForDelete.budget?.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Status: {selectedJobForDelete.status.replace("_", " ")}
+                </p>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeleteJobModal(false);
+                    setSelectedJobForDelete(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmDeleteJob}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Job
+                </Button>
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        {/* Cancel Assignment Confirmation Modal */}
+        <Modal
+          isOpen={showCancelAssignmentModal}
+          onClose={() => {
+            setShowCancelAssignmentModal(false);
+            setSelectedJobForCancel(null);
+          }}
+          title="Cancel Assignment"
+          size="md"
+        >
+          {selectedJobForCancel && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Are you sure you want to cancel this assignment?
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    The worker will be notified and the job will be reopened for
+                    applications.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
+                <p className="text-gray-700">{selectedJobForCancel.title}</p>
+                <p className="text-sm text-gray-500">
+                  Budget: ETB {selectedJobForCancel.budget?.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Assigned Worker:{" "}
+                  {selectedJobForCancel.worker?.name || "Not Available"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Status: {selectedJobForCancel.status.replace("_", " ")}
+                </p>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowCancelAssignmentModal(false);
+                    setSelectedJobForCancel(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmCancelAssignment}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Cancel Assignment
+                </Button>
+              </div>
+            </div>
+          )}
         </Modal>
 
         {/* Dispute Modal */}
