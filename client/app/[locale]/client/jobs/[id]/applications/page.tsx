@@ -117,61 +117,20 @@ const ApplicationsPage: React.FC = () => {
       setShowChat(true);
       const res = await clientAPI.getJobMessages(jobId);
       const messages = (res.data.data || []) as ChatMessage[];
-      const converted: ModernMessage[] = messages.map((m, index) => ({
-        id: `msg-${index}-${Date.now()}`,
-        senderId:
-          m.sender?.role === "client"
-            ? getStoredUser()?._id || "client"
-            : "worker",
-        senderName:
-          m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
-        content: m.content,
-        timestamp: m.sentAt,
-        attachments: [],
-      }));
-      setModernMessages(converted);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const sendModernMessage = async (content: string, files?: File[]) => {
-    if (!content.trim()) return;
-    try {
-      const attachmentUrls = files
-        ? files.map((f) => URL.createObjectURL(f))
-        : [];
-      await clientAPI.sendJobMessage(jobId, content, attachmentUrls);
-      const newMsg: ModernMessage = {
-        id: `msg-${Date.now()}`,
-        senderId: getStoredUser()?._id || "client",
-        senderName: "You",
-        content,
-        timestamp: new Date().toISOString(),
-        attachments:
-          files?.map((f, i) => ({
-            id: `a-${i}`,
-            name: f.name,
-            url: URL.createObjectURL(f),
-            type: f.type,
-          })) || [],
-      };
-      setModernMessages((prev) => [...prev, newMsg]);
-      toast.success("Message sent");
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to send message");
-      throw e;
-    }
-  };
-  // Poll chat while chat is open
-  useEffect(() => {
-    if (!showChat) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await clientAPI.getJobMessages(jobId);
-        const messages = (res.data.data || []) as ChatMessage[];
-        const converted: ModernMessage[] = messages.map((m, index) => ({
+      const converted: ModernMessage[] = messages.map((m, index) => {
+        const atts = Array.isArray((m as any).attachments)
+          ? ((m as any).attachments as string[]).map((url, ai) => {
+              const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+              const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+              return {
+                id: `${index}-att-${ai}`,
+                name: nameFromUrl || `Attachment ${ai + 1}`,
+                url,
+                type: isImage ? "image/*" : "application/octet-stream",
+              };
+            })
+          : [];
+        return {
           id: `msg-${index}-${Date.now()}`,
           senderId:
             m.sender?.role === "client"
@@ -181,15 +140,118 @@ const ApplicationsPage: React.FC = () => {
             m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
           content: m.content,
           timestamp: m.sentAt,
-          attachments: [],
-        }));
-        setModernMessages(converted);
-      } catch {
-        /* ignore */
-      }
+          attachments: atts,
+        };
+      });
+      setModernMessages(converted);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const sendModernMessage = async (content: string, files?: File[]) => {
+    if (!content.trim() && !(files && files.length)) return;
+    const fileToDataURL = (file: File) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    const optimisticId = `optimistic-${Date.now()}`;
+    const optimisticAttachments = files
+      ? files.map((file, index) => ({
+          id: `${optimisticId}-att-${index}`,
+          name: file.name,
+          url: URL.createObjectURL(file), // Use a temporary blob URL for the preview
+          type: file.type,
+        }))
+      : [];
+
+    const optimisticMessage: ModernMessage = {
+      id: optimisticId,
+      senderId: getStoredUser()?._id || "client",
+      senderName: "You",
+      content,
+      timestamp: new Date().toISOString(),
+      attachments: optimisticAttachments,
+    };
+
+    setModernMessages((prev) => [...prev, optimisticMessage]);
+
+    try {
+      const attachmentDataUrls = files && files.length
+        ? await Promise.all(files.map((f) => fileToDataURL(f)))
+        : [];
+      await clientAPI.sendJobMessage(jobId, content, attachmentDataUrls);
+      toast.success("Message sent");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to send message");
+      // If the API call fails, remove the optimistic message
+      setModernMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+      throw e;
+    }
+  };
+  // Poll chat while chat is open
+  useEffect(() => {
+    if (!showChat) return;
+    const interval = setInterval(() => {
+      // No need for a full re-render, just fetch in the background
+      // The main `openMessages` function can be used to manually refresh.
+      clientAPI.getJobMessages(jobId).then(res => {
+        const messages = (res.data.data || []) as ChatMessage[];
+        const converted = messages.map((m, index) => {
+          const atts = Array.isArray((m as any).attachments)
+            ? ((m as any).attachments as string[]).map((url, ai) => {
+                const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+                const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+                return {
+                  id: `${(m as any)._id || index}-att-${ai}`,
+                  name: nameFromUrl || `Attachment ${ai + 1}`,
+                  url,
+                  type: isImage ? "image/*" : "application/octet-stream",
+                };
+              })
+            : [];
+          return {
+            id: (m as any)._id || `msg-${index}`,
+            senderId:
+              m.sender?.role === "client"
+                ? getStoredUser()?._id || "client"
+                : "worker",
+            senderName:
+              m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
+            content: m.content,
+            timestamp: m.sentAt,
+            attachments: atts,
+          };
+        });
+        setModernMessages(prev => {
+          // A simple merge strategy to avoid disrupting optimistic messages
+          const existingIds = new Set(prev.map(msg => msg.id));
+          const newMessages = converted.filter(msg => !existingIds.has(msg.id));
+          return [...prev, ...newMessages];
+        });
+      }).catch(() => { /* ignore polling errors */ });
     }, 4000);
     return () => clearInterval(interval);
   }, [showChat, jobId]);
+
+  // Cleanup blob URLs from optimistic messages
+  useEffect(() => {
+    return () => {
+      modernMessages.forEach(message => {
+        if (message.attachments) {
+          message.attachments.forEach(att => {
+            if (att.url.startsWith('blob:')) {
+              URL.revokeObjectURL(att.url);
+            }
+          });
+        }
+      });
+    };
+  }, [modernMessages]);
 
   if (loading) return <LoadingPage />;
   if (!job) return <ErrorPage message="Job not found" />;

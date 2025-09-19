@@ -68,9 +68,8 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
   const [attachments, setAttachments] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [optimisticMessages, setOptimisticMessages] = useState<ChatMessage[]>(
-    [],
-  );
+  // Optimistic messages are now handled by the parent component to ensure a single source of truth.
+  // The `messages` prop should be updated optimistically by the parent.
   const [showAll, setShowAll] = useState(false);
 
   // Refs for focus management
@@ -80,24 +79,21 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Only render a window of the latest messages for performance
-  const baseMessages = useMemo(() => {
+  const visibleMessages = useMemo(() => {
     const MAX = 50; // render last 50 messages for speed
-    if (!messages) return [] as typeof messages;
+    if (!messages) return [];
     if (showAll) return messages;
     return messages.length > MAX ? messages.slice(-MAX) : messages;
   }, [messages, showAll]);
 
-  const visibleMessages = useMemo(() => {
-    return [...baseMessages, ...optimisticMessages];
-  }, [baseMessages, optimisticMessages]);
-
   // Auto-scroll to bottom when new messages arrive
+  // This useEffect handles auto-scrolling.
+  // It now depends directly on `messages` prop.
   useEffect(() => {
     if (messagesEndRef.current && isOpen && mode === "chat") {
-      // use auto scroll for snappier feel
-      messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [visibleMessages, isOpen, mode]);
+  }, [messages, isOpen, mode]);
 
   // Focus management - maintain focus on message input
   useEffect(() => {
@@ -188,64 +184,41 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
   );
 
   const handleSendMessage = useCallback(async () => {
-    if ((!newMessage.trim() && attachments.length === 0) || sending) {
+    const content = newMessage.trim();
+    if ((!content && attachments.length === 0) || sending) {
       return;
     }
+
     setSending(true);
+
+    // Keep copies of the state to be cleared
+    const currentContent = newMessage;
+    const currentAttachments = [...attachments];
+
+    // Immediately clear the input fields for a better user experience
+    setNewMessage("");
+    setAttachments([]);
+    setShowEmojiPicker(false);
+
     try {
-      // optimistic: show pending bubble immediately
-      const optimisticId = `pending-${Date.now()}`;
-      const pending: ChatMessage = {
-        id: optimisticId,
-        senderId: currentUserId,
-        senderName: "You",
-        content: newMessage.trim(),
-        timestamp: new Date().toISOString(),
-        attachments: attachments.map((f, i) => ({
-          id: `${optimisticId}-${i}`,
-          name: f.name,
-          url: "",
-          type: f.type,
-        })),
-      };
-      if (newMessage.trim() || attachments.length > 0) {
-        setOptimisticMessages((prev) => [...prev, pending]);
-      }
+      // Compress images before sending
+      const maybeCompressed = await compressFilesIfNeeded(currentAttachments);
 
-      // attempt lightweight compression for image attachments
-      const maybeCompressed = await compressFilesIfNeeded(attachments);
-
-      await onSendMessage(newMessage.trim(), maybeCompressed);
-
-      setNewMessage("");
-      setAttachments([]);
-      setShowEmojiPicker(false);
-
-      // Maintain focus after sending
+      // The parent component is now responsible for optimistic updates.
+      await onSendMessage(content, maybeCompressed);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // If sending fails, restore the message and attachments so the user can retry.
+      setNewMessage(currentContent);
+      setAttachments(currentAttachments);
+    } finally {
+      setSending(false);
+      // Ensure focus is returned to the input field after the operation completes.
       setTimeout(() => {
         messageInputRef.current?.focus();
       }, 50);
-      // remove optimistic item once server confirms (parent messages should include the real one)
-      setOptimisticMessages((prev) =>
-        prev.filter((m) => m.id !== optimisticId),
-      );
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      // remove optimistic on error as well
-      setOptimisticMessages((prev) =>
-        prev.filter((m) => !m.id.startsWith("pending-")),
-      );
-    } finally {
-      setSending(false);
     }
-  }, [
-    newMessage,
-    attachments,
-    sending,
-    onSendMessage,
-    compressFilesIfNeeded,
-    currentUserId,
-  ]);
+  }, [newMessage, attachments, sending, onSendMessage, compressFilesIfNeeded]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -359,21 +332,44 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
               </p>
 
               {message.attachments && message.attachments.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {message.attachments.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className={`
-                      flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:opacity-80
-                      ${isSent ? "bg-white/20" : "bg-gray-50"}
-                    `}
-                    >
-                      <Paperclip className="w-3 h-3" />
-                      <span className="text-xs truncate">
-                        {attachment.name}
-                      </span>
-                    </div>
-                  ))}
+                <div className="mt-2 space-y-2">
+                  {message.attachments.map((attachment) => {
+                    const isImage =
+                      (attachment.type && attachment.type.startsWith("image/")) ||
+                      /^data:image\//.test(attachment.url) ||
+                      /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(attachment.url);
+                    return (
+                      <div key={attachment.id} className={`
+                        group border rounded-lg overflow-hidden ${isSent ? "bg-white/20 border-white/30" : "bg-gray-50 border-gray-200"}
+                      `}>
+                        {isImage ? (
+                          <a href={attachment.url} target="_blank" rel="noreferrer" className="block">
+                            <img
+                              src={attachment.url}
+                              alt={attachment.name}
+                              className="max-h-40 object-contain w-full bg-white"
+                              loading="lazy"
+                            />
+                            <div className="flex items-center gap-2 px-2 py-1 text-xs text-gray-700 bg-white/80">
+                              <Paperclip className="w-3 h-3" />
+                              <span className="truncate">{attachment.name}</span>
+                            </div>
+                          </a>
+                        ) : (
+                          <a
+                            href={attachment.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            download={attachment.name}
+                            className={`flex items-center gap-2 p-2 text-xs hover:underline ${isSent ? "text-white" : "text-blue-700"}`}
+                          >
+                            <Paperclip className="w-3 h-3" />
+                            <span className="truncate">{attachment.name}</span>
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -533,7 +529,7 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
               <button
                 onClick={handleAttachFile}
                 disabled={sending}
-                className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
+                className="py-4 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
                 title="Attach file"
               >
                 <Paperclip className="w-5 h-5" />
@@ -562,7 +558,7 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   disabled={sending}
-                  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
+                  className="py-4 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
                   title="Add emoji"
                 >
                   <Smile className="w-5 h-5" />

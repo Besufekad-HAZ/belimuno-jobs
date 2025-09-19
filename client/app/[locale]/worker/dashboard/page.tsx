@@ -380,7 +380,20 @@ const WorkerDashboard: React.FC = () => {
             sender?: { name?: string; role?: string };
             content: string;
             sentAt: string;
+            attachments?: string[];
           };
+          const atts = Array.isArray(m.attachments)
+            ? m.attachments.map((url, ai) => {
+                const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+                const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+                return {
+                  id: `${m._id || index}-att-${ai}`,
+                  name: nameFromUrl || `Attachment ${ai + 1}`,
+                  url,
+                  type: isImage ? "image/*" : "application/octet-stream",
+                };
+              })
+            : [];
           return {
             id: m._id || `msg-${index}-${Date.now()}`,
             senderId:
@@ -392,7 +405,7 @@ const WorkerDashboard: React.FC = () => {
               (m.sender?.role === "worker" ? "You" : "Client"),
             content: m.content,
             timestamp: m.sentAt,
-            attachments: [],
+            attachments: atts,
           };
         }
         return {
@@ -413,37 +426,56 @@ const WorkerDashboard: React.FC = () => {
 
   // Removed legacy sendChat handler; modern chat uses sendModernMessage
 
-  const sendModernMessage = async (content: string, attachments?: File[]) => {
-    if (!chatJobId || !content.trim()) return;
+  const sendModernMessage = async (content: string, files?: File[]) => {
+    if (!chatJobId || (!content.trim() && !(files && files.length))) return;
+
+    const fileToDataURL = (file: File) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+    // Create an optimistic message to display immediately.
+    const optimisticId = `optimistic-${Date.now()}`;
+    const optimisticAttachments = files
+      ? files.map((file, index) => ({
+          id: `${optimisticId}-att-${index}`,
+          name: file.name,
+          url: URL.createObjectURL(file), // Use a temporary blob URL for the preview
+          type: file.type,
+        }))
+      : [];
+
+    const optimisticMessage = {
+      id: optimisticId,
+      senderId: getStoredUser()?._id || "worker",
+      senderName: "You",
+      content: content,
+      timestamp: new Date().toISOString(),
+      attachments: optimisticAttachments,
+    };
+
+    setModernChatMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      const attachmentUrls = attachments
-        ? attachments.map((file) => URL.createObjectURL(file))
+      const attachmentDataUrls = files && files.length
+        ? await Promise.all(files.map((f) => fileToDataURL(f)))
         : [];
+
       const res = await workerAPI.sendJobMessage(
         chatJobId,
         content,
-        attachmentUrls,
+        attachmentDataUrls,
       );
 
       // Add the new message to the modern chat messages
-      const newMessage = {
-        id: `msg-${Date.now()}`,
-        senderId: getStoredUser()?._id || "worker",
-        senderName: "You",
-        content: content,
-        timestamp: new Date().toISOString(),
-        attachments: attachments
-          ? attachments.map((file, index) => ({
-              id: `attachment-${index}`,
-              name: file.name,
-              url: URL.createObjectURL(file),
-              type: file.type,
-            }))
-          : [],
-      };
-
-      setModernChatMessages((prev) => [...prev, newMessage]);
+      // The optimistic message is now created *before* the API call.
+      // Note: The `UniversalChatSystem` no longer creates its own optimistic message.
+      // The parent component is now the single source of truth for the message list.
+      // After the message is successfully sent, the polling mechanism will fetch the true message from the server.
+      // We are not adding the response `res.data` to the chat messages directly to avoid duplicates.
       return res.data;
     } catch (error) {
       console.error("Failed to send message:", error);
