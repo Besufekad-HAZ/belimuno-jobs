@@ -787,6 +787,8 @@ exports.acceptAssignedJob = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Job already accepted" });
   }
   job.workerAcceptance = "accepted";
+  job.status = "in_progress";
+  job.startDate = job.startDate || new Date();
   await job.save();
 
   await Notification.create({
