@@ -64,6 +64,13 @@ interface Dispute {
     budget: number;
     status: string;
   };
+  payment?: {
+    _id: string;
+    transactionId: string;
+    amount: number;
+    status: string;
+    paymentMethod: string;
+  };
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
@@ -627,6 +634,28 @@ const DisputeResolution: React.FC = () => {
                     </p>
                     <p>
                       <strong>Status:</strong> {selectedDispute.job.status}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {selectedDispute.payment && (
+                <div>
+                  <h4 className="font-semibold mb-3">Related Payment</h4>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p>
+                      <strong>Transaction ID:</strong>{" "}
+                      {selectedDispute.payment.transactionId}
+                    </p>
+                    <p>
+                      <strong>Amount:</strong> ${selectedDispute.payment.amount}
+                    </p>
+                    <p>
+                      <strong>Status:</strong> {selectedDispute.payment.status}
+                    </p>
+                    <p>
+                      <strong>Method:</strong>{" "}
+                      {selectedDispute.payment.paymentMethod.replace("_", " ")}
                     </p>
                   </div>
                 </div>

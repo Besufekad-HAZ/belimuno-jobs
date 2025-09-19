@@ -58,6 +58,19 @@ type PaymentItem = {
   };
   error?: { code?: string; message?: string };
   notes?: string;
+  dispute?: {
+    _id: string;
+    title: string;
+    status: "open" | "investigating" | "resolved" | "closed";
+    type: string;
+    priority: string;
+  };
+  adminResolution?: {
+    resolvedBy?: string;
+    resolution?: string;
+    action?: "refund" | "release" | "partial";
+    resolvedAt?: string;
+  };
   initiatedAt?: string;
   processedAt?: string;
   completedAt?: string;
@@ -459,7 +472,16 @@ const AdminPaymentsPage: React.FC = () => {
                       {p.paymentMethod.replace("_", " ")}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={statusBadge(p.status)}>{p.status}</span>
+                      <div className="flex flex-col gap-1">
+                        <span className={statusBadge(p.status)}>
+                          {p.status}
+                        </span>
+                        {p.dispute && (
+                          <span className="text-xs bg-red-50 text-red-700 px-1.5 py-0.5 rounded">
+                            Dispute: {p.dispute.status}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-600">
                       {p.createdAt
@@ -527,9 +549,33 @@ const AdminPaymentsPage: React.FC = () => {
             <div className="flex items-center mb-3">
               <ShieldAlert className="h-5 w-5 text-orange-600 mr-2" />
               <h2 className="text-lg font-semibold text-blue-800">
-                Resolve Dispute
+                {activePayment?.dispute
+                  ? "Update Dispute Resolution"
+                  : "Resolve Dispute"}
               </h2>
             </div>
+            {activePayment?.dispute && (
+              <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+                <p className="font-medium text-gray-700">
+                  {activePayment.dispute.title}
+                </p>
+                <div className="mt-1 text-sm">
+                  <span
+                    className={`px-2 py-0.5 rounded ${
+                      activePayment.dispute.priority === "high" ||
+                      activePayment.dispute.priority === "urgent"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {activePayment.dispute.priority}
+                  </span>
+                  <span className="ml-2 text-gray-600">
+                    Type: {activePayment.dispute.type}
+                  </span>
+                </div>
+              </div>
+            )}
             <div className="text-sm text-gray-600 mb-3">
               Choose an action and provide a short resolution note.
             </div>

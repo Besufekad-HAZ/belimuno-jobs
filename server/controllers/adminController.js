@@ -557,13 +557,27 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
   const payment = await Payment.findById(req.params.id)
     .populate("job")
     .populate("payer")
-    .populate("recipient");
+    .populate("recipient")
+    .populate("dispute");
 
   if (!payment) {
     return res.status(404).json({
       success: false,
       message: "Payment not found",
     });
+  }
+
+  // Find associated dispute if not already populated
+  let dispute = payment.dispute;
+  if (!dispute && payment.job) {
+    dispute = await Dispute.findOne({
+      job: payment.job._id,
+      type: "payment",
+      status: { $in: ["open", "investigating"] },
+    });
+    if (dispute) {
+      payment.dispute = dispute._id;
+    }
   }
 
   // Update payment based on admin decision
@@ -589,13 +603,26 @@ exports.handlePaymentDispute = asyncHandler(async (req, res) => {
 
   await payment.save();
 
-  // Update job dispute status
-  if (payment.job && payment.job.dispute && payment.job.dispute.isDisputed) {
-    payment.job.dispute.status = "resolved";
-    payment.job.dispute.resolvedBy = req.user._id;
-    payment.job.dispute.resolution = resolution;
-    payment.job.dispute.resolvedAt = new Date();
-    await payment.job.save();
+  // Update dispute status
+  if (dispute) {
+    dispute.status = "resolved";
+    dispute.resolvedBy = req.user._id;
+    dispute.resolution = resolution;
+    dispute.resolvedAt = new Date();
+    await dispute.save();
+
+    // Update job dispute status
+    if (payment.job) {
+      payment.job.status = action === "refund" ? "cancelled" : "completed";
+      payment.job.dispute = {
+        isDisputed: false,
+        resolvedBy: req.user._id,
+        resolution: resolution,
+        resolvedAt: new Date(),
+        status: "resolved",
+      };
+      await payment.job.save();
+    }
   }
 
   // Create notifications
