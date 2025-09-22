@@ -43,13 +43,16 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const url = (error.config && error.config.url) || "";
       // Do NOT auto-redirect on auth endpoints so forms can show field-level errors
-      const isAuthEndpoint = typeof url === "string" && (
-        url.includes("/auth/login") ||
-        url.includes("/auth/register") ||
-        url.includes("/auth/forgot-password") ||
-        url.includes("/auth/google")
-      );
-      const onLoginPage = typeof window !== "undefined" && window.location && window.location.pathname === "/login";
+      const isAuthEndpoint =
+        typeof url === "string" &&
+        (url.includes("/auth/login") ||
+          url.includes("/auth/register") ||
+          url.includes("/auth/forgot-password") ||
+          url.includes("/auth/google"));
+      const onLoginPage =
+        typeof window !== "undefined" &&
+        window.location &&
+        window.location.pathname === "/login";
       if (!isAuthEndpoint && !onLoginPage) {
         Cookies.remove("token");
         Cookies.remove("user");
@@ -268,7 +271,8 @@ export const workerAPI = {
 
 // Admin API
 export const adminAPI = {
-  getDashboard: () => api.get("/admin/dashboard"),
+  getDashboard: (params?: Record<string, unknown>) =>
+    api.get("/admin/dashboard", { params }),
   getUsers: (params?: Record<string, unknown>) =>
     api.get("/admin/users", { params }),
   getUser: (id: string) => api.get(`/admin/users/${id}`),
@@ -278,7 +282,8 @@ export const adminAPI = {
     api.put(`/admin/users/${id}/deactivate`, { reason }),
   activateUser: (id: string) => api.put(`/admin/users/${id}/activate`),
   verifyWorker: (id: string) => api.put(`/admin/verify-worker/${id}`),
-  getAllJobs: () => api.get("/admin/jobs"),
+  getAllJobs: (params?: Record<string, unknown>) =>
+    api.get("/admin/jobs", { params }),
   createJob: (payload: Record<string, unknown>) =>
     api.post("/admin/jobs", payload),
   updateJob: (id: string, payload: Record<string, unknown>) =>

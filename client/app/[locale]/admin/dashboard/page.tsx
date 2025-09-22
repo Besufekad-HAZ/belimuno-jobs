@@ -84,10 +84,26 @@ const AdminDashboard: React.FC = () => {
       setLoading(true);
       const [dashboardResponse, usersResponse, jobsResponse, paymentsResponse] =
         await Promise.all([
-          adminAPI.getDashboard(),
-          adminAPI.getUsers({ limit: 5, sort: "-createdAt" }),
-          adminAPI.getAllJobs(),
-          adminAPI.getPayments(),
+          adminAPI.getDashboard({ minimal: true }),
+          // Only fetch what we need for the cards
+          adminAPI.getUsers({
+            limit: 5,
+            sort: "-createdAt",
+            select: "name email role isVerified createdAt",
+          }),
+          // Fetch recent jobs for the list
+          adminAPI.getAllJobs({
+            limit: 6,
+            sort: "-createdAt",
+            select: "title status budget createdAt",
+          }),
+          // Fetch only disputed payments for the disputes badge/modal
+          adminAPI.getPayments({
+            status: "disputed",
+            limit: 20,
+            sort: "-createdAt",
+            select: "status amount createdAt",
+          }),
         ]);
 
       setRecentUsers(usersResponse.data.data || []);
@@ -251,7 +267,7 @@ const AdminDashboard: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowReportsModal(true)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
                 size="sm"
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
@@ -264,7 +280,7 @@ const AdminDashboard: React.FC = () => {
                 <Button
                   variant="outline"
                   onClick={() => setShowDisputeModal(true)}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
                   size="sm"
                 >
                   <AlertTriangle className="h-4 w-4 mr-2" />
@@ -491,7 +507,7 @@ const AdminDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
               variant="outline"
-              className="p-4 h-auto flex flex-col items-center"
+              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
               onClick={() => router.push("/admin/users")}
             >
               <Users className="h-6 w-6 mb-2" />
@@ -499,7 +515,7 @@ const AdminDashboard: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              className="p-4 h-auto flex flex-col items-center"
+              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
               onClick={() => router.push("/admin/jobs")}
             >
               <Briefcase className="h-6 w-6 mb-2" />
@@ -507,7 +523,7 @@ const AdminDashboard: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              className="p-4 h-auto flex flex-col items-center"
+              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
               onClick={() => router.push("/admin/payments")}
             >
               <DollarSign className="h-6 w-6 mb-2" />

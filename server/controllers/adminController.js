@@ -10,77 +10,79 @@ const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
 
-// @desc    Get admin dashboard
+// Lightweight in-memory cache for dashboard
+const __dashboardCache = { data: null, ts: 0 };
+
+// @desc    Get admin dashboard (optimized)
 // @route   GET /api/admin/dashboard
 // @access  Private/Super Admin
 exports.getDashboard = asyncHandler(async (req, res) => {
-  // Get overall statistics
-  const totalUsers = await User.countDocuments();
-  const totalWorkers = await User.countDocuments({ role: "worker" });
-  const totalClients = await User.countDocuments({ role: "client" });
-  const verifiedWorkers = await User.countDocuments({
-    role: "worker",
-    isVerified: true,
-  });
+  const now = Date.now();
+  const cacheTTL = 15 * 1000; // 15 seconds
+  if (__dashboardCache.data && now - __dashboardCache.ts < cacheTTL) {
+    return res.status(200).json({ success: true, data: __dashboardCache.data });
+  }
 
-  const totalJobs = await Job.countDocuments();
-  const activeJobs = await Job.countDocuments({
-    status: { $in: ["posted", "assigned", "in_progress"] },
-  });
-  const completedJobs = await Job.countDocuments({ status: "completed" });
-
-  const totalPayments = await Payment.countDocuments();
-  const completedPayments = await Payment.countDocuments({
-    status: "completed",
-  });
-
-  // Calculate revenue
-  const revenueData = await Payment.aggregate([
-    { $match: { status: "completed" } },
-    { $group: { _id: null, total: { $sum: "$amount" } } },
-  ]);
-  const totalRevenue = revenueData[0]?.total || 0;
-
-  // Get recent activities
-  const recentJobs = await Job.find()
-    .populate("client", "name profile.avatar")
-    .populate("worker", "name profile.avatar")
-    .sort({ createdAt: -1 })
-    .limit(10);
-
-  const recentUsers = await User.find()
-    .select("name email role isVerified createdAt")
-    .sort({ createdAt: -1 })
-    .limit(10);
-
-  // Jobs by status
-  const jobsByStatus = await Job.aggregate([
-    { $group: { _id: "$status", count: { $sum: 1 } } },
-  ]);
-
-  // Revenue by month (last 12 months)
   const twelveMonthsAgo = new Date();
   twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+  const minimal = String(req.query.minimal || "false").toLowerCase() === "true";
 
-  const monthlyRevenue = await Payment.aggregate([
-    {
-      $match: {
-        status: "completed",
-        createdAt: { $gte: twelveMonthsAgo },
-      },
-    },
-    {
-      $group: {
-        _id: {
-          year: { $year: "$createdAt" },
-          month: { $month: "$createdAt" },
-        },
-        revenue: { $sum: "$amount" },
-        count: { $sum: 1 },
-      },
-    },
-    { $sort: { "_id.year": 1, "_id.month": 1 } },
+  // Run independent computations in parallel
+  const [
+    usersCounts,
+    jobsCounts,
+    paymentsAgg,
+    jobsByStatus,
+    monthlyRevenue,
+    recentUsers,
+    recentJobs,
+  ] = await Promise.all([
+    // Users counters
+    Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ role: "worker" }),
+      User.countDocuments({ role: "client" }),
+      User.countDocuments({ role: "worker", isVerified: true }),
+    ]),
+    // Jobs counters
+    Promise.all([
+      Job.countDocuments(),
+      Job.countDocuments({ status: { $in: ["posted", "assigned", "in_progress"] } }),
+      Job.countDocuments({ status: "completed" }),
+    ]),
+    // Revenue total
+    Payment.aggregate([
+      { $match: { status: "completed" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]),
+    // Jobs by status
+    Job.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+    // Monthly revenue (last 12 months)
+    minimal
+      ? Promise.resolve([])
+      : Payment.aggregate([
+          { $match: { status: "completed", createdAt: { $gte: twelveMonthsAgo } } },
+          { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, revenue: { $sum: "$amount" }, count: { $sum: 1 } } },
+          { $sort: { "_id.year": 1, "_id.month": 1 } },
+        ]),
+    // Only a few recent users, lean objects
+    User.find()
+      .select("name email role isVerified createdAt")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean(),
+    // Only lightweight job fields for recent jobs, no heavy arrays; lean + minimal populate
+    Job.find({}, "title status budget createdAt client worker")
+      .populate({ path: "client", select: "name profile.avatar" })
+      .populate({ path: "worker", select: "name profile.avatar" })
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .lean(),
   ]);
+
+  const [totalUsers, totalWorkers, totalClients, verifiedWorkers] = usersCounts;
+  const [totalJobs, activeJobs, completedJobs] = jobsCounts;
+  const totalRevenue = paymentsAgg[0]?.total || 0;
 
   const dashboardData = {
     overview: {
@@ -92,12 +94,12 @@ exports.getDashboard = asyncHandler(async (req, res) => {
       activeJobs,
       completedJobs,
       totalRevenue,
-      completedPayments,
+      completedPayments: undefined, // not used on UI currently
       pendingVerifications: totalWorkers - verifiedWorkers,
     },
     charts: {
       jobsByStatus,
-      monthlyRevenue,
+  monthlyRevenue,
     },
     recent: {
       jobs: recentJobs,
@@ -105,24 +107,17 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     },
   };
 
-  res.status(200).json({
-    success: true,
-    data: dashboardData,
-  });
+  __dashboardCache.data = dashboardData;
+  __dashboardCache.ts = Date.now();
+
+  res.status(200).json({ success: true, data: dashboardData });
 });
 
 // @desc    Get all users with filtering
 // @route   GET /api/admin/users
 // @access  Private/Super Admin
 exports.getUsers = asyncHandler(async (req, res) => {
-  const {
-    role,
-    isVerified,
-    isActive,
-    page = 1,
-    limit = 20,
-    search,
-  } = req.query;
+  const { role, isVerified, isActive, page = 1, limit = 20, search, select, sort } = req.query;
 
   const query = {};
   if (role) query.role = role;
@@ -136,12 +131,21 @@ exports.getUsers = asyncHandler(async (req, res) => {
     ];
   }
 
-  const users = await User.find(query)
-    .select("-password")
-    .populate("region", "name")
-    .sort({ createdAt: -1 })
+  const projection = select ? String(select).split(",").join(" ") : "-password";
+  const sortBy = sort ? String(sort).split(",").join(" ") : "-createdAt";
+  const usersQuery = User.find(query)
+    .select(projection)
+    .sort(sortBy)
     .limit(limit * 1)
-    .skip((page - 1) * limit);
+    .skip((page - 1) * limit)
+    .lean();
+
+  // populate region only when requested
+  if (!select || String(select).includes("region")) {
+    usersQuery.populate("region", "name");
+  }
+
+  const users = await usersQuery;
 
   const total = await User.countDocuments(query);
 
@@ -281,20 +285,30 @@ exports.verifyWorker = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/jobs
 // @access  Private/Super Admin
 exports.getJobs = asyncHandler(async (req, res) => {
-  const { status, category, region, page = 1, limit = 20 } = req.query;
+  const { status, category, region, page = 1, limit = 20, select, sort } = req.query;
 
   const query = {};
   if (status) query.status = status;
   if (category) query.category = category;
   if (region) query.region = region;
 
-  const jobs = await Job.find(query)
-    .populate("client", "name profile.avatar")
-    .populate("worker", "name profile.avatar")
-    .populate("region", "name")
-    .sort({ createdAt: -1 })
+  const projection = select ? String(select).split(",").join(" ") : undefined;
+  const sortBy = sort ? String(sort).split(",").join(" ") : "-createdAt";
+  const jobsQuery = Job.find(query, projection)
+    .sort(sortBy)
     .limit(limit * 1)
-    .skip((page - 1) * limit);
+    .skip((page - 1) * limit)
+    .lean();
+
+  // populate only if corresponding fields present
+  const wantsClient = !projection || /\bclient\b/.test(projection);
+  const wantsWorker = !projection || /\bworker\b/.test(projection);
+  const wantsRegion = !projection || /\bregion\b/.test(projection);
+  if (wantsClient) jobsQuery.populate({ path: "client", select: "name profile.avatar" });
+  if (wantsWorker) jobsQuery.populate({ path: "worker", select: "name profile.avatar" });
+  if (wantsRegion) jobsQuery.populate({ path: "region", select: "name" });
+
+  const jobs = await jobsQuery;
 
   const total = await Job.countDocuments(query);
 
@@ -520,18 +534,30 @@ exports.getPerformanceMetrics = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/payments
 // @access  Private/Super Admin
 exports.getPayments = asyncHandler(async (req, res) => {
-  const { status, page = 1, limit = 20 } = req.query;
+  const { status, page = 1, limit = 20, select, sort } = req.query;
 
   const query = {};
   if (status) query.status = status;
 
-  const payments = await Payment.find(query)
-    .populate("payer", "name role profile.avatar")
-    .populate("recipient", "name role profile.avatar")
-    .populate("job", "title")
-    .sort({ createdAt: -1 })
+  const projection = select ? String(select).split(",").join(" ") : undefined;
+  const sortBy = sort ? String(sort).split(",").join(" ") : "-createdAt";
+  const paymentsQuery = Payment.find(query, projection)
+    .sort(sortBy)
     .limit(limit * 1)
-    .skip((page - 1) * limit);
+    .skip((page - 1) * limit)
+    .lean();
+
+  if (!projection || /\bpayer\b/.test(projection)) {
+    paymentsQuery.populate("payer", "name role profile.avatar");
+  }
+  if (!projection || /\brecipient\b/.test(projection)) {
+    paymentsQuery.populate("recipient", "name role profile.avatar");
+  }
+  if (!projection || /\bjob\b/.test(projection)) {
+    paymentsQuery.populate("job", "title");
+  }
+
+  const payments = await paymentsQuery;
 
   const total = await Payment.countDocuments(query);
 
