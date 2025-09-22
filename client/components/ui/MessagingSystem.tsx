@@ -13,6 +13,7 @@ import {
   Video,
   Info
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Message {
   id: string;
@@ -207,11 +208,12 @@ const MessagingSystem: React.FC<MessagingSystemProps> = ({
                     >
                       {isImage ? (
                         <a href={attachment.url} target="_blank" rel="noreferrer" className="block">
-                          <img
+                          <Image
                             src={attachment.url}
                             alt={attachment.name}
+                            width={400}
+                            height={160}
                             className="max-h-40 object-contain w-full bg-white"
-                            loading="lazy"
                           />
                           <div className="flex items-center gap-2 px-2 py-1 text-xs text-gray-700 bg-white/80">
                             <Paperclip className="w-3 h-3" />

@@ -36,9 +36,11 @@ interface JobDetail {
   description: string;
 }
 interface ChatMessage {
+  _id?: string;
   content: string;
   sender?: { name?: string; role?: string };
   sentAt: string;
+  attachments?: string[];
 }
 
 const ApplicationsPage: React.FC = () => {
@@ -118,8 +120,8 @@ const ApplicationsPage: React.FC = () => {
       const res = await clientAPI.getJobMessages(jobId);
       const messages = (res.data.data || []) as ChatMessage[];
       const converted: ModernMessage[] = messages.map((m, index) => {
-        const atts = Array.isArray((m as any).attachments)
-          ? ((m as any).attachments as string[]).map((url, ai) => {
+        const atts = Array.isArray(m.attachments)
+          ? (m.attachments as string[]).map((url, ai) => {
               const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
               const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
               return {
@@ -202,12 +204,12 @@ const ApplicationsPage: React.FC = () => {
       clientAPI.getJobMessages(jobId).then(res => {
         const messages = (res.data.data || []) as ChatMessage[];
         const converted = messages.map((m, index) => {
-          const atts = Array.isArray((m as any).attachments)
-            ? ((m as any).attachments as string[]).map((url, ai) => {
+          const atts = Array.isArray(m.attachments)
+            ? (m.attachments as string[]).map((url, ai) => {
                 const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
                 const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
                 return {
-                  id: `${(m as any)._id || index}-att-${ai}`,
+                  id: `${m._id || index}-att-${ai}`,
                   name: nameFromUrl || `Attachment ${ai + 1}`,
                   url,
                   type: isImage ? "image/*" : "application/octet-stream",
@@ -215,7 +217,7 @@ const ApplicationsPage: React.FC = () => {
               })
             : [];
           return {
-            id: (m as any)._id || `msg-${index}`,
+            id: m._id || `msg-${index}`,
             senderId:
               m.sender?.role === "client"
                 ? getStoredUser()?._id || "client"

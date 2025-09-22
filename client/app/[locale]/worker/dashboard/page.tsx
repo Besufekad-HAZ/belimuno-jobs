@@ -18,7 +18,6 @@ import {
   ThumbsDown,
   FileText,
   AlertTriangle,
-  Play,
   RefreshCw,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
