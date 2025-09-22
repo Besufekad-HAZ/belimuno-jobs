@@ -280,7 +280,7 @@ const SimpleChatInterface: React.FC<SimpleChatInterfaceProps> = ({
             <button
               onClick={handleAttachFile}
               disabled={sending}
-              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
+              className="py-4 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
               title="Attach file"
             >
               <Paperclip className="w-5 h-5" />
