@@ -122,7 +122,7 @@ export default function Home() {
               <Button
                 size="lg"
                 onClick={handleGetStarted}
-                className="group bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-2xl hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold"
+                className="group bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-2xl hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-300 px-8 py-3 text-lg font-semibold"
               >
                 <span className="inline-flex items-center">
                   <span className="mr-3">
@@ -149,11 +149,15 @@ export default function Home() {
 
             {/* Trust Indicators */}
             <div className="mt-16 animate-fade-in-up delay-1200">
-              <p className="text-sm text-gray-500 mb-6 font-medium">Trusted by thousands of professionals</p>
+              <p className="text-sm text-gray-500 mb-6 font-medium">
+                Trusted by thousands of professionals
+              </p>
               <div className="flex justify-center items-center space-x-8 opacity-60">
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-sm text-gray-600">Verified Companies</span>
+                  <span className="text-sm text-gray-600">
+                    Verified Companies
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-green-500" />

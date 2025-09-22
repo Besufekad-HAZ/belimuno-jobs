@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Manrope, Noto_Sans_Ethiopic } from "next/font/google";
 import "./globals.css";
 import "./fonts.css";
 import Navbar from "@/components/Layout/Navbar";
@@ -12,14 +12,20 @@ import ChatbotComponent from "@/chatbot/ChatbotComponent";
 import { Toaster } from "@/components/ui/sonner";
 import "react-chatbot-kit/build/main.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const notoEthiopic = Noto_Sans_Ethiopic({
+  variable: "--font-noto-ethiopic",
+  weight: ["400", "500", "700"],
+  subsets: ["ethiopic"],
 });
 
 export const metadata: Metadata = {
@@ -51,7 +57,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${manrope.variable} ${notoEthiopic.variable} ${geistMono.variable} antialiased`}
       >
         <a href="#main-content" className="skip-link">
           Skip to main content
