@@ -46,15 +46,15 @@ const ServicesPage: React.FC = () => {
               iconMap[t(`services.${num}.icon`) as keyof typeof iconMap];
             return (
               <Card key={num} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white">
-                    <IconComponent className="h-6 w-6" />
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 p-3 ring-1 ring-white/60 shadow-sm">
+                    <IconComponent className="h-6 w-6 text-white" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-xl font-bold text-gray-900">
                       {t(`services.${num}.title`)}
                     </h3>
-                    <p className="text-gray-600 mt-1">
+                    <p className="text-gray-600 mt-1 leading-relaxed">
                       {t(`services.${num}.description`)}
                     </p>
                   </div>
