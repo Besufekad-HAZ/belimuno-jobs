@@ -18,7 +18,7 @@ import {
   Video,
   MoreVertical,
 } from "lucide-react";
-import Image from 'next/image';
+import NextImage from 'next/image';
 
 interface ChatMessage {
   id: string;
@@ -345,7 +345,7 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                       `}>
                         {isImage ? (
                           <a href={attachment.url} target="_blank" rel="noreferrer" className="block">
-                            <Image
+                            <NextImage
                               src={attachment.url}
                               alt={attachment.name}
                               width={400}
