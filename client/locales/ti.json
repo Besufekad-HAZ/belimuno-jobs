@@ -980,6 +980,12 @@
     "recentUsers": {
       "title": "ቀረባ ተጠቃምቲ",
       "viewAll": "ኩሉ ርኢ",
+      "tags": {
+        "verified": "ተረጋጊጹ",
+        "unverified": "ዘይተረጋገጸ",
+        "active": "ንቁ",
+        "inactive": "ዘይንበር"
+      },
       "buttons": {
         "verify": "ኣረጋግጽ"
       }

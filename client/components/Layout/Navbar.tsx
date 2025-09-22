@@ -123,6 +123,10 @@ const Navbar: React.FC = () => {
     }
   };
 
+  const isAdminRoute = pathname?.startsWith("/admin");
+  const isAdminUser =
+    user && ["super_admin", "admin_hr", "admin_outsource"].includes(user.role);
+
   return (
     <nav className="sticky top-0 z-50 bg-gradient-primary shadow-md border-b border-blue-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -144,46 +148,81 @@ const Navbar: React.FC = () => {
             </Link>
 
             {/* Desktop navigation */}
-            <nav className="hidden lg:flex space-x-6" aria-label="Primary">
-              <Link
-                href="/"
-                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
-                aria-current={pathname === "/" ? "page" : undefined}
-              >
-                {t("navigation.home")}
-              </Link>
-              <Link
-                href="/about"
-                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
-                aria-current={pathname === "/about" ? "page" : undefined}
-              >
-                {t("navigation.about")}
-              </Link>
-              <Link
-                href="/services"
-                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
-              >
-                {t("navigation.services")}
-              </Link>
-              <Link
-                href="/clients"
-                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
-              >
-                {t("navigation.clients")}
-              </Link>
-              <Link
-                href="/jobs"
-                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
-              >
-                {t("navigation.jobs")}
-              </Link>
-              <Link
-                href="/contact"
-                className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
-              >
-                {t("navigation.contact")}
-              </Link>
-            </nav>
+            {isAdminRoute || isAdminUser ? (
+              <nav className="hidden lg:flex space-x-6" aria-label="Admin">
+                <Link
+                  href="/admin/dashboard"
+                  className="text-white hover:text-blue-200 font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className="text-white hover:text-blue-200 font-medium"
+                >
+                  Users
+                </Link>
+                <Link
+                  href="/admin/jobs"
+                  className="text-white hover:text-blue-200 font-medium"
+                >
+                  Jobs
+                </Link>
+                <Link
+                  href="/admin/payments"
+                  className="text-white hover:text-blue-200 font-medium"
+                >
+                  Payments
+                </Link>
+                <Link
+                  href="/admin/reviews"
+                  className="text-white hover:text-blue-200 font-medium"
+                >
+                  Reviews
+                </Link>
+              </nav>
+            ) : (
+              <nav className="hidden lg:flex space-x-6" aria-label="Primary">
+                <Link
+                  href="/"
+                  className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                  aria-current={pathname === "/" ? "page" : undefined}
+                >
+                  {t("navigation.home")}
+                </Link>
+                <Link
+                  href="/about"
+                  className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                  aria-current={pathname === "/about" ? "page" : undefined}
+                >
+                  {t("navigation.about")}
+                </Link>
+                <Link
+                  href="/services"
+                  className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                >
+                  {t("navigation.services")}
+                </Link>
+                <Link
+                  href="/clients"
+                  className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                >
+                  {t("navigation.clients")}
+                </Link>
+                <Link
+                  href="/jobs"
+                  className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                >
+                  {t("navigation.jobs")}
+                </Link>
+                <Link
+                  href="/contact"
+                  className="text-white hover:text-blue-200 font-medium transform hover:scale-105 transition duration-150 ease-in-out"
+                >
+                  {t("navigation.contact")}
+                </Link>
+              </nav>
+            )}
           </div>
 
           {user ? (

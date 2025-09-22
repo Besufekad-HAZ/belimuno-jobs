@@ -980,6 +980,12 @@
     "recentUsers": {
       "title": "Fayyadamtoota Duraanii",
       "viewAll": "Hunda Ilali",
+      "tags": {
+        "verified": "Mirkanaa'e",
+        "unverified": "Hin mirkanaa'in",
+        "active": "Sochii keessa",
+        "inactive": "Hojii dhiisuu"
+      },
       "buttons": {
         "verify": "Mirkaneessuu"
       }

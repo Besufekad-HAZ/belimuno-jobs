@@ -40,6 +40,7 @@ interface RecentUser {
   email: string;
   role: string;
   isVerified?: boolean;
+  isActive?: boolean;
   profile?: { verified?: boolean };
   createdAt: string;
 }
@@ -89,7 +90,7 @@ const AdminDashboard: React.FC = () => {
           adminAPI.getUsers({
             limit: 5,
             sort: "-createdAt",
-            select: "name email role isVerified createdAt",
+            select: "name email role isVerified isActive createdAt",
           }),
           // Fetch recent jobs for the list
           adminAPI.getAllJobs({
@@ -429,12 +430,46 @@ const AdminDashboard: React.FC = () => {
                   key={user._id}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
-                  <div>
-                    <p className="font-medium text-gray-900">{user.name}</p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                    <p className="text-xs text-gray-400 capitalize">
-                      {user.role.replace("_", " ")}
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 truncate">
+                      {user.name}
                     </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {user.email}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      <Badge
+                        variant={
+                          user.role === "super_admin"
+                            ? "purple"
+                            : user.role === "admin_hr" ||
+                                user.role === "admin_outsource"
+                              ? "blue"
+                              : user.role === "worker"
+                                ? "teal"
+                                : "orange"
+                        }
+                        size="sm"
+                      >
+                        {user.role.replace("_", " ")}
+                      </Badge>
+                      <Badge
+                        variant={user.isVerified ? "success" : "gray"}
+                        size="sm"
+                      >
+                        {user.isVerified
+                          ? t("recentUsers.tags.verified")
+                          : t("recentUsers.tags.unverified")}
+                      </Badge>
+                      <Badge
+                        variant={user.isActive === false ? "danger" : "success"}
+                        size="sm"
+                      >
+                        {user.isActive === false
+                          ? t("recentUsers.tags.inactive")
+                          : t("recentUsers.tags.active")}
+                      </Badge>
+                    </div>
                   </div>
                   {user.role === "worker" && !user.isVerified && (
                     <Button

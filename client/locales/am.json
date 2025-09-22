@@ -980,6 +980,12 @@
     "recentUsers": {
       "title": "የቅርብ ጊዜ ተጠቃሚዎች",
       "viewAll": "ሁሉንም ይመልከቱ",
+      "tags": {
+        "verified": "የተረጋገጠ",
+        "unverified": "ያልተረጋገጠ",
+        "active": "ንቁ",
+        "inactive": "የተሰናከለ"
+      },
       "buttons": {
         "verify": "ያረጋግጡ"
       }
