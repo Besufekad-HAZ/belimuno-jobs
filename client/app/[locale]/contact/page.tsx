@@ -107,7 +107,7 @@ const ContactPage: React.FC = () => {
               </div>
             </form>
           </Card>
-          <Card className="p-6">
+          <Card className="p-6 self-start">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               {t("office.title")}
             </h2>
