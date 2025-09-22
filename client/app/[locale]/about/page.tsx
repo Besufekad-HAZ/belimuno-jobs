@@ -10,6 +10,7 @@ import {
   Mail,
   Send,
   Phone,
+  Briefcase,
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -307,37 +308,33 @@ const AboutPage: React.FC = () => {
 
           <div className="text-center">
             <Link href="/clients">
-              <Button>{t("clients.viewButton")}</Button>
+              <Button variant="secondary" size="lg" className="px-8">
+                <Users className="h-5 w-5" /> {t("clients.viewButton")}
+              </Button>
             </Link>
           </div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-600 text-white relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-300 rounded-full translate-x-48 translate-y-48"></div>
-        </div>
-
+      <section className="py-20 bg-gradient-to-r from-blue-50 via-white to-cyan-50 text-gray-900 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <h2 className="text-4xl font-bold mb-6 leading-tight">
             {t("cta.title")}
           </h2>
-          <p className="text-xl text-cyan-100 font-medium mb-10 leading-relaxed max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 font-medium mb-10 leading-relaxed max-w-3xl mx-auto">
             {t("cta.subtitle")}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
             <Link href="/contact">
-              <Button className="bg-black text-blue-800 hover:bg-cyan-50 hover:scale-105 hover:text-black transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
-                {t("cta.buttons.contact")}
+              <Button variant="primary" size="lg" className="px-8">
+                <Mail className="h-5 w-5" /> {t("cta.buttons.contact")}
               </Button>
             </Link>
             <Link href="/jobs">
-              <Button className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-800 hover:scale-105 transition-all duration-300 px-10 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-white/20">
-                {t("cta.buttons.jobs")}
+              <Button variant="outline" size="lg" className="px-8">
+                <Briefcase className="h-5 w-5" /> {t("cta.buttons.jobs")}
               </Button>
             </Link>
           </div>
@@ -346,17 +343,17 @@ const AboutPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             <a
               href="mailto:info@belimunojobs.com"
-              className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 group"
+              className="flex items-center justify-center gap-3 bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all duration-300 group"
               aria-label="Email Belimuno Jobs"
             >
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 text-white">
+              <div className="w-10 h-10 bg-blue-50 text-blue-700 border border-blue-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Mail className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-gray-900">
                   {t("cta.contact.email.title")}
                 </p>
-                <p className="text-cyan-200 text-sm">info@belimunojobs.com</p>
+                <p className="text-gray-600 text-sm">info@belimunojobs.com</p>
               </div>
             </a>
 
@@ -364,26 +361,26 @@ const AboutPage: React.FC = () => {
               href="https://t.me/belimunojobs"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 transition-all duration-300 group"
+              className="flex items-center justify-center gap-3 bg-white border border-slate-200 rounded-lg p-4 hover:shadow-md transition-all duration-300 group"
               aria-label="Open Belimuno Jobs Telegram"
             >
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 text-white">
+              <div className="w-10 h-10 bg-cyan-50 text-cyan-700 border border-cyan-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Send className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-gray-900">
                   {t("cta.contact.telegram.title")}
                 </p>
-                <p className="text-cyan-200 text-sm">@belimunojobs</p>
+                <p className="text-gray-600 text-sm">@belimunojobs</p>
               </div>
             </a>
 
-            <div className="flex items-center justify-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 text-white">
+            <div className="flex items-center justify-center gap-3 bg-white border border-slate-200 rounded-lg p-4">
+              <div className="w-10 h-10 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                 <Phone className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-gray-900">
                   {t("cta.contact.phone.title")}
                 </p>
                 {[
@@ -395,10 +392,10 @@ const AboutPage: React.FC = () => {
                   <a
                     key={phone}
                     href={`tel:${phone.replace(/\s/g, "")}`}
-                    className="block hover:bg-white/20 transition-all duration-300"
+                    className="block rounded hover:bg-slate-50 transition-all duration-200"
                     aria-label={`Call Belimuno Jobs at ${phone}`}
                   >
-                    <p className="text-cyan-200 text-sm">{phone}</p>
+                    <span className="text-gray-600 text-sm">{phone}</span>
                   </a>
                 ))}
               </div>
