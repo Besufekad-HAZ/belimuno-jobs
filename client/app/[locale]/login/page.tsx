@@ -8,8 +8,15 @@ import { setAuth, getRoleDashboardPath } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useTranslations } from "next-intl";
-import { Formik, Form, Field, FormikProps, FormikHelpers, FieldProps } from 'formik';
-import * as Yup from 'yup';
+import {
+  Formik,
+  Form,
+  Field,
+  FormikProps,
+  FormikHelpers,
+  FieldProps,
+} from "formik";
+import * as Yup from "yup";
 
 type GoogleIdentity = {
   accounts?: {
@@ -41,18 +48,23 @@ const LoginPage: React.FC = () => {
   const t = useTranslations("LoginPage");
 
   const LoginSchema = Yup.object().shape({
-    email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().required('Password is required'),
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    password: Yup.string().required("Password is required"),
   });
 
   interface LoginFormValues {
     email: string;
     password: string;
+    remember: boolean;
   }
 
   const handleSubmit = async (
     values: LoginFormValues,
-    { setSubmitting, setFieldError, setFieldTouched }: FormikHelpers<LoginFormValues>
+    {
+      setSubmitting,
+      setFieldError,
+      setFieldTouched,
+    }: FormikHelpers<LoginFormValues>,
   ) => {
     setLoading(true);
     setError("");
@@ -62,6 +74,18 @@ const LoginPage: React.FC = () => {
       const { token, user } = response.data;
 
       setAuth(token, user);
+      // Persist remembered email based on user preference
+      try {
+        if (typeof window !== "undefined") {
+          if (values.remember) {
+            window.localStorage.setItem("rememberedEmail", values.email);
+          } else {
+            window.localStorage.removeItem("rememberedEmail");
+          }
+        }
+      } catch {
+        // ignore storage errors
+      }
       // Notify all tabs and components
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("authChanged"));
@@ -85,36 +109,44 @@ const LoginPage: React.FC = () => {
       const status = error.response?.status;
       const url = error.config?.url || error.response?.config?.url;
       const serverMsg = error.response?.data?.message;
-      const msg = (typeof serverMsg === 'string' ? serverMsg : '') || t("errors.default");
+      const msg =
+        (typeof serverMsg === "string" ? serverMsg : "") || t("errors.default");
       const lower = msg.toLowerCase();
 
       // Prefer field-level feedback for login endpoint
-      if (typeof url === 'string' && url.includes('/auth/login')) {
+      if (typeof url === "string" && url.includes("/auth/login")) {
         if (status && [400, 401, 404, 422].includes(status)) {
-          if (lower.includes('password')) {
-            setFieldError('password', serverMsg || 'Incorrect password.');
-            setFieldTouched('password', true, false);
-            setError('');
+          if (lower.includes("password")) {
+            setFieldError("password", serverMsg || "Incorrect password.");
+            setFieldTouched("password", true, false);
+            setError("");
             // Focus password field for convenience
-            const pwdEl = document.querySelector<HTMLInputElement>('input[name="password"]');
+            const pwdEl = document.querySelector<HTMLInputElement>(
+              'input[name="password"]',
+            );
             pwdEl?.focus();
-          } else if (lower.includes('email') || lower.includes('account')) {
-            setFieldError('email', serverMsg || 'No account found with this email.');
-            setFieldTouched('email', true, false);
-            setError('');
+          } else if (lower.includes("email") || lower.includes("account")) {
+            setFieldError(
+              "email",
+              serverMsg || "No account found with this email.",
+            );
+            setFieldTouched("email", true, false);
+            setError("");
             // Focus email field for convenience
-            const emailEl = document.querySelector<HTMLInputElement>('input[name="email"]');
+            const emailEl = document.querySelector<HTMLInputElement>(
+              'input[name="email"]',
+            );
             emailEl?.focus();
-          } else if (lower.includes('deactivated')) {
+          } else if (lower.includes("deactivated")) {
             // account state issues: show a banner
             setError(msg);
           } else {
             // Generic unauthorized
-            setFieldError('email', ' ');
-            setFieldError('password', ' ');
-            setFieldTouched('email', true, false);
-            setFieldTouched('password', true, false);
-            setError(t('errors.default'));
+            setFieldError("email", " ");
+            setFieldError("password", " ");
+            setFieldTouched("email", true, false);
+            setFieldTouched("password", true, false);
+            setError(t("errors.default"));
           }
         } else {
           // Non-401: show banner with server message
@@ -145,6 +177,24 @@ const LoginPage: React.FC = () => {
     s.id = "google-identity";
     s.onload = () => setGoogleReady(true);
     document.body.appendChild(s);
+  }, []);
+
+  // Remembered email (optional UX): prefill if saved previously
+  const [initialEmail, setInitialEmail] = useState("");
+  const [initialRemember, setInitialRemember] = useState(false);
+  useEffect(() => {
+    try {
+      const remembered =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("rememberedEmail")
+          : null;
+      if (remembered) {
+        setInitialEmail(remembered);
+        setInitialRemember(true);
+      }
+    } catch {
+      // ignore storage errors
+    }
   }, []);
 
   // Initialize and render Google Sign-In button
@@ -225,10 +275,14 @@ const LoginPage: React.FC = () => {
 
   const fillTestAccount = (email: string, password: string) => {
     if (formikRef.current) {
-      formikRef.current.setValues({ email, password });
+      formikRef.current.setValues({ email, password, remember: true });
       // Clear any previous errors/touched when selecting a test account
       formikRef.current.setErrors({});
-      formikRef.current.setTouched({ email: false, password: false });
+      formikRef.current.setTouched({
+        email: false,
+        password: false,
+        remember: true,
+      });
     }
   };
 
@@ -279,7 +333,7 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Auth Tabs */}
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl lg:max-w-3xl">
           <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex">
             <Link href="/login" className="flex-1">
               <div className="text-center py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">
@@ -295,22 +349,31 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Main Form Card */}
-        <div className="mt-6 sm:mt-10 mx-auto w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="mt-6 sm:mt-10 mx-auto w-full sm:max-w-2xl lg:max-w-3xl">
+          <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100 ring-1 ring-blue-50 overflow-hidden">
+            <div className="h-1 w-full bg-gradient-to-r from-blue-600 via-sky-500 to-indigo-600" />
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               {/* Email/Password Sign-In */}
 
               <Formik
                 innerRef={formikRef}
-                initialValues={{ email: '', password: '' }}
+                enableReinitialize
+                initialValues={{
+                  email: initialEmail,
+                  password: "",
+                  remember: initialRemember,
+                }}
                 validationSchema={LoginSchema}
                 onSubmit={handleSubmit}
               >
-
-                {({ isSubmitting }) => (
+                {({ isSubmitting, values }) => (
                   <Form className="space-y-6">
                     {error && (
-                      <div role="alert" aria-live="polite" className="error-banner animate-shake">
+                      <div
+                        role="alert"
+                        aria-live="polite"
+                        className="error-banner animate-shake"
+                      >
                         <span aria-hidden="true" className="error-accent" />
                         <button
                           type="button"
@@ -318,14 +381,31 @@ const LoginPage: React.FC = () => {
                           aria-label="Dismiss"
                           onClick={() => setError("")}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                            <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-4 h-4"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                           <span className="sr-only">Dismiss</span>
                         </button>
                         <div className="flex items-center">
-                          <svg className="w-5 h-5 mr-2 icon" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          <svg
+                            className="w-5 h-5 mr-2 icon"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
                           </svg>
                           <span className="font-medium">{error}</span>
                         </div>
@@ -344,12 +424,11 @@ const LoginPage: React.FC = () => {
                               autoComplete="email"
                               required
                               error={meta.error}
-                              className={`transition-all duration-200 focus:scale-[1.02] ${meta.error ? 'animate-shake error-ring' : ''}`}
+                              className={`rounded-xl border-gray-200 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${meta.error ? "animate-shake error-ring" : ""}`}
                             />
                           )}
                         </Field>
                       </div>
-
                       <div>
                         <Field name="password">
                           {({ field, meta }: FieldProps) => (
@@ -361,20 +440,43 @@ const LoginPage: React.FC = () => {
                               autoComplete="current-password"
                               required
                               error={meta.error}
-                              className={`transition-all duration-200 focus:scale-[1.02] ${meta.error ? 'animate-shake error-ring' : ''}`}
+                              className={`rounded-xl border-gray-200 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${meta.error ? "animate-shake error-ring" : ""}`}
                             />
                           )}
                         </Field>
                       </div>
-                    </div>
-
-                    <div className="text-right">
-                      <Link
-                        href="/forgot-password"
-                        className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
-                      >
-                        Forgot your password?
-                      </Link>
+                      <div className="flex items-center justify-between">
+                        <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                          <Field name="remember">
+                            {({ field }: FieldProps) => (
+                              <>
+                                <input
+                                  type="checkbox"
+                                  className="sr-only"
+                                  {...field}
+                                />
+                                <span
+                                  className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${values.remember ? "bg-blue-600" : "bg-gray-300"}`}
+                                  aria-hidden="true"
+                                >
+                                  <span
+                                    className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transform transition-transform ${values.remember ? "translate-x-4" : ""}`}
+                                  />
+                                </span>
+                                <span className="text-sm text-gray-600">
+                                  Remember me
+                                </span>
+                              </>
+                            )}
+                          </Field>
+                        </label>
+                        <Link
+                          href="/forgot-password"
+                          className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
+                        >
+                          Forgot your password?
+                        </Link>
+                      </div>
                     </div>
 
                     <Button
@@ -390,25 +492,46 @@ const LoginPage: React.FC = () => {
                 )}
               </Formik>
 
-                {/* OR Divider */}
-                <div className="relative my-6">
-                  <div
-                    className="absolute inset-0 flex items-center"
-                    aria-hidden="true"
-                  >
-                    <div className="w-full border-t border-gray-200" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">
-                      {t("form.divider")}
-                    </span>
-                  </div>
+              {/* OR Divider */}
+              <div className="relative my-6">
+                <div
+                  className="absolute inset-0 flex items-center"
+                  aria-hidden="true"
+                >
+                  <div className="w-full border-t border-gray-200" />
                 </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">
+                    {t("form.divider")}
+                  </span>
+                </div>
+              </div>
 
-                {/* Google Sign-In */}
-                <div className="flex justify-center">
-                  <div ref={googleBtnRef} />
-                </div>
+              {/* Google Sign-In */}
+              <div className="flex justify-center">
+                <div
+                  ref={googleBtnRef}
+                  className="shadow-sm hover:shadow-md transition-shadow rounded-md"
+                />
+              </div>
+              <div className="mt-4 flex items-center justify-center text-xs text-gray-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4 text-green-600 mr-2"
+                >
+                  <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                  <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M4 21v-2a4 4 0 0 1 3-3.87" />
+                  <path d="M7 7a5 5 0 0 1 10 0v4a5 5 0 0 1-10 0V7z" />
+                </svg>
+                <span>Secure login — your credentials are encrypted</span>
+              </div>
             </div>
 
             {/* Test Accounts Section */}
@@ -421,7 +544,7 @@ const LoginPage: React.FC = () => {
                 <div className="flex-1 border-t border-gray-200"></div>
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {testAccounts.map((account, index) => (
                   <button
                     key={index}
