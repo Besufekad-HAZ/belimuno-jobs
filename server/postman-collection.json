@@ -1,1312 +1,1326 @@
 {
-  "info": {
-    "name": "Belimuno Jobs API",
-    "description": "Complete API collection for testing all endpoints",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{authToken}}",
-        "type": "string"
-      }
-    ]
-  },
-  "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:5000/api",
-      "type": "string"
-    },
-    {
-      "key": "authToken",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "userId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "jobId",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "applicationId",
-      "value": "",
-      "type": "string"
-    }
-  ],
-  "item": [
-    {
-      "name": "1. Health Check",
-      "item": [
-        {
-          "name": "API Health Check",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["health"]
-            }
-          }
-        },
-        {
-          "name": "API Info",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/",
-              "host": ["{{baseUrl}}"],
-              "path": [""]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "2. Authentication",
-      "item": [
-        {
-          "name": "Register Super Admin",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('adminToken', pm.response.json().token);",
-                  "    pm.environment.set('adminUserId', pm.response.json().user._id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Super Admin\",\n  \"email\": \"admin@belimuno.com\",\n  \"password\": \"SuperAdmin123!\",\n  \"role\": \"super_admin\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register"]
-            }
-          }
-        },
-        {
-          "name": "Register Worker",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('workerToken', pm.response.json().token);",
-                  "    pm.environment.set('workerUserId', pm.response.json().user._id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"worker@belimuno.com\",\n  \"password\": \"Worker123!\",\n  \"role\": \"worker\",\n  \"phone\": \"+251911234567\",\n  \"region\": \"507f1f77bcf86cd799439011\",\n  \"workerProfile\": {\n    \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\"],\n    \"experience\": \"intermediate\",\n    \"hourlyRate\": 25,\n    \"availability\": \"freelance\",\n    \"portfolio\": [\"https://github.com/johndoe\"],\n    \"languages\": [\"English\", \"Amharic\"]\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register"]
-            }
-          }
-        },
-        {
-          "name": "Register Client",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('clientToken', pm.response.json().token);",
-                  "    pm.environment.set('clientUserId', pm.response.json().user._id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Tech Solutions Ltd\",\n  \"email\": \"client@belimuno.com\",\n  \"password\": \"Client123!\",\n  \"role\": \"client\",\n  \"phone\": \"+251911234568\",\n  \"region\": \"507f1f77bcf86cd799439011\",\n  \"clientProfile\": {\n    \"companyName\": \"Tech Solutions Ltd\",\n    \"industry\": \"Technology\",\n    \"website\": \"https://techsolutions.et\"\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register"]
-            }
-          }
-        },
-        {
-          "name": "Login Super Admin",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('adminToken', pm.response.json().token);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@belimuno.com\",\n  \"password\": \"SuperAdmin123!\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
-            }
-          }
-        },
-        {
-          "name": "Login Client",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('clientToken', pm.response.json().token);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"client@belimuno.com\",\n  \"password\": \"Client123!\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
-            }
-          }
-        },
-        {
-          "name": "Login Worker",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('workerToken', pm.response.json().token);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"worker@belimuno.com\",\n  \"password\": \"Worker123!\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
-            }
-          }
-        },
-        {
-          "name": "Get Profile",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/auth/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "me"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "3. Jobs (Public)",
-      "item": [
-        {
-          "name": "Get All Jobs",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/jobs",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs"]
-            }
-          }
-        },
-        {
-          "name": "Get Job Categories",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/jobs/categories",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs", "categories"]
-            }
-          }
-        },
-        {
-          "name": "Search Jobs",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/jobs/search?q=web development",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs", "search"],
-              "query": [
-                {
-                  "key": "q",
-                  "value": "web development"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Job Stats",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/jobs/stats",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs", "stats"]
-            }
-          }
-        },
-        {
-          "name": "Get Single Job",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/jobs/{{jobId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs", "{{jobId}}"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "4. Client Portal",
-      "item": [
-        {
-          "name": "Client Dashboard",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/client/dashboard",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "dashboard"]
-            }
-          }
-        },
-        {
-          "name": "Create Job",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('jobId', pm.response.json().data._id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"E-commerce Website Development\",\n  \"description\": \"Build a modern e-commerce website with React and Node.js. Should include user authentication, product catalog, shopping cart, and payment integration.\",\n  \"category\": \"Technology\",\n  \"subcategory\": \"Web Development\",\n  \"budget\": 5000,\n  \"budgetType\": \"fixed\",\n  \"deadline\": \"2024-03-15T00:00:00.000Z\",\n  \"region\": \"507f1f77bcf86cd799439011\",\n  \"requiredSkills\": [\"React\", \"Node.js\", \"MongoDB\", \"JavaScript\", \"Express\"],\n  \"experienceLevel\": \"intermediate\",\n  \"priority\": \"high\",\n  \"estimatedHours\": 200,\n  \"tags\": [\"urgent\", \"ecommerce\", \"fullstack\"]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs"]
-            }
-          }
-        },
-        {
-          "name": "Get Client Jobs",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs"]
-            }
-          }
-        },
-        {
-          "name": "Get Single Job with Applications",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs/{{jobId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs", "{{jobId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Job",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"E-commerce Website Development (Updated)\",\n  \"description\": \"Build a modern e-commerce website with React and Node.js. Updated requirements include mobile responsiveness and SEO optimization.\",\n  \"priority\": \"urgent\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs/{{jobId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs", "{{jobId}}"]
-            }
-          }
-        },
-        {
-          "name": "Accept Application",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"notes\": \"Great proposal! Looking forward to working with you.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs/{{jobId}}/applications/{{applicationId}}/accept",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs", "{{jobId}}", "applications", "{{applicationId}}", "accept"]
-            }
-          }
-        },
-        {
-          "name": "Reject Application",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Thank you for your interest, but we've decided to go with another candidate.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs/{{jobId}}/applications/{{applicationId}}/reject",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs", "{{jobId}}", "applications", "{{applicationId}}", "reject"]
-            }
-          }
-        },
-        {
-          "name": "Request Revision",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Please add mobile responsiveness and improve the checkout flow.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs/{{jobId}}/request-revision",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs", "{{jobId}}", "request-revision"]
-            }
-          }
-        },
-        {
-          "name": "Mark Job Completed",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"rating\": 5,\n  \"review\": \"Excellent work! Delivered on time and exceeded expectations.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/client/jobs/{{jobId}}/complete",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "jobs", "{{jobId}}", "complete"]
-            }
-          }
-        },
-        {
-          "name": "Get Client Payments",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/client/payments",
-              "host": ["{{baseUrl}}"],
-              "path": ["client", "payments"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "5. Worker Portal",
-      "item": [
-        {
-          "name": "Worker Dashboard",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/worker/dashboard",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "dashboard"]
-            }
-          }
-        },
-        {
-          "name": "Apply for Job",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "if (pm.response.json().success) {",
-                  "    pm.environment.set('applicationId', pm.response.json().data._id);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"proposal\": \"I am excited to work on your e-commerce project. With 5+ years of experience in React and Node.js, I can deliver a high-quality, scalable solution. I've built similar platforms before and understand the complexities of payment integration and user management.\",\n  \"proposedBudget\": 4800,\n  \"estimatedDuration\": \"6-8 weeks\",\n  \"coverLetter\": \"I specialize in full-stack JavaScript development and have extensive experience with e-commerce platforms. I can provide you with a modern, responsive, and secure solution.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/jobs/{{jobId}}/apply",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs", "{{jobId}}", "apply"]
-            }
-          }
-        },
-        {
-          "name": "Get Worker Jobs",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/worker/jobs",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "jobs"]
-            }
-          }
-        },
-        {
-          "name": "Get Single Worker Job",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/worker/jobs/{{jobId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "jobs", "{{jobId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Job Status",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"in_progress\",\n  \"progressPercentage\": 25,\n  \"updateMessage\": \"Started working on the project. Completed initial setup and database design.\",\n  \"attachments\": [\"https://example.com/progress-screenshot.png\"]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/worker/jobs/{{jobId}}/status",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "jobs", "{{jobId}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "Get Worker Applications",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/worker/applications",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "applications"]
-            }
-          }
-        },
-        {
-          "name": "Withdraw Application",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/worker/applications/{{applicationId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "applications", "{{applicationId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Worker Profile",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"workerProfile\": {\n    \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\", \"TypeScript\", \"AWS\"],\n    \"hourlyRate\": 30,\n    \"bio\": \"Full-stack developer with 5+ years experience building scalable web applications.\",\n    \"portfolio\": [\"https://github.com/johndoe\", \"https://johndoe.dev\"]\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/worker/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "profile"]
-            }
-          }
-        },
-        {
-          "name": "Get Worker Earnings",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/worker/earnings",
-              "host": ["{{baseUrl}}"],
-              "path": ["worker", "earnings"]
-            }
-          }
-        },
-        {
-          "name": "Get Recommended Jobs",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{workerToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/jobs/recommended",
-              "host": ["{{baseUrl}}"],
-              "path": ["jobs", "recommended"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "6. Super Admin Portal",
-      "item": [
-        {
-          "name": "Admin Dashboard",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/dashboard",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "dashboard"]
-            }
-          }
-        },
-        {
-          "name": "Get All Users",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/users?role=worker&isVerified=false",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users"],
-              "query": [
-                {
-                  "key": "role",
-                  "value": "worker"
-                },
-                {
-                  "key": "isVerified",
-                  "value": "false"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Single User",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/users/{{workerUserId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users", "{{workerUserId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update User",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"isVerified\": true,\n  \"isActive\": true\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/users/{{workerUserId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users", "{{workerUserId}}"]
-            }
-          }
-        },
-        {
-          "name": "Verify Worker (Admin)",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/verify-worker/{{workerUserId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "verify-worker", "{{workerUserId}}"]
-            }
-          }
-        },
-        {
-          "name": "Get All Jobs (Admin)",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/jobs",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "jobs"]
-            }
-          }
-        },
-        {
-          "name": "Get Performance Metrics (Admin)",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/performance?period=90d",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "performance"],
-              "query": [
-                {
-                  "key": "period",
-                  "value": "90d"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Payments",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/admin/payments",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "payments"]
-            }
-          }
-        },
-        {
-          "name": "Handle Payment Dispute",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"resolution\": \"After thorough investigation, payment will be released to the worker.\",\n  \"action\": \"release\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/payments/{{paymentId}}/dispute",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "payments", "{{paymentId}}", "dispute"]
-            }
-          }
-        },
-        {
-          "name": "Deactivate User",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Violation of terms of service\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/admin/users/{{userId}}/deactivate",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users", "{{userId}}", "deactivate"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "7. Notifications",
-      "item": [
-        {
-          "name": "Get Notifications",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/notifications",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications"]
-            }
-          }
-        },
-        {
-          "name": "Get Notification Stats",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/notifications/stats",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications", "stats"]
-            }
-          }
-        },
-        {
-          "name": "Mark Notification as Read",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications", "{{notificationId}}", "read"]
-            }
-          }
-        },
-        {
-          "name": "Mark All Notifications as Read",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/notifications/read-all",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications", "read-all"]
-            }
-          }
-        },
-        {
-          "name": "Delete Notification",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{clientToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/notifications/{{notificationId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["notifications", "{{notificationId}}"]
-            }
-          }
-        }
-      ]
-    }
-  ]
+	"info": {
+		"name": "Belimuno Jobs API",
+		"description": "Complete API collection for testing all endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5001/api",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "jobId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "applicationId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Health Check",
+			"item": [
+				{
+					"name": "API Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						}
+					}
+				},
+				{
+					"name": "API Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": ["{{baseUrl}}"],
+							"path": [""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Authentication",
+			"item": [
+				{
+					"name": "Register Super Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('adminToken', pm.response.json().token);",
+									"    pm.environment.set('adminUserId', pm.response.json().user._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Super Admin\",\n  \"email\": \"admin@belimuno.com\",\n  \"password\": \"SuperAdmin123!\",\n  \"role\": \"super_admin\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Register Worker",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('workerToken', pm.response.json().token);",
+									"    pm.environment.set('workerUserId', pm.response.json().user._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"worker@belimuno.com\",\n  \"password\": \"Worker123!\",\n  \"role\": \"worker\",\n  \"phone\": \"+251911234567\",\n  \"region\": \"507f1f77bcf86cd799439011\",\n  \"workerProfile\": {\n    \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\"],\n    \"experience\": \"intermediate\",\n    \"hourlyRate\": 25,\n    \"availability\": \"freelance\",\n    \"portfolio\": [\"https://github.com/johndoe\"],\n    \"languages\": [\"English\", \"Amharic\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Register Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('clientToken', pm.response.json().token);",
+									"    pm.environment.set('clientUserId', pm.response.json().user._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Tech Solutions Ltd\",\n  \"email\": \"client@belimuno.com\",\n  \"password\": \"Client123!\",\n  \"role\": \"client\",\n  \"phone\": \"+251911234568\",\n  \"region\": \"507f1f77bcf86cd799439011\",\n  \"clientProfile\": {\n    \"companyName\": \"Tech Solutions Ltd\",\n    \"industry\": \"Technology\",\n    \"website\": \"https://techsolutions.et\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login Super Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('adminToken', pm.response.json().token);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@belimuno.com\",\n  \"password\": \"SuperAdmin123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login Client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('clientToken', pm.response.json().token);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"client@belimuno.com\",\n  \"password\": \"Client123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login Worker",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('workerToken', pm.response.json().token);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"worker@belimuno.com\",\n  \"password\": \"Worker123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Get Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Jobs (Public)",
+			"item": [
+				{
+					"name": "Get All Jobs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs",
+							"host": ["{{baseUrl}}"],
+							"path": ["jobs"]
+						}
+					}
+				},
+				{
+					"name": "Get Job Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs/categories",
+							"host": ["{{baseUrl}}"],
+							"path": ["jobs", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Search Jobs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs/search?q=web development",
+							"host": ["{{baseUrl}}"],
+							"path": ["jobs", "search"],
+							"query": [
+								{
+									"key": "q",
+									"value": "web development"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Job Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["jobs", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Job",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs/{{jobId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["jobs", "{{jobId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Client Portal",
+			"item": [
+				{
+					"name": "Client Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/client/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "dashboard"]
+						}
+					}
+				},
+				{
+					"name": "Create Job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('jobId', pm.response.json().data._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"E-commerce Website Development\",\n  \"description\": \"Build a modern e-commerce website with React and Node.js. Should include user authentication, product catalog, shopping cart, and payment integration.\",\n  \"category\": \"Technology\",\n  \"subcategory\": \"Web Development\",\n  \"budget\": 5000,\n  \"budgetType\": \"fixed\",\n  \"deadline\": \"2024-03-15T00:00:00.000Z\",\n  \"region\": \"507f1f77bcf86cd799439011\",\n  \"requiredSkills\": [\"React\", \"Node.js\", \"MongoDB\", \"JavaScript\", \"Express\"],\n  \"experienceLevel\": \"intermediate\",\n  \"priority\": \"high\",\n  \"estimatedHours\": 200,\n  \"tags\": [\"urgent\", \"ecommerce\", \"fullstack\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "jobs"]
+						}
+					}
+				},
+				{
+					"name": "Get Client Jobs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "jobs"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Job with Applications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs/{{jobId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "jobs", "{{jobId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Job",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"E-commerce Website Development (Updated)\",\n  \"description\": \"Build a modern e-commerce website with React and Node.js. Updated requirements include mobile responsiveness and SEO optimization.\",\n  \"priority\": \"urgent\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs/{{jobId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "jobs", "{{jobId}}"]
+						}
+					}
+				},
+				{
+					"name": "Accept Application",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"notes\": \"Great proposal! Looking forward to working with you.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs/{{jobId}}/applications/{{applicationId}}/accept",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"client",
+								"jobs",
+								"{{jobId}}",
+								"applications",
+								"{{applicationId}}",
+								"accept"
+							]
+						}
+					}
+				},
+				{
+					"name": "Reject Application",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Thank you for your interest, but we've decided to go with another candidate.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs/{{jobId}}/applications/{{applicationId}}/reject",
+							"host": ["{{baseUrl}}"],
+							"path": [
+								"client",
+								"jobs",
+								"{{jobId}}",
+								"applications",
+								"{{applicationId}}",
+								"reject"
+							]
+						}
+					}
+				},
+				{
+					"name": "Request Revision",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Please add mobile responsiveness and improve the checkout flow.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs/{{jobId}}/request-revision",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "jobs", "{{jobId}}", "request-revision"]
+						}
+					}
+				},
+				{
+					"name": "Mark Job Completed",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rating\": 5,\n  \"review\": \"Excellent work! Delivered on time and exceeded expectations.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/client/jobs/{{jobId}}/complete",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "jobs", "{{jobId}}", "complete"]
+						}
+					}
+				},
+				{
+					"name": "Get Client Payments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/client/payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["client", "payments"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Worker Portal",
+			"item": [
+				{
+					"name": "Worker Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/worker/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "dashboard"]
+						}
+					}
+				},
+				{
+					"name": "Apply for Job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.json().success) {",
+									"    pm.environment.set('applicationId', pm.response.json().data._id);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"proposal\": \"I am excited to work on your e-commerce project. With 5+ years of experience in React and Node.js, I can deliver a high-quality, scalable solution. I've built similar platforms before and understand the complexities of payment integration and user management.\",\n  \"proposedBudget\": 4800,\n  \"estimatedDuration\": \"6-8 weeks\",\n  \"coverLetter\": \"I specialize in full-stack JavaScript development and have extensive experience with e-commerce platforms. I can provide you with a modern, responsive, and secure solution.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/jobs/{{jobId}}/apply",
+							"host": ["{{baseUrl}}"],
+							"path": ["jobs", "{{jobId}}", "apply"]
+						}
+					}
+				},
+				{
+					"name": "Get Worker Jobs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/worker/jobs",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "jobs"]
+						}
+					}
+				},
+				{
+					"name": "Get Single Worker Job",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/worker/jobs/{{jobId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "jobs", "{{jobId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Job Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"in_progress\",\n  \"progressPercentage\": 25,\n  \"updateMessage\": \"Started working on the project. Completed initial setup and database design.\",\n  \"attachments\": [\"https://example.com/progress-screenshot.png\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/worker/jobs/{{jobId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "jobs", "{{jobId}}", "status"]
+						}
+					}
+				},
+				{
+					"name": "Get Worker Applications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/worker/applications",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "applications"]
+						}
+					}
+				},
+				{
+					"name": "Withdraw Application",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/worker/applications/{{applicationId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "applications", "{{applicationId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Worker Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"workerProfile\": {\n    \"skills\": [\"JavaScript\", \"React\", \"Node.js\", \"MongoDB\", \"TypeScript\", \"AWS\"],\n    \"hourlyRate\": 30,\n    \"bio\": \"Full-stack developer with 5+ years experience building scalable web applications.\",\n    \"portfolio\": [\"https://github.com/johndoe\", \"https://johndoe.dev\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/worker/profile",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Get Worker Earnings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/worker/earnings",
+							"host": ["{{baseUrl}}"],
+							"path": ["worker", "earnings"]
+						}
+					}
+				},
+				{
+					"name": "Get Recommended Jobs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{workerToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/jobs/recommended",
+							"host": ["{{baseUrl}}"],
+							"path": ["jobs", "recommended"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Super Admin Portal",
+			"item": [
+				{
+					"name": "Admin Dashboard",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "dashboard"]
+						}
+					}
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users?role=worker&isVerified=false",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users"],
+							"query": [
+								{
+									"key": "role",
+									"value": "worker"
+								},
+								{
+									"key": "isVerified",
+									"value": "false"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Single User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{workerUserId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{workerUserId}}"]
+						}
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isVerified\": true,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{workerUserId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{workerUserId}}"]
+						}
+					}
+				},
+				{
+					"name": "Verify Worker (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/verify-worker/{{workerUserId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "verify-worker", "{{workerUserId}}"]
+						}
+					}
+				},
+				{
+					"name": "Get All Jobs (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/jobs",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "jobs"]
+						}
+					}
+				},
+				{
+					"name": "Get Performance Metrics (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/performance?period=90d",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "performance"],
+							"query": [
+								{
+									"key": "period",
+									"value": "90d"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Payments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/admin/payments",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "payments"]
+						}
+					}
+				},
+				{
+					"name": "Handle Payment Dispute",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resolution\": \"After thorough investigation, payment will be released to the worker.\",\n  \"action\": \"release\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/payments/{{paymentId}}/dispute",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "payments", "{{paymentId}}", "dispute"]
+						}
+					}
+				},
+				{
+					"name": "Deactivate User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{adminToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Violation of terms of service\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/users/{{userId}}/deactivate",
+							"host": ["{{baseUrl}}"],
+							"path": ["admin", "users", "{{userId}}", "deactivate"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Notifications",
+			"item": [
+				{
+					"name": "Get Notifications",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notifications",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications"]
+						}
+					}
+				},
+				{
+					"name": "Get Notification Stats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notifications/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Mark Notification as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications", "{{notificationId}}", "read"]
+						}
+					}
+				},
+				{
+					"name": "Mark All Notifications as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notifications/read-all",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications", "read-all"]
+						}
+					}
+				},
+				{
+					"name": "Delete Notification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{clientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/notifications/{{notificationId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications", "{{notificationId}}"]
+						}
+					}
+				}
+			]
+		}
+	]
 }

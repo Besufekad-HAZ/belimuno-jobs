@@ -31,7 +31,7 @@
         "part2": "Opportunities"
       },
       "description": "Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country. Join thousands of professionals building their careers.",
-      "getStarted": "Get Started",
+      "getStarted": "Register",
       "goToDashboard": "Go to Dashboard",
       "browseJobs": "Browse Jobs"
     },
@@ -65,6 +65,65 @@
       "step3": {
         "title": "Get Paid",
         "description": "Complete projects and receive secure payments through our platform"
+      }
+    },
+    "testimonials": {
+      "title": "What Our Users Say",
+      "subtitle": "Hear from professionals who have found success with Belimuno Jobs",
+      "testimonial1": {
+        "name": "Meron Tadesse",
+        "role": "Software Developer",
+        "company": "Tech Solutions Ethiopia",
+        "content": "Belimuno Jobs helped me find my dream job as a software developer. The platform is professional and the support team is amazing.",
+        "rating": 5
+      },
+      "testimonial2": {
+        "name": "Daniel Bekele",
+        "role": "Marketing Manager",
+        "company": "Digital Marketing Co.",
+        "content": "As a client, I've found excellent talent through Belimuno. The quality of workers and the ease of use makes it my go-to platform.",
+        "rating": 5
+      },
+      "testimonial3": {
+        "name": "Hanan Ahmed",
+        "role": "Graphic Designer",
+        "company": "Creative Agency",
+        "content": "The platform connected me with multiple clients and helped me build a steady income. Highly recommended for freelancers!",
+        "rating": 5
+      }
+    },
+    "regions": {
+      "title": "Regions Where We Operate",
+      "subtitle": "We connect talent with opportunities across Ethiopia's major regions",
+      "addisAbaba": {
+        "name": "Addis Ababa",
+        "description": "The capital and largest commercial hub with the highest concentration of opportunities",
+        "jobs": "500+ Active Jobs"
+      },
+      "oromia": {
+        "name": "Oromia",
+        "description": "Ethiopia's largest region with growing opportunities in agriculture and manufacturing",
+        "jobs": "200+ Active Jobs"
+      },
+      "amhara": {
+        "name": "Amhara",
+        "description": "Historic region with expanding infrastructure and development projects",
+        "jobs": "150+ Active Jobs"
+      },
+      "tigray": {
+        "name": "Tigray",
+        "description": "Northern region with opportunities in reconstruction and development",
+        "jobs": "80+ Active Jobs"
+      },
+      "snnp": {
+        "name": "SNNP",
+        "description": "Southern region with diverse opportunities in agriculture and tourism",
+        "jobs": "120+ Active Jobs"
+      },
+      "sidama": {
+        "name": "Sidama",
+        "description": "Coffee-growing region with opportunities in agriculture and processing",
+        "jobs": "60+ Active Jobs"
       }
     },
     "cta": {
@@ -672,25 +731,9 @@
             "client": "Client (Employer)"
           }
         },
-        "phone": "Phone",
-        "location": "Location",
-        "bio": {
-          "label": "Bio",
-          "placeholder": "Tell us about yourself..."
-        },
-        "worker": {
-          "skills": {
-            "label": "Skills (comma-separated)",
-            "placeholder": "e.g. JavaScript, React, Node.js"
-          },
-          "experience": "Years of Experience",
-          "hourlyRate": "Hourly Rate (ETB)"
-        },
-        "client": {
-          "company": "Company Name",
-          "industry": "Industry",
-          "website": "Website"
-        },
+        "company": "Company Name",
+        "industry": "Industry",
+        "website": "Website",
         "password": "Password",
         "confirmPassword": "Confirm Password"
       },

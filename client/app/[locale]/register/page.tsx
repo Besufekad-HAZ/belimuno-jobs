@@ -37,12 +37,7 @@ const RegisterPage: React.FC = () => {
     password: "",
     confirmPassword: "",
     role: "worker",
-    phone: "",
-    location: "",
-    bio: "",
-    skills: "",
-    experience: "",
-    hourlyRate: "",
+    // Client-specific fields
     company: "",
     industry: "",
     website: "",
@@ -121,39 +116,15 @@ const RegisterPage: React.FC = () => {
         }
         break;
 
-      case "phone":
-        const phoneRegex = /^(\+251|0)[1-9]\d{8}$/;
-        if (value && !phoneRegex.test(value)) {
-          errors.push(
-            "Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)",
-          );
-        }
-        break;
-
-      case "skills":
-        if (
-          formData.role === "worker" &&
-          (!value || value.trim().length === 0)
-        ) {
-          errors.push("Skills are required for workers");
-        }
-        break;
-
       case "company":
-        if (
-          formData.role === "client" &&
-          (!value || value.trim().length === 0)
-        ) {
-          errors.push("Company name is required for clients");
+        if (formData.role === "client" && (!value || value.trim().length < 2)) {
+          errors.push("Company name must be at least 2 characters long");
         }
         break;
 
       case "industry":
-        if (
-          formData.role === "client" &&
-          (!value || value.trim().length === 0)
-        ) {
-          errors.push("Industry is required for clients");
+        if (formData.role === "client" && (!value || value.trim().length < 2)) {
+          errors.push("Industry must be at least 2 characters long");
         }
         break;
     }
@@ -188,6 +159,13 @@ const RegisterPage: React.FC = () => {
         const errors = validateField(name, value);
         if (errors.length > 0) {
           setFieldErrors((prev) => ({ ...prev, [name]: errors[0] }));
+        } else {
+          // Clear error when field becomes valid
+          setFieldErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[name];
+            return newErrors;
+          });
         }
       }, 500);
     }
@@ -240,31 +218,13 @@ const RegisterPage: React.FC = () => {
       errors.push("Please select a valid role");
     }
 
-    // Phone validation (Ethiopian phone format)
-    const phoneRegex = /^(\+251|0)[1-9]\d{8}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone)) {
-      errors.push(
-        "Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)",
-      );
-    }
-
-    // Role-specific validation
-    if (formData.role === "worker") {
-      if (!formData.skills || formData.skills.trim().length === 0) {
-        errors.push("Skills are required for workers");
+    // Client-specific validation
+    if (formData.role === "client") {
+      if (!formData.company || formData.company.trim().length < 2) {
+        errors.push("Company name must be at least 2 characters long");
       }
-      if (formData.experience && isNaN(parseInt(formData.experience))) {
-        errors.push("Experience must be a valid number");
-      }
-      if (formData.hourlyRate && isNaN(parseFloat(formData.hourlyRate))) {
-        errors.push("Hourly rate must be a valid number");
-      }
-    } else if (formData.role === "client") {
-      if (!formData.company || formData.company.trim().length === 0) {
-        errors.push("Company name is required for clients");
-      }
-      if (!formData.industry || formData.industry.trim().length === 0) {
-        errors.push("Industry is required for clients");
+      if (!formData.industry || formData.industry.trim().length < 2) {
+        errors.push("Industry must be at least 2 characters long");
       }
     }
 
@@ -299,13 +259,7 @@ const RegisterPage: React.FC = () => {
         email: string;
         password: string;
         role: string;
-        phone: string;
-        profile: RegistrationProfile;
-        workerProfile?: {
-          skills: string[];
-          experience: string;
-          hourlyRate: number;
-        };
+        profile?: RegistrationProfile;
         clientProfile?: {
           companyName: string;
           industry: string;
@@ -318,27 +272,11 @@ const RegisterPage: React.FC = () => {
         email: formData.email,
         password: formData.password,
         role: formData.role,
-        phone: formData.phone,
-        profile: {
-          bio: formData.bio,
-          address: {
-            city: formData.location,
-            country: "Ethiopia",
-          },
-        },
+        profile: {},
       };
 
       // Add role-specific fields
-      if (formData.role === "worker") {
-        registrationData.workerProfile = {
-          skills: formData.skills
-            .split(",")
-            .map((s: string) => s.trim())
-            .filter(Boolean),
-          experience: formData.experience,
-          hourlyRate: parseFloat(formData.hourlyRate) || 0,
-        };
-      } else if (formData.role === "client") {
+      if (formData.role === "client") {
         registrationData.clientProfile = {
           companyName: formData.company,
           industry: formData.industry,
@@ -356,7 +294,13 @@ const RegisterPage: React.FC = () => {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("authChanged"));
       }
-      router.push(getRoleDashboardPath(user.role));
+      
+      // Redirect workers to CV builder, others to dashboard
+      if (user.role === "worker") {
+        router.push("/profile/cv-builder");
+      } else {
+        router.push(getRoleDashboardPath(user.role));
+      }
     } catch (error: unknown) {
       if (
         error &&
@@ -530,144 +474,59 @@ const RegisterPage: React.FC = () => {
               </select>
             </div>
 
-            {/* Google Sign Up Button */}
-            <div className="flex justify-center md:col-span-2 xl:col-span-3">
-              <div ref={googleBtnRef} />
-            </div>
-
-            <div className="md:col-span-1">
-              <Input
-                label={t("form.fields.phone")}
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className={fieldErrors.phone ? "border-red-500" : ""}
-              />
-              {fieldErrors.phone && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
-              )}
-            </div>
-
-            <div className="md:col-span-1">
-              <Input
-                label={t("form.fields.location")}
-                name="location"
-                type="text"
-                value={formData.location}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="md:col-span-2 xl:col-span-3">
-              <label
-                htmlFor="bio"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t("form.fields.bio.label")}
-              </label>
-              <textarea
-                id="bio"
-                name="bio"
-                rows={3}
-                value={formData.bio}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder={t("form.fields.bio.placeholder")}
-              />
-            </div>
-
-            {/* Worker-specific fields */}
-            {formData.role === "worker" && (
-              <>
-                <div className="md:col-span-2 xl:col-span-3">
-                  <Input
-                    label={t("form.fields.worker.skills.label")}
-                    name="skills"
-                    type="text"
-                    value={formData.skills}
-                    onChange={handleChange}
-                    placeholder={t("form.fields.worker.skills.placeholder")}
-                    className={fieldErrors.skills ? "border-red-500" : ""}
-                  />
-                  {fieldErrors.skills && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {fieldErrors.skills}
-                    </p>
-                  )}
-                </div>
-
-                <div className="md:col-span-1">
-                  <Input
-                    label={t("form.fields.worker.experience")}
-                    name="experience"
-                    type="number"
-                    min="0"
-                    value={formData.experience}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="md:col-span-1">
-                  <Input
-                    label={t("form.fields.worker.hourlyRate")}
-                    name="hourlyRate"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.hourlyRate}
-                    onChange={handleChange}
-                  />
-                </div>
-              </>
-            )}
-
             {/* Client-specific fields */}
             {formData.role === "client" && (
               <>
                 <div className="md:col-span-1">
                   <Input
-                    label={t("form.fields.client.company")}
+                    label={t("form.fields.company")}
                     name="company"
                     type="text"
+                    required
                     value={formData.company}
                     onChange={handleChange}
                     className={fieldErrors.company ? "border-red-500" : ""}
                   />
                   {fieldErrors.company && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {fieldErrors.company}
-                    </p>
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.company}</p>
                   )}
                 </div>
 
                 <div className="md:col-span-1">
                   <Input
-                    label={t("form.fields.client.industry")}
+                    label={t("form.fields.industry")}
                     name="industry"
                     type="text"
+                    required
                     value={formData.industry}
                     onChange={handleChange}
                     className={fieldErrors.industry ? "border-red-500" : ""}
                   />
                   {fieldErrors.industry && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {fieldErrors.industry}
-                    </p>
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.industry}</p>
                   )}
                 </div>
 
-                <div className="md:col-span-2 xl:col-span-3">
+                <div className="md:col-span-1">
                   <Input
-                    label={t("form.fields.client.website")}
+                    label={t("form.fields.website")}
                     name="website"
                     type="url"
                     value={formData.website}
                     onChange={handleChange}
+                    className={fieldErrors.website ? "border-red-500" : ""}
                   />
+                  {fieldErrors.website && (
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.website}</p>
+                  )}
                 </div>
               </>
             )}
+
+            {/* Google Sign Up Button */}
+            <div className="flex justify-center md:col-span-2 xl:col-span-3">
+              <div ref={googleBtnRef} />
+            </div>
 
             <div className="md:col-span-1">
               <Input

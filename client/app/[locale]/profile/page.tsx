@@ -3,13 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { User as BaseUser } from "@/lib/auth";
 import { getStoredUser } from "@/lib/auth";
-import { authAPI } from "@/lib/api";
+import { authAPI, workerAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
 import ProgressBar from "@/components/ui/ProgressBar";
 import BackToDashboard from "@/components/ui/BackToDashboard";
+import EnhancedCVBuilder from "@/components/ui/EnhancedCVBuilder";
+import jsPDF from "jspdf";
 import {
   Camera,
   User2,
@@ -23,6 +25,8 @@ import {
   Link2,
   X,
   Eye,
+  Edit,
+  Plus,
 } from "lucide-react";
 import Cookies from "js-cookie";
 
@@ -905,76 +909,42 @@ const ProfilePage = () => {
                 </Card>
 
                 <Card>
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Educational Background
+                  <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FileText className="h-4 w-4" /> CV Builder
                   </h3>
-                  <AddEducationForm onAdd={addEducationItem} />
-                  <div className="mt-3 space-y-3">
-                    {(user.workerProfile?.education || []).map((ed, i) => (
-                      <div
-                        key={i}
-                        className="relative p-3 bg-white rounded border border-gray-200 shadow-sm"
-                      >
-                        <button
-                          aria-label="Remove education"
-                          className="absolute top-2 right-2 p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => removeEducationItem(i)}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        <div className="font-medium text-gray-900">
-                          {ed.school} {ed.degree ? `• ${ed.degree}` : ""}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {ed.startDate || "—"} - {ed.endDate || "Present"}
-                        </div>
-                        {ed.field && (
-                          <div className="text-sm text-gray-600">
-                            Field: {ed.field}
-                          </div>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Use our interactive CV builder to create a professional resume with all your details.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="primary"
+                      onClick={() => window.open("/profile/cv-builder", "_blank")}
+                      className="flex-1"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Open CV Builder
+                    </Button>
+                  </div>
+                  
+                  {/* Show summary of CV data if available */}
+                  {user.profile?.cv?.data && (
+                    <div className="mt-4 p-3 bg-gray-50 rounded border">
+                      <p className="text-sm text-gray-700 mb-2">
+                        <strong>Current CV Status:</strong> Complete
+                      </p>
+                      <div className="text-xs text-gray-600">
+                        {user.workerProfile?.education?.length > 0 && (
+                          <span className="mr-4">• {user.workerProfile.education.length} Education entries</span>
                         )}
-                        {ed.description && (
-                          <p className="text-sm text-gray-700 mt-1">
-                            {ed.description}
-                          </p>
+                        {user.workerProfile?.workHistory?.length > 0 && (
+                          <span className="mr-4">• {user.workerProfile.workHistory.length} Work experiences</span>
+                        )}
+                        {user.workerProfile?.skills?.length > 0 && (
+                          <span>• {user.workerProfile.skills.length} Skills</span>
                         )}
                       </div>
-                    ))}
-                  </div>
-                </Card>
-
-                <Card>
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Work Experience
-                  </h3>
-                  <AddWorkForm onAdd={addWorkItem} />
-                  <div className="mt-3 space-y-3">
-                    {(user.workerProfile?.workHistory || []).map((wk, i) => (
-                      <div
-                        key={i}
-                        className="relative p-3 bg-white rounded border border-gray-200 shadow-sm"
-                      >
-                        <button
-                          aria-label="Remove work"
-                          className="absolute top-2 right-2 p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => removeWorkItem(i)}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        <div className="font-medium text-gray-900">
-                          {wk.title} {wk.company ? `• ${wk.company}` : ""}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {wk.startDate || "—"} - {wk.endDate || "Present"}
-                        </div>
-                        {wk.description && (
-                          <p className="text-sm text-gray-700 mt-1">
-                            {wk.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </Card>
               </>
             )}
@@ -1116,11 +1086,18 @@ const ProfilePage = () => {
                         );
                       })()}
                       <Button
+                        variant="primary"
+                        onClick={() => window.open("/profile/cv-builder", "_blank")}
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit CV
+                      </Button>
+                      <Button
                         variant="outline"
                         onClick={() => cvRef.current?.click()}
                       >
                         <FileUp className="h-4 w-4 mr-2" />
-                        Update CV
+                        Upload CV
                       </Button>
                       <Button variant="danger" onClick={onDeleteCV}>
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -1130,11 +1107,23 @@ const ProfilePage = () => {
                   </div>
                 ) : (
                   <div className="text-sm text-gray-600">
-                    <p className="mb-2">No CV uploaded yet.</p>
-                    <Button onClick={() => cvRef.current?.click()}>
-                      <FileUp className="h-4 w-4 mr-2" />
-                      Upload CV
-                    </Button>
+                    <p className="mb-2">No CV created yet.</p>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="primary"
+                        onClick={() => window.open("/profile/cv-builder", "_blank")}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Build CV
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => cvRef.current?.click()}
+                      >
+                        <FileUp className="h-4 w-4 mr-2" />
+                        Upload CV
+                      </Button>
+                    </div>
                   </div>
                 );
               })()}

@@ -9,6 +9,8 @@ import {
   Briefcase,
   TrendingUp,
   CheckCircle,
+  Star,
+  MapPin,
 } from "lucide-react";
 import { getStoredUser, getRoleDashboardPath } from "@/lib/auth";
 import { jobsAPI } from "@/lib/api";
@@ -317,6 +319,218 @@ export default function Home() {
                 {t("howItWorks.step3.description")}
               </p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonials Section */}
+      <div className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">
+              {t("testimonials.title")}
+            </h2>
+            <p className="text-gray-600 mt-4">{t("testimonials.subtitle")}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="h-5 w-5 text-yellow-400 fill-current"
+                  />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6 italic">
+                &ldquo;{t("testimonials.testimonial1.content")}&rdquo;
+              </p>
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {t("testimonials.testimonial1.name")}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {t("testimonials.testimonial1.role")}
+                </p>
+                <p className="text-sm text-blue-600">
+                  {t("testimonials.testimonial1.company")}
+                </p>
+              </div>
+            </Card>
+
+            {/* Testimonial 2 */}
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="h-5 w-5 text-yellow-400 fill-current"
+                  />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6 italic">
+                &ldquo;{t("testimonials.testimonial2.content")}&rdquo;
+              </p>
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {t("testimonials.testimonial2.name")}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {t("testimonials.testimonial2.role")}
+                </p>
+                <p className="text-sm text-blue-600">
+                  {t("testimonials.testimonial2.company")}
+                </p>
+              </div>
+            </Card>
+
+            {/* Testimonial 3 */}
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="flex justify-center mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="h-5 w-5 text-yellow-400 fill-current"
+                  />
+                ))}
+              </div>
+              <p className="text-gray-600 mb-6 italic">
+                &ldquo;{t("testimonials.testimonial3.content")}&rdquo;
+              </p>
+              <div>
+                <p className="font-semibold text-gray-900">
+                  {t("testimonials.testimonial3.name")}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {t("testimonials.testimonial3.role")}
+                </p>
+                <p className="text-sm text-blue-600">
+                  {t("testimonials.testimonial3.company")}
+                </p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Regions Where We Operate */}
+      <div className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">
+              {t("regions.title")}
+            </h2>
+            <p className="text-gray-600 mt-4">{t("regions.subtitle")}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Addis Ababa */}
+            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-6 w-6 text-blue-600 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t("regions.addisAbaba.name")}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {t("regions.addisAbaba.description")}
+                  </p>
+                  <Badge variant="primary" size="sm">
+                    {t("regions.addisAbaba.jobs")}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
+            {/* Oromia */}
+            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-6 w-6 text-green-600 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t("regions.oromia.name")}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {t("regions.oromia.description")}
+                  </p>
+                  <Badge variant="secondary" size="sm">
+                    {t("regions.oromia.jobs")}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
+            {/* Amhara */}
+            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-yellow-500">
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-6 w-6 text-yellow-600 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t("regions.amhara.name")}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {t("regions.amhara.description")}
+                  </p>
+                  <Badge variant="secondary" size="sm">
+                    {t("regions.amhara.jobs")}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
+            {/* Tigray */}
+            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-6 w-6 text-purple-600 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t("regions.tigray.name")}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {t("regions.tigray.description")}
+                  </p>
+                  <Badge variant="secondary" size="sm">
+                    {t("regions.tigray.jobs")}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
+            {/* SNNP */}
+            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-indigo-500">
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-6 w-6 text-indigo-600 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t("regions.snnp.name")}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {t("regions.snnp.description")}
+                  </p>
+                  <Badge variant="secondary" size="sm">
+                    {t("regions.snnp.jobs")}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
+
+            {/* Sidama */}
+            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-red-500">
+              <div className="flex items-start space-x-3">
+                <MapPin className="h-6 w-6 text-red-600 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {t("regions.sidama.name")}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {t("regions.sidama.description")}
+                  </p>
+                  <Badge variant="secondary" size="sm">
+                    {t("regions.sidama.jobs")}
+                  </Badge>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
