@@ -20,6 +20,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
+import { newsData } from "@/data/news";
 
 type StoredUser = { role: string } | null;
 type Stats = {
@@ -49,36 +50,6 @@ export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
   const [stats, setStats] = useState<Stats>(null);
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
-
-  const newsItems = [
-    {
-      id: "1",
-      title: "Belimuno Jobs Platform Reaches 10,000+ Active Users",
-      excerpt:
-        "We're excited to announce that our platform has reached a major milestone with over 10,000 active users across Ethiopia.",
-      date: "2024-01-15",
-      category: "Platform Update",
-      imageUrl: "/belimuno.png",
-    },
-    {
-      id: "2",
-      title: "New Mobile App Launch - Apply for Jobs on the Go",
-      excerpt:
-        "Download our new mobile application to browse and apply for jobs directly from your smartphone.",
-      date: "2024-01-10",
-      category: "Product Launch",
-      imageUrl: "/belimuno.png",
-    },
-    {
-      id: "3",
-      title: "Partnership with Leading Ethiopian Companies",
-      excerpt:
-        "We've partnered with top companies including Ethiopian Airlines, Commercial Bank of Ethiopia, and more.",
-      date: "2024-01-05",
-      category: "Partnership",
-      imageUrl: "/belimuno.png",
-    },
-  ];
 
   const router = useRouter();
   const t = useTranslations("Home");
@@ -379,7 +350,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {newsItems.map((news) => (
+            {newsData.map((news) => (
               <Card
                 key={news.id}
                 className="hover:shadow-lg transition-all duration-300 group overflow-hidden"
@@ -438,6 +409,7 @@ export default function Home() {
                       size="sm"
                       variant="outline"
                       className="group-hover:bg-blue-50 group-hover:border-blue-300 group-hover:text-blue-600 transition-all duration-300"
+                      onClick={() => router.push(`/news/${news.id}`)}
                     >
                       <span className="flex items-center">
                         {t("news.readMore")}

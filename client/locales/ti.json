@@ -73,6 +73,13 @@
       "readMore": "ዝያዳ ኣንብብ",
       "viewAllNews": "ኩሉ ዜናታት ርአ"
     },
+    "NewsDetail": {
+      "backButton": "ምምላስ",
+      "shareButton": "ኣጋራ",
+      "backToHome": "ናብ ገዛ ምምላስ",
+      "viewAllNews": "ኩሉ ዜናታት ርአ",
+      "relatedNews": "ዝተሓሓዙ ዜናታት"
+    },
     "cta": {
       "title": "ንጕዓዝኻ ንምጅማር ድሉው ዲኻ?",
       "subtitle": "ሞግсаጽቶም ንምምዕባል ቤሊሙኖ ዮብስ ዝጥቀሙ ሽዱሽተ ሚልዮን ሞግсаጽቲ ሞግсаጽቶም ከጥፍኡ።",

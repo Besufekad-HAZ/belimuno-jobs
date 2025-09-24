@@ -73,6 +73,13 @@
       "readMore": "Dabalataa Dubbisi",
       "viewAllNews": "Oduu Hundaa Ilaali"
     },
+    "NewsDetail": {
+      "backButton": "Deebi'i",
+      "shareButton": "Qoodsi",
+      "backToHome": "Manaatti Deebi'i",
+      "viewAllNews": "Oduu Hundaa Ilaali",
+      "relatedNews": "Oduu Walqabataa"
+    },
     "cta": {
       "title": "Imalaa Keessan Jalqabuu Ready Ta'anii?",
       "subtitle": "Kumoota hojjettoota mijataa career isaanii fudhachuuf Belimuno Jobs fayyadamuu keessatti walitti qabanii.",

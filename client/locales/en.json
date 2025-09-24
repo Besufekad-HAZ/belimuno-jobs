@@ -73,6 +73,13 @@
       "readMore": "Read More",
       "viewAllNews": "View All News"
     },
+    "NewsDetail": {
+      "backButton": "Back",
+      "shareButton": "Share",
+      "backToHome": "Back to Home",
+      "viewAllNews": "View All News",
+      "relatedNews": "Related News"
+    },
     "cta": {
       "title": "Ready to Start Your Journey?",
       "subtitle": "Join thousands of professionals already using Belimuno Jobs to advance their careers",
