@@ -103,14 +103,13 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     let totalFields = 0;
     let completedFields = 0;
 
-    // Personal Info (10 fields, all required)
+    // Personal Info (9 fields, all required)
     const personalInfoFields = [
       cvData.personalInfo.fullName,
       cvData.personalInfo.email,
       cvData.personalInfo.phone,
       cvData.personalInfo.address,
       cvData.personalInfo.summary,
-      cvData.personalInfo.workerSkills.length > 0,
       cvData.personalInfo.workerExperience,
       cvData.personalInfo.workerHourlyRate > 0,
       cvData.personalInfo.dateOfBirth,
@@ -172,9 +171,6 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     } else if (cvData.personalInfo.summary.length > 500) {
       newErrors["personalInfo.summary"] = "Professional summary must be 500 characters or less";
     }
-    if (cvData.personalInfo.workerSkills.length === 0) {
-      newErrors["personalInfo.workerSkills"] = "At least one skill is required";
-    }
     if (!cvData.personalInfo.workerExperience.trim()) {
       newErrors["personalInfo.workerExperience"] = "Years of experience is required";
     }
@@ -226,8 +222,29 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
   };
 
   const handleSave = async () => {
-    if (!validateRequiredFields()) {
-      toast.error("Please fill in all required fields");
+    const isValid = validateRequiredFields();
+    if (!isValid) {
+      // Show specific error messages
+      const errorFields = Object.keys(errors);
+      if (errorFields.length > 0) {
+        const firstError = errorFields[0];
+        const fieldName = firstError.replace('personalInfo.', '');
+        const displayName = {
+          'fullName': 'Full Name',
+          'email': 'Email',
+          'phone': 'Phone Number',
+          'address': 'Address',
+          'summary': 'Professional Summary',
+          'workerExperience': 'Years of Experience',
+          'workerHourlyRate': 'Hourly Rate',
+          'dateOfBirth': 'Date of Birth',
+          'gender': 'Gender',
+          'portfolio': 'Portfolio Link'
+        }[fieldName] || fieldName;
+        toast.error(`Please fix the ${displayName} field`);
+      } else {
+        toast.error("Please fill in all required fields");
+      }
       setActiveTab("personal");
       return;
     }
@@ -342,12 +359,53 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
 
   const completionPercentage = calculateCompletionPercentage();
 
-  const renderPersonalInfo = () => (
-    <div className="space-y-6">
-      <h3 className="text-lg font-semibold flex items-center">
-        <User className="h-5 w-5 mr-2" />
-        Personal Information
-      </h3>
+  const renderPersonalInfo = () => {
+    const personalInfoErrors = Object.keys(errors).filter(key => key.startsWith('personalInfo.'));
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold flex items-center">
+            <User className="h-5 w-5 mr-2" />
+            Personal Information
+          </h3>
+          {personalInfoErrors.length > 0 && (
+            <div className="flex items-center text-red-600 text-sm">
+              <AlertCircle className="h-4 w-4 mr-1" />
+              {personalInfoErrors.length} field{personalInfoErrors.length > 1 ? 's' : ''} need{personalInfoErrors.length === 1 ? 's' : ''} attention
+            </div>
+          )}
+        </div>
+        
+        {personalInfoErrors.length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-red-800 mb-2">Missing Required Fields:</h4>
+            <ul className="text-sm text-red-700 space-y-1">
+              {personalInfoErrors.map(errorKey => {
+                const fieldName = errorKey.replace('personalInfo.', '');
+                const displayName = {
+                  'fullName': 'Full Name',
+                  'email': 'Email',
+                  'phone': 'Phone Number',
+                  'address': 'Address',
+                  'summary': 'Professional Summary',
+                  'workerExperience': 'Years of Experience',
+                  'workerHourlyRate': 'Hourly Rate',
+                  'dateOfBirth': 'Date of Birth',
+                  'gender': 'Gender',
+                  'portfolio': 'Portfolio Link'
+                }[fieldName] || fieldName;
+                
+                return (
+                  <li key={errorKey} className="flex items-center">
+                    <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                    {displayName}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -657,8 +715,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
             )}
           </div>
         </div>
-    </div>
-  );
+      </div>
+    );
+  };
 
   const renderEducation = () => (
     <div className="space-y-6">

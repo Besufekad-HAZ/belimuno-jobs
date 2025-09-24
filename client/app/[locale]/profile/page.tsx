@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { User as BaseUser } from "@/lib/auth";
 import { getStoredUser } from "@/lib/auth";
 import { authAPI, workerAPI } from "@/lib/api";
@@ -67,6 +68,7 @@ interface ProfileUpdatePayload {
 
 
 const ProfilePage = () => {
+  const router = useRouter();
   const [user, setUser] = useState<ExtendedUser | null>(
     getStoredUser() as ExtendedUser | null,
   );
@@ -419,6 +421,9 @@ const ProfilePage = () => {
       Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 });
       
       console.log("CV saved successfully!");
+      
+      // Redirect to jobs page after successful save
+      router.push("/jobs");
     } catch (error) {
       console.error("Failed to save CV:", error);
       throw error;
