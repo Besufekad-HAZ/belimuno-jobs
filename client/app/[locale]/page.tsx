@@ -350,7 +350,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {newsData.map((news) => (
+            {newsData.slice(0, 3).map((news) => (
               <Card
                 key={news.id}
                 className="hover:shadow-lg transition-all duration-300 group overflow-hidden"
@@ -427,6 +427,7 @@ export default function Home() {
               variant="outline"
               size="lg"
               className="border-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-300"
+              onClick={() => router.push("/news")}
             >
               <Newspaper className="h-5 w-5 mr-2" />
               {t("news.viewAllNews")}
