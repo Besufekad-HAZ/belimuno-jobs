@@ -33,7 +33,7 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
             News Not Found
           </h1>
           <p className="text-gray-600 mb-8">
-            The news article you're looking for doesn't exist.
+            The news article you are looking for does not exist.
           </p>
           <Button onClick={() => router.push("/")}>
             <ArrowLeft className="h-4 w-4 mr-2" />

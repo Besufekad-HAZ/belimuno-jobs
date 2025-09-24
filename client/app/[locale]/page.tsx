@@ -36,15 +36,6 @@ type FeaturedJob = {
   deadline?: string;
   budget?: number;
 };
-type NewsItem = {
-  id: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  category: string;
-  imageUrl?: string;
-  readMoreUrl?: string;
-};
 
 export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
