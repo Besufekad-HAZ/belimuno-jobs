@@ -31,7 +31,7 @@
         "part2": "Opportunities"
       },
       "description": "Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country. Join thousands of professionals building their careers.",
-      "getStarted": "Get Started",
+      "register": "Register",
       "goToDashboard": "Go to Dashboard",
       "browseJobs": "Browse Jobs"
     },
@@ -66,6 +66,12 @@
         "title": "Get Paid",
         "description": "Complete projects and receive secure payments through our platform"
       }
+    },
+    "news": {
+      "title": "What's New",
+      "subtitle": "Stay updated with the latest news, updates, and announcements from Belimuno Jobs",
+      "readMore": "Read More",
+      "viewAllNews": "View All News"
     },
     "cta": {
       "title": "Ready to Start Your Journey?",
