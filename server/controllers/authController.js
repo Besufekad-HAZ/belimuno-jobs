@@ -206,6 +206,10 @@ const updateProfile = async (req, res, next) => {
 				updateOps.$set["profile.hourlyRate"] = incomingProfile.hourlyRate;
 			if (Object.prototype.hasOwnProperty.call(incomingProfile, "address"))
 				updateOps.$set["profile.address"] = incomingProfile.address;
+			if (Object.prototype.hasOwnProperty.call(incomingProfile, "dob"))
+				updateOps.$set["profile.dob"] = incomingProfile.dob;
+			if (Object.prototype.hasOwnProperty.call(incomingProfile, "gender"))
+				updateOps.$set["profile.gender"] = incomingProfile.gender;
 
 			// Track explicit CV deletion intent
 			let shouldUnsetCv = false;
@@ -237,21 +241,16 @@ const updateProfile = async (req, res, next) => {
 			delete incomingProfile.experience;
 			delete incomingProfile.hourlyRate;
 			delete incomingProfile.address;
+			delete incomingProfile.dob;
+			delete incomingProfile.gender;
 			delete incomingProfile.cv;
 
-			// Merge remaining top-level profile fields (e.g., firstName, lastName, avatar)
-			const mergedProfile = { ...currentProfile, ...incomingProfile };
-
-			// If there are still fields in mergedProfile, update the entire profile object
-			if (Object.keys(mergedProfile).length > 0) {
-				updateOps.$set.profile = mergedProfile;
-			} else if (
-				Object.keys(incomingProfile).length === 0 &&
-				!shouldUnsetCv &&
-				Object.keys(updateOps.$set).every((key) => !key.startsWith("profile."))
-			) {
-				// If incomingProfile is empty and no specific nested fields were updated, and no CV unset, do nothing with profile to avoid unintentional full replacement
-				delete updateOps.$set.profile;
+			// Only merge remaining top-level profile fields if there are any left after deleting specific fields
+			if (Object.keys(incomingProfile).length > 0) {
+				// For remaining fields, update them individually to avoid conflicts
+				Object.keys(incomingProfile).forEach((key) => {
+					updateOps.$set[`profile.${key}`] = incomingProfile[key];
+				});
 			}
 		}
 
