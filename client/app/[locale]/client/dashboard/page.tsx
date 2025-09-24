@@ -68,6 +68,8 @@ const ClientDashboard: React.FC = () => {
   const [jobs, setJobs] = useState<EnrichedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<EnrichedJob | null>(null);
+  const [selectedJobForDetails, setSelectedJobForDetails] =
+    useState<EnrichedJob | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
@@ -221,7 +223,7 @@ const ClientDashboard: React.FC = () => {
 
   const handlePaymentAndRating = (job: EnrichedJob) => {
     setSelectedJob(job);
-    setSelectedWorker(job.assignedWorker || null);
+    setSelectedWorker(job.worker || null);
     setShowPaymentModal(true);
   };
 
@@ -585,7 +587,7 @@ const ClientDashboard: React.FC = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setSelectedJob(job)}
+                      onClick={() => setSelectedJobForDetails(job)}
                       className="w-full sm:w-auto"
                     >
                       <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
@@ -615,7 +617,7 @@ const ClientDashboard: React.FC = () => {
                         size="sm"
                         variant="outline"
                         onClick={() => handleDeleteJob(job)}
-                        className="w-full sm:w-auto text-red-600 hover:bg-red-50"
+                        className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
                       >
                         <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                         <span className="text-xs sm:text-sm">
@@ -630,7 +632,7 @@ const ClientDashboard: React.FC = () => {
                         size="sm"
                         variant="outline"
                         onClick={() => handleCancelAssignment(job)}
-                        className="text-red-600 hover:bg-red-50"
+                        className="text-red-600 hover:bg-red-50 border-red-600"
                       >
                         {t("sections.jobs.actions.cancelAssignment")}
                       </Button>
@@ -661,17 +663,13 @@ const ClientDashboard: React.FC = () => {
                       </>
                     )}
 
-                    {/* Payment and rating happens after completion */}
-                    {job.status === "completed" &&
-                      job.payment?.paymentStatus !== "paid" && (
-                        <Button
-                          size="sm"
-                          onClick={() => handlePaymentAndRating(job)}
-                        >
-                          <CreditCard className="h-4 w-4 mr-1" />
-                          {t("sections.jobs.actions.payAndRate")}
-                        </Button>
-                      )}
+                    <Button
+                      size="sm"
+                      onClick={() => handlePaymentAndRating(job)}
+                    >
+                      <CreditCard className="h-4 w-4 mr-1" />
+                      {t("sections.jobs.actions.payAndRate")}
+                    </Button>
 
                     {/* Client can dispute during active phases */}
                     {(job.status === "in_progress" ||
@@ -684,7 +682,7 @@ const ClientDashboard: React.FC = () => {
                           setSelectedJobForDispute(job);
                           setShowDisputeModal(true);
                         }}
-                        className="text-red-600 hover:bg-red-50"
+                        className="text-red-600 hover:bg-red-50 border-red-600"
                       >
                         <AlertTriangle className="h-4 w-4 mr-1" />
                         {t("sections.jobs.actions.raiseDispute")}
@@ -838,14 +836,17 @@ const ClientDashboard: React.FC = () => {
         </Card>
 
         {/* Job Details Modal */}
-        {selectedJob && (
+        {selectedJobForDetails && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-96 overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {selectedJob.title}
+                  {selectedJobForDetails.title}
                 </h3>
-                <Button variant="ghost" onClick={() => setSelectedJob(null)}>
+                <Button
+                  variant="ghost"
+                  onClick={() => setSelectedJobForDetails(null)}
+                >
                   ×
                 </Button>
               </div>
@@ -854,7 +855,9 @@ const ClientDashboard: React.FC = () => {
                   <h4 className="font-medium text-gray-900">
                     {t("modals.jobDetails.fields.description")}
                   </h4>
-                  <p className="text-gray-600">{selectedJob.description}</p>
+                  <p className="text-gray-600">
+                    {selectedJobForDetails.description}
+                  </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -862,7 +865,7 @@ const ClientDashboard: React.FC = () => {
                       {t("modals.jobDetails.fields.budget")}
                     </h4>
                     <p className="text-gray-600">
-                      ETB {selectedJob.budget?.toLocaleString()}
+                      ETB {selectedJobForDetails.budget?.toLocaleString()}
                     </p>
                   </div>
                   <div>
@@ -870,31 +873,35 @@ const ClientDashboard: React.FC = () => {
                       {t("modals.jobDetails.fields.deadline")}
                     </h4>
                     <p className="text-gray-600">
-                      {new Date(selectedJob.deadline).toLocaleDateString()}
+                      {new Date(
+                        selectedJobForDetails.deadline,
+                      ).toLocaleDateString()}
                     </p>
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">
                       {t("modals.jobDetails.fields.category")}
                     </h4>
-                    <p className="text-gray-600">{selectedJob.category}</p>
+                    <p className="text-gray-600">
+                      {selectedJobForDetails.category}
+                    </p>
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">
                       {t("modals.jobDetails.fields.status")}
                     </h4>
                     <p className="text-gray-600 capitalize">
-                      {selectedJob.status.replace("_", " ")}
+                      {selectedJobForDetails.status.replace("_", " ")}
                     </p>
                   </div>
                 </div>
-                {selectedJob.requirements && (
+                {selectedJobForDetails.requirements && (
                   <div>
                     <h4 className="font-medium text-gray-900">
                       {t("modals.jobDetails.fields.requirements")}
                     </h4>
                     <ul className="text-gray-600 list-disc list-inside">
-                      {selectedJob.requirements.map(
+                      {selectedJobForDetails.requirements.map(
                         (req: string, index: number) => (
                           <li key={index}>{req}</li>
                         ),

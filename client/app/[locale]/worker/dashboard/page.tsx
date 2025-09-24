@@ -835,7 +835,7 @@ const WorkerDashboard: React.FC = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => declineAssignment(job._id)}
-                              className="flex-1 sm:flex-none text-red-600 hover:bg-red-50"
+                              className="flex-1 sm:flex-none text-red-600 hover:bg-red-50 border-red-600"
                             >
                               <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                               <span className="text-xs sm:text-sm">
@@ -899,7 +899,7 @@ const WorkerDashboard: React.FC = () => {
                               setSelectedJobForDispute(job);
                               setShowDisputeModal(true);
                             }}
-                            className="text-red-600 hover:bg-red-50"
+                            className="text-red-600 hover:bg-red-50 "
                           >
                             <AlertTriangle className="h-4 w-4 mr-1" />
                             {t("sections.activeJobs.actions.raiseDispute")}

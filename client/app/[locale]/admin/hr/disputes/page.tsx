@@ -16,6 +16,7 @@ import {
   FileText,
   Flag,
   Award,
+  Info,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI, notificationsAPI } from "@/lib/api";
@@ -820,23 +821,60 @@ const DisputeResolution: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
+                  Update Status
                 </label>
-                <select
-                  value={resolutionData.status}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setResolutionData((prev) => ({
-                      ...prev,
-                      status: e.target.value as ResolutionStatus,
-                      paymentAction: prev.paymentAction,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="investigating">Investigating</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
-                </select>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setResolutionData((prev) => ({
+                        ...prev,
+                        status: "investigating",
+                        paymentAction: "",
+                      }))
+                    }
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      resolutionData.status === "investigating"
+                        ? "bg-blue-100 text-blue-800 border-2 border-blue-300"
+                        : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    Investigating
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setResolutionData((prev) => ({
+                        ...prev,
+                        status: "resolved",
+                      }))
+                    }
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      resolutionData.status === "resolved"
+                        ? "bg-green-100 text-green-800 border-2 border-green-300"
+                        : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    Resolved
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setResolutionData((prev) => ({
+                        ...prev,
+                        status: "closed",
+                        paymentAction: "",
+                      }))
+                    }
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                      resolutionData.status === "closed"
+                        ? "bg-red-100 text-red-800 border-2 border-red-300"
+                        : "bg-gray-50 text-gray-700 border border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    Closed
+                  </button>
+                </div>
               </div>
 
               {selectedDispute.type === "payment" &&
@@ -938,15 +976,15 @@ const DisputeResolution: React.FC = () => {
                 />
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex items-center text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                <Info className="h-4 w-4 mr-1" />
+                Resolution details will be sent to both parties and recorded in
+                the system.
+              </div>
+
+              <div className="flex justify-end gap-2">
                 <Button
-                  onClick={handleResolveDispute}
-                  variant="primary"
-                  disabled={!resolutionData.resolution}
-                >
-                  Update Dispute
-                </Button>
-                <Button
+                  variant="outline"
                   onClick={() => {
                     setShowResolutionModal(false);
                     setResolutionData({
@@ -956,9 +994,20 @@ const DisputeResolution: React.FC = () => {
                       paymentAction: "",
                     });
                   }}
-                  variant="outline"
                 >
                   Cancel
+                </Button>
+                <Button
+                  onClick={handleResolveDispute}
+                  variant="primary"
+                  disabled={
+                    !resolutionData.resolution ||
+                    (selectedDispute.type === "payment" &&
+                      resolutionData.status === "resolved" &&
+                      !resolutionData.paymentAction)
+                  }
+                >
+                  Update Dispute
                 </Button>
               </div>
             </div>

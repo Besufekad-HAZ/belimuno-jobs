@@ -489,7 +489,7 @@ exports.rejectApplication = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Mark job as completed and request review
+// @desc    Mark job as completed, rate the worker, create payment, request review and notify worker
 // @route   PUT /api/client/jobs/:id/complete
 // @access  Private/Client
 exports.markJobCompleted = asyncHandler(async (req, res) => {
