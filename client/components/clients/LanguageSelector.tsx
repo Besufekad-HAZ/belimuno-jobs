@@ -76,7 +76,7 @@ const LanguageSelector = () => {
           id="language-menu"
           role="listbox"
           tabIndex={-1}
-          className="absolute mt-2 bg-cyan-700 text-white rounded-lg shadow-lg"
+          className="absolute right-0 mt-2 z-50 min-w-[160px] overflow-hidden rounded-lg bg-blue-900/95 text-white shadow-lg ring-1 ring-white/10 border border-blue-300/20 backdrop-blur-sm divide-y divide-white/10"
         >
           {Object.entries(languages).map(([code, name]) => (
             <li
@@ -84,7 +84,7 @@ const LanguageSelector = () => {
               role="option"
               tabIndex={0}
               aria-selected={locale === code}
-              className="px-4 py-2 hover:bg-cyan-800 cursor-pointer border-b border-cyan-800 last:border-b-0"
+              className="px-4 py-2 hover:bg-white/10 focus:bg-white/10 cursor-pointer focus:outline-none"
               onClick={() => handleLanguageChange(code)}
               onKeyDown={(e) =>
                 (e.key === "Enter" || e.key === " ") &&

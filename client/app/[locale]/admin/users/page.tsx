@@ -292,6 +292,7 @@ const AdminUsersPage: React.FC = () => {
                   {user.role === "worker" && !user.isVerified && (
                     <Button
                       size="sm"
+                      className="transition-transform hover:-translate-y-0.5"
                       onClick={() => setVerifyModal({ open: true, user })}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-1" /> Verify
@@ -300,6 +301,7 @@ const AdminUsersPage: React.FC = () => {
                   <Button
                     size="sm"
                     variant="outline"
+                    className="transition-transform hover:-translate-y-0.5"
                     onClick={() =>
                       setEditRole({ open: true, user, newRole: user.role })
                     }
@@ -309,6 +311,8 @@ const AdminUsersPage: React.FC = () => {
                   {user.isActive === false ? (
                     <Button
                       size="sm"
+                      variant="success"
+                      className="transition-transform hover:-translate-y-0.5"
                       onClick={() => reactivate(user._id)}
                       disabled={reactivatingId === user._id}
                     >
@@ -319,7 +323,8 @@ const AdminUsersPage: React.FC = () => {
                   ) : (
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="danger"
+                      className="transition-transform hover:-translate-y-0.5"
                       onClick={() => setDeactivateModal({ open: true, user })}
                     >
                       <UserX className="h-4 w-4 mr-1" /> Deactivate

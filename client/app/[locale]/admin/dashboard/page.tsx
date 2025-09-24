@@ -40,6 +40,7 @@ interface RecentUser {
   email: string;
   role: string;
   isVerified?: boolean;
+  isActive?: boolean;
   profile?: { verified?: boolean };
   createdAt: string;
 }
@@ -84,10 +85,26 @@ const AdminDashboard: React.FC = () => {
       setLoading(true);
       const [dashboardResponse, usersResponse, jobsResponse, paymentsResponse] =
         await Promise.all([
-          adminAPI.getDashboard(),
-          adminAPI.getUsers({ limit: 5, sort: "-createdAt" }),
-          adminAPI.getAllJobs(),
-          adminAPI.getPayments(),
+          adminAPI.getDashboard({ minimal: true }),
+          // Only fetch what we need for the cards
+          adminAPI.getUsers({
+            limit: 5,
+            sort: "-createdAt",
+            select: "name email role isVerified isActive createdAt",
+          }),
+          // Fetch recent jobs for the list
+          adminAPI.getAllJobs({
+            limit: 6,
+            sort: "-createdAt",
+            select: "title status budget createdAt",
+          }),
+          // Fetch only disputed payments for the disputes badge/modal
+          adminAPI.getPayments({
+            status: "disputed",
+            limit: 20,
+            sort: "-createdAt",
+            select: "status amount createdAt",
+          }),
         ]);
 
       setRecentUsers(usersResponse.data.data || []);
@@ -251,7 +268,7 @@ const AdminDashboard: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowReportsModal(true)}
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
                 size="sm"
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
@@ -264,7 +281,7 @@ const AdminDashboard: React.FC = () => {
                 <Button
                   variant="outline"
                   onClick={() => setShowDisputeModal(true)}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
                   size="sm"
                 >
                   <AlertTriangle className="h-4 w-4 mr-2" />
@@ -413,12 +430,46 @@ const AdminDashboard: React.FC = () => {
                   key={user._id}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
-                  <div>
-                    <p className="font-medium text-gray-900">{user.name}</p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                    <p className="text-xs text-gray-400 capitalize">
-                      {user.role.replace("_", " ")}
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 truncate">
+                      {user.name}
                     </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {user.email}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      <Badge
+                        variant={
+                          user.role === "super_admin"
+                            ? "purple"
+                            : user.role === "admin_hr" ||
+                                user.role === "admin_outsource"
+                              ? "blue"
+                              : user.role === "worker"
+                                ? "teal"
+                                : "orange"
+                        }
+                        size="sm"
+                      >
+                        {user.role.replace("_", " ")}
+                      </Badge>
+                      <Badge
+                        variant={user.isVerified ? "success" : "gray"}
+                        size="sm"
+                      >
+                        {user.isVerified
+                          ? t("recentUsers.tags.verified")
+                          : t("recentUsers.tags.unverified")}
+                      </Badge>
+                      <Badge
+                        variant={user.isActive === false ? "danger" : "success"}
+                        size="sm"
+                      >
+                        {user.isActive === false
+                          ? t("recentUsers.tags.inactive")
+                          : t("recentUsers.tags.active")}
+                      </Badge>
+                    </div>
                   </div>
                   {user.role === "worker" && !user.isVerified && (
                     <Button
@@ -491,7 +542,7 @@ const AdminDashboard: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button
               variant="outline"
-              className="p-4 h-auto flex flex-col items-center"
+              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
               onClick={() => router.push("/admin/users")}
             >
               <Users className="h-6 w-6 mb-2" />
@@ -499,7 +550,7 @@ const AdminDashboard: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              className="p-4 h-auto flex flex-col items-center"
+              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
               onClick={() => router.push("/admin/jobs")}
             >
               <Briefcase className="h-6 w-6 mb-2" />
@@ -507,7 +558,7 @@ const AdminDashboard: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              className="p-4 h-auto flex flex-col items-center"
+              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
               onClick={() => router.push("/admin/payments")}
             >
               <DollarSign className="h-6 w-6 mb-2" />

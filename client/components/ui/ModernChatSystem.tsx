@@ -16,6 +16,7 @@ import {
   Minimize2,
   Maximize2,
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface Message {
   id: string;
@@ -232,19 +233,46 @@ const ModernChatSystem: React.FC<ModernChatSystemProps> = ({
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
 
             {message.attachments && message.attachments.length > 0 && (
-              <div className="mt-2 space-y-1">
-                {message.attachments.map((attachment) => (
-                  <div
-                    key={attachment.id}
-                    className={`
-                      flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:opacity-80
-                      ${isSent ? 'bg-white/20' : 'bg-gray-50 hover:bg-gray-100'}
-                    `}
-                  >
-                    <Paperclip className="w-3 h-3" />
-                    <span className="text-xs truncate">{attachment.name}</span>
-                  </div>
-                ))}
+              <div className="mt-2 space-y-2">
+                {message.attachments.map((attachment) => {
+                  const isImage =
+                    (attachment.type && attachment.type.startsWith('image/')) ||
+                    /^data:image\//.test(attachment.url) ||
+                    /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(attachment.url);
+                  return (
+                    <div
+                      key={attachment.id}
+                      className={`group border rounded-lg overflow-hidden ${isSent ? 'bg-white/20 border-white/30' : 'bg-gray-50 border-gray-200'}`}
+                    >
+                      {isImage ? (
+                        <a href={attachment.url} target="_blank" rel="noreferrer" className="block">
+                          <Image
+                            src={attachment.url}
+                            alt={attachment.name}
+                            width={400}
+                            height={160}
+                            className="max-h-40 object-contain w-full bg-white"
+                          />
+                          <div className="flex items-center gap-2 px-2 py-1 text-xs text-gray-700 bg-white/80">
+                            <Paperclip className="w-3 h-3" />
+                            <span className="truncate">{attachment.name}</span>
+                          </div>
+                        </a>
+                      ) : (
+                        <a
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          download={attachment.name}
+                          className={`flex items-center gap-2 p-2 text-xs hover:underline ${isSent ? 'text-white' : 'text-blue-700'}`}
+                        >
+                          <Paperclip className="w-3 h-3" />
+                          <span className="truncate">{attachment.name}</span>
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -486,7 +514,7 @@ const ModernChatSystem: React.FC<ModernChatSystemProps> = ({
                       <button
                         onClick={handleAttachFile}
                         disabled={sending}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
+                        className="py-4 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50"
                         title="Attach file"
                       >
                         <Paperclip className="w-5 h-5" />

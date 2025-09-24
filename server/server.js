@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const connectDB = require('./config/db');
 const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
@@ -16,6 +17,9 @@ const app = express();
 // Body parser middleware (bigger limit to allow base64 attachments)
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+
+// Compression for faster responses
+app.use(compression());
 
 // Cookie parser middleware
 app.use(cookieParser());

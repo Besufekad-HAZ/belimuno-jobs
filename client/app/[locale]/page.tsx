@@ -137,7 +137,7 @@ export default function Home() {
               <Button
                 size="lg"
                 onClick={handleGetStarted}
-                className="group bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-2xl hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-300 px-8 py-4 text-lg font-semibold"
+                className="group bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white shadow-2xl hover:shadow-orange-500/25 transform hover:scale-105 transition-all duration-300 px-8 py-3 text-lg font-semibold"
               >
                 <span className="inline-flex items-center">
                   <span className="mr-3">
@@ -437,23 +437,31 @@ export default function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-16 bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-600">
+      <div className="py-16 bg-gradient-to-r from-blue-50 via-white to-cyan-50">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
             {t("cta.title")}
           </h2>
-          <p className="text-xl text-blue-100 mb-8">{t("cta.subtitle")}</p>
+          <p className="text-xl text-gray-600 mb-8">{t("cta.subtitle")}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              variant="outline"
-              className="bg-white text-blue-800 hover:bg-blue-50 border-2 border-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+              onClick={() => {
+                if (user?.role === "client") {
+                  router.push("/client/jobs/new");
+                } else {
+                  router.push("/login");
+                }
+              }}
             >
               {t("cta.findWorkers")}
             </Button>
             <Button
               size="lg"
-              className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg"
+              variant="outline"
+              className="border-2 border-cyan-600 text-cyan-700 hover:bg-cyan-50"
+              onClick={() => router.push("/jobs")}
             >
               {t("cta.findWork")}
             </Button>

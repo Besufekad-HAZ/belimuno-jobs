@@ -17,7 +17,7 @@ const Footer = () => {
   const t = useTranslations("Footer");
 
   return (
-    <footer className="mt-1 bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-700 text-white">
+    <footer className="mt-0 border-t border-slate-200 bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-700 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <h3 className="text-xl font-semibold mb-3">{t("brand.name")}</h3>

@@ -69,14 +69,15 @@ const RegisterPage: React.FC = () => {
 
     score = Object.values(checks).filter(Boolean).length;
 
-    const strengthText = {
-      0: "Very Weak",
-      1: "Weak",
-      2: "Fair",
-      3: "Good",
-      4: "Strong",
-      5: "Very Strong"
-    }[score] || "";
+    const strengthText =
+      {
+        0: "Very Weak",
+        1: "Weak",
+        2: "Fair",
+        3: "Good",
+        4: "Strong",
+        5: "Very Strong",
+      }[score] || "";
 
     return { score, text: strengthText, checks };
   };
@@ -105,9 +106,12 @@ const RegisterPage: React.FC = () => {
         if (!value || value.length < 8) {
           errors.push("Password must be at least 8 characters long");
         }
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+        const passwordRegex =
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
         if (value && !passwordRegex.test(value)) {
-          errors.push("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)");
+          errors.push(
+            "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+          );
         }
         break;
 
@@ -120,24 +124,35 @@ const RegisterPage: React.FC = () => {
       case "phone":
         const phoneRegex = /^(\+251|0)[1-9]\d{8}$/;
         if (value && !phoneRegex.test(value)) {
-          errors.push("Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)");
+          errors.push(
+            "Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)",
+          );
         }
         break;
 
       case "skills":
-        if (formData.role === "worker" && (!value || value.trim().length === 0)) {
+        if (
+          formData.role === "worker" &&
+          (!value || value.trim().length === 0)
+        ) {
           errors.push("Skills are required for workers");
         }
         break;
 
       case "company":
-        if (formData.role === "client" && (!value || value.trim().length === 0)) {
+        if (
+          formData.role === "client" &&
+          (!value || value.trim().length === 0)
+        ) {
           errors.push("Company name is required for clients");
         }
         break;
 
       case "industry":
-        if (formData.role === "client" && (!value || value.trim().length === 0)) {
+        if (
+          formData.role === "client" &&
+          (!value || value.trim().length === 0)
+        ) {
           errors.push("Industry is required for clients");
         }
         break;
@@ -160,7 +175,7 @@ const RegisterPage: React.FC = () => {
 
     // Clear field error when user starts typing
     if (fieldErrors[name]) {
-      setFieldErrors(prev => {
+      setFieldErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -172,7 +187,7 @@ const RegisterPage: React.FC = () => {
       setTimeout(() => {
         const errors = validateField(name, value);
         if (errors.length > 0) {
-          setFieldErrors(prev => ({ ...prev, [name]: errors[0] }));
+          setFieldErrors((prev) => ({ ...prev, [name]: errors[0] }));
         }
       }, 500);
     }
@@ -200,9 +215,12 @@ const RegisterPage: React.FC = () => {
       errors.push("Password must be at least 8 characters long");
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
     if (formData.password && !passwordRegex.test(formData.password)) {
-      errors.push("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)");
+      errors.push(
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+      );
     }
 
     // Password confirmation
@@ -211,7 +229,13 @@ const RegisterPage: React.FC = () => {
     }
 
     // Role validation
-    const validRoles = ['super_admin', 'admin_hr', 'admin_outsource', 'client', 'worker'];
+    const validRoles = [
+      "super_admin",
+      "admin_hr",
+      "admin_outsource",
+      "client",
+      "worker",
+    ];
     if (!formData.role || !validRoles.includes(formData.role)) {
       errors.push("Please select a valid role");
     }
@@ -219,7 +243,9 @@ const RegisterPage: React.FC = () => {
     // Phone validation (Ethiopian phone format)
     const phoneRegex = /^(\+251|0)[1-9]\d{8}$/;
     if (formData.phone && !phoneRegex.test(formData.phone)) {
-      errors.push("Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)");
+      errors.push(
+        "Please provide a valid Ethiopian phone number (e.g., 0912345678 or +251912345678)",
+      );
     }
 
     // Role-specific validation
@@ -297,8 +323,8 @@ const RegisterPage: React.FC = () => {
           bio: formData.bio,
           address: {
             city: formData.location,
-            country: 'Ethiopia'
-          }
+            country: "Ethiopia",
+          },
         },
       };
 
@@ -345,7 +371,7 @@ const RegisterPage: React.FC = () => {
       ) {
         setError(
           (error as { response: { data: { message: string } } }).response.data
-            .message
+            .message,
         );
       } else {
         setError(t("errors.default"));
@@ -410,7 +436,8 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+      {/* Top tabs + title section remains narrow for focus */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex mt-2">
           <Link href="/login" className="flex-1">
             <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">
@@ -437,16 +464,20 @@ const RegisterPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      {/* Main form card: widen and use responsive grid on md+/xl */}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-6xl">
         <Card>
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form
+            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+            onSubmit={handleSubmit}
+          >
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded md:col-span-2 xl:col-span-3">
                 {error}
               </div>
             )}
 
-            <div>
+            <div className="md:col-span-1">
               <Input
                 label={t("form.fields.name")}
                 name="name"
@@ -461,7 +492,7 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            <div>
+            <div className="md:col-span-1">
               <Input
                 label={t("form.fields.email")}
                 name="email"
@@ -476,7 +507,7 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            <div>
+            <div className="md:col-span-1">
               <label
                 htmlFor="role"
                 className="block text-sm font-medium text-gray-700 mb-1"
@@ -500,11 +531,11 @@ const RegisterPage: React.FC = () => {
             </div>
 
             {/* Google Sign Up Button */}
-            <div className="flex justify-center">
+            <div className="flex justify-center md:col-span-2 xl:col-span-3">
               <div ref={googleBtnRef} />
             </div>
 
-            <div>
+            <div className="md:col-span-1">
               <Input
                 label={t("form.fields.phone")}
                 name="phone"
@@ -518,15 +549,17 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            <Input
-              label={t("form.fields.location")}
-              name="location"
-              type="text"
-              value={formData.location}
-              onChange={handleChange}
-            />
+            <div className="md:col-span-1">
+              <Input
+                label={t("form.fields.location")}
+                name="location"
+                type="text"
+                value={formData.location}
+                onChange={handleChange}
+              />
+            </div>
 
-            <div>
+            <div className="md:col-span-2 xl:col-span-3">
               <label
                 htmlFor="bio"
                 className="block text-sm font-medium text-gray-700 mb-1"
@@ -547,7 +580,7 @@ const RegisterPage: React.FC = () => {
             {/* Worker-specific fields */}
             {formData.role === "worker" && (
               <>
-                <div>
+                <div className="md:col-span-2 xl:col-span-3">
                   <Input
                     label={t("form.fields.worker.skills.label")}
                     name="skills"
@@ -558,35 +591,41 @@ const RegisterPage: React.FC = () => {
                     className={fieldErrors.skills ? "border-red-500" : ""}
                   />
                   {fieldErrors.skills && (
-                    <p className="mt-1 text-sm text-red-600">{fieldErrors.skills}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {fieldErrors.skills}
+                    </p>
                   )}
                 </div>
 
-                <Input
-                  label={t("form.fields.worker.experience")}
-                  name="experience"
-                  type="number"
-                  min="0"
-                  value={formData.experience}
-                  onChange={handleChange}
-                />
+                <div className="md:col-span-1">
+                  <Input
+                    label={t("form.fields.worker.experience")}
+                    name="experience"
+                    type="number"
+                    min="0"
+                    value={formData.experience}
+                    onChange={handleChange}
+                  />
+                </div>
 
-                <Input
-                  label={t("form.fields.worker.hourlyRate")}
-                  name="hourlyRate"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.hourlyRate}
-                  onChange={handleChange}
-                />
+                <div className="md:col-span-1">
+                  <Input
+                    label={t("form.fields.worker.hourlyRate")}
+                    name="hourlyRate"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.hourlyRate}
+                    onChange={handleChange}
+                  />
+                </div>
               </>
             )}
 
             {/* Client-specific fields */}
             {formData.role === "client" && (
               <>
-                <div>
+                <div className="md:col-span-1">
                   <Input
                     label={t("form.fields.client.company")}
                     name="company"
@@ -596,11 +635,13 @@ const RegisterPage: React.FC = () => {
                     className={fieldErrors.company ? "border-red-500" : ""}
                   />
                   {fieldErrors.company && (
-                    <p className="mt-1 text-sm text-red-600">{fieldErrors.company}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {fieldErrors.company}
+                    </p>
                   )}
                 </div>
 
-                <div>
+                <div className="md:col-span-1">
                   <Input
                     label={t("form.fields.client.industry")}
                     name="industry"
@@ -610,21 +651,25 @@ const RegisterPage: React.FC = () => {
                     className={fieldErrors.industry ? "border-red-500" : ""}
                   />
                   {fieldErrors.industry && (
-                    <p className="mt-1 text-sm text-red-600">{fieldErrors.industry}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {fieldErrors.industry}
+                    </p>
                   )}
                 </div>
 
-                <Input
-                  label={t("form.fields.client.website")}
-                  name="website"
-                  type="url"
-                  value={formData.website}
-                  onChange={handleChange}
-                />
+                <div className="md:col-span-2 xl:col-span-3">
+                  <Input
+                    label={t("form.fields.client.website")}
+                    name="website"
+                    type="url"
+                    value={formData.website}
+                    onChange={handleChange}
+                  />
+                </div>
               </>
             )}
 
-            <div>
+            <div className="md:col-span-1">
               <Input
                 label={t("form.fields.password")}
                 name="password"
@@ -633,9 +678,12 @@ const RegisterPage: React.FC = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className={fieldErrors.password ? "border-red-500" : ""}
+                showPasswordToggle
               />
               {fieldErrors.password && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {fieldErrors.password}
+                </p>
               )}
 
               {/* Password Strength Indicator */}
@@ -644,7 +692,9 @@ const RegisterPage: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <div className="flex space-x-1">
                       {[1, 2, 3, 4, 5].map((level) => {
-                        const passwordStrength = getPasswordStrength(formData.password);
+                        const passwordStrength = getPasswordStrength(
+                          formData.password,
+                        );
                         return (
                           <div
                             key={level}
@@ -653,21 +703,23 @@ const RegisterPage: React.FC = () => {
                                 ? passwordStrength.score <= 2
                                   ? "bg-red-500"
                                   : passwordStrength.score <= 3
-                                  ? "bg-yellow-500"
-                                  : "bg-green-500"
+                                    ? "bg-yellow-500"
+                                    : "bg-green-500"
                                 : "bg-gray-200"
                             }`}
                           />
                         );
                       })}
                     </div>
-                    <span className={`text-sm font-medium ${
-                      getPasswordStrength(formData.password).score <= 2
-                        ? "text-red-600"
-                        : getPasswordStrength(formData.password).score <= 3
-                        ? "text-yellow-600"
-                        : "text-green-600"
-                    }`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        getPasswordStrength(formData.password).score <= 2
+                          ? "text-red-600"
+                          : getPasswordStrength(formData.password).score <= 3
+                            ? "text-yellow-600"
+                            : "text-green-600"
+                      }`}
+                    >
                       {getPasswordStrength(formData.password).text}
                     </span>
                   </div>
@@ -676,24 +728,44 @@ const RegisterPage: React.FC = () => {
                   <div className="mt-2 text-xs text-gray-600">
                     <p className="font-medium">Password must contain:</p>
                     <ul className="mt-1 space-y-1">
-                      <li className={`flex items-center ${formData.password.length >= 8 ? "text-green-600" : "text-gray-500"}`}>
-                        <span className="mr-2">{formData.password.length >= 8 ? "✓" : "○"}</span>
+                      <li
+                        className={`flex items-center ${formData.password.length >= 8 ? "text-green-600" : "text-gray-500"}`}
+                      >
+                        <span className="mr-2">
+                          {formData.password.length >= 8 ? "✓" : "○"}
+                        </span>
                         At least 8 characters
                       </li>
-                      <li className={`flex items-center ${/[a-z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
-                        <span className="mr-2">{/[a-z]/.test(formData.password) ? "✓" : "○"}</span>
+                      <li
+                        className={`flex items-center ${/[a-z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
+                      >
+                        <span className="mr-2">
+                          {/[a-z]/.test(formData.password) ? "✓" : "○"}
+                        </span>
                         One lowercase letter
                       </li>
-                      <li className={`flex items-center ${/[A-Z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
-                        <span className="mr-2">{/[A-Z]/.test(formData.password) ? "✓" : "○"}</span>
+                      <li
+                        className={`flex items-center ${/[A-Z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
+                      >
+                        <span className="mr-2">
+                          {/[A-Z]/.test(formData.password) ? "✓" : "○"}
+                        </span>
                         One uppercase letter
                       </li>
-                      <li className={`flex items-center ${/\d/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
-                        <span className="mr-2">{/\d/.test(formData.password) ? "✓" : "○"}</span>
+                      <li
+                        className={`flex items-center ${/\d/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
+                      >
+                        <span className="mr-2">
+                          {/\d/.test(formData.password) ? "✓" : "○"}
+                        </span>
                         One number
                       </li>
-                      <li className={`flex items-center ${/[@$!%*?&]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}>
-                        <span className="mr-2">{/[@$!%*?&]/.test(formData.password) ? "✓" : "○"}</span>
+                      <li
+                        className={`flex items-center ${/[@$!%*?&]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
+                      >
+                        <span className="mr-2">
+                          {/[@$!%*?&]/.test(formData.password) ? "✓" : "○"}
+                        </span>
                         One special character (@$!%*?&)
                       </li>
                     </ul>
@@ -702,7 +774,7 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            <div>
+            <div className="md:col-span-1">
               <Input
                 label={t("form.fields.confirmPassword")}
                 name="confirmPassword"
@@ -711,17 +783,22 @@ const RegisterPage: React.FC = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className={fieldErrors.confirmPassword ? "border-red-500" : ""}
+                showPasswordToggle
               />
               {fieldErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {fieldErrors.confirmPassword}
+                </p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" loading={loading}>
-              {loading
-                ? t("form.buttons.submit.loading")
-                : t("form.buttons.submit.default")}
-            </Button>
+            <div className="md:col-span-2 xl:col-span-3">
+              <Button type="submit" className="w-full" loading={loading}>
+                {loading
+                  ? t("form.buttons.submit.loading")
+                  : t("form.buttons.submit.default")}
+              </Button>
+            </div>
           </form>
         </Card>
       </div>

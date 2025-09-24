@@ -1080,6 +1080,12 @@
     "recentUsers": {
       "title": "Recent Users",
       "viewAll": "View All",
+      "tags": {
+        "verified": "Verified",
+        "unverified": "Unverified",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
       "buttons": {
         "verify": "Verify"
       }

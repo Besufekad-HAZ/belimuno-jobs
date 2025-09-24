@@ -4,27 +4,58 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-
   /* Modern Belimuno Brand Colors */
-  --belimuno-primary: #1E3A8A; /* Deep Navy Primary brand color */
-  --belimuno-secondary: #4D84FF; /* Bright Blue - Accent and interactive elements */
-  --belimuno-accent: #7AA9FF; /* Soft Sky Blue - Hover states and secondary interactions */
-  --belimuno-light: #D6E4FF; /* Light Blue - Background cards and sections */
+  --belimuno-primary: #1e3a8a; /* Deep Navy Primary brand color */
+  --belimuno-secondary: #4d84ff; /* Bright Blue - Accent and interactive elements */
+  --belimuno-accent: #7aa9ff; /* Soft Sky Blue - Hover states and secondary interactions */
+  --belimuno-light: #d6e4ff; /* Light Blue - Background cards and sections */
   --belimuno-cta: #ff9437; /* Vibrant Yellow - Call-to-action buttons */
-  --belimuno-error: #FF6B6B; /* Coral Red - Alerts and error states */
-  --belimuno-success: #10B981; /* Success Green - Positive feedback */
+  --belimuno-error: #ff6b6b; /* Coral Red - Alerts and error states */
+  --belimuno-success: #10b981; /* Success Green - Positive feedback */
   --belimuno-warning: #720000; /* Warning Orange - Caution states */
-  --belimuno-dark: #1E3A8A; /* Deep navy for consistency */
-  --belimuno-neutral: #F3F4F6; /* Light gray for card backgrounds */
+  --belimuno-dark: #1e3a8a; /* Deep navy for consistency */
+  --belimuno-neutral: #f3f4f6; /* Light gray for card backgrounds */
   --belimuno-text-primary: #374151; /* Dark gray for primary text */
-  --belimuno-text-secondary: #6B7280; /* Medium gray for secondary text */
-  --belimuno-text-inverse: #FFFFFF; /* White for text on dark backgrounds */ --radius: 0.625rem; --background: oklch(1 0 0); --foreground: oklch(0.145 0 0); --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0); --popover: oklch(1 0 0); --popover-foreground: oklch(0.145 0 0); --primary: oklch(0.205 0 0); --primary-foreground: oklch(0.985 0 0); --secondary: oklch(0.97 0 0); --secondary-foreground: oklch(0.205 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0); --accent: oklch(0.97 0 0); --accent-foreground: oklch(0.205 0 0); --destructive: oklch(0.577 0.245 27.325); --border: oklch(0.922 0 0); --input: oklch(0.922 0 0); --ring: oklch(0.708 0 0); --chart-1: oklch(0.646 0.222 41.116); --chart-2: oklch(0.6 0.118 184.704); --chart-3: oklch(0.398 0.07 227.392); --chart-4: oklch(0.828 0.189 84.429); --chart-5: oklch(0.769 0.188 70.08); --sidebar: oklch(0.985 0 0); --sidebar-foreground: oklch(0.145 0 0); --sidebar-primary: oklch(0.205 0 0); --sidebar-primary-foreground: oklch(0.985 0 0); --sidebar-accent: oklch(0.97 0 0); --sidebar-accent-foreground: oklch(0.205 0 0); --sidebar-border: oklch(0.922 0 0); --sidebar-ring: oklch(0.708 0 0);
+  --belimuno-text-secondary: #6b7280; /* Medium gray for secondary text */
+  --belimuno-text-inverse: #ffffff; /* White for text on dark backgrounds */
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -73,15 +104,19 @@
 
 /* Additional utility classes for the new color system */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, var(--belimuno-primary), var(--belimuno-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--belimuno-primary),
+    var(--belimuno-secondary)
+  );
 }
 
 .bg-gradient-cta {
-  background: linear-gradient(135deg, var(--belimuno-cta), #F59E0B);
+  background: linear-gradient(135deg, var(--belimuno-cta), #f59e0b);
 }
 
 .bg-gradient-success {
-  background: linear-gradient(135deg, var(--belimuno-success), #34D399);
+  background: linear-gradient(135deg, var(--belimuno-success), #34d399);
 }
 
 .bg-gradient-background {
@@ -116,6 +151,29 @@ h5,
 h6 {
   font-family: var(--font-heading);
   letter-spacing: -0.01em;
+}
+
+/* Enforce unified font across embedded/third-party components */
+/* Many libraries set Arial or system fonts; normalize them */
+:where(
+  [class^="react-chatbot-kit-"],
+  [class*=" react-chatbot-kit-"],
+  [data-sonner-toaster],
+  .sonner,
+  .Toastify__toast,
+  .Toastify__toast-body,
+  .rc-slider,
+  .rc-select,
+  .rc-tooltip,
+  .rdp,
+  .radix-themes,
+  .radix-themes *
+),
+input,
+button,
+select,
+textarea {
+  font-family: var(--font-primary) !important;
 }
 
 /* Global form element styling for better contrast */
@@ -205,7 +263,8 @@ option {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -214,7 +273,8 @@ option {
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(1);
   }
@@ -298,5 +358,140 @@ option {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ---- Auth Form Error UX (shake + ring) ---- */
+@keyframes belimuno-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: belimuno-shake 300ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.error-ring {
+  box-shadow:
+    0 0 0 1px #ef4444,
+    0 0 0 6px rgba(239, 68, 68, 0.12) !important; /* red-500 */
+  border-color: #ef4444 !important;
+}
+
+.error-banner {
+  position: relative;
+  overflow: hidden;
+  background: #fef2f2; /* red-50 */
+  color: #b91c1c; /* red-700 */
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem 1rem 1rem;
+  box-shadow:
+    0 5px 18px rgba(239, 68, 68, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  animation: error-slide-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.error-banner .icon {
+  color: #ef4444; /* red-500 */
+  filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.25));
+  animation: alert-pop 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.error-banner .error-accent {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 6px;
+  background: linear-gradient(180deg, #ef4444, #f43f5e, #ef4444);
+  background-size: 100% 200%;
+  animation: error-scan 1.2s linear infinite;
+}
+
+.error-banner .error-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #f97316, #ef4444);
+  background-size: 200% 100%;
+  animation:
+    error-progress 5.4s linear forwards,
+    error-scan 1.2s linear infinite;
+  opacity: 0.9;
+}
+
+.error-banner .error-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: #991b1b; /* red-800 */
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  transition: all 0.2s ease;
+}
+
+.error-banner .error-dismiss:hover {
+  transform: scale(1.05);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@keyframes error-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes alert-pop {
+  0% {
+    transform: scale(0.85) rotate(-8deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes error-scan {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 200%;
+  }
+}
+
+@keyframes error-progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
   }
 }

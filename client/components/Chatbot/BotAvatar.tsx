@@ -13,7 +13,7 @@ const BotAvatar: React.FC<AvatarProps> = () => {
     //     height={100}
     //   />
     // </div>
-    <div className="w-[40px] h-[40px] rounded-lg flex items-center justify-center text-[20px] font-bold bg-[#4D84FF] text-white ml-4">
+    <div className="w-[40px] h-[40px] rounded-lg flex items-center justify-center text-[20px] font-bold bg-[#4D84FF] text-white">
       B
     </div>
   );

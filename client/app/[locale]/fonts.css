@@ -1,8 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@400;600;700&display=swap");
-
 :root {
-  --font-primary: "Inter", system-ui, sans-serif;
-  --font-heading: "Montserrat", "Inter", system-ui, sans-serif;
+  /* Unify typography: use Manrope as primary with Ethiopic fallback */
+  --font-primary: var(--font-manrope), var(--font-noto-ethiopic), system-ui, sans-serif;
+  --font-heading: var(--font-manrope), var(--font-noto-ethiopic), system-ui, sans-serif;
 }
 
 body {

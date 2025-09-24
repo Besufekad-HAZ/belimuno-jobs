@@ -209,7 +209,7 @@ const ClientDashboard: React.FC = () => {
       toast.error("Failed to update job status");
     }
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleRequestRevision = async (jobId: string) => {
     const reason = prompt("Please provide a reason for the revision request:");
     if (!reason) return;

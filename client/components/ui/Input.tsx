@@ -19,6 +19,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
 }, ref) => {
   const uniqueId = useId();
   const inputId = id || `input-${uniqueId}`;
+  const errorId = `${inputId}-error`;
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   return (
@@ -45,6 +46,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
               ${error ? "border-red-500 focus:ring-red-500 focus:border-red-500" : ""}
               ${className}
             `}
+            aria-invalid={!!error}
+            aria-describedby={error ? errorId : undefined}
             {...props}
           />
           <button
@@ -101,10 +104,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({
             ${error ? "border-red-500 focus:ring-red-500 focus:border-red-500" : ""}
             ${className}
           `}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
           {...props}
         />
       )}
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && (
+        <p id={errorId} className="mt-1 text-sm text-red-600">
+          {error}
+        </p>
+      )}
       {helperText && !error && (
         <p className="mt-1 text-sm text-gray-600">{helperText}</p>
       )}

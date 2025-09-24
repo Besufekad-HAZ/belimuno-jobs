@@ -228,5 +228,74 @@ const testEmail = async (testEmail) => {
 module.exports = {
   sendPasswordResetEmail,
   sendPasswordResetSuccessEmail,
-  testEmail
+  testEmail,
+  // New contact email helpers
+  sendContactMessageEmail: async (toEmail, payload) => {
+    const { name, email, phone, subject, message } = payload || {};
+    const mailOptions = {
+      from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+      to: toEmail,
+      subject: `📬 New Contact Message: ${subject || 'No subject'}`,
+      text: `You have received a new contact message.\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || '-'}\nSubject: ${subject}\n\nMessage:\n${message}\n` ,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg,#3b82f6,#1d4ed8); padding:16px; color:#fff; border-radius:12px 12px 0 0;">
+            <h2 style="margin:0;">New Contact Message</h2>
+            <p style="margin:4px 0 0 0; opacity:0.95;">Belimuno Jobs</p>
+          </div>
+          <div style="background:#f8fafc; padding:20px; border:1px solid #e5e7eb; border-top:0; border-radius:0 0 12px 12px;">
+            <p><strong>Name:</strong> ${name || '-'}<br/>
+               <strong>Email:</strong> <a href="mailto:${email}">${email}</a><br/>
+               <strong>Phone:</strong> ${phone || '-'}<br/>
+               <strong>Subject:</strong> ${subject || '-'}
+            </p>
+            <div style="margin-top:12px;">
+              <p style="margin:0 0 6px 0; font-weight:600;">Message:</p>
+              <div style="white-space:pre-wrap; background:#fff; border:1px solid #e5e7eb; padding:12px; border-radius:8px;">${(message || '').replace(/</g,'&lt;')}</div>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    try {
+      const result = await getTransporter().sendMail(mailOptions);
+      console.log('✅ Contact admin email sent:', result.messageId);
+      return result;
+    } catch (error) {
+      console.error('❌ Error sending contact admin email:', error);
+      throw error;
+    }
+  },
+  sendContactAutoReply: async (toEmail, name) => {
+    const mailOptions = {
+      from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+      to: toEmail,
+      subject: 'We received your message – Belimuno Jobs',
+      text: `Hello ${name || ''},\n\nThanks for reaching out to Belimuno Jobs. We have received your message and our team will get back to you shortly.\n\nBest regards,\nBelimuno Jobs Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg,#10b981,#059669); padding:16px; color:#fff; border-radius:12px 12px 0 0;">
+            <h2 style="margin:0;">Thanks for contacting us</h2>
+            <p style="margin:4px 0 0 0; opacity:0.95;">Belimuno Jobs</p>
+          </div>
+          <div style="background:#f8fafc; padding:20px; border:1px solid #e5e7eb; border-top:0; border-radius:0 0 12px 12px;">
+            <p>Hello ${name || ''},</p>
+            <p>Thanks for reaching out to Belimuno Jobs. We have received your message and our team will get back to you shortly.</p>
+            <p style="color:#6b7280; font-size:13px;">If this wasn’t you, you can ignore this email.</p>
+            <p style="margin-top:16px;">Best regards,<br/>Belimuno Jobs Team</p>
+          </div>
+        </div>
+      `
+    };
+
+    try {
+      const result = await getTransporter().sendMail(mailOptions);
+      console.log('✅ Contact auto-reply sent:', result.messageId);
+      return result;
+    } catch (error) {
+      console.error('❌ Error sending contact auto-reply:', error);
+      throw error;
+    }
+  }
 };

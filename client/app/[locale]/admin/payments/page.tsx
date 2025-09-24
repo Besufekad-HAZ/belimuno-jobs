@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Image from "next/image";
 import { adminAPI } from "@/lib/api";
