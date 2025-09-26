@@ -67,6 +67,17 @@
         "description": "Complete projects and receive secure payments through our platform"
       }
     },
+    "testimonials": {
+      "eyebrow": "Testimonials",
+      "title": "Stories from teams who trust Belimuno",
+      "subtitle": "Hear how HR leaders and workers use Belimuno to deliver reliable projects across Ethiopia.",
+      "metrics": "Loved by <count>{total}</count> clients and professionals nationwide.",
+      "controls": {
+        "previous": "Previous testimonials",
+        "next": "Next testimonials",
+        "goTo": "Go to testimonial slide {index}"
+      }
+    },
     "news": {
       "title": "What's New",
       "subtitle": "Stay updated with the latest news, updates, and announcements from Belimuno Jobs",

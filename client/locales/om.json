@@ -67,6 +67,17 @@
         "description": "Proojektota xumuri fi kaffaltii nagaa platformaa keenya irraa argadhu"
       }
     },
+    "testimonials": {
+      "eyebrow": "Mirkaneessa",
+      "title": "Hirmaattoonni Belimuno irratti amanan akkana jedhu",
+      "subtitle": "Hoggantoota HR fi hojjettoonni Belimuno fayyadamuun projektoota Itoophiyaa keessatti akkamitti milkeessan dhaggeeffadhaa.",
+      "metrics": "Guutuu biyyaatti maamiloota fi ogeeyyii <count>{total}</count> biratti jaalatame.",
+      "controls": {
+        "previous": "Mirkaneessa dura",
+        "next": "Mirkaneessa itti aanuu",
+        "goTo": "Slayidii mirkaneessa {index} bira galu"
+      }
+    },
     "news": {
       "title": "Waan Haaraa Maal Jira?",
       "subtitle": "Oduu dhiyaataa, fooyya'iinsa, fi beeksisaawwan Belimuno Jobs irraa dhufanii walitti qabaa",

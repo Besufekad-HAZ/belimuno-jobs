@@ -21,6 +21,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import { newsData } from "@/data/news";
+import TestimonialsSection from "@/components/sections/TestimonialsSection";
 
 type StoredUser = { role: string } | null;
 type Stats = {
@@ -326,6 +327,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <TestimonialsSection />
 
       {/* News Section */}
       <div className="py-16 bg-gray-50">
