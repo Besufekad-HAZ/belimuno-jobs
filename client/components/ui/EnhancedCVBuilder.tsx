@@ -26,7 +26,7 @@ interface Education {
   degree: string;
   fieldOfStudy: string;
   startDate: string;
-  endDate: string;
+  endDate: string | undefined;
   current: boolean;
 }
 
@@ -35,7 +35,7 @@ interface Experience {
   company: string;
   position: string;
   startDate: string;
-  endDate: string;
+  endDate: string | undefined;
   current: boolean;
   description: string;
 }

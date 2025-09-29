@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getStoredUser, hasRole } from "@/lib/auth";
-import { workerAPI, jobsAPI } from "@/lib/api";
+import { jobsAPI, authAPI } from "@/lib/api";
 import EnhancedCVBuilder from "@/components/ui/EnhancedCVBuilder";
 import LoadingPage from "@/components/Layout/LoadingPage";
 import { toast } from "@/components/ui/sonner";
@@ -37,7 +37,7 @@ const CVBuilderPage: React.FC = () => {
       degree: string;
       fieldOfStudy: string;
       startDate: string;
-      endDate: string;
+      endDate: string | undefined;
       current: boolean;
     }>;
     experience: Array<{
@@ -45,14 +45,14 @@ const CVBuilderPage: React.FC = () => {
       company: string;
       position: string;
       startDate: string;
-      endDate: string;
+      endDate: string | undefined;
       current: boolean;
       description: string;
     }>;
     detailedSkills: Array<{
       id: string;
       name: string;
-      level: string;
+      level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
     }>;
   } | null>(null);
   const [availableJobs, setAvailableJobs] = useState<Array<{
@@ -88,33 +88,18 @@ const CVBuilderPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await authAPI.getMe();
-      const userData = response.data.user;
-      const profile = userData.profile;
-      const workerProfile = userData.workerProfile;
+      const userData = response.data?.user;
       
-      if (profile.cv?.data) {
-        const cvData = typeof profile.cv.data === 'string' 
-          ? JSON.parse(profile.cv.data) 
-          : profile.cv.data;
-        setInitialCVData(cvData);
-      } else {
-        // Initialize with user's basic info
-        setInitialCVData({
-          personalInfo: {
-            fullName: user?.name || "",
-            email: user?.email || "",
-            phone: profile.phone || "",
-            address: profile.address?.city ? `${profile.address.city}, ${profile.address.country || 'Ethiopia'}` : "",
-            summary: profile.bio || "",
-            workerSkills: profile.skills || [],
-            workerExperience: profile.experience || "",
-            workerHourlyRate: profile.hourlyRate || 0,
-            portfolio: userData.workerProfile?.portfolio?.[0] || "",
-            dateOfBirth: profile.dob ? String(profile.dob).substring(0, 10) : "",
-            gender: (profile as { gender?: string }).gender || "",
-          },
-          // Preserve existing education, experience, and detailed skills if available
-          education: (workerProfile?.education || []).map((edu: {
+      if (!userData) {
+        throw new Error("No user data found");
+      }
+      
+      const profile = userData.profile;
+      
+      // Define extended user data interface
+      interface ExtendedUserData {
+        workerProfile?: {
+          education?: Array<{
             _id?: string;
             school: string;
             degree: string;
@@ -122,7 +107,69 @@ const CVBuilderPage: React.FC = () => {
             startDate: string;
             endDate?: string;
             description?: string;
-          }) => ({
+          }>;
+          workHistory?: Array<{
+            _id?: string;
+            company: string;
+            title: string;
+            startDate: string;
+            endDate?: string;
+            description: string;
+          }>;
+          portfolio?: string[];
+        };
+      }
+      
+      interface ExtendedProfile {
+        cv?: {
+          data?: string | object;
+        };
+        address?: {
+          city?: string;
+          country?: string;
+        };
+        dob?: string | Date;
+        gender?: string;
+        detailedSkills?: Array<{
+          _id?: string;
+          name: string;
+          level: string;
+        }>;
+      }
+      
+      const extendedUserData = userData as ExtendedUserData;
+      const workerProfile = extendedUserData.workerProfile;
+      const extendedProfile = profile as ExtendedProfile;
+      
+      // Check if CV data exists in profile
+      const cvData = extendedProfile?.cv?.data;
+      if (cvData) {
+        const parsedCVData = typeof cvData === 'string' 
+          ? JSON.parse(cvData) 
+          : cvData;
+        setInitialCVData(parsedCVData);
+      } else {
+        // Initialize with user's basic info
+        setInitialCVData({
+          personalInfo: {
+            fullName: user?.name || "",
+            email: user?.email || "",
+            phone: profile?.phone || "",
+            address: extendedProfile?.address?.city 
+              ? `${extendedProfile.address.city}, ${extendedProfile.address.country || 'Ethiopia'}` 
+              : "",
+            summary: profile?.bio || "",
+            workerSkills: profile?.skills || [],
+            workerExperience: String(profile?.experience || ""),
+            workerHourlyRate: profile?.hourlyRate || 0,
+            portfolio: workerProfile?.portfolio?.[0] || "",
+            dateOfBirth: extendedProfile?.dob 
+              ? String(extendedProfile.dob).substring(0, 10) 
+              : "",
+            gender: extendedProfile?.gender || "",
+          },
+          // Preserve existing education, experience, and detailed skills if available
+          education: (workerProfile?.education || []).map((edu) => ({
             id: edu._id || Date.now().toString(),
             institution: edu.school,
             degree: edu.degree,
@@ -131,14 +178,7 @@ const CVBuilderPage: React.FC = () => {
             endDate: edu.endDate,
             current: false, // Assuming 'current' status needs to be re-evaluated or handled differently
           })),
-          experience: (workerProfile?.workHistory || []).map((exp: {
-            _id?: string;
-            company: string;
-            title: string;
-            startDate: string;
-            endDate?: string;
-            description: string;
-          }) => ({
+          experience: (workerProfile?.workHistory || []).map((exp) => ({
             id: exp._id || Date.now().toString(),
             company: exp.company,
             position: exp.title,
@@ -147,14 +187,12 @@ const CVBuilderPage: React.FC = () => {
             current: false, // Assuming 'current' status needs to be re-evaluated or handled differently
             description: exp.description,
           })),
-          detailedSkills: (profile.detailedSkills || []).map((skill: {
-            _id?: string;
-            name: string;
-            level: string;
-          }) => ({
+          detailedSkills: (extendedProfile?.detailedSkills || []).map((skill) => ({
             id: skill._id || Date.now().toString(),
             name: skill.name,
-            level: skill.level || "Beginner",
+            level: (["Beginner", "Intermediate", "Advanced", "Expert"].includes(skill.level) 
+              ? skill.level 
+              : "Beginner") as "Beginner" | "Intermediate" | "Advanced" | "Expert",
           })),
         });
       }
@@ -194,14 +232,14 @@ const CVBuilderPage: React.FC = () => {
       degree: string;
       fieldOfStudy: string;
       startDate: string;
-      endDate: string;
+      endDate: string | undefined;
       current: boolean;
     }>;
     experience: Array<{
       company: string;
       position: string;
       startDate: string;
-      endDate: string;
+      endDate: string | undefined;
       current: boolean;
       description: string;
     }>;
@@ -276,14 +314,14 @@ const CVBuilderPage: React.FC = () => {
       degree: string;
       fieldOfStudy: string;
       startDate: string;
-      endDate: string;
+      endDate: string | undefined;
       current: boolean;
     }>;
     experience: Array<{
       company: string;
       position: string;
       startDate: string;
-      endDate: string;
+      endDate: string | undefined;
       current: boolean;
       description: string;
     }>;
@@ -362,14 +400,7 @@ const CVBuilderPage: React.FC = () => {
       if (cvData.experience && cvData.experience.length > 0) {
         addText("WORK EXPERIENCE", 14, true);
         
-        cvData.experience.forEach((exp: {
-          position: string;
-          company: string;
-          startDate: string;
-          endDate: string;
-          current: boolean;
-          description: string;
-        }) => {
+        cvData.experience.forEach((exp) => {
           const title = `${exp.position || 'Position'} at ${exp.company || 'Company'}`;
           const dates = `${exp.startDate || ''} - ${exp.current ? 'Present' : exp.endDate || ''}`;
           
@@ -388,14 +419,7 @@ const CVBuilderPage: React.FC = () => {
       if (cvData.education && cvData.education.length > 0) {
         addText("EDUCATION", 14, true);
         
-        cvData.education.forEach((edu: {
-          degree: string;
-          fieldOfStudy: string;
-          institution: string;
-          startDate: string;
-          endDate: string;
-          current: boolean;
-        }) => {
+        cvData.education.forEach((edu) => {
           const degree = `${edu.degree || 'Degree'}${edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}`;
           const school = edu.institution || 'Institution';
           const dates = `${edu.startDate || ''} - ${edu.current ? 'Present' : edu.endDate || ''}`;
