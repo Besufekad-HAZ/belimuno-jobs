@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Users,
   Search,
-  Filter,
   Eye,
   CheckCircle,
   XCircle,
@@ -16,7 +15,11 @@ import {
   MessageSquare,
   Award,
   Clock,
+  SlidersHorizontal,
+  RefreshCw,
+  Sparkles,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI, notificationsAPI } from "@/lib/api";
@@ -27,6 +30,10 @@ import Modal from "@/components/ui/Modal";
 import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "@/components/ui/sonner";
+import {
+  classifyWorkerCategory,
+  DEFAULT_WORKER_CATEGORY,
+} from "@/data/workerCategories";
 
 interface Worker {
   _id: string;
@@ -82,15 +89,54 @@ interface Worker {
   };
 }
 
+type WorkerMeta = {
+  category: string;
+  experience: string;
+};
+
+type WorkerWithMeta = Worker & {
+  __meta: WorkerMeta;
+};
+
+const NOT_SPECIFIED_EXPERIENCE = "Not specified";
+
+const formatExperienceLabel = (experience?: string | null) => {
+  if (!experience) return NOT_SPECIFIED_EXPERIENCE;
+  const cleaned = experience.replace(/[_-]/g, " ").trim().toLowerCase();
+  if (!cleaned) return NOT_SPECIFIED_EXPERIENCE;
+  return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 const WorkerManagement: React.FC = () => {
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
+  const [workers, setWorkers] = useState<WorkerWithMeta[]>([]);
+  const [filteredWorkers, setFilteredWorkers] = useState<WorkerWithMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const statuses = ["all", "verified", "pending", "inactive"] as const;
   type Status = (typeof statuses)[number];
+  const statusMeta: Record<
+    Status,
+    { label: string; icon: LucideIcon; iconClass: string }
+  > = {
+    all: { label: "All", icon: Users, iconClass: "text-blue-500" },
+    verified: {
+      label: "Verified",
+      icon: CheckCircle,
+      iconClass: "text-emerald-500",
+    },
+    pending: { label: "Pending", icon: Clock, iconClass: "text-amber-500" },
+    inactive: { label: "Inactive", icon: XCircle, iconClass: "text-rose-500" },
+  };
   const [statusFilter, setStatusFilter] = useState<Status>("all");
-  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [experienceFilter, setExperienceFilter] = useState<string>("all");
+  const [selectedWorker, setSelectedWorker] = useState<WorkerWithMeta | null>(
+    null,
+  );
   const [showWorkerModal, setShowWorkerModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationAction, setVerificationAction] = useState<
@@ -103,6 +149,38 @@ const WorkerManagement: React.FC = () => {
     message: "",
   });
   const router = useRouter();
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    workers.forEach((worker) => {
+      set.add(worker.__meta?.category || DEFAULT_WORKER_CATEGORY);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [workers]);
+
+  const experienceOptions = useMemo(() => {
+    const set = new Set<string>();
+    workers.forEach((worker) => {
+      set.add(worker.__meta?.experience || NOT_SPECIFIED_EXPERIENCE);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [workers]);
+
+  const filtersDirty = useMemo(() => {
+    return (
+      statusFilter !== "all" ||
+      categoryFilter !== "all" ||
+      experienceFilter !== "all" ||
+      Boolean(searchQuery.trim())
+    );
+  }, [statusFilter, categoryFilter, experienceFilter, searchQuery]);
+
+  const resetFilters = useCallback(() => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setCategoryFilter("all");
+    setExperienceFilter("all");
+  }, []);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -117,19 +195,30 @@ const WorkerManagement: React.FC = () => {
   const filterWorkers = useCallback(() => {
     let filtered = [...workers];
 
-    // Apply search filter
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (worker) =>
-          worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          worker.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          worker.workerProfile?.skills?.some((skill) =>
-            skill.toLowerCase().includes(searchQuery.toLowerCase()),
-          ),
-      );
+    const query = searchQuery.trim().toLowerCase();
+
+    if (query) {
+      filtered = filtered.filter((worker) => {
+        const skillsMatch = worker.workerProfile?.skills?.some((skill) =>
+          skill.toLowerCase().includes(query),
+        );
+        const categoryMatch = worker.__meta?.category
+          ?.toLowerCase()
+          .includes(query);
+        const experienceMatch = worker.__meta?.experience
+          ?.toLowerCase()
+          .includes(query);
+
+        return (
+          worker.name.toLowerCase().includes(query) ||
+          worker.email.toLowerCase().includes(query) ||
+          skillsMatch ||
+          categoryMatch ||
+          experienceMatch
+        );
+      });
     }
 
-    // Apply status filter
     switch (statusFilter) {
       case "verified":
         filtered = filtered.filter((w) => w.isVerified || w.profile?.verified);
@@ -144,8 +233,23 @@ const WorkerManagement: React.FC = () => {
         break;
     }
 
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter(
+        (w) =>
+          (w.__meta?.category || DEFAULT_WORKER_CATEGORY) === categoryFilter,
+      );
+    }
+
+    if (experienceFilter !== "all") {
+      filtered = filtered.filter(
+        (w) =>
+          (w.__meta?.experience || NOT_SPECIFIED_EXPERIENCE) ===
+          experienceFilter,
+      );
+    }
+
     setFilteredWorkers(filtered);
-  }, [workers, searchQuery, statusFilter]);
+  }, [workers, searchQuery, statusFilter, categoryFilter, experienceFilter]);
 
   useEffect(() => {
     filterWorkers();
@@ -155,9 +259,29 @@ const WorkerManagement: React.FC = () => {
     try {
       setLoading(true);
       const response = await adminAPI.getUsers({ role: "worker", limit: 100 });
-      const workersData =
-        response.data?.data || response.data?.users || response.data || [];
-      setWorkers(workersData);
+      const workersData = (response.data?.data ||
+        response.data?.users ||
+        response.data ||
+        []) as Worker[];
+
+      const normalized: WorkerWithMeta[] = workersData.map((worker) => {
+        const category = classifyWorkerCategory(
+          worker.workerProfile?.skills || [],
+        );
+        const experience = formatExperienceLabel(
+          worker.workerProfile?.experience,
+        );
+
+        return {
+          ...worker,
+          __meta: {
+            category: category || DEFAULT_WORKER_CATEGORY,
+            experience,
+          },
+        };
+      });
+
+      setWorkers(normalized);
     } catch (error) {
       console.error("Failed to fetch workers:", error);
     } finally {
@@ -386,41 +510,144 @@ const WorkerManagement: React.FC = () => {
         </div>
 
         {/* Filters and Search */}
-        <Card className="p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Card className="p-6 mb-6 bg-white/90 border border-blue-100 shadow-lg shadow-blue-50/60 backdrop-blur-sm">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/40">
+                  <SlidersHorizontal className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    Candidate Filters
+                    <Sparkles className="h-4 w-4 text-blue-500" />
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Refine your talent pool by keyword, status, category, and
+                    experience.
+                  </p>
+                </div>
+              </div>
+
+              {filtersDirty && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetFilters}
+                  className="border border-blue-200 text-blue-600 hover:text-blue-700 hover:border-blue-400 shadow-sm"
+                >
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Reset filters
+                </Button>
+              )}
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+              <div className="relative group">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400 transition-colors duration-200 group-focus-within:text-blue-500" />
                 <input
                   type="text"
-                  placeholder="Search workers by name, email, or skills..."
+                  placeholder="Search by name, email, skills, category or experience..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-xl border border-blue-100 bg-white/90 px-12 py-3 text-sm shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 group-hover:border-blue-200"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                <Filter className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">Status:</span>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Category
+                  </label>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="w-full rounded-xl border border-blue-100 bg-white/90 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 hover:border-blue-200"
+                  >
+                    <option value="all">All categories</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Experience
+                  </label>
+                  <select
+                    value={experienceFilter}
+                    onChange={(e) => setExperienceFilter(e.target.value)}
+                    className="w-full rounded-xl border border-blue-100 bg-white/90 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 hover:border-blue-200"
+                  >
+                    <option value="all">All experience levels</option>
+                    {experienceOptions.map((experience) => (
+                      <option key={experience} value={experience}>
+                        {experience}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-
-              {statuses.map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setStatusFilter(status)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    statusFilter === status
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </button>
-              ))}
             </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Status
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {statuses.map((status) => {
+                  const meta = statusMeta[status];
+                  const isActive = statusFilter === status;
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => setStatusFilter(status)}
+                      className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                        isActive
+                          ? "bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-lg shadow-blue-200/70 scale-[1.03] focus:ring-blue-500"
+                          : "bg-white/80 border border-blue-100 text-blue-700 hover:bg-blue-50 focus:ring-blue-300"
+                      }`}
+                    >
+                      <meta.icon
+                        className={`h-4 w-4 transition-colors duration-200 ${
+                          isActive ? "text-white" : meta.iconClass
+                        }`}
+                      />
+                      <span>{meta.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {filtersDirty && (
+              <div className="flex flex-wrap items-center gap-2 text-sm text-blue-700">
+                <span className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                  Active filters
+                </span>
+                {statusFilter !== "all" && (
+                  <Badge variant="info" size="sm">
+                    Status: {statusMeta[statusFilter].label}
+                  </Badge>
+                )}
+                {categoryFilter !== "all" && (
+                  <Badge variant="info" size="sm">
+                    Category: {categoryFilter}
+                  </Badge>
+                )}
+                {experienceFilter !== "all" && (
+                  <Badge variant="info" size="sm">
+                    Experience: {experienceFilter}
+                  </Badge>
+                )}
+                {searchQuery.trim() && (
+                  <Badge variant="info" size="sm">
+                    Search: &ldquo;{searchQuery.trim()}&rdquo;
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         </Card>
 
@@ -440,7 +667,10 @@ const WorkerManagement: React.FC = () => {
             </Card>
           ) : (
             filteredWorkers.map((worker) => (
-              <Card key={worker._id} className="p-6">
+              <Card
+                key={worker._id}
+                className="p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:border-blue-100/80"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Avatar */}
@@ -465,6 +695,11 @@ const WorkerManagement: React.FC = () => {
                           {worker.name}
                         </h3>
                         {getWorkerStatusBadge(worker)}
+                        {worker.__meta?.category && (
+                          <Badge variant="secondary">
+                            {worker.__meta.category}
+                          </Badge>
+                        )}
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 text-yellow-500" />
                           <span className="text-sm font-medium">
@@ -490,8 +725,9 @@ const WorkerManagement: React.FC = () => {
                         <div>
                           <p className="text-sm text-gray-600">
                             <strong>Experience:</strong>{" "}
-                            {worker.workerProfile?.experience ||
-                              "Not specified"}
+                            {worker.__meta?.experience ||
+                              worker.workerProfile?.experience ||
+                              NOT_SPECIFIED_EXPERIENCE}
                           </p>
                           <p className="text-sm text-gray-600">
                             <strong>Jobs:</strong>{" "}
@@ -673,7 +909,14 @@ const WorkerManagement: React.FC = () => {
                   {selectedWorker.phone && (
                     <p className="text-gray-600">{selectedWorker.phone}</p>
                   )}
-                  {getWorkerStatusBadge(selectedWorker)}
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {getWorkerStatusBadge(selectedWorker)}
+                    {selectedWorker.__meta?.category && (
+                      <Badge variant="secondary">
+                        {selectedWorker.__meta.category}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -738,28 +981,36 @@ const WorkerManagement: React.FC = () => {
                   <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                     <div className="grid grid-cols-2 gap-4">
                       <p>
+                        <strong>Category:</strong>{" "}
+                        {selectedWorker.__meta?.category ||
+                          DEFAULT_WORKER_CATEGORY}
+                      </p>
+                      <p>
                         <strong>Experience:</strong>{" "}
-                        {selectedWorker.workerProfile.experience}
+                        {selectedWorker.__meta?.experience ||
+                          selectedWorker.workerProfile.experience ||
+                          NOT_SPECIFIED_EXPERIENCE}
                       </p>
                       <p>
                         <strong>Hourly Rate:</strong> $
-                        {selectedWorker.workerProfile.hourlyRate || "Not set"}
+                        {selectedWorker.workerProfile.hourlyRate ?? "Not set"}
                       </p>
                       <p>
                         <strong>Availability:</strong>{" "}
-                        {selectedWorker.workerProfile.availability}
+                        {selectedWorker.workerProfile.availability ||
+                          "Not specified"}
                       </p>
                       <p>
                         <strong>Rating:</strong>{" "}
-                        {selectedWorker.workerProfile.rating}/5 ⭐
+                        {selectedWorker.workerProfile.rating ?? 0}/5 ⭐
                       </p>
                       <p>
                         <strong>Total Jobs:</strong>{" "}
-                        {selectedWorker.workerProfile.totalJobs}
+                        {selectedWorker.workerProfile.totalJobs ?? 0}
                       </p>
                       <p>
                         <strong>Completed Jobs:</strong>{" "}
-                        {selectedWorker.workerProfile.completedJobs}
+                        {selectedWorker.workerProfile.completedJobs ?? 0}
                       </p>
                     </div>
 
