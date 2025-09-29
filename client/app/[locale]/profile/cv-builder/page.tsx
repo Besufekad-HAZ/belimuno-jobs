@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { workerAPI, jobsAPI } from "@/lib/api";
@@ -14,23 +14,63 @@ import Badge from "@/components/ui/Badge";
 import { Briefcase, Calendar, MapPin, Eye } from "lucide-react";
 
 const CVBuilderPage: React.FC = () => {
-  const [user, setUser] = useState(getStoredUser());
+  const [user] = useState(getStoredUser());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [initialCVData, setInitialCVData] = useState(null);
-  const [availableJobs, setAvailableJobs] = useState([]);
+  const [initialCVData, setInitialCVData] = useState<{
+    personalInfo: {
+      fullName: string;
+      email: string;
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      portfolio: string;
+      dateOfBirth: string;
+      gender: string;
+    };
+    education: Array<{
+      id: string;
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+    }>;
+    experience: Array<{
+      id: string;
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+      description: string;
+    }>;
+    detailedSkills: Array<{
+      id: string;
+      name: string;
+      level: string;
+    }>;
+  } | null>(null);
+  const [availableJobs, setAvailableJobs] = useState<Array<{
+    _id: string;
+    title: string;
+    description: string;
+    budget: { min: number; max: number };
+    category: string;
+    location: string;
+    createdAt: string;
+    deadline: string;
+    client: {
+      name: string;
+      companyName?: string;
+    };
+  }>>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const router = useRouter();
-
-  useEffect(() => {
-    if (!user || !hasRole(user, ["worker"])) {
-      router.push("/login");
-      return;
-    }
-
-    loadExistingCV();
-    loadAvailableJobs();
-  }, [user, router]);
 
   const loadAvailableJobs = async () => {
     try {
@@ -44,12 +84,13 @@ const CVBuilderPage: React.FC = () => {
     }
   };
 
-  const loadExistingCV = async () => {
+  const loadExistingCV = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await workerAPI.getProfile();
-      const profile = response.data.data;
-      const workerProfile = response.data.data.workerProfile; // Fetch workerProfile
+      const response = await authAPI.getMe();
+      const userData = response.data.user;
+      const profile = userData.profile;
+      const workerProfile = userData.workerProfile;
       
       if (profile.cv?.data) {
         const cvData = typeof profile.cv.data === 'string' 
@@ -60,17 +101,28 @@ const CVBuilderPage: React.FC = () => {
         // Initialize with user's basic info
         setInitialCVData({
           personalInfo: {
-            fullName: user.name || "",
-            email: user.email || "",
+            fullName: user?.name || "",
+            email: user?.email || "",
             phone: profile.phone || "",
             address: profile.address?.city ? `${profile.address.city}, ${profile.address.country || 'Ethiopia'}` : "",
             summary: profile.bio || "",
             workerSkills: profile.skills || [],
             workerExperience: profile.experience || "",
             workerHourlyRate: profile.hourlyRate || 0,
+            portfolio: userData.workerProfile?.portfolio?.[0] || "",
+            dateOfBirth: profile.dob ? String(profile.dob).substring(0, 10) : "",
+            gender: (profile as { gender?: string }).gender || "",
           },
           // Preserve existing education, experience, and detailed skills if available
-          education: (workerProfile?.education || []).map((edu: any) => ({
+          education: (workerProfile?.education || []).map((edu: {
+            _id?: string;
+            school: string;
+            degree: string;
+            field: string;
+            startDate: string;
+            endDate?: string;
+            description?: string;
+          }) => ({
             id: edu._id || Date.now().toString(),
             institution: edu.school,
             degree: edu.degree,
@@ -79,7 +131,14 @@ const CVBuilderPage: React.FC = () => {
             endDate: edu.endDate,
             current: false, // Assuming 'current' status needs to be re-evaluated or handled differently
           })),
-          experience: (workerProfile?.workHistory || []).map((exp: any) => ({
+          experience: (workerProfile?.workHistory || []).map((exp: {
+            _id?: string;
+            company: string;
+            title: string;
+            startDate: string;
+            endDate?: string;
+            description: string;
+          }) => ({
             id: exp._id || Date.now().toString(),
             company: exp.company,
             position: exp.title,
@@ -88,7 +147,11 @@ const CVBuilderPage: React.FC = () => {
             current: false, // Assuming 'current' status needs to be re-evaluated or handled differently
             description: exp.description,
           })),
-          detailedSkills: (profile.detailedSkills || []).map((skill: any) => ({
+          detailedSkills: (profile.detailedSkills || []).map((skill: {
+            _id?: string;
+            name: string;
+            level: string;
+          }) => ({
             id: skill._id || Date.now().toString(),
             name: skill.name,
             level: skill.level || "Beginner",
@@ -101,13 +164,52 @@ const CVBuilderPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.email, user?.name]);
 
-  const handleSaveCV = async (cvData: any) => {
+  useEffect(() => {
+    if (!user || !hasRole(user, ["worker"])) {
+      router.push("/login");
+      return;
+    }
+
+    loadExistingCV();
+    loadAvailableJobs();
+  }, [user, router, loadExistingCV]);
+
+  const handleSaveCV = async (cvData: {
+    personalInfo: {
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      dateOfBirth: string;
+      gender: string;
+      fullName: string;
+      portfolio: string;
+    };
+    education: Array<{
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+    }>;
+    experience: Array<{
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+      description: string;
+    }>;
+  }) => {
     try {
       setSaving(true);
 
-      const profileUpdate: Record<string, any> = {
+      const profileUpdate: Record<string, unknown> = {
         phone: cvData.personalInfo.phone,
         address: {
           city: cvData.personalInfo.address.split(',')[0]?.trim() || "",
@@ -126,7 +228,7 @@ const CVBuilderPage: React.FC = () => {
       };
 
       // Add workerProfile specific fields
-      const workerProfileUpdate: Record<string, any> = {
+      const workerProfileUpdate: Record<string, unknown> = {
         education: cvData.education.map(edu => ({
           school: edu.institution,
           degree: edu.degree,
@@ -145,7 +247,7 @@ const CVBuilderPage: React.FC = () => {
         // Detailed skills are stored separately in cvData.detailedSkills, not workerProfile.skills
       };
 
-      await workerAPI.updateProfile({ profile: profileUpdate, workerProfile: workerProfileUpdate });
+      await authAPI.updateProfile({ profile: profileUpdate, workerProfile: workerProfileUpdate });
       toast.success("CV saved successfully!");
     } catch (error) {
       console.error("Failed to save CV:", error);
@@ -155,7 +257,41 @@ const CVBuilderPage: React.FC = () => {
     }
   };
 
-  const handleDownloadPDF = (cvData: any) => {
+  const handleDownloadPDF = (cvData: {
+    personalInfo: {
+      fullName: string;
+      email: string;
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      portfolio: string;
+      dateOfBirth: string;
+      gender: string;
+    };
+    education: Array<{
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+    }>;
+    experience: Array<{
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+      description: string;
+    }>;
+    detailedSkills: Array<{
+      name: string;
+      level: string;
+    }>;
+  }) => {
     try {
       const pdf = new jsPDF();
       const pageWidth = pdf.internal.pageSize.getWidth();
@@ -226,7 +362,14 @@ const CVBuilderPage: React.FC = () => {
       if (cvData.experience && cvData.experience.length > 0) {
         addText("WORK EXPERIENCE", 14, true);
         
-        cvData.experience.forEach((exp: any) => {
+        cvData.experience.forEach((exp: {
+          position: string;
+          company: string;
+          startDate: string;
+          endDate: string;
+          current: boolean;
+          description: string;
+        }) => {
           const title = `${exp.position || 'Position'} at ${exp.company || 'Company'}`;
           const dates = `${exp.startDate || ''} - ${exp.current ? 'Present' : exp.endDate || ''}`;
           
@@ -245,7 +388,14 @@ const CVBuilderPage: React.FC = () => {
       if (cvData.education && cvData.education.length > 0) {
         addText("EDUCATION", 14, true);
         
-        cvData.education.forEach((edu: any) => {
+        cvData.education.forEach((edu: {
+          degree: string;
+          fieldOfStudy: string;
+          institution: string;
+          startDate: string;
+          endDate: string;
+          current: boolean;
+        }) => {
           const degree = `${edu.degree || 'Degree'}${edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}`;
           const school = edu.institution || 'Institution';
           const dates = `${edu.startDate || ''} - ${edu.current ? 'Present' : edu.endDate || ''}`;
@@ -259,16 +409,19 @@ const CVBuilderPage: React.FC = () => {
       }
 
       // Skills
-      if (cvData.skills && cvData.skills.length > 0) {
+      if (cvData.detailedSkills && cvData.detailedSkills.length > 0) {
         addText("SKILLS", 14, true);
         
-        const skillsByLevel = cvData.skills.reduce((acc: any, skill: any) => {
+        const skillsByLevel = cvData.detailedSkills.reduce((acc: Record<string, string[]>, skill: {
+          name: string;
+          level: string;
+        }) => {
           if (!acc[skill.level]) acc[skill.level] = [];
           acc[skill.level].push(skill.name);
           return acc;
         }, {});
 
-        Object.entries(skillsByLevel).forEach(([level, skills]: [string, any]) => {
+        Object.entries(skillsByLevel).forEach(([level, skills]: [string, string[]]) => {
           addText(`${level}: ${skills.join(', ')}`, 10);
         });
       }
@@ -301,7 +454,7 @@ const CVBuilderPage: React.FC = () => {
             <EnhancedCVBuilder
               onSave={handleSaveCV}
               onDownload={handleDownloadPDF}
-              initialData={initialCVData}
+              initialData={initialCVData || undefined}
               saving={saving}
             />
           </div>
@@ -325,7 +478,20 @@ const CVBuilderPage: React.FC = () => {
                 </div>
               ) : availableJobs.length > 0 ? (
                 <div className="space-y-4">
-                  {availableJobs.slice(0, 5).map((job: any) => (
+                  {availableJobs.slice(0, 5).map((job: {
+                    _id: string;
+                    title: string;
+                    description: string;
+                    budget: { min: number; max: number };
+                    category: string;
+                    location: string;
+                    createdAt: string;
+                    deadline: string;
+                    client: {
+                      name: string;
+                      companyName?: string;
+                    };
+                  }) => (
                     <div key={job._id} className="border-b border-gray-100 pb-3 last:border-b-0">
                       <h4 className="font-medium text-gray-900 text-sm mb-1 line-clamp-2">
                         {job.title}

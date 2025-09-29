@@ -378,6 +378,17 @@ export const notificationsAPI = {
   markAllAsRead: () => api.put<ApiResponse<null>>("/notifications/read-all"),
 };
 
+// Contact API
+export const contactAPI = {
+  sendMessage: (messageData: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject: string;
+    message: string;
+  }) => api.post("/contact", messageData),
+};
+
 // Admin API
 export const adminAPI = {
   getDashboard: () => api.get("/admin/dashboard"),

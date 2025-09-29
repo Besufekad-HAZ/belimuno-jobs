@@ -252,7 +252,7 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     try {
       await onSave(cvData);
       toast.success("CV saved successfully!");
-    } catch (error) {
+    } catch {
       toast.error("Failed to save CV. Please try again.");
     }
   };
@@ -1212,7 +1212,7 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as "personal" | "education" | "experience" | "skills")}
               className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center transition-colors ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-600"

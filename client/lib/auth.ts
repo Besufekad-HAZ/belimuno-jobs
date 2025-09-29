@@ -57,7 +57,29 @@ export const getStoredToken = (): string | null => {
 
 export const setAuth = (token: string, user: User) => {
   Cookies.set("token", token, { expires: 30 });
-  Cookies.set("user", JSON.stringify(user), { expires: 30 });
+  
+  // Store only essential user data to avoid cookie size limits
+  const essentialUser = {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isVerified: user.isVerified,
+    isActive: user.isActive
+  };
+  
+  try {
+    Cookies.set("user", JSON.stringify(essentialUser), { expires: 30 });
+  } catch (error) {
+    console.error("Failed to store user in cookies:", error);
+    // Fallback: try with even smaller object
+    Cookies.set("user", JSON.stringify({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    }), { expires: 30 });
+  }
 };
 
 export const clearAuth = () => {

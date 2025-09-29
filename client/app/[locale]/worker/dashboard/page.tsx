@@ -186,7 +186,9 @@ const WorkerDashboard: React.FC = () => {
 
   useEffect(() => {
     const user = getStoredUser();
+    console.log("Dashboard - stored user:", user);
     if (!user || !hasRole(user, ["worker"])) {
+      console.log("Dashboard - redirecting to login, user role:", user?.role);
       router.push("/login");
       return;
     }

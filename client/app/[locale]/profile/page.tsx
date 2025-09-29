@@ -47,8 +47,23 @@ type ExtendedUser = BaseUser & {
     portfolio?: string[];
     certifications?: string[];
     languages?: string[];
-    education?: any[];
-    workHistory?: any[];
+  education?: Array<{
+    _id?: string;
+    school: string;
+    degree: string;
+    field: string;
+    startDate: string;
+    endDate?: string;
+    description?: string;
+  }>;
+  workHistory?: Array<{
+    _id?: string;
+    company: string;
+    title: string;
+    startDate: string;
+    endDate?: string;
+    description: string;
+  }>;
   };
   clientProfile?: {
     companyName?: string;
@@ -79,7 +94,44 @@ const ProfilePage = () => {
   const [cvPreview, setCvPreview] = useState<string | null>(
     user?.profile?.cv?.data || null,
   );
-  const [initialCVData, setInitialCVData] = useState<any>(null);
+  const [initialCVData, setInitialCVData] = useState<{
+    personalInfo: {
+      fullName: string;
+      email: string;
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      portfolio: string;
+      dateOfBirth: string;
+      gender: string;
+    };
+    education: Array<{
+      id: string;
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+    }>;
+    experience: Array<{
+      id: string;
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+      description: string;
+    }>;
+    detailedSkills: Array<{
+      id: string;
+      name: string;
+      level: string;
+    }>;
+  } | null>(null);
   const [cvBuilderLoading, setCvBuilderLoading] = useState(true);
   const [cvObjectUrl, setCvObjectUrl] = useState<string | null>(null);
   const ensureDataUrl = (
@@ -180,6 +232,87 @@ const ProfilePage = () => {
       return url;
     });
   }, [user?.profile?.cv?.data, user?.profile?.cv?.mimeType]);
+
+  // CV Builder functions
+  const loadExistingCV = useCallback(async () => {
+    try {
+      setCvBuilderLoading(true);
+      const response = await authAPI.getMe();
+      const userData = response.data.user as ExtendedUser;
+      if (!userData) return;
+      const profile = userData.profile || {};
+      const workerProfile = userData.workerProfile || {};
+
+      setInitialCVData({
+        personalInfo: {
+          fullName: userData.name || "",
+          email: userData.email || "",
+          phone: profile.phone || "",
+          address: (profile as { address?: { city?: string; country?: string } }).address?.city ? `${(profile as { address?: { city?: string; country?: string } }).address?.city}, ${(profile as { address?: { city?: string; country?: string } }).address?.country || 'Ethiopia'}` : "",
+          summary: profile.bio || "",
+          workerSkills: profile.skills || [],
+          workerExperience: String(profile.experience || ""),
+          workerHourlyRate: profile.hourlyRate || 0,
+          portfolio: userData.workerProfile?.portfolio?.[0] || "",
+          dateOfBirth: profile.dob ? String(profile.dob).substring(0, 10) : "",
+          gender: (profile as { gender?: string }).gender || "",
+        },
+        education: (workerProfile?.education || []).map((edu: {
+          _id?: string;
+          school: string;
+          degree: string;
+          field: string;
+          startDate: string;
+          endDate?: string;
+          description?: string;
+        }) => ({
+          id: edu._id || Date.now().toString(),
+          institution: edu.school,
+          degree: edu.degree,
+          fieldOfStudy: edu.field,
+          startDate: edu.startDate,
+          endDate: edu.endDate || "",
+          current: false,
+        })),
+        experience: (workerProfile?.workHistory || []).map((exp: {
+          _id?: string;
+          company: string;
+          title: string;
+          startDate: string;
+          endDate?: string;
+          description: string;
+        }) => ({
+          id: exp._id || Date.now().toString(),
+          company: exp.company,
+          position: exp.title,
+          startDate: exp.startDate,
+          endDate: exp.endDate || "",
+          current: false,
+          description: exp.description,
+        })),
+        detailedSkills: ((profile as { detailedSkills?: Array<{ _id?: string; name: string; level: string }> }).detailedSkills || []).map((skill: {
+          _id?: string;
+          name: string;
+          level: string;
+        }) => ({
+          id: skill._id || Date.now().toString(),
+          name: skill.name,
+          level: (skill.level || "Beginner") as "Beginner" | "Intermediate" | "Advanced" | "Expert",
+        })),
+      });
+    } catch (error) {
+      console.error("Failed to load existing CV:", error);
+    } finally {
+      setCvBuilderLoading(false);
+    }
+  }, []);
+
+  // Load CV data on component mount
+  useEffect(() => {
+    if (user?.role === 'worker') {
+      loadExistingCV();
+    }
+  }, [user?.role, loadExistingCV]);
 
   if (!user) {
     return <div className="p-8 text-center">You are not logged in.</div>;
@@ -318,64 +451,41 @@ const ProfilePage = () => {
     if (cvRef.current) cvRef.current.value = "";
   };
 
-  // CV Builder functions
-  const loadExistingCV = useCallback(async () => {
-    try {
-      setCvBuilderLoading(true);
-      const response = await authAPI.getMe();
-      const userData = response.data.user;
-      const profile = userData.profile || {};
-      const workerProfile = userData.workerProfile || {};
 
-      setInitialCVData({
-        personalInfo: {
-          fullName: userData.name || "",
-          email: userData.email || "",
-          phone: profile.phone || "",
-          address: profile.address?.city ? `${profile.address.city}, ${profile.address.country || 'Ethiopia'}` : "",
-          summary: profile.bio || "",
-          workerSkills: profile.skills || [],
-          workerExperience: profile.experience || "",
-          workerHourlyRate: profile.hourlyRate || 0,
-          portfolio: userData.workerProfile?.portfolio?.[0] || "",
-          dateOfBirth: profile.dob ? String(profile.dob).substring(0, 10) : "",
-          gender: profile.gender || "",
-        },
-        education: (workerProfile?.education || []).map((edu: any) => ({
-          id: edu._id || Date.now().toString(),
-          institution: edu.school,
-          degree: edu.degree,
-          fieldOfStudy: edu.field,
-          startDate: edu.startDate,
-          endDate: edu.endDate,
-          current: false,
-        })),
-        experience: (workerProfile?.workHistory || []).map((exp: any) => ({
-          id: exp._id || Date.now().toString(),
-          company: exp.company,
-          position: exp.title,
-          startDate: exp.startDate,
-          endDate: exp.current ? null : exp.endDate,
-          description: exp.description,
-        })),
-        detailedSkills: (profile.detailedSkills || []).map((skill: any) => ({
-          id: skill._id || Date.now().toString(),
-          name: skill.name,
-          level: skill.level || "Beginner",
-        })),
-      });
-    } catch (error) {
-      console.error("Failed to load existing CV:", error);
-    } finally {
-      setCvBuilderLoading(false);
-    }
-  }, [user]);
-
-  const handleSaveCV = async (cvData: any) => {
+  const handleSaveCV = async (cvData: {
+    personalInfo: {
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      dateOfBirth: string;
+      gender: string;
+      fullName: string;
+      portfolio: string;
+    };
+    education: Array<{
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+    }>;
+    experience: Array<{
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+      description: string;
+    }>;
+  }) => {
     try {
       setSaving(true);
       
-      const profileUpdate: Record<string, any> = {
+      const profileUpdate: Record<string, unknown> = {
         phone: cvData.personalInfo.phone,
         address: {
           city: cvData.personalInfo.address.split(',')[0]?.trim() || "",
@@ -394,8 +504,8 @@ const ProfilePage = () => {
         }
       };
 
-      const workerProfileUpdate: Record<string, any> = {
-        education: cvData.education.map((edu: any) => ({
+      const workerProfileUpdate: Record<string, unknown> = {
+        education: cvData.education.map((edu) => ({
           school: edu.institution,
           degree: edu.degree,
           field: edu.fieldOfStudy,
@@ -403,7 +513,7 @@ const ProfilePage = () => {
           endDate: edu.current ? null : edu.endDate,
           description: "",
         })),
-        workHistory: cvData.experience.map((exp: any) => ({
+        workHistory: cvData.experience.map((exp) => ({
           company: exp.company,
           title: exp.position,
           startDate: exp.startDate,
@@ -432,7 +542,41 @@ const ProfilePage = () => {
     }
   };
 
-  const handleDownloadPDF = (cvData: any) => {
+  const handleDownloadPDF = (cvData: {
+    personalInfo: {
+      fullName: string;
+      email: string;
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      portfolio: string;
+      dateOfBirth: string;
+      gender: string;
+    };
+    education: Array<{
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+    }>;
+    experience: Array<{
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+      description: string;
+    }>;
+    detailedSkills: Array<{
+      name: string;
+      level: string;
+    }>;
+  }) => {
     const doc = new jsPDF();
     const margin = 20;
     let yPosition = margin;
@@ -519,7 +663,14 @@ const ProfilePage = () => {
       doc.text("EDUCATION", margin, yPosition);
       yPosition += 8;
 
-      cvData.education.forEach((edu: any) => {
+      cvData.education.forEach((edu: {
+        degree: string;
+        institution: string;
+        fieldOfStudy: string;
+        startDate: string;
+        endDate: string;
+        current: boolean;
+      }) => {
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`${edu.degree} - ${edu.institution}`, margin, yPosition);
@@ -543,7 +694,14 @@ const ProfilePage = () => {
       doc.text("EXPERIENCE", margin, yPosition);
       yPosition += 8;
 
-      cvData.experience.forEach((exp: any) => {
+      cvData.experience.forEach((exp: {
+        position: string;
+        company: string;
+        startDate: string;
+        endDate: string;
+        current: boolean;
+        description: string;
+      }) => {
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`${exp.position} - ${exp.company}`, margin, yPosition);
@@ -570,7 +728,10 @@ const ProfilePage = () => {
       doc.text("DETAILED SKILLS", margin, yPosition);
       yPosition += 8;
 
-      cvData.detailedSkills.forEach((skill: any) => {
+      cvData.detailedSkills.forEach((skill: {
+        name: string;
+        level: string;
+      }) => {
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.text(`• ${skill.name} (${skill.level})`, margin, yPosition);
@@ -581,12 +742,7 @@ const ProfilePage = () => {
     doc.save(`${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.pdf`);
   };
 
-  // Load CV data on component mount
-  useEffect(() => {
-    if (user?.role === 'worker') {
-      loadExistingCV();
-    }
-  }, [user, loadExistingCV]);
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -692,7 +848,7 @@ const ProfilePage = () => {
                       <EnhancedCVBuilder
                         onSave={handleSaveCV}
                         onDownload={handleDownloadPDF}
-                        initialData={initialCVData}
+                        initialData={initialCVData as Record<string, unknown> || undefined}
                         saving={saving}
                       />
                           </div>

@@ -474,7 +474,41 @@ const ApplicationsPage: React.FC = () => {
               </Button>
             </div>
             <div className="p-6">
-              <CVDisplay cvData={selectedWorkerCV as any} />
+              <CVDisplay cvData={selectedWorkerCV as {
+                personalInfo: {
+                  fullName: string;
+                  email: string;
+                  phone: string;
+                  address: string;
+                  summary: string;
+                  workerSkills: string[];
+                  workerExperience: string;
+                  workerHourlyRate: number;
+                  portfolio: string;
+                  dateOfBirth: string;
+                  gender: string;
+                };
+                education: Array<{
+                  institution: string;
+                  degree: string;
+                  fieldOfStudy: string;
+                  startDate: string;
+                  endDate: string;
+                  current: boolean;
+                }>;
+                experience: Array<{
+                  company: string;
+                  position: string;
+                  startDate: string;
+                  endDate: string;
+                  current: boolean;
+                  description: string;
+                }>;
+                detailedSkills: Array<{
+                  name: string;
+                  level: string;
+                }>;
+              }} />
             </div>
           </div>
         </div>
