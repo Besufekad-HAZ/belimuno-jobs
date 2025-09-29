@@ -26,9 +26,9 @@ const envBase =
         .env?.NEXT_PUBLIC_API_BASE_URL
     : undefined;
 const DEFAULT_BASES = [
-  "http://localhost:5001/api",
+  "http://localhost:5000/api",
   // "https://belimuno-jobs.onrender.com/api",
-  // "http://localhost:5001/api",
+  // "http://localhost:5000/api",
   // "http://localhost:5002/api",
   // "http://localhost:5003/api",
   // "http://localhost:5004/api",
