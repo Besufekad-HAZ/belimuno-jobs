@@ -180,6 +180,8 @@ const WorkerDashboard: React.FC = () => {
       resolution?: string;
     }>
   >([]);
+  const [jobsForYou, setJobsForYou] = useState<SimpleJob[]>([]);
+  const [jobsForYouLoading, setJobsForYouLoading] = useState(false);
   const router = useRouter();
   const PROPOSAL_MAX = 1200;
   const t = useTranslations("WorkerDashboard");
@@ -192,6 +194,7 @@ const WorkerDashboard: React.FC = () => {
     }
 
     fetchDashboardData();
+    fetchJobsForYou();
     fetchNotifications();
   }, [router]);
 
@@ -238,6 +241,44 @@ const WorkerDashboard: React.FC = () => {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchJobsForYou = async () => {
+    try {
+      setJobsForYouLoading(true);
+      const response = await workerAPI.getJobsForYou({ limit: 5 });
+      const payload = response.data;
+      const list = (payload.data || []) as unknown as Array<
+        Record<string, unknown>
+      >;
+      setJobsForYou(
+        list.map((j) => ({
+          _id: String(j._id),
+          title: String(j.title || ""),
+          description: String(j.description || ""),
+          budget: Number(j.budget || 0),
+          deadline: String(j.deadline || ""),
+          category: String(j.category || ""),
+          region: j.region as { name?: string } | undefined,
+          status: String(j.status || ""),
+          progress: Number(j.progress || 0),
+          acceptedApplication: j.acceptedApplication as
+            | {
+                proposedBudget?: number;
+              }
+            | undefined,
+          applicationCount: Number(j.applicationCount || 0),
+          review: j.review as
+            | { workerReview?: { rating?: number } }
+            | undefined,
+        })),
+      );
+    } catch (error) {
+      console.error("Failed to fetch jobs for you:", error);
+      setJobsForYou([]);
+    } finally {
+      setJobsForYouLoading(false);
     }
   };
 
@@ -383,8 +424,12 @@ const WorkerDashboard: React.FC = () => {
           };
           const atts = Array.isArray(m.attachments)
             ? m.attachments.map((url, ai) => {
-                const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
-                const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+                const isImage =
+                  /^data:image\//.test(url) ||
+                  /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+                const nameFromUrl = decodeURIComponent(
+                  url.split("/").pop() || "",
+                );
                 return {
                   id: `${m._id || index}-att-${ai}`,
                   name: nameFromUrl || `Attachment ${ai + 1}`,
@@ -459,9 +504,10 @@ const WorkerDashboard: React.FC = () => {
     setModernChatMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      const attachmentDataUrls = files && files.length
-        ? await Promise.all(files.map((f) => fileToDataURL(f)))
-        : [];
+      const attachmentDataUrls =
+        files && files.length
+          ? await Promise.all(files.map((f) => fileToDataURL(f)))
+          : [];
 
       const res = await workerAPI.sendJobMessage(
         chatJobId,
@@ -651,142 +697,292 @@ const WorkerDashboard: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-          {/* Available Jobs */}
-          <Card>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                {t("sections.availableJobs.title")}
-              </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push("/jobs")}
-                className="w-full sm:w-auto"
-              >
-                {t("buttons.viewAll")}
-              </Button>
-            </div>
-            <div className="space-y-3 sm:space-y-4 max-h-80 sm:max-h-96 overflow-y-auto">
-              {availableJobs.map((job) => (
-                <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
-                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
-                      {job.title}
-                    </h4>
-                    <div className="text-left sm:text-right">
-                      <span className="text-sm font-semibold text-green-600 block">
-                        ETB {job.budget?.toLocaleString()}
-                      </span>
-                      {job.applicationCount !== undefined && (
-                        <span className="text-[10px] sm:text-[11px] text-gray-500">
-                          {job.applicationCount}{" "}
-                          {t("sections.availableJobs.applications")}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">
-                    {job.description}
-                  </p>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-gray-500">
-                      <span>
-                        {t("sections.availableJobs.due")}:{" "}
-                        {new Date(job.deadline).toLocaleDateString()}
-                      </span>
-                      <span className="hidden sm:inline">•</span>
-                      <span className="sm:hidden block">{job.category}</span>
-                      <span className="hidden sm:inline">{job.category}</span>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedJob(job)}
-                        className="w-full sm:w-auto"
-                      >
-                        <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                        <span className="text-xs sm:text-sm">
-                          {appliedJobIds.has(job._id)
-                            ? t("sections.availableJobs.details")
-                            : t("sections.availableJobs.view")}
-                        </span>
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedJob(job)}
-                        disabled={appliedJobIds.has(job._id)}
-                        className="w-full sm:w-auto"
-                      >
-                        <span className="text-xs sm:text-sm">
-                          {appliedJobIds.has(job._id)
-                            ? t("sections.availableJobs.applied")
-                            : t("sections.availableJobs.apply")}
-                        </span>
-                      </Button>
-                    </div>
-                  </div>
+          <div className="space-y-8">
+            {/* Jobs for You Section - Only show for workers with matching jobs */}
+            {jobsForYou.length > 0 && (
+              <Card className="h-fit">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                    {t("jobsForYou.title")}
+                  </h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push("/jobs")}
+                    className="w-full sm:w-auto"
+                  >
+                    {t("jobsForYou.viewAll")}
+                  </Button>
                 </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* My Active Jobs */}
-          <Card>
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                {t("sections.activeJobs.title")}
-              </h3>
-            </div>
-            <div className="space-y-3 sm:space-y-4 max-h-80 sm:max-h-96 overflow-y-auto">
-              {/* Pending Applications Snapshot */}
-              <Card className="mt-4 sm:mt-8">
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-                  {t("sections.activeJobs.pendingApplications.title")}
-                </h3>
-                {stats?.pendingApplicationsList?.length ? (
-                  <div className="space-y-2 sm:space-y-3 max-h-48 sm:max-h-64 overflow-y-auto">
-                    {stats.pendingApplicationsList.map((app) => (
+                <div className="space-y-3 sm:space-y-4">
+                  {jobsForYouLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    jobsForYou.slice(0, 5).map((job) => (
                       <div
-                        key={app._id}
-                        className="p-2 sm:p-3 bg-gray-50 rounded border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                        key={job._id}
+                        className="p-3 sm:p-4 bg-gray-50 rounded-lg"
                       >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-900 line-clamp-1">
-                            {app.job?.title || "Job"}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {t(
-                              "sections.activeJobs.pendingApplications.applied",
-                            )}{" "}
-                            {new Date(app.appliedAt).toLocaleDateString()}
-                          </p>
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
+                          <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
+                            {job.title}
+                          </h4>
+                          <div className="text-left sm:text-right">
+                            <span className="text-sm font-semibold text-green-600 block">
+                              ETB {job.budget?.toLocaleString()}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 self-start sm:self-auto">
-                          {t("sections.activeJobs.pendingApplications.status")}
+                        <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">
+                          {job.description}
+                        </p>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-gray-500">
+                            <span>
+                              {t("sections.availableJobs.due")}:{" "}
+                              {new Date(job.deadline).toLocaleDateString()}
+                            </span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="sm:hidden block">
+                              {job.category}
+                            </span>
+                            <span className="hidden sm:inline">
+                              {job.category}
+                            </span>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedJob(job)}
+                              className="w-full sm:w-auto"
+                            >
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="text-xs sm:text-sm">
+                                {appliedJobIds.has(job._id)
+                                  ? t("sections.availableJobs.details")
+                                  : t("sections.availableJobs.view")}
+                              </span>
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => setSelectedJob(job)}
+                              disabled={appliedJobIds.has(job._id)}
+                              className="w-full sm:w-auto"
+                            >
+                              <span className="text-xs sm:text-sm">
+                                {appliedJobIds.has(job._id)
+                                  ? t("sections.availableJobs.applied")
+                                  : t("sections.availableJobs.apply")}
+                              </span>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </Card>
+            )}
+
+            {/* My Active Jobs */}
+            <Card className="h-fit">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                  {t("sections.activeJobs.title")}
+                </h3>
+              </div>
+              <div className="space-y-3 sm:space-y-4">
+                {myJobs
+                  .filter(
+                    (job) =>
+                      job.status &&
+                      [
+                        "assigned",
+                        "in_progress",
+                        "revision_requested",
+                        "completed",
+                        "disputed",
+                      ].includes(job.status),
+                  )
+                  .map((job) => (
+                    <div
+                      key={job._id}
+                      className="p-3 sm:p-4 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
+                        <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
+                          {job.title}
+                        </h4>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full self-start sm:self-auto ${
+                            job.status === "in_progress"
+                              ? "bg-blue-100 text-blue-800"
+                              : job.status === "assigned"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {job.status ? job.status.replace("_", " ") : ""}
                         </span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs sm:text-sm text-gray-500">
-                    {t("sections.activeJobs.pendingApplications.empty")}
-                  </p>
-                )}
-              </Card>
-              {myJobs
-                .filter(
-                  (job) =>
-                    job.status &&
-                    [
-                      "assigned",
-                      "in_progress",
-                      "revision_requested",
-                      "completed",
-                      "disputed",
-                    ].includes(job.status),
-                )
-                .map((job) => (
+                      <div className="mb-3">
+                        <ProgressBar
+                          progress={job.progress || 0}
+                          size="md"
+                          color={
+                            (job.progress || 0) >= 100
+                              ? "green"
+                              : (job.progress || 0) >= 50
+                                ? "blue"
+                                : "yellow"
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <span className="text-xs sm:text-sm text-gray-600">
+                          ETB{" "}
+                          {job.acceptedApplication?.proposedBudget?.toLocaleString()}
+                        </span>
+
+                        {/* Status-based action buttons */}
+                        <div className="flex flex-wrap gap-2">
+                          {/* Worker can Decline and Accept Assignment if job is assigned */}
+                          {job.status === "assigned" && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => declineAssignment(job._id)}
+                                className="flex-1 sm:flex-none text-red-600 hover:bg-red-50 border-red-600"
+                              >
+                                <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                                <span className="text-xs sm:text-sm">
+                                  {t("sections.activeJobs.actions.decline")}
+                                </span>
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => acceptAssignment(job._id)}
+                                className="flex-1 sm:flex-none"
+                              >
+                                <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                                <span className="text-xs sm:text-sm">
+                                  {t("sections.activeJobs.actions.accept")}
+                                </span>
+                              </Button>
+                            </>
+                          )}
+
+                          {/* Worker can Submit Work if job is in progress */}
+                          {job.status === "in_progress" && (
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleUpdateJobStatus(job._id, "submitted")
+                              }
+                              className="w-full sm:w-auto"
+                            >
+                              <Send className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="text-xs sm:text-sm">
+                                {t("sections.activeJobs.actions.submitWork")}
+                              </span>
+                            </Button>
+                          )}
+
+                          {/* Worker can Resubmit Work if job is revision requested */}
+                          {job.status === "revision_requested" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                handleUpdateJobStatus(job._id, "submitted")
+                              }
+                              className="w-full sm:w-auto"
+                            >
+                              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="text-xs sm:text-sm">
+                                {t("sections.activeJobs.actions.resubmitWork")}
+                              </span>
+                            </Button>
+                          )}
+
+                          {/* Worker can Raise Dispute if in progress, submitted, or revision requested */}
+                          {(job.status === "in_progress" ||
+                            job.status === "submitted" ||
+                            job.status === "revision_requested") && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedJobForDispute(job);
+                                setShowDisputeModal(true);
+                              }}
+                              className="text-red-600 hover:bg-red-50 "
+                            >
+                              <AlertTriangle className="h-4 w-4 mr-1" />
+                              {t("sections.activeJobs.actions.raiseDispute")}
+                            </Button>
+                          )}
+
+                          {/* Worker can Rate Client if job is completed */}
+                          {job.status === "completed" &&
+                            !job.review?.workerReview?.rating && (
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setRateJobId(job._id);
+                                  setShowRateModal(true);
+                                }}
+                                className="flex-1 sm:flex-none"
+                              >
+                                <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                                <span className="text-xs sm:text-sm">
+                                  {t("sections.activeJobs.actions.rateClient")}
+                                </span>
+                              </Button>
+                            )}
+
+                          {/* Chat button to view messages*/}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openChat(job._id)}
+                            className="flex-1 sm:flex-none"
+                            title={t(
+                              "sections.activeJobs.actions.viewMessages",
+                            )}
+                          >
+                            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </Card>
+          </div>
+
+          <div className="space-y-8">
+            {/* Available Jobs */}
+            <Card className="h-fit">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                  {t("sections.availableJobs.title")}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/jobs")}
+                  className="w-full sm:w-auto"
+                >
+                  {t("buttons.viewAll")}
+                </Button>
+              </div>
+              <div className="space-y-3 sm:space-y-4">
+                {availableJobs.map((job) => (
                   <div
                     key={job._id}
                     className="p-3 sm:p-4 bg-gray-50 rounded-lg"
@@ -795,221 +991,173 @@ const WorkerDashboard: React.FC = () => {
                       <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
                         {job.title}
                       </h4>
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full self-start sm:self-auto ${
-                          job.status === "in_progress"
-                            ? "bg-blue-100 text-blue-800"
-                            : job.status === "assigned"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {job.status ? job.status.replace("_", " ") : ""}
-                      </span>
+                      <div className="text-left sm:text-right">
+                        <span className="text-sm font-semibold text-green-600 block">
+                          ETB {job.budget?.toLocaleString()}
+                        </span>
+                        {job.applicationCount !== undefined && (
+                          <span className="text-[10px] sm:text-[11px] text-gray-500">
+                            {job.applicationCount}{" "}
+                            {t("sections.availableJobs.applications")}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <div className="mb-3">
-                      <ProgressBar
-                        progress={job.progress || 0}
-                        size="md"
-                        color={
-                          (job.progress || 0) >= 100
-                            ? "green"
-                            : (job.progress || 0) >= 50
-                              ? "blue"
-                              : "yellow"
-                        }
-                      />
-                    </div>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">
+                      {job.description}
+                    </p>
                     <div className="flex flex-col gap-3">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        ETB{" "}
-                        {job.acceptedApplication?.proposedBudget?.toLocaleString()}
-                      </span>
-
-                      {/* Status-based action buttons */}
-                      <div className="flex flex-wrap gap-2">
-                        {/* Worker can Decline and Accept Assignment if job is assigned */}
-                        {job.status === "assigned" && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => declineAssignment(job._id)}
-                              className="flex-1 sm:flex-none text-red-600 hover:bg-red-50 border-red-600"
-                            >
-                              <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                              <span className="text-xs sm:text-sm">
-                                {t("sections.activeJobs.actions.decline")}
-                              </span>
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => acceptAssignment(job._id)}
-                              className="flex-1 sm:flex-none"
-                            >
-                              <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                              <span className="text-xs sm:text-sm">
-                                {t("sections.activeJobs.actions.accept")}
-                              </span>
-                            </Button>
-                          </>
-                        )}
-
-                        {/* Worker can Submit Work if job is in progress */}
-                        {job.status === "in_progress" && (
-                          <Button
-                            size="sm"
-                            onClick={() =>
-                              handleUpdateJobStatus(job._id, "submitted")
-                            }
-                            className="w-full sm:w-auto"
-                          >
-                            <Send className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span className="text-xs sm:text-sm">
-                              {t("sections.activeJobs.actions.submitWork")}
-                            </span>
-                          </Button>
-                        )}
-
-                        {/* Worker can Resubmit Work if job is revision requested */}
-                        {job.status === "revision_requested" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              handleUpdateJobStatus(job._id, "submitted")
-                            }
-                            className="w-full sm:w-auto"
-                          >
-                            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span className="text-xs sm:text-sm">
-                              {t("sections.activeJobs.actions.resubmitWork")}
-                            </span>
-                          </Button>
-                        )}
-
-                        {/* Worker can Raise Dispute if in progress, submitted, or revision requested */}
-                        {(job.status === "in_progress" ||
-                          job.status === "submitted" ||
-                          job.status === "revision_requested") && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedJobForDispute(job);
-                              setShowDisputeModal(true);
-                            }}
-                            className="text-red-600 hover:bg-red-50 "
-                          >
-                            <AlertTriangle className="h-4 w-4 mr-1" />
-                            {t("sections.activeJobs.actions.raiseDispute")}
-                          </Button>
-                        )}
-
-                        {/* Worker can Rate Client if job is completed */}
-                        {job.status === "completed" &&
-                          !job.review?.workerReview?.rating && (
-                            <Button
-                              size="sm"
-                              onClick={() => {
-                                setRateJobId(job._id);
-                                setShowRateModal(true);
-                              }}
-                              className="flex-1 sm:flex-none"
-                            >
-                              <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                              <span className="text-xs sm:text-sm">
-                                {t("sections.activeJobs.actions.rateClient")}
-                              </span>
-                            </Button>
-                          )}
-
-                        {/* Chat button to view messages*/}
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-gray-500">
+                        <span>
+                          {t("sections.availableJobs.due")}:{" "}
+                          {new Date(job.deadline).toLocaleDateString()}
+                        </span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="sm:hidden block">{job.category}</span>
+                        <span className="hidden sm:inline">{job.category}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => openChat(job._id)}
-                          className="flex-1 sm:flex-none"
-                          title={t("sections.activeJobs.actions.viewMessages")}
+                          onClick={() => setSelectedJob(job)}
+                          className="w-full sm:w-auto"
                         >
-                          <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          <span className="text-xs sm:text-sm">
+                            {appliedJobIds.has(job._id)
+                              ? t("sections.availableJobs.details")
+                              : t("sections.availableJobs.view")}
+                          </span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => setSelectedJob(job)}
+                          disabled={appliedJobIds.has(job._id)}
+                          className="w-full sm:w-auto"
+                        >
+                          <span className="text-xs sm:text-sm">
+                            {appliedJobIds.has(job._id)
+                              ? t("sections.availableJobs.applied")
+                              : t("sections.availableJobs.apply")}
+                          </span>
                         </Button>
                       </div>
                     </div>
                   </div>
                 ))}
-            </div>
-          </Card>
+              </div>
+            </Card>
 
-          {/* Active Disputes */}
-          <Card>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Active Disputes
+            {/* Pending Applications */}
+            <Card className="h-fit">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+                {t("sections.activeJobs.pendingApplications.title")}
               </h3>
-            </div>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {disputes
-                .filter((d) => d.status !== "resolved" && d.status !== "closed")
-                .map((dispute) => (
-                  <div key={dispute._id} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-medium text-gray-900">
-                          {dispute.title}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {dispute.job?.title}
+              {stats?.pendingApplicationsList?.length ? (
+                <div className="space-y-2 sm:space-y-3">
+                  {stats.pendingApplicationsList.map((app) => (
+                    <div
+                      key={app._id}
+                      className="p-2 sm:p-3 bg-gray-50 rounded border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm font-medium text-gray-900 line-clamp-1">
+                          {app.job?.title || "Job"}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {t("sections.activeJobs.pendingApplications.applied")}{" "}
+                          {new Date(app.appliedAt).toLocaleDateString()}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge
-                          variant={
-                            dispute.priority === "urgent"
-                              ? "danger"
-                              : dispute.priority === "high"
-                                ? "warning"
-                                : "info"
-                          }
-                        >
-                          {dispute.priority}
-                        </Badge>
-                        <Badge
-                          variant={
-                            dispute.status === "open"
-                              ? "danger"
-                              : dispute.status === "investigating"
-                                ? "warning"
-                                : "success"
-                          }
-                        >
-                          {dispute.status}
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {dispute.description}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>
-                        Created{" "}
-                        {formatDistanceToNow(new Date(dispute.createdAt), {
-                          addSuffix: true,
-                        })}
+                      <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 self-start sm:self-auto">
+                        {t("sections.activeJobs.pendingApplications.status")}
                       </span>
-                      <span>Type: {dispute.type}</span>
                     </div>
-                  </div>
-                ))}
-              {disputes.filter(
-                (d) => d.status !== "resolved" && d.status !== "closed",
-              ).length === 0 && (
-                <p className="text-center text-gray-500 py-4">
-                  No active disputes
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs sm:text-sm text-gray-500">
+                  {t("sections.activeJobs.pendingApplications.empty")}
                 </p>
               )}
-            </div>
-          </Card>
+            </Card>
+
+            {/* Active Disputes */}
+            <Card className="h-fit">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Active Disputes
+                </h3>
+              </div>
+              <div className="space-y-4">
+                {disputes
+                  .filter(
+                    (d) => d.status !== "resolved" && d.status !== "closed",
+                  )
+                  .map((dispute) => (
+                    <div
+                      key={dispute._id}
+                      className="p-4 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium text-gray-900">
+                            {dispute.title}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {dispute.job?.title}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge
+                            variant={
+                              dispute.priority === "urgent"
+                                ? "danger"
+                                : dispute.priority === "high"
+                                  ? "warning"
+                                  : "info"
+                            }
+                          >
+                            {dispute.priority}
+                          </Badge>
+                          <Badge
+                            variant={
+                              dispute.status === "open"
+                                ? "danger"
+                                : dispute.status === "investigating"
+                                  ? "warning"
+                                  : "success"
+                            }
+                          >
+                            {dispute.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {dispute.description}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>
+                          Created{" "}
+                          {formatDistanceToNow(new Date(dispute.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                        <span>Type: {dispute.type}</span>
+                      </div>
+                    </div>
+                  ))}
+                {disputes.filter(
+                  (d) => d.status !== "resolved" && d.status !== "closed",
+                ).length === 0 && (
+                  <p className="text-center text-gray-500 py-4">
+                    No active disputes
+                  </p>
+                )}
+              </div>
+            </Card>
+          </div>
         </div>
 
         {/* Enhanced Application Modal */}

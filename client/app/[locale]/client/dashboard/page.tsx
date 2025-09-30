@@ -60,7 +60,7 @@ const ClientDashboard: React.FC = () => {
     recentApplications?: ApplicationPreview[];
     assignedWorker?: { name: string; _id?: string };
     category?: string;
-    requirements?: string[];
+    requiredSkills?: string[];
     acceptedApplication?: { proposedBudget?: number };
     payment?: { paymentStatus?: string };
     worker?: { name: string };
@@ -663,13 +663,17 @@ const ClientDashboard: React.FC = () => {
                       </>
                     )}
 
-                    <Button
-                      size="sm"
-                      onClick={() => handlePaymentAndRating(job)}
-                    >
-                      <CreditCard className="h-4 w-4 mr-1" />
-                      {t("sections.jobs.actions.payAndRate")}
-                    </Button>
+                    {/* Payment and rating happens after completion */}
+                    {job.status === "completed" &&
+                      job.payment?.paymentStatus !== "paid" && (
+                        <Button
+                          size="sm"
+                          onClick={() => handlePaymentAndRating(job)}
+                        >
+                          <CreditCard className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.payAndRate")}
+                        </Button>
+                      )}
 
                     {/* Client can dispute during active phases */}
                     {(job.status === "in_progress" ||
@@ -895,13 +899,13 @@ const ClientDashboard: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                {selectedJobForDetails.requirements && (
+                {selectedJobForDetails.requiredSkills && (
                   <div>
                     <h4 className="font-medium text-gray-900">
                       {t("modals.jobDetails.fields.requirements")}
                     </h4>
                     <ul className="text-gray-600 list-disc list-inside">
-                      {selectedJobForDetails.requirements.map(
+                      {selectedJobForDetails.requiredSkills.map(
                         (req: string, index: number) => (
                           <li key={index}>{req}</li>
                         ),

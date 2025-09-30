@@ -333,6 +333,17 @@
       "of": "of",
       "next": "Next"
     },
+    "jobsForYou": {
+      "title": "Jobs for You",
+      "subtitle": "Jobs that match your skills",
+      "matchingJobs": "matching jobs",
+      "viewAll": "View All",
+      "more": "more"
+    },
+    "searchAndJobs": {
+      "title": "Search & Browse Jobs",
+      "subtitle": "Find the perfect job opportunity that matches your skills and interests"
+    },
     "categories": {
       "1": "Web Development",
       "2": "Mobile Development",
@@ -345,6 +356,42 @@
       "9": "Consulting",
       "10": "Other"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "Job Not Found",
+      "description": "The job you're looking for doesn't exist or has been removed.",
+      "backButton": "Back to Jobs"
+    },
+    "loading": "Loading...",
+    "backToJobs": "Back to Jobs",
+    "saveJob": "Save Job",
+    "saved": "Saved",
+    "share": "Share",
+    "jobDetails": "Job Details",
+    "category": "Category",
+    "budget": "Budget",
+    "deadline": "Deadline",
+    "location": "Location",
+    "experienceLevel": "Experience Level",
+    "posted": "Posted",
+    "requiredSkills": "Required Skills",
+    "tags": "Tags",
+    "deliverables": "Deliverables",
+    "attachments": "Attachments",
+    "clientInfo": "Client Information",
+    "viewClientProfile": "View Client Profile",
+    "actions": "Actions",
+    "applyNow": "Apply Now",
+    "manageJob": "Manage Job",
+    "loginToApply": "Login to Apply",
+    "jobStatus": "Job Status",
+    "status": "Status",
+    "priority": "Priority",
+    "public": "Public",
+    "progress": "Progress",
+    "yes": "Yes",
+    "no": "No"
   },
   "ContactPage": {
     "hero": {
@@ -518,6 +565,16 @@
           "placeholder": "Type a message"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "Jobs for You",
+      "subtitle": "Jobs that match your skills",
+      "matchingJobs": "matching jobs",
+      "viewAll": "View All",
+      "more": "more",
+      "viewDetails": "View Details",
+      "applyNow": "Apply Now",
+      "applied": "Applied"
     }
   },
   "ClientDashboard": {

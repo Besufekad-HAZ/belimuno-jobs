@@ -332,6 +332,17 @@
       "of": "irraa",
       "next": "Itti Aanu"
     },
+    "jobsForYou": {
+      "title": "Hojiiwwan Siif Jiru",
+      "subtitle": "Hojiiwwan dandeettii kee waliin walqabatan",
+      "matchingJobs": "hojiiwwan walqabatan",
+      "viewAll": "Hunda Ilalaa",
+      "more": "dabalataa"
+    },
+    "searchAndJobs": {
+      "title": "Hojiiwwan Barbaadi fi Ilalaa",
+      "subtitle": "Hojiiwwan dandeettii fi fedhii kee waliin walqabatan barbaadi"
+    },
     "categories": {
       "1": "Fooyya'insa Weebsaayitii",
       "2": "Fooyya'insa Mobiila",
@@ -344,6 +355,42 @@
       "9": "Gorsaa",
       "10": "Kan Biroo"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "Hojii Hinargamne",
+      "description": "Hojii barbaachisaa kee hinjiru ykn darbameera.",
+      "backButton": "Hojiiwwan Irraa Deebi'i"
+    },
+    "loading": "Galmaa'aa...",
+    "backToJobs": "Hojiiwwan Irraa Deebi'i",
+    "saveJob": "Hojii Qusadhu",
+    "saved": "Qusatame",
+    "share": "Qoodaa",
+    "jobDetails": "Faallaawwan Hojii",
+    "category": "Gosa",
+    "budget": "Baajeta",
+    "deadline": "Guyyaa Xumuraa",
+    "location": "Bakka",
+    "experienceLevel": "Sadarkaa Ogummaa",
+    "posted": "Maxxanfame",
+    "requiredSkills": "Dandeettii Barbaachisaa",
+    "tags": "Mallattoolee",
+    "deliverables": "Wantoota Fudhatamaa",
+    "attachments": "Faayiliiwwan Walqabatan",
+    "clientInfo": "Odeeffannoo Maamilaa",
+    "viewClientProfile": "Seenaa Maamilaa Ilalaa",
+    "actions": "Hojiiwwan",
+    "applyNow": "Amma Applii Godhaa",
+    "manageJob": "Hojii Bulchi",
+    "loginToApply": "Applii Godhuuf Seenuu",
+    "jobStatus": "Haala Hojii",
+    "status": "Haala",
+    "priority": "Dur-sammuu",
+    "public": "Ummataa",
+    "progress": "Fooyya'iinsa",
+    "yes": "Eeyyee",
+    "no": "Lakki"
   },
   "ContactPage": {
     "hero": {
@@ -517,6 +564,16 @@
           "placeholder": "Ergaa barreessi"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "Hojiiwwan Siif Jiru",
+      "subtitle": "Hojiiwwan dandeettii kee waliin walqabatan",
+      "matchingJobs": "hojiiwwan walqabatan",
+      "viewAll": "Hunda Ilali",
+      "more": "Dabalataa",
+      "viewDetails": "Faallaawwan Ilali",
+      "applyNow": "Amma Applii Godhaa",
+      "applied": "Applii Godhame"
     }
   },
   "ClientDashboard": {
