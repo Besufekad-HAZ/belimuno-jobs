@@ -64,8 +64,8 @@ type Job = {
   };
   progress: {
     percentage: number;
-    milestones: any[];
-    updates: any[];
+    milestones: object[];
+    updates: object[];
   };
   payment: {
     paymentStatus: string;
