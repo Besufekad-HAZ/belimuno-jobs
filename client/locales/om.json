@@ -339,6 +339,10 @@
       "viewAll": "Hunda Ilalaa",
       "more": "dabalataa"
     },
+    "searchAndJobs": {
+      "title": "Hojiiwwan Barbaadi fi Ilalaa",
+      "subtitle": "Hojiiwwan dandeettii fi fedhii kee waliin walqabatan barbaadi"
+    },
     "categories": {
       "1": "Fooyya'insa Weebsaayitii",
       "2": "Fooyya'insa Mobiila",
@@ -560,6 +564,16 @@
           "placeholder": "Ergaa barreessi"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "Hojiiwwan Siif Jiru",
+      "subtitle": "Hojiiwwan dandeettii kee waliin walqabatan",
+      "matchingJobs": "hojiiwwan walqabatan",
+      "viewAll": "Hunda Ilali",
+      "more": "Dabalataa",
+      "viewDetails": "Faallaawwan Ilali",
+      "applyNow": "Amma Applii Godhaa",
+      "applied": "Applii Godhame"
     }
   },
   "ClientDashboard": {

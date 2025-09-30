@@ -312,6 +312,7 @@ const ProfilePage = () => {
       try {
         const res = await authAPI.getMe();
         const serverUser = res.data?.user as ExtendedUser | undefined;
+        console.log(serverUser);
         if (serverUser) {
           setUser(serverUser);
           setCvPreview(

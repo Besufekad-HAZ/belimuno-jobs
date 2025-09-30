@@ -340,6 +340,10 @@
       "viewAll": "View All",
       "more": "more"
     },
+    "searchAndJobs": {
+      "title": "Search & Browse Jobs",
+      "subtitle": "Find the perfect job opportunity that matches your skills and interests"
+    },
     "categories": {
       "1": "Web Development",
       "2": "Mobile Development",
@@ -561,6 +565,16 @@
           "placeholder": "Type a message"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "Jobs for You",
+      "subtitle": "Jobs that match your skills",
+      "matchingJobs": "matching jobs",
+      "viewAll": "View All",
+      "more": "more",
+      "viewDetails": "View Details",
+      "applyNow": "Apply Now",
+      "applied": "Applied"
     }
   },
   "ClientDashboard": {

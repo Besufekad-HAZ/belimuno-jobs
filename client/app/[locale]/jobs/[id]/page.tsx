@@ -450,11 +450,11 @@ const JobDetailPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <Link href={`/client/${job.client?._id}`}>
+                {/* <Link href={`/client/${job.client?._id}`}>
                   <Button variant="outline" className="w-full">
                     {t("viewClientProfile")}
                   </Button>
-                </Link>
+                </Link> */}
               </div>
             </Card>
 

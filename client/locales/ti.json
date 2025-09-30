@@ -339,6 +339,10 @@
       "viewAll": "ኩሎም ርኣይ",
       "more": "ዝያዳ"
     },
+    "searchAndJobs": {
+      "title": "ስራሓት ምድላው እና ምርኣይ",
+      "subtitle": "ስራሕ ምስ ብልክዕታትካን ድሌታትካን ዝሰማማዕ ፍጹም ኣጋጣሚ ረኸብ"
+    },
     "categories": {
       "1": "ዳቨሎፕመንት ወብሳይት",
       "2": "ዳቨሎፕመንት ሞባይል",
@@ -560,6 +564,16 @@
           "placeholder": "መልእኽቲ ጽሓፍ"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "ስራሓት ንኣኻ",
+      "subtitle": "ስራሓት ምስ ብልክዕታትካ ዝሰማማዕ",
+      "matchingJobs": "ስራሓት ዝሰማማዕ",
+      "viewAll": "ኩሉ ርኢ",
+      "more": "ዝያዳ",
+      "viewDetails": "ዝርዝራት ርኢ",
+      "applyNow": "ሕጂ ኣመልክት",
+      "applied": "ተመደበ"
     }
   },
   "ClientDashboard": {
