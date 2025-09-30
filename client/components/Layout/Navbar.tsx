@@ -135,7 +135,7 @@ const Navbar: React.FC = () => {
             <Link href="/" className="flex-shrink-0 flex items-center gap-2">
               <div className="relative h-10 w-10 sm:h-12 sm:w-12 mix-blend-luminosity border border-cyan-200 rounded-full bg-amber-50">
                 <Image
-                  src="/belimuno.png"
+                  src="/belimuno-logo.png"
                   alt="Belimuno Logo"
                   fill
                   sizes="48px"
