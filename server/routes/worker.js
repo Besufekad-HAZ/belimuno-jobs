@@ -15,6 +15,7 @@ const {
   saveJob,
   unsaveJob,
   getSavedJobs,
+  getJobsForYou,
   reviewClient,
   createDispute,
   getDisputes,
@@ -34,6 +35,7 @@ router.get("/dashboard", getDashboard);
 
 // Job management
 router.get("/jobs", getJobs);
+router.get("/jobs-for-you", getJobsForYou);
 router.get("/jobs/:id", getJob);
 router.put("/jobs/:id/status", updateJobStatus);
 router.put("/jobs/:id/decline", declineAssignedJob);

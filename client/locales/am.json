@@ -332,6 +332,13 @@
       "of": "ከ",
       "next": "ቀጣይ"
     },
+    "jobsForYou": {
+      "title": "ለእርስዎ የሚሆኑ ስራዎች",
+      "subtitle": "ከችሎታዎችዎ ጋር የሚስማሙ ስራዎች",
+      "matchingJobs": "የሚስማሙ ስራዎች",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "more": "ተጨማሪ"
+    },
     "categories": {
       "1": "ዌብሳይት ማበልፀግ",
       "2": "የሞባይል አፕሊኬሽን ማበልፀግ",
@@ -344,6 +351,42 @@
       "9": "ኮንሳልቲንግ",
       "10": "ሌላ"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "ስራ አልተገኘም",
+      "description": "የሚፈልጉት ስራ አልተገኘም ወይም ተወግዷል።",
+      "backButton": "ወደ ስራዎች ተመለስ"
+    },
+    "loading": "በመጫን ላይ...",
+    "backToJobs": "ወደ ስራዎች ተመለስ",
+    "saveJob": "ስራ አስቀምጥ",
+    "saved": "ተቀምጧል",
+    "share": "አጋራ",
+    "jobDetails": "የስራ ዝርዝሮች",
+    "category": "ምድብ",
+    "budget": "በጀት",
+    "deadline": "መጨረሻ ቀን",
+    "location": "አካባቢ",
+    "experienceLevel": "የልምድ ደረጃ",
+    "posted": "ተለጠፈ",
+    "requiredSkills": "የሚያስፈልጉ ችሎታዎች",
+    "tags": "መለያዎች",
+    "deliverables": "የሚያቀርቡ ነገሮች",
+    "attachments": "ተያያዥ ፋይሎች",
+    "clientInfo": "የደንበኛ መረጃ",
+    "viewClientProfile": "የደንበኛ መገለጫ ይመልከቱ",
+    "actions": "ድርጊቶች",
+    "applyNow": "አሁን ያመልክቱ",
+    "manageJob": "ስራ አስተዳድር",
+    "loginToApply": "ለመመልከት ይግቡ",
+    "jobStatus": "የስራ ሁኔታ",
+    "status": "ሁኔታ",
+    "priority": "ቅድሚያ",
+    "public": "የህዝብ",
+    "progress": "እድገት",
+    "yes": "አዎ",
+    "no": "አይ"
   },
   "ContactPage": {
     "hero": {
