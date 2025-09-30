@@ -542,52 +542,55 @@ const WorkerManagement: React.FC = () => {
               )}
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-              <div className="relative group">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400 transition-colors duration-200 group-focus-within:text-blue-500" />
-                <input
-                  type="text"
-                  placeholder="Search by name, email, skills, category or experience..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-blue-100 bg-white/90 px-12 py-3 text-sm shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 group-hover:border-blue-200"
-                />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:items-end">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Keyword Search
+                </label>
+                <div className="relative group">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-blue-400 transition-colors duration-200 group-focus-within:text-blue-500" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, email, skills, category or experience..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full rounded-xl border border-blue-100 bg-white/90 pl-11 pr-4 py-2.5 text-sm shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 group-hover:border-blue-200"
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Category
-                  </label>
-                  <select
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="w-full rounded-xl border border-blue-100 bg-white/90 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 hover:border-blue-200"
-                  >
-                    <option value="all">All categories</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Experience
-                  </label>
-                  <select
-                    value={experienceFilter}
-                    onChange={(e) => setExperienceFilter(e.target.value)}
-                    className="w-full rounded-xl border border-blue-100 bg-white/90 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 hover:border-blue-200"
-                  >
-                    <option value="all">All experience levels</option>
-                    {experienceOptions.map((experience) => (
-                      <option key={experience} value={experience}>
-                        {experience}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Category
+                </label>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="w-full rounded-xl border border-blue-100 bg-white/90 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 hover:border-blue-200"
+                >
+                  <option value="all">All categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Experience
+                </label>
+                <select
+                  value={experienceFilter}
+                  onChange={(e) => setExperienceFilter(e.target.value)}
+                  className="w-full rounded-xl border border-blue-100 bg-white/90 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 hover:border-blue-200"
+                >
+                  <option value="all">All experience levels</option>
+                  {experienceOptions.map((experience) => (
+                    <option key={experience} value={experience}>
+                      {experience}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
