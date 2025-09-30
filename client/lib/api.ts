@@ -392,6 +392,33 @@ export const notificationsAPI = {
     }),
 };
 
+// Chat API for admin collaboration
+export const chatAPI = {
+  getContacts: () => api.get("/chat/contacts"),
+  getConversations: () => api.get("/chat/conversations"),
+  createConversation: (participantIds: string[], title?: string) =>
+    api.post("/chat/conversations", {
+      participantIds,
+      title,
+    }),
+  getMessages: (
+    conversationId: string,
+    params?: { limit?: number; before?: string },
+  ) => api.get(`/chat/conversations/${conversationId}/messages`, { params }),
+  sendMessage: (
+    conversationId: string,
+    payload: {
+      content?: string;
+      attachments?: Array<{
+        name: string;
+        type?: string;
+        url: string;
+        size?: number;
+      }>;
+    },
+  ) => api.post(`/chat/conversations/${conversationId}/messages`, payload),
+};
+
 // Public contact API
 export const contactAPI = {
   submit: (payload: {

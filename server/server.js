@@ -62,6 +62,7 @@ const client = require('./routes/client');
 const job = require('./routes/job');
 const notification = require('./routes/notification');
 const contact = require('./routes/contact');
+const chat = require('./routes/chat');
 
 // API Info route
 app.get('/api', (req, res) => {
@@ -137,6 +138,7 @@ app.use('/api/client', client);
 app.use('/api/jobs', job);
 app.use('/api/notifications', notification);
 app.use('/api/contact', contact);
+app.use('/api/chat', chat);
 
 // Catch 404 routes
 app.all('*', (req, res) => {

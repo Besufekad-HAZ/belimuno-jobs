@@ -13,6 +13,7 @@ import {
   Star,
   Download,
   MessageSquare,
+  MessageSquarePlus,
   Award,
   Clock,
   SlidersHorizontal,
@@ -442,6 +443,14 @@ const WorkerManagement: React.FC = () => {
             </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
+            <Button
+              onClick={() => router.push("/admin/chat")}
+              variant="primary"
+              className="flex items-center gap-2"
+            >
+              <MessageSquarePlus className="h-4 w-4" />
+              Team Chat
+            </Button>
             <Button
               onClick={() => router.push("/admin/hr/dashboard")}
               variant="outline"
