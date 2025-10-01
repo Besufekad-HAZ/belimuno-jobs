@@ -38,10 +38,13 @@ const ApplicantsPage = () => {
       try {
         setLoading(true);
         const response = await adminAPI.getJob(params.id as string);
+        console.log("response", response);
         const jobData = response.data?.data || response.data;
+        console.log("jobData", jobData);
 
         if (jobData?.applicants) {
           setApplicants(jobData.applicants);
+          console.log("applicants", applicants);
         }
       } catch (err) {
         console.error("Failed to fetch applicants:", err);
@@ -147,9 +150,16 @@ const ApplicantsPage = () => {
                         </p>
                       </div>
                     </div>
-                    {applicant.worker.workerProfile?.rating && (
+                    {typeof applicant.worker.workerProfile?.rating ===
+                      "number" && (
                       <div className="flex items-center space-x-2">
-                        <span className="text-yellow-400">⭐</span>
+                        <span
+                          className="text-yellow-400 text-lg"
+                          role="img"
+                          aria-label="star"
+                        >
+                          ★
+                        </span>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
                             Rating

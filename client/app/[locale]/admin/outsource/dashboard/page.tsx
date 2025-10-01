@@ -11,6 +11,7 @@ import {
   BarChart3,
   FileText,
   Eye,
+  Users,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI } from "@/lib/api";
@@ -470,16 +471,29 @@ const OutsourceAdminDashboard: React.FC = () => {
                       </h3>
                       {getProjectStatusBadge(project.status)}
                     </div>
-                    <Button
-                      onClick={() => {
-                        setSelectedProject(project);
-                        setShowProjectModal(true);
-                      }}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setShowProjectModal(true);
+                        }}
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          router.push(
+                            `/admin/outsource/projects/${project._id}/applicants`,
+                          )
+                        }
+                        variant="primary"
+                        size="sm"
+                      >
+                        <Users className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-2">

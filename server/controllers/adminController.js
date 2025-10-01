@@ -368,7 +368,7 @@ exports.getJob = asyncHandler(async (req, res) => {
     .populate("client", "name email profile.avatar clientProfile")
     .populate("worker", "name email profile.avatar workerProfile")
     .populate("region", "name")
-    .populate("applicants.worker", "name email profile.avatar workerProfile");
+    .populate("messages.sender", "name role");
 
   if (!job) {
     return res.status(404).json({
@@ -377,9 +377,30 @@ exports.getJob = asyncHandler(async (req, res) => {
     });
   }
 
+  // Get applications for this job
+  const applications = await Application.find({ job: job._id })
+    .populate(
+      "worker",
+      "name email profile.avatar workerProfile.rating workerProfile.skills"
+    )
+    .sort({ appliedAt: -1 });
+
+  // Transform applications into the expected format
+  const transformedApplications = applications.map((app) => ({
+    worker: app.worker,
+    appliedAt: app.appliedAt,
+    proposal: app.proposal,
+    proposedBudget: app.proposedBudget,
+    status: app.status,
+  }));
+
+  // Add applications to job data
+  const jobData = job.toObject();
+  jobData.applicants = transformedApplications;
+
   res.status(200).json({
     success: true,
-    data: job,
+    data: jobData,
   });
 });
 

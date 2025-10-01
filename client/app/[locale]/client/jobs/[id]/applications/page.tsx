@@ -78,6 +78,7 @@ const ApplicationsPage: React.FC = () => {
         return;
       }
       const jobRes = await clientAPI.getJob(jobId);
+      console.log("jobs", jobRes);
       setJob(
         jobRes.data.job ||
           jobRes.data.data?.job ||
@@ -86,6 +87,7 @@ const ApplicationsPage: React.FC = () => {
       ); // fallback chain
       const apps =
         jobRes.data.applications || jobRes.data.data?.applications || [];
+      console.log("applications", apps);
       setApplications(apps);
     } catch (e) {
       console.error(e);
@@ -122,8 +124,12 @@ const ApplicationsPage: React.FC = () => {
       const converted: ModernMessage[] = messages.map((m, index) => {
         const atts = Array.isArray(m.attachments)
           ? (m.attachments as string[]).map((url, ai) => {
-              const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
-              const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+              const isImage =
+                /^data:image\//.test(url) ||
+                /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+              const nameFromUrl = decodeURIComponent(
+                url.split("/").pop() || "",
+              );
               return {
                 id: `${index}-att-${ai}`,
                 name: nameFromUrl || `Attachment ${ai + 1}`,
@@ -182,9 +188,10 @@ const ApplicationsPage: React.FC = () => {
     setModernMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      const attachmentDataUrls = files && files.length
-        ? await Promise.all(files.map((f) => fileToDataURL(f)))
-        : [];
+      const attachmentDataUrls =
+        files && files.length
+          ? await Promise.all(files.map((f) => fileToDataURL(f)))
+          : [];
       await clientAPI.sendJobMessage(jobId, content, attachmentDataUrls);
       toast.success("Message sent");
     } catch (e) {
@@ -201,41 +208,53 @@ const ApplicationsPage: React.FC = () => {
     const interval = setInterval(() => {
       // No need for a full re-render, just fetch in the background
       // The main `openMessages` function can be used to manually refresh.
-      clientAPI.getJobMessages(jobId).then(res => {
-        const messages = (res.data.data || []) as ChatMessage[];
-        const converted = messages.map((m, index) => {
-          const atts = Array.isArray(m.attachments)
-            ? (m.attachments as string[]).map((url, ai) => {
-                const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
-                const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
-                return {
-                  id: `${m._id || index}-att-${ai}`,
-                  name: nameFromUrl || `Attachment ${ai + 1}`,
-                  url,
-                  type: isImage ? "image/*" : "application/octet-stream",
-                };
-              })
-            : [];
-          return {
-            id: m._id || `msg-${index}`,
-            senderId:
-              m.sender?.role === "client"
-                ? getStoredUser()?._id || "client"
-                : "worker",
-            senderName:
-              m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
-            content: m.content,
-            timestamp: m.sentAt,
-            attachments: atts,
-          };
+      clientAPI
+        .getJobMessages(jobId)
+        .then((res) => {
+          const messages = (res.data.data || []) as ChatMessage[];
+          const converted = messages.map((m, index) => {
+            const atts = Array.isArray(m.attachments)
+              ? (m.attachments as string[]).map((url, ai) => {
+                  const isImage =
+                    /^data:image\//.test(url) ||
+                    /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+                  const nameFromUrl = decodeURIComponent(
+                    url.split("/").pop() || "",
+                  );
+                  return {
+                    id: `${m._id || index}-att-${ai}`,
+                    name: nameFromUrl || `Attachment ${ai + 1}`,
+                    url,
+                    type: isImage ? "image/*" : "application/octet-stream",
+                  };
+                })
+              : [];
+            return {
+              id: m._id || `msg-${index}`,
+              senderId:
+                m.sender?.role === "client"
+                  ? getStoredUser()?._id || "client"
+                  : "worker",
+              senderName:
+                m.sender?.name ||
+                (m.sender?.role === "client" ? "You" : "Worker"),
+              content: m.content,
+              timestamp: m.sentAt,
+              attachments: atts,
+            };
+          });
+          setModernMessages((prev) => {
+            // A simple merge strategy to avoid disrupting optimistic messages
+            const existingIds = new Set(prev.map((msg) => msg.id));
+            const newMessages = converted.filter(
+              (msg) => !existingIds.has(msg.id),
+            );
+            return [...prev, ...newMessages];
+          });
+        })
+        .catch(() => {
+          /* ignore polling errors */
         });
-        setModernMessages(prev => {
-          // A simple merge strategy to avoid disrupting optimistic messages
-          const existingIds = new Set(prev.map(msg => msg.id));
-          const newMessages = converted.filter(msg => !existingIds.has(msg.id));
-          return [...prev, ...newMessages];
-        });
-      }).catch(() => { /* ignore polling errors */ });
     }, 4000);
     return () => clearInterval(interval);
   }, [showChat, jobId]);
@@ -243,10 +262,10 @@ const ApplicationsPage: React.FC = () => {
   // Cleanup blob URLs from optimistic messages
   useEffect(() => {
     return () => {
-      modernMessages.forEach(message => {
+      modernMessages.forEach((message) => {
         if (message.attachments) {
-          message.attachments.forEach(att => {
-            if (att.url.startsWith('blob:')) {
+          message.attachments.forEach((att) => {
+            if (att.url.startsWith("blob:")) {
               URL.revokeObjectURL(att.url);
             }
           });
