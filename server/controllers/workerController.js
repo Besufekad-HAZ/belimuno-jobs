@@ -8,6 +8,56 @@ const NotificationService = require("../utils/notificationService");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 
+// @desc    Get jobs for you based on worker skills/category
+// @route   GET /api/worker/jobs-for-you
+// @access  Private/Worker
+exports.getJobsForYou = asyncHandler(async (req, res) => {
+  const worker = req.user;
+  const { page = 1, limit = 10 } = req.query;
+
+  // Get worker's skills
+  const workerSkills = worker.workerProfile?.skills || [];
+
+  // If no skills, return empty result
+  if (workerSkills.length === 0) {
+    return res.status(200).json({
+      success: true,
+      data: [],
+      pagination: {
+        page: parseInt(page),
+        pages: 0,
+        total: 0,
+      },
+    });
+  }
+
+  // Find jobs where requiredSkills intersect with worker's skills
+  const matchingJobs = await Job.find({
+    status: "posted",
+    requiredSkills: { $in: workerSkills },
+  })
+    .populate("client", "name profile.avatar")
+    .populate("region", "name")
+    .sort({ createdAt: -1 })
+    .limit(limit * 1)
+    .skip((page - 1) * limit);
+
+  const total = await Job.countDocuments({
+    status: "posted",
+    requiredSkills: { $in: workerSkills },
+  });
+
+  res.status(200).json({
+    success: true,
+    data: matchingJobs,
+    pagination: {
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+      total,
+    },
+  });
+});
+
 // @desc    Get worker dashboard
 // @route   GET /api/worker/dashboard
 // @access  Private/Worker

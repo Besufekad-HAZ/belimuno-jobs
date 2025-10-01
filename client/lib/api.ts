@@ -343,6 +343,14 @@ export const workerAPI = {
   getSavedJobs: () => api.get("/worker/saved-jobs"),
   saveJob: (jobId: string) => api.post(`/worker/saved-jobs/${jobId}`),
   unsaveJob: (jobId: string) => api.delete(`/worker/saved-jobs/${jobId}`),
+  // Jobs for you based on worker skills/category
+  getJobsForYou: (params?: Record<string, unknown>) =>
+    api.get("/worker/jobs-for-you", { params }),
+  // Reviews
+  reviewClient: (
+    jobId: string,
+    payload: { rating: number; comment: string; title?: string },
+  ) => api.post(`/worker/jobs/${jobId}/review`, payload),
 
   // Disputes
   createDispute: (payload: {

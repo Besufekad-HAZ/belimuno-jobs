@@ -384,6 +384,17 @@
       "of": "ካብ",
       "next": "ቀጺሉ"
     },
+    "jobsForYou": {
+      "title": "ስራሓት ንኣኻ",
+      "subtitle": "ስራሓት ምስ ብልክዕታትካ ዝሰማማዕ",
+      "matchingJobs": "ስራሓት ዝሰማማዕ",
+      "viewAll": "ኩሎም ርኣይ",
+      "more": "ዝያዳ"
+    },
+    "searchAndJobs": {
+      "title": "ስራሓት ምድላው እና ምርኣይ",
+      "subtitle": "ስራሕ ምስ ብልክዕታትካን ድሌታትካን ዝሰማማዕ ፍጹም ኣጋጣሚ ረኸብ"
+    },
     "categories": {
       "1": "ዳቨሎፕመንት ወብሳይት",
       "2": "ዳቨሎፕመንት ሞባይል",
@@ -396,6 +407,42 @@
       "9": "ኮንሳልቲንግ",
       "10": "ካልእ"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "ስራሕ ኣይተረኽበን",
+      "description": "እቲ ዝደሊኻዮ ስራሕ ኣይተረኽበን ወይ ተሰሪዑ።",
+      "backButton": "ናብ ስራሓት ተመለስ"
+    },
+    "loading": "ይጽዓን...",
+    "backToJobs": "ናብ ስራሓት ተመለስ",
+    "saveJob": "ስራሕ ኣስቀምጥ",
+    "saved": "ተቐሚጡ",
+    "share": "ኣጋራ",
+    "jobDetails": "ዝርዝር ስራሕ",
+    "category": "መደብ",
+    "budget": "በጀት",
+    "deadline": "መወዳእታ ዕለት",
+    "location": "ኣካባቢ",
+    "experienceLevel": "ደረጃ ተመክሮ",
+    "posted": "ተለጢፈ",
+    "requiredSkills": "ዘድሊ ብልክዕታት",
+    "tags": "መለዋወጺታት",
+    "deliverables": "ዝምሓሱ ነገራት",
+    "attachments": "ዝተሓሓዙ ፋይላት",
+    "clientInfo": "ሓበሬታ ደንበኛ",
+    "viewClientProfile": "መገለጺ ደንበኛ ርኣይ",
+    "actions": "ተግባራት",
+    "applyNow": "ሕጂ ኣመልክት",
+    "manageJob": "ስራሕ ኣስተዳድር",
+    "loginToApply": "ንምመልከት ኣብ ውሽጢ እተ",
+    "jobStatus": "ሁኔታ ስራሕ",
+    "status": "ሁኔታ",
+    "priority": "ቅድሚት",
+    "public": "ህዝባዊ",
+    "progress": "ምዕባለ",
+    "yes": "እወ",
+    "no": "ኣይኮነን"
   },
   "ContactPage": {
     "hero": {
@@ -569,6 +616,16 @@
           "placeholder": "መልእኽቲ ጽሓፍ"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "ስራሓት ንኣኻ",
+      "subtitle": "ስራሓት ምስ ብልክዕታትካ ዝሰማማዕ",
+      "matchingJobs": "ስራሓት ዝሰማማዕ",
+      "viewAll": "ኩሉ ርኢ",
+      "more": "ዝያዳ",
+      "viewDetails": "ዝርዝራት ርኢ",
+      "applyNow": "ሕጂ ኣመልክት",
+      "applied": "ተመደበ"
     }
   },
   "ClientDashboard": {
