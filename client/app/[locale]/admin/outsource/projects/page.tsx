@@ -53,6 +53,7 @@ interface Project {
     completed: boolean;
     dueDate: string;
   }>;
+  totalApplicants?: number;
 }
 
 interface ProjectStats {
@@ -63,6 +64,7 @@ interface ProjectStats {
   totalValue: number;
   averageCompletion: number;
   onTimeDelivery: number;
+  totalApplicants: number;
 }
 
 // Minimal job shape from API we rely on
@@ -89,6 +91,8 @@ type JobApi = {
   updatedAt?: string;
   startDate?: string;
   tags?: string[];
+  applicantsCount?: number;
+  applicants?: object[];
 };
 
 type StatusFilter =
@@ -151,6 +155,14 @@ const ProjectOversight: React.FC = () => {
         const computedPriority: Project["priority"] = isOverdue
           ? "urgent"
           : nonUrgent[Math.floor(Math.random() * nonUrgent.length)];
+
+        // Try to get applicants count from job
+        let totalApplicants = 0;
+        if (typeof job.applicantsCount === "number") {
+          totalApplicants = job.applicantsCount;
+        } else if (Array.isArray((job as any).applicants)) {
+          totalApplicants = (job as any).applicants.length;
+        }
 
         return {
           _id: job._id,
@@ -227,6 +239,7 @@ const ProjectOversight: React.FC = () => {
                 new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
             },
           ],
+          totalApplicants, // <-- Added
         };
       });
 
@@ -234,6 +247,10 @@ const ProjectOversight: React.FC = () => {
 
       // Calculate stats
       const now = new Date();
+      const totalApplicants = projectsData.reduce(
+        (sum, p) => sum + (p.totalApplicants || 0),
+        0,
+      );
       const projectStats: ProjectStats = {
         totalProjects: projectsData.length,
         activeProjects: projectsData.filter((p) =>
@@ -249,6 +266,7 @@ const ProjectOversight: React.FC = () => {
           projectsData.reduce((sum, p) => sum + p.progress, 0) /
           Math.max(projectsData.length, 1),
         onTimeDelivery: 85, // Mock data
+        totalApplicants, // <-- Added
       };
 
       setStats(projectStats);
@@ -390,7 +408,7 @@ const ProjectOversight: React.FC = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="p-6">
             <div className="flex items-center">
               <Briefcase className="h-8 w-8 text-blue-600" />
@@ -435,6 +453,19 @@ const ProjectOversight: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">Overdue</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.overdue || 0}
+                </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-indigo-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  Total Applicants
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats?.totalApplicants || 0}
                 </p>
               </div>
             </div>
@@ -577,7 +608,7 @@ const ProjectOversight: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                       <div>
                         <p className="text-sm font-medium text-gray-700">
                           Client
@@ -611,6 +642,16 @@ const ProjectOversight: React.FC = () => {
                         </p>
                         <p className="text-xs text-gray-500">
                           Due: {new Date(project.deadline).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">
+                          Applicants
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {typeof project.totalApplicants === "number"
+                            ? project.totalApplicants
+                            : 0}
                         </p>
                       </div>
                     </div>
@@ -751,6 +792,12 @@ const ProjectOversight: React.FC = () => {
                     <p>
                       <strong>Actual Hours:</strong>{" "}
                       {selectedProject.actualHours}
+                    </p>
+                    <p>
+                      <strong>Total Applicants:</strong>{" "}
+                      {typeof selectedProject.totalApplicants === "number"
+                        ? selectedProject.totalApplicants
+                        : 0}
                     </p>
                   </div>
                 </div>

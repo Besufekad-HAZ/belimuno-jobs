@@ -345,18 +345,49 @@ exports.getJobs = asyncHandler(async (req, res) => {
 
   const jobs = await jobsQuery;
 
+  // For each job, fetch its applications and attach as applicants[]
+  const jobIds = jobs.map((job) => job._id);
+  // Get all applications for these jobs in one query
+  const applications = await Application.find({ job: { $in: jobIds } })
+    .populate(
+      "worker",
+      "name email profile.avatar workerProfile.rating workerProfile.skills"
+    )
+    .sort({ appliedAt: -1 })
+    .lean();
+
+  // Group applications by job id
+  const appsByJob = {};
+  for (const app of applications) {
+    const jobId = String(app.job);
+    if (!appsByJob[jobId]) appsByJob[jobId] = [];
+    appsByJob[jobId].push({
+      worker: app.worker,
+      appliedAt: app.appliedAt,
+      proposal: app.proposal,
+      proposedBudget: app.proposedBudget,
+      status: app.status,
+    });
+  }
+
+  // Attach applicants to each job
+  const jobsWithApplicants = jobs.map((job) => ({
+    ...job,
+    applicants: appsByJob[String(job._id)] || [],
+  }));
+
   const total = await Job.countDocuments(query);
 
   res.status(200).json({
     success: true,
-    count: jobs.length,
+    count: jobsWithApplicants.length,
     total,
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
       pages: Math.ceil(total / limit),
     },
-    data: jobs,
+    data: jobsWithApplicants,
   });
 });
 
