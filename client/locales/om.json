@@ -790,9 +790,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "Daashbooraa Bulchinsa Ala Tajaajilaa",
-      "subtitle": "Pirojeektota, maamiloota, fi dalagaa daldalaa bulchiisi",
+      "subtitle": "Hojiiwwan, maamiloota, fi dalagaa daldalaa bulchiisi",
       "buttons": {
-        "manageProjects": "Pirojeektota Bulchiisi",
+        "manageJobs": "Hojiiwwan Bulchiisi",
         "clientManagement": "Bulchiinsa Maamilaa"
       }
     },
@@ -801,9 +801,9 @@
         "title": "Maamiloota Waliigalaa",
         "label": "Maamiloota Waliigalaa"
       },
-      "activeProjects": {
-        "title": "Pirojeektota Hojii Irra Jiran",
-        "label": "Pirojeektota Hojii Irra Jiran"
+      "activeJobs": {
+        "title": "Hojiiwwan Hojii Irra Jiran",
+        "label": "Hojiiwwan Hojii Irra Jiran"
       },
       "totalRevenue": {
         "title": "Argatta Waliigalaa",
@@ -819,20 +819,20 @@
         "title": "Qo'annoo Maamilaa",
         "rating": "irraa 5"
       },
-      "projectSuccess": {
-        "title": "Sadarkaa Milkaa'ina Pirojeektii"
+      "jobSuccess": {
+        "title": "Sadarkaa Milkaa'ina Hojii"
       },
       "revenueGrowth": {
         "title": "Guddina Argattaa"
       }
     },
-    "projects": {
-      "title": "Pirojeektota Duraanii",
+    "jobs": {
+      "title": "Hojiiwwan Duraanii",
       "viewAll": "Hunda Ilali",
       "details": {
         "client": "Maamilaa",
         "progress": "Itti Fufiinsa",
-        "title": "Faallaawwan Pirojeektii",
+        "title": "Faallaawwan Hojii",
         "assignedWorker": "Hojjetaa Kenname",
         "deadline": "Yeroo Xumuraa",
         "budget": "Baajeta",
@@ -853,14 +853,14 @@
       "title": "Maamiloota Ol'aanaa",
       "viewAll": "Hunda Ilali",
       "metrics": {
-        "projects": "pirojeektota"
+        "jobs": "hojiiwwan"
       }
     },
     "operations": {
       "title": "Dalagaa Daldalaa",
       "buttons": {
         "clientManagement": "Bulchiinsa Maamilaa",
-        "projectOversight": "Ilaalcha Pirojeektii",
+        "jobOversight": "Ilaalcha Hojii",
         "businessAnalytics": "Qorannoo Daldalaa",
         "financialReports": "Ripoorota Qabeenyaa"
       }
@@ -868,10 +868,10 @@
     "keyMetrics": {
       "title": "Meetirika Gurguddoo",
       "metrics": {
-        "avgProjectValue": "Giddugaleessaa Gatii Pirojeektii",
+        "avgJobValue": "Giddugaleessaa Gatii Hojii",
         "clientRetention": "Dhaabbannaa Maamilaa",
-        "projectCompletionRate": "Sadarkaa Xumura Pirojeektii",
-        "avgProjectDuration": "Giddugaleessaa Yeroo Pirojeektii"
+        "jobCompletionRate": "Sadarkaa Xumura Hojii",
+        "avgJobDuration": "Giddugaleessaa Yeroo Hojii"
       }
     },
     "recentActivity": {

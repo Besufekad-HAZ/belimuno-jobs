@@ -790,9 +790,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "ዳሽቦርድ ኣስተዳደሪ ኣውትሶርሲንግ",
-      "subtitle": "ፕሮጀክትታት፣ ደንበኛታትን ንግዳዊ ንጥፈታትን ኣስተድሕን",
+      "subtitle": "ስራታት፣ ደንበኛታትን ንግዳዊ ንጥፈታትን ኣስተድሕን",
       "buttons": {
-        "manageProjects": "ፕሮጀክትታት ኣስተድሕን",
+        "manageJobs": "ስራታት ኣስተድሕን",
         "clientManagement": "ኣስተዳደር ደንበኛ"
       }
     },
@@ -801,9 +801,9 @@
         "title": "ጠቕላላ ደንበኛታት",
         "label": "ጠቕላላ ደንበኛታት"
       },
-      "activeProjects": {
-        "title": "ንቑሓት ፕሮጀክትታት",
-        "label": "ንቑሓት ፕሮጀክትታት"
+      "activeJobs": {
+        "title": "ንቑሓት ስራታት",
+        "label": "ንቑሓት ስራታት"
       },
       "totalRevenue": {
         "title": "ጠቕላላ እታኻ",
@@ -819,20 +819,20 @@
         "title": "ርእሚ ደንበኛ",
         "rating": "ካብ 5"
       },
-      "projectSuccess": {
-        "title": "ናብ ስኬት ዝወስድ መጠን ፕሮጀክት"
+      "jobSuccess": {
+        "title": "ናብ ስኬት ዝወስድ መጠን ስራ"
       },
       "revenueGrowth": {
         "title": "ዕብየት እታኻ"
       }
     },
-    "projects": {
-      "title": "ቀረባ ፕሮጀክትታት",
+    "jobs": {
+      "title": "ቀረባ ስራታት",
       "viewAll": "ኩሉ ርኢ",
       "details": {
         "client": "ደንበኛ",
         "progress": "ምዕባለ",
-        "title": "ዝርዝራት ፕሮጀክት",
+        "title": "ዝርዝራት ስራ",
         "assignedWorker": "ዝተመደበ ሰራሕተኛ",
         "deadline": "ዕለት መዛግብቲ",
         "budget": "በጀት",
@@ -853,14 +853,14 @@
       "title": "ልዑላት ደንበኛታት",
       "viewAll": "ኩሉ ርኢ",
       "metrics": {
-        "projects": "ፕሮጀክትታት"
+        "jobs": "ስራታት"
       }
     },
     "operations": {
       "title": "ንግዳዊ ንጥፈታት",
       "buttons": {
         "clientManagement": "ኣስተዳደር ደንበኛ",
-        "projectOversight": "ቁጽጽር ፕሮጀክት",
+        "jobOversight": "ቁጽጽር ስራ",
         "businessAnalytics": "ትንታነ ንግዲ",
         "financialReports": "ፋይናንሻል ሪፖርት"
       }
@@ -868,10 +868,10 @@
     "keyMetrics": {
       "title": "ኣገደስቲ መለክዒታት",
       "metrics": {
-        "avgProjectValue": "ኣማካይ ዋጋ ፕሮጀክት",
+        "avgJobValue": "ኣማካይ ዋጋ ስራ",
         "clientRetention": "ምዕጻው ደንበኛ",
-        "projectCompletionRate": "መጠን ምውዳእ ፕሮጀክት",
-        "avgProjectDuration": "ኣማካይ ንውሓት ፕሮጀክት"
+        "jobCompletionRate": "መጠን ምውዳእ ስራ",
+        "avgJobDuration": "ኣማካይ ንውሓት ስራ"
       }
     },
     "recentActivity": {

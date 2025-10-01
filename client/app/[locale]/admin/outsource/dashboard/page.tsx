@@ -236,17 +236,13 @@ const OutsourceAdminDashboard: React.FC = () => {
   const getProjectStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return (
-          <Badge variant="success">{t("projects.status.completed")}</Badge>
-        );
+        return <Badge variant="success">{t("jobs.status.completed")}</Badge>;
       case "in_progress":
-        return (
-          <Badge variant="primary">{t("projects.status.inProgress")}</Badge>
-        );
+        return <Badge variant="primary">{t("jobs.status.inProgress")}</Badge>;
       case "assigned":
-        return <Badge variant="warning">{t("projects.status.assigned")}</Badge>;
+        return <Badge variant="warning">{t("jobs.status.assigned")}</Badge>;
       case "posted":
-        return <Badge variant="secondary">{t("projects.status.posted")}</Badge>;
+        return <Badge variant="secondary">{t("jobs.status.posted")}</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -297,7 +293,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               className="flex items-center space-x-2"
             >
               <Briefcase className="h-4 w-4" />
-              <span>{t("header.buttons.manageProjects")}</span>
+              <span>{t("header.buttons.manageJobs")}</span>
             </Button>
             <Button
               onClick={() => router.push("/admin/outsource/clients")}
@@ -335,7 +331,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">
-                  {t("stats.activeProjects.label")}
+                  {t("stats.activeJobs.label")}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.activeProjects || 0}
@@ -405,7 +401,7 @@ const OutsourceAdminDashboard: React.FC = () => {
 
           <Card className="p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              {t("metrics.projectSuccess.title")}
+              {t("metrics.jobSuccess.title")}
             </h2>
             <div className="flex items-center space-x-4">
               <div className="flex-1">
@@ -451,14 +447,14 @@ const OutsourceAdminDashboard: React.FC = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                {t("projects.title")}
+                {t("jobs.title")}
               </h2>
               <Button
                 onClick={() => router.push("/admin/outsource/projects")}
                 variant="outline"
                 size="sm"
               >
-                {t("projects.viewAll")}
+                {t("jobs.viewAll")}
               </Button>
             </div>
             <div className="space-y-3">
@@ -498,14 +494,14 @@ const OutsourceAdminDashboard: React.FC = () => {
 
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                     <span>
-                      {t("projects.details.client")}: {project.client.name}
+                      {t("jobs.details.client")}: {project.client.name}
                     </span>
                     <span>{formatCurrency(project.budget)}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-gray-600">
-                      {t("projects.details.progress")}
+                      {t("jobs.details.progress")}
                     </span>
                     <span className="font-medium">{project.progress}%</span>
                   </div>
@@ -562,7 +558,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                     </p>
                     <p className="text-sm text-gray-600">
                       {client.clientProfile?.totalJobsPosted || 0}{" "}
-                      {t("clients.metrics.projects")}
+                      {t("clients.metrics.jobs")}
                     </p>
                   </div>
                 </div>
@@ -593,7 +589,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                 className="w-full justify-start"
               >
                 <Briefcase className="h-4 w-4 mr-2" />
-                {t("operations.buttons.projectOversight")}
+                {t("operations.buttons.jobOversight")}
               </Button>
               <Button
                 onClick={() => router.push("/admin/outsource/analytics")}
@@ -622,7 +618,7 @@ const OutsourceAdminDashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">
-                  {t("keyMetrics.metrics.avgProjectValue")}
+                  {t("keyMetrics.metrics.avgJobValue")}
                 </span>
                 <span className="font-semibold text-gray-900">
                   {formatCurrency(
@@ -646,7 +642,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">
-                  {t("keyMetrics.metrics.projectCompletionRate")}
+                  {t("keyMetrics.metrics.jobCompletionRate")}
                 </span>
                 <span className="font-semibold text-gray-900">
                   {Math.round(
@@ -659,7 +655,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">
-                  {t("keyMetrics.metrics.avgProjectDuration")}
+                  {t("keyMetrics.metrics.avgJobDuration")}
                 </span>
                 <span className="font-semibold text-gray-900">
                   {Math.round(
@@ -702,7 +698,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                   >
                     <div className="h-2 w-2 bg-green-500 rounded-full"></div>
                     <span className="text-sm text-gray-600">
-                      Project &quot;{project.title}&quot; completed
+                      Job &quot;{project.title}&quot; completed
                     </span>
                   </div>
                 ))}
@@ -753,7 +749,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                   >
                     <div className="h-2 w-2 bg-purple-500 rounded-full"></div>
                     <span className="text-sm text-gray-600">
-                      Project &quot;{project.title}&quot; is {project.progress}%
+                      Job &quot;{project.title}&quot; is {project.progress}%
                       complete
                     </span>
                   </div>
@@ -769,7 +765,7 @@ const OutsourceAdminDashboard: React.FC = () => {
             setShowProjectModal(false);
             setSelectedProject(null);
           }}
-          title={t("projects.details.title")}
+          title={t("jobs.details.title")}
           size="lg"
         >
           {selectedProject && (
@@ -784,7 +780,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-gray-600">
-                    {t("projects.details.client")}
+                    {t("jobs.details.client")}
                   </p>
                   <p className="font-medium">{selectedProject.client.name}</p>
                   {selectedProject.client.company && (
@@ -795,7 +791,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">
-                    {t("projects.details.budget")}
+                    {t("jobs.details.budget")}
                   </p>
                   <p className="font-medium">
                     {formatCurrency(selectedProject.budget)}
@@ -804,14 +800,14 @@ const OutsourceAdminDashboard: React.FC = () => {
                 {selectedProject.worker && (
                   <div>
                     <p className="text-sm font-medium text-gray-600">
-                      {t("projects.details.assignedWorker")}
+                      {t("jobs.details.assignedWorker")}
                     </p>
                     <p className="font-medium">{selectedProject.worker.name}</p>
                   </div>
                 )}
                 <div>
                   <p className="text-sm font-medium text-gray-600">
-                    {t("projects.details.deadline")}
+                    {t("jobs.details.deadline")}
                   </p>
                   <p className="font-medium">
                     {new Date(selectedProject.deadline).toLocaleDateString()}
@@ -822,7 +818,7 @@ const OutsourceAdminDashboard: React.FC = () => {
               <div>
                 <div className="flex justify-between text-sm mb-2">
                   <span className="font-medium text-gray-600">
-                    {t("projects.details.progress")}
+                    {t("jobs.details.progress")}
                   </span>
                   <span className="font-medium">
                     {selectedProject.progress}%
@@ -838,13 +834,13 @@ const OutsourceAdminDashboard: React.FC = () => {
 
               <div className="flex space-x-3">
                 <Button variant="primary">
-                  {t("projects.details.buttons.viewDetails")}
+                  {t("jobs.details.buttons.viewDetails")}
                 </Button>
                 <Button variant="outline">
-                  {t("projects.details.buttons.contactClient")}
+                  {t("jobs.details.buttons.contactClient")}
                 </Button>
                 <Button variant="outline">
-                  {t("projects.details.buttons.generateReport")}
+                  {t("jobs.details.buttons.generateReport")}
                 </Button>
               </div>
             </div>

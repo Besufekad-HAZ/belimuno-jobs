@@ -877,9 +877,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "Outsourcing Admin Dashboard",
-      "subtitle": "Manage projects, clients, and business operations",
+      "subtitle": "Manage jobs, clients, and business operations",
       "buttons": {
-        "manageProjects": "Manage Projects",
+        "manageJobs": "Manage Jobs",
         "clientManagement": "Client Management"
       }
     },
@@ -888,9 +888,9 @@
         "title": "Total Clients",
         "label": "Total Clients"
       },
-      "activeProjects": {
-        "title": "Active Projects",
-        "label": "Active Projects"
+      "activeJobs": {
+        "title": "Active Jobs",
+        "label": "Active Jobs"
       },
       "totalRevenue": {
         "title": "Total Revenue",
@@ -906,20 +906,20 @@
         "title": "Client Satisfaction",
         "rating": "out of 5"
       },
-      "projectSuccess": {
-        "title": "Project Success Rate"
+      "jobSuccess": {
+        "title": "Job Success Rate"
       },
       "revenueGrowth": {
         "title": "Revenue Growth"
       }
     },
-    "projects": {
-      "title": "Recent Projects",
+    "jobs": {
+      "title": "Recent Jobs",
       "viewAll": "View All",
       "details": {
         "client": "Client",
         "progress": "Progress",
-        "title": "Project Details",
+        "title": "Job Details",
         "assignedWorker": "Assigned Worker",
         "deadline": "Deadline",
         "budget": "Budget",
@@ -940,14 +940,14 @@
       "title": "Top Clients",
       "viewAll": "View All",
       "metrics": {
-        "projects": "projects"
+        "jobs": "jobs"
       }
     },
     "operations": {
       "title": "Business Operations",
       "buttons": {
         "clientManagement": "Client Management",
-        "projectOversight": "Project Oversight",
+        "jobOversight": "Job Oversight",
         "businessAnalytics": "Business Analytics",
         "financialReports": "Financial Reports"
       }
@@ -955,10 +955,10 @@
     "keyMetrics": {
       "title": "Key Metrics",
       "metrics": {
-        "avgProjectValue": "Avg. Project Value",
+        "avgJobValue": "Avg. Job Value",
         "clientRetention": "Client Retention",
-        "projectCompletionRate": "Project Completion Rate",
-        "avgProjectDuration": "Avg. Project Duration"
+        "jobCompletionRate": "Job Completion Rate",
+        "avgJobDuration": "Avg. Job Duration"
       }
     },
     "recentActivity": {

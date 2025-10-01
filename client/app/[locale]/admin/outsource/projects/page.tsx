@@ -390,11 +390,9 @@ const ProjectOversight: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Project Oversight
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">Job Oversight</h1>
             <p className="text-gray-600">
-              Monitor and manage all client projects and deliverables
+              Monitor and manage all client jobs and deliverables
             </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
@@ -413,9 +411,7 @@ const ProjectOversight: React.FC = () => {
             <div className="flex items-center">
               <Briefcase className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Total Projects
-                </p>
+                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.totalProjects || 0}
                 </p>
@@ -426,9 +422,7 @@ const ProjectOversight: React.FC = () => {
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-orange-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Active Projects
-                </p>
+                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.activeProjects || 0}
                 </p>
@@ -476,14 +470,12 @@ const ProjectOversight: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Project Value
+              Job Value
             </h3>
             <div className="text-3xl font-bold text-green-600 mb-2">
               {formatCurrency(stats?.totalValue || 0)}
             </div>
-            <p className="text-sm text-gray-600">
-              Total project portfolio value
-            </p>
+            <p className="text-sm text-gray-600">Total job portfolio value</p>
           </Card>
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -524,7 +516,7 @@ const ProjectOversight: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search projects by title, client, worker, or tags..."
+                  placeholder="Search jobs by title, client, worker, or tags..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -578,12 +570,12 @@ const ProjectOversight: React.FC = () => {
             <Card className="p-12 text-center">
               <Briefcase className="h-16 w-16 mx-auto mb-4 text-gray-300" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No projects found
+                No jobs found
               </h3>
               <p className="text-gray-600">
                 {searchQuery
-                  ? "No projects match your search criteria."
-                  : "No projects available."}
+                  ? "No jobs match your search criteria."
+                  : "No jobs available."}
               </p>
             </Card>
           ) : (
@@ -752,7 +744,7 @@ const ProjectOversight: React.FC = () => {
             setShowProjectModal(false);
             setSelectedProject(null);
           }}
-          title="Project Details"
+          title="Job Details"
           size="xl"
         >
           {selectedProject && (
@@ -772,7 +764,7 @@ const ProjectOversight: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold mb-2">Project Information</h4>
+                  <h4 className="font-semibold mb-2">Job Information</h4>
                   <div className="space-y-2 text-sm">
                     <p>
                       <strong>Budget:</strong>{" "}
@@ -836,7 +828,7 @@ const ProjectOversight: React.FC = () => {
 
               {selectedProject.milestones && (
                 <div>
-                  <h4 className="font-semibold mb-3">Project Milestones</h4>
+                  <h4 className="font-semibold mb-3">Job Milestones</h4>
                   <div className="space-y-2">
                     {selectedProject.milestones.map((milestone, idx) => (
                       <div
