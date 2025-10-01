@@ -8,7 +8,7 @@
 
 ### 2. Set Environment Variables
 Create a new environment in Postman with these variables:
-- `baseUrl`: `http://localhost:5000/api`
+- `baseUrl`: `http://localhost:5001/api`
 - `superAdminToken`: (will be set automatically)
 - `adminHrToken`: (will be set automatically)
 - `adminOutsourceToken`: (will be set automatically)

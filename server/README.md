@@ -161,7 +161,7 @@ CHAPA_PUBLIC_KEY=your_chapa_public_key
    npm run test:full
    ```
 
-The server will start on `http://localhost:5000`
+The server will start on `http://localhost:5001`
 
 ## 🧪 Testing
 

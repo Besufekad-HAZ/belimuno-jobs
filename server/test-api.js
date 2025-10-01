@@ -2,7 +2,7 @@ const axios = require("axios");
 const colors = require("colors");
 
 // Configuration
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5001/api";
 const authTokens = {
 	superAdmin: null,
 	adminHr: null,
