@@ -833,8 +833,15 @@ const OutsourceAdminDashboard: React.FC = () => {
               </div>
 
               <div className="flex space-x-3">
-                <Button variant="primary">
-                  {t("jobs.details.buttons.viewDetails")}
+                <Button
+                  onClick={() =>
+                    router.push(
+                      `/admin/outsource/projects/${selectedProject._id}/applicants`,
+                    )
+                  }
+                  variant="primary"
+                >
+                  {t("jobs.details.buttons.applicants")}
                 </Button>
                 <Button variant="outline">
                   {t("jobs.details.buttons.contactClient")}

@@ -329,7 +329,7 @@ const ProjectOversight: React.FC = () => {
       case "posted":
         return <Badge variant="secondary">Posted</Badge>;
       case "assigned":
-        return <Badge variant="warning">Assigned</Badge>;
+        return <Badge variant="primary">Assigned</Badge>;
       case "in_progress":
         return <Badge variant="info">In Progress</Badge>;
       case "completed":
@@ -444,7 +444,7 @@ const ProjectOversight: React.FC = () => {
             <div className="flex items-center">
               <AlertCircle className="h-8 w-8 text-red-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Overdue</p>
+                <p className="text-sm font-medium text-gray-600">Expired</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.overdue || 0}
                 </p>
@@ -540,7 +540,7 @@ const ProjectOversight: React.FC = () => {
                   <option value="assigned">Assigned</option>
                   <option value="in_progress">In Progress</option>
                   <option value="completed">Completed</option>
-                  <option value="overdue">Overdue</option>
+                  <option value="overdue">Expired</option>
                 </select>
               </div>
 
@@ -595,7 +595,7 @@ const ProjectOversight: React.FC = () => {
                       {isOverdue(project.deadline, project.status) && (
                         <Badge variant="danger">
                           <AlertCircle className="h-3 w-3 mr-1" />
-                          Overdue
+                          Expired
                         </Badge>
                       )}
                     </div>

@@ -840,7 +840,8 @@
         "buttons": {
           "viewDetails": "ዝርዝራት ርኢ",
           "contactClient": "ምስ ደንበኛ ተራኸብ",
-          "generateReport": "ሪፖርት ፍጠር"
+          "generateReport": "ሪፖርት ፍጠር",
+          "applicants": "የስራ መለያዎች"
         }
       },
       "status": {

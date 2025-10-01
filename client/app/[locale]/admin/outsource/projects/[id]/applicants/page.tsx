@@ -36,6 +36,7 @@ const ApplicantsPage = () => {
   const params = useParams();
   const router = useRouter();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [jobData, setJobData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,6 +48,8 @@ const ApplicantsPage = () => {
         console.log("response", response);
         const jobData = response.data?.data || response.data;
         console.log("jobData", jobData);
+
+        setJobData(jobData);
 
         if (jobData?.applicants) {
           setApplicants(jobData.applicants);
@@ -80,6 +83,27 @@ const ApplicantsPage = () => {
       default:
         return <Badge variant="warning">Pending</Badge>;
     }
+  };
+
+  const isJobOverdue = () => {
+    if (!jobData?.deadline) return false;
+    const deadline = new Date(jobData.deadline);
+    const now = new Date();
+    return deadline < now && jobData.status !== "completed";
+  };
+
+  const canShortlist = () => {
+    return jobData?.status === "posted";
+  };
+
+  const getShortlistRestrictionMessage = () => {
+    if (!canShortlist()) {
+      return "You can only shortlist candidates for posted jobs.";
+    }
+    if (isJobOverdue()) {
+      return "The job is expired. You cannot shortlist candidates for expired jobs.";
+    }
+    return "";
   };
 
   const handleShortlist = async (applicantId: string) => {
@@ -139,7 +163,12 @@ const ApplicantsPage = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Job Applicants</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Job Applicants</h1>
+            {jobData?.title && (
+              <p className="text-lg text-gray-600 mt-1">{jobData.title}</p>
+            )}
+          </div>
           <Button
             onClick={() => router.back()}
             variant="outline"
@@ -259,12 +288,28 @@ const ApplicantsPage = () => {
                   <div className="flex space-x-3 pt-4 border-t">
                     {applicant.status === "pending" && (
                       <>
-                        <Button
-                          variant="primary"
-                          onClick={() => handleShortlist(applicant.worker._id)}
-                        >
-                          Shortlist Candidate
-                        </Button>
+                        <div className="relative group">
+                          <Button
+                            variant="primary"
+                            onClick={() =>
+                              handleShortlist(applicant.worker._id)
+                            }
+                            disabled={!canShortlist() || isJobOverdue()}
+                            className={
+                              !canShortlist() || isJobOverdue()
+                                ? "cursor-not-allowed"
+                                : ""
+                            }
+                          >
+                            Shortlist Candidate
+                          </Button>
+                          {(!canShortlist() || isJobOverdue()) && (
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                              {getShortlistRestrictionMessage()}
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                            </div>
+                          )}
+                        </div>
                         <Button
                           variant="outline"
                           onClick={() => {

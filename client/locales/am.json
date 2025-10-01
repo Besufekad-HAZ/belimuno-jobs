@@ -840,7 +840,8 @@
         "buttons": {
           "viewDetails": "ዝርዝሮችን ይመልከቱ",
           "contactClient": "ከደንበኛ ይገናኙ",
-          "generateReport": "ሪፖርት ይፍጠሩ"
+          "generateReport": "ሪፖርት ይፍጠሩ",
+          "applicants": "የስራ መለያዎች"
         }
       },
       "status": {

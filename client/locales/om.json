@@ -840,7 +840,8 @@
         "buttons": {
           "viewDetails": "Faallaawwan Ilali",
           "contactClient": "Maamilaa Qunnamaa",
-          "generateReport": "Ripoorii Uumi"
+          "generateReport": "Ripoorii Uumi",
+          "applicants": "Appliiwwan"
         }
       },
       "status": {
