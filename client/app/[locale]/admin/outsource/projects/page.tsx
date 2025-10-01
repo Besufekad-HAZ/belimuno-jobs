@@ -11,6 +11,7 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
+  Users,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI } from "@/lib/api";
@@ -127,6 +128,7 @@ const ProjectOversight: React.FC = () => {
       const response = await adminAPI.getAllJobs();
       const jobsData: JobApi[] =
         response.data?.data || response.data?.jobs || response.data || [];
+      console.log(jobsData);
 
       // Transform jobs to projects with enhanced data
       const projectsData: Project[] = jobsData.map((job: JobApi) => {
@@ -680,6 +682,20 @@ const ProjectOversight: React.FC = () => {
                     >
                       <Edit className="h-4 w-4" />
                       <span>Manage</span>
+                    </Button>
+
+                    <Button
+                      onClick={() =>
+                        router.push(
+                          `/admin/outsource/projects/${project._id}/applicants`,
+                        )
+                      }
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-2"
+                    >
+                      <Users className="h-4 w-4" />
+                      <span>Applicants</span>
                     </Button>
                   </div>
                 </div>

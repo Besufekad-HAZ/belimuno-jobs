@@ -287,6 +287,7 @@ export const adminAPI = {
   verifyWorker: (id: string) => api.put(`/admin/verify-worker/${id}`),
   getAllJobs: (params?: Record<string, unknown>) =>
     api.get("/admin/jobs", { params }),
+  getJob: (id: string) => api.get(`/admin/jobs/${id}`),
   createJob: (payload: Record<string, unknown>) =>
     api.post("/admin/jobs", payload),
   updateJob: (id: string, payload: Record<string, unknown>) =>

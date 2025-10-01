@@ -6,6 +6,7 @@ const {
   updateUser,
   verifyWorker,
   getJobs,
+  getJob,
   createJob,
   updateJob,
   deleteJob,
@@ -49,6 +50,7 @@ router.put("/verify-worker/:id", verifyWorker);
 
 // Job management (any admin)
 router.get("/jobs", getJobs);
+router.get("/jobs/:id", getJob);
 router.post("/jobs", createJob);
 router.put("/jobs/:id", updateJob);
 router.delete("/jobs/:id", deleteJob);

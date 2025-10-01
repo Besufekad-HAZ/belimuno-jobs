@@ -47,7 +47,9 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     // Jobs counters
     Promise.all([
       Job.countDocuments(),
-      Job.countDocuments({ status: { $in: ["posted", "assigned", "in_progress"] } }),
+      Job.countDocuments({
+        status: { $in: ["posted", "assigned", "in_progress"] },
+      }),
       Job.countDocuments({ status: "completed" }),
     ]),
     // Revenue total
@@ -61,8 +63,22 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     minimal
       ? Promise.resolve([])
       : Payment.aggregate([
-          { $match: { status: "completed", createdAt: { $gte: twelveMonthsAgo } } },
-          { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, revenue: { $sum: "$amount" }, count: { $sum: 1 } } },
+          {
+            $match: {
+              status: "completed",
+              createdAt: { $gte: twelveMonthsAgo },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+              },
+              revenue: { $sum: "$amount" },
+              count: { $sum: 1 },
+            },
+          },
           { $sort: { "_id.year": 1, "_id.month": 1 } },
         ]),
     // Only a few recent users, lean objects
@@ -99,7 +115,7 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     },
     charts: {
       jobsByStatus,
-  monthlyRevenue,
+      monthlyRevenue,
     },
     recent: {
       jobs: recentJobs,
@@ -117,7 +133,16 @@ exports.getDashboard = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/users
 // @access  Private/Super Admin
 exports.getUsers = asyncHandler(async (req, res) => {
-  const { role, isVerified, isActive, page = 1, limit = 20, search, select, sort } = req.query;
+  const {
+    role,
+    isVerified,
+    isActive,
+    page = 1,
+    limit = 20,
+    search,
+    select,
+    sort,
+  } = req.query;
 
   const query = {};
   if (role) query.role = role;
@@ -285,7 +310,15 @@ exports.verifyWorker = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/jobs
 // @access  Private/Super Admin
 exports.getJobs = asyncHandler(async (req, res) => {
-  const { status, category, region, page = 1, limit = 20, select, sort } = req.query;
+  const {
+    status,
+    category,
+    region,
+    page = 1,
+    limit = 20,
+    select,
+    sort,
+  } = req.query;
 
   const query = {};
   if (status) query.status = status;
@@ -304,8 +337,10 @@ exports.getJobs = asyncHandler(async (req, res) => {
   const wantsClient = !projection || /\bclient\b/.test(projection);
   const wantsWorker = !projection || /\bworker\b/.test(projection);
   const wantsRegion = !projection || /\bregion\b/.test(projection);
-  if (wantsClient) jobsQuery.populate({ path: "client", select: "name profile.avatar" });
-  if (wantsWorker) jobsQuery.populate({ path: "worker", select: "name profile.avatar" });
+  if (wantsClient)
+    jobsQuery.populate({ path: "client", select: "name profile.avatar" });
+  if (wantsWorker)
+    jobsQuery.populate({ path: "worker", select: "name profile.avatar" });
   if (wantsRegion) jobsQuery.populate({ path: "region", select: "name" });
 
   const jobs = await jobsQuery;
@@ -322,6 +357,29 @@ exports.getJobs = asyncHandler(async (req, res) => {
       pages: Math.ceil(total / limit),
     },
     data: jobs,
+  });
+});
+
+// @desc    Get single job by ID
+// @route   GET /api/admin/jobs/:id
+// @access  Private/Super Admin
+exports.getJob = asyncHandler(async (req, res) => {
+  const job = await Job.findById(req.params.id)
+    .populate("client", "name email profile.avatar clientProfile")
+    .populate("worker", "name email profile.avatar workerProfile")
+    .populate("region", "name")
+    .populate("applicants.worker", "name email profile.avatar workerProfile");
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: "Job not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: job,
   });
 });
 
