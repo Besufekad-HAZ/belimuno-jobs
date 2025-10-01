@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 import { User } from "@/lib/auth"; // Import User interface
 
@@ -209,8 +210,17 @@ export const clientAPI = {
     },
   ) => api.put(`/client/payments/${paymentId}/proof`, payload),
   getJobMessages: (jobId: string) => api.get(`/client/jobs/${jobId}/messages`),
-  sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
-    api.post(`/client/jobs/${jobId}/messages`, { content, attachments }),
+  sendJobMessage: (
+    jobId: string,
+    content: string,
+    attachments?: string[],
+    config?: AxiosRequestConfig,
+  ) =>
+    api.post(
+      `/client/jobs/${jobId}/messages`,
+      { content, attachments },
+      config,
+    ),
 
   // Disputes
   createDispute: (payload: {
@@ -311,8 +321,17 @@ export const workerAPI = {
   }) => api.put<ApiResponse<{ user: User }>>("/worker/profile", profileData),
   getEarnings: () => api.get("/worker/earnings"),
   getJobMessages: (jobId: string) => api.get(`/worker/jobs/${jobId}/messages`),
-  sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
-    api.post(`/worker/jobs/${jobId}/messages`, { content, attachments }),
+  sendJobMessage: (
+    jobId: string,
+    content: string,
+    attachments?: string[],
+    config?: AxiosRequestConfig,
+  ) =>
+    api.post(
+      `/worker/jobs/${jobId}/messages`,
+      { content, attachments },
+      config,
+    ),
   reviewClient: (
     jobId: string,
     payload: { rating: number; comment?: string },
@@ -434,7 +453,9 @@ export const chatAPI = {
         size?: number;
       }>;
     },
-  ) => api.post(`/chat/conversations/${conversationId}/messages`, payload),
+    config?: AxiosRequestConfig,
+  ) =>
+    api.post(`/chat/conversations/${conversationId}/messages`, payload, config),
 };
 
 // Contact API

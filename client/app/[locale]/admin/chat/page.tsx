@@ -47,6 +47,7 @@ interface ChatMessage {
   content: string;
   timestamp: string;
   attachments?: Array<{ id: string; name: string; type: string; url: string }>;
+  uploadProgress?: number;
 }
 
 interface ApiChatMessage {
@@ -165,6 +166,33 @@ const AdminCollaborationChat: React.FC = () => {
     [],
   );
 
+  const fileToDataUrl = useCallback(
+    (file: File, onProgress?: (value: number) => void) => {
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === "string") {
+            resolve(result);
+          } else {
+            reject(new Error("Unable to read file"));
+          }
+        };
+        reader.onerror = () =>
+          reject(reader.error || new Error("File read failed"));
+        reader.onprogress = (event) => {
+          if (!onProgress) return;
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            onProgress(percent);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    },
+    [],
+  );
+
   const openConversation = useCallback(
     async (conversation: ChatConversation) => {
       setActiveConversation(conversation);
@@ -242,7 +270,7 @@ const AdminCollaborationChat: React.FC = () => {
     }, [selectedRecipients, openConversation]);
 
   const handleSendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, attachments?: File[]) => {
       let targetConversation = activeConversation;
 
       if (!targetConversation) {
@@ -252,30 +280,111 @@ const AdminCollaborationChat: React.FC = () => {
       }
 
       const trimmed = content.trim();
-      if (!trimmed) return;
+      const hasAttachments = Boolean(attachments && attachments.length > 0);
+      if (!trimmed && !hasAttachments) return;
+
+      const pendingId = `pending-${Date.now()}`;
+      const tempAttachmentUrls: string[] = [];
+      const optimisticAttachments = (attachments || []).map((file, index) => {
+        const url = URL.createObjectURL(file);
+        tempAttachmentUrls.push(url);
+        return {
+          id: `${pendingId}-attachment-${index}`,
+          name: file.name,
+          url,
+          type: file.type || "application/octet-stream",
+        };
+      });
 
       const optimisticMessage: ChatMessage = {
-        id: `pending-${Date.now()}`,
+        id: pendingId,
         senderId: currentUser?._id || "",
         senderName: currentUser?.name || "You",
         content: trimmed,
         timestamp: new Date().toISOString(),
+        attachments: optimisticAttachments,
+        uploadProgress: hasAttachments ? 5 : undefined,
       };
 
       setMessages((prev) => [...prev, optimisticMessage]);
 
+      const updateMessageProgress = (value: number) => {
+        if (!hasAttachments) return;
+        const bounded = Math.max(1, Math.min(99, Math.round(value)));
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === pendingId ? { ...msg, uploadProgress: bounded } : msg,
+          ),
+        );
+      };
+
       try {
-        const response = await chatAPI.sendMessage(targetConversation.id, {
-          content: trimmed,
-        });
+        let attachmentPayload:
+          | Array<{
+              name: string;
+              type?: string;
+              url: string;
+              size?: number;
+            }>
+          | undefined;
+
+        if (hasAttachments && attachments?.length) {
+          const total = attachments.length;
+          attachmentPayload = [];
+          for (let index = 0; index < total; index += 1) {
+            const file = attachments[index];
+            const url = await fileToDataUrl(file, (progress) => {
+              const base = index / total;
+              const combined = base + (progress / 100) * (1 / total);
+              updateMessageProgress(10 + combined * 60);
+            });
+            attachmentPayload.push({
+              name: file.name,
+              type: file.type || "application/octet-stream",
+              url,
+              size: file.size,
+            });
+          }
+          updateMessageProgress(70);
+        }
+
+        const response = await chatAPI.sendMessage(
+          targetConversation.id,
+          {
+            content: trimmed,
+            ...(attachmentPayload && attachmentPayload.length > 0
+              ? { attachments: attachmentPayload }
+              : {}),
+          },
+          hasAttachments
+            ? {
+                onUploadProgress: (event) => {
+                  if (!event.total) {
+                    updateMessageProgress(90);
+                    return;
+                  }
+                  const ratio = event.loaded / event.total;
+                  updateMessageProgress(70 + ratio * 25);
+                },
+              }
+            : undefined,
+        );
+
         const apiMessage = response.data?.data as ApiChatMessage | undefined;
         if (apiMessage) {
+          if (hasAttachments) {
+            updateMessageProgress(100);
+          }
           const savedMessage = normalizeMessage(apiMessage);
-          setMessages((prev) =>
-            prev
-              .filter((msg) => !msg.id.startsWith("pending-"))
-              .concat(savedMessage),
-          );
+          setMessages((prev) => {
+            const hasPending = prev.some((msg) => msg.id === pendingId);
+            if (!hasPending) {
+              return [...prev, savedMessage];
+            }
+            return prev.map((msg) =>
+              msg.id === pendingId ? savedMessage : msg,
+            );
+          });
 
           setConversations((prev) =>
             prev
@@ -284,7 +393,12 @@ const AdminCollaborationChat: React.FC = () => {
                   ? {
                       ...conversation,
                       lastMessage: {
-                        content: savedMessage.content,
+                        content:
+                          savedMessage.content?.trim() ||
+                          (savedMessage.attachments &&
+                          savedMessage.attachments.length > 0
+                            ? `Attachment: ${savedMessage.attachments[0].name}`
+                            : ""),
                         senderId: savedMessage.senderId,
                         senderName: savedMessage.senderName,
                         timestamp: savedMessage.timestamp,
@@ -302,14 +416,15 @@ const AdminCollaborationChat: React.FC = () => {
         }
       } catch (error) {
         console.error("Failed to send message", error);
-        setMessages((prev) =>
-          prev.filter((msg) => !msg.id.startsWith("pending-")),
-        );
+        setMessages((prev) => prev.filter((msg) => msg.id !== pendingId));
+      } finally {
+        tempAttachmentUrls.forEach((url) => URL.revokeObjectURL(url));
       }
     },
     [
       activeConversation,
       currentUser,
+      fileToDataUrl,
       handleCreateConversation,
       normalizeMessage,
     ],

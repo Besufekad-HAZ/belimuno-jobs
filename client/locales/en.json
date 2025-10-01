@@ -76,6 +76,58 @@
         "previous": "Previous testimonials",
         "next": "Next testimonials",
         "goTo": "Go to testimonial slide {index}"
+      },
+      "testimonial1": {
+        "content": "Belimuno helped us staff critical roles in days instead of weeks.",
+        "name": "Meron Alemu",
+        "role": "Operations Manager",
+        "company": "EthioLogistics"
+      },
+      "testimonial2": {
+        "content": "I trust Belimuno for vetted professionals on every major project.",
+        "name": "Samuel Kebede",
+        "role": "Project Director",
+        "company": "Blue Nile Construction"
+      },
+      "testimonial3": {
+        "content": "Their platform streamlines hiring and payment for our remote teams.",
+        "name": "Hanna Tesfaye",
+        "role": "HR Lead",
+        "company": "Habesha Foods"
+      }
+    },
+    "regions": {
+      "title": "Regions we operate in",
+      "subtitle": "Connecting workers and employers across Ethiopia's major regions",
+      "addisAbaba": {
+        "name": "Addis Ababa",
+        "description": "Finance, technology and administration talent hub.",
+        "jobs": "120+ active jobs"
+      },
+      "oromia": {
+        "name": "Oromia",
+        "description": "Logistics, agriculture and field project specialists.",
+        "jobs": "80+ active jobs"
+      },
+      "amhara": {
+        "name": "Amhara",
+        "description": "Tourism, education and healthcare opportunities.",
+        "jobs": "60+ active jobs"
+      },
+      "tigray": {
+        "name": "Tigray",
+        "description": "Reconstruction, services and operations roles.",
+        "jobs": "40+ active jobs"
+      },
+      "snnp": {
+        "name": "SNNP",
+        "description": "Manufacturing, hospitality and cultural projects.",
+        "jobs": "55+ active jobs"
+      },
+      "sidama": {
+        "name": "Sidama",
+        "description": "Agri-business, retail and customer support roles.",
+        "jobs": "45+ active jobs"
       }
     },
     "news": {

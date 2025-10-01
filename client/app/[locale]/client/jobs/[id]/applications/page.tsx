@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { clientAPI } from "@/lib/api";
 import { getStoredUser, hasRole } from "@/lib/auth";
@@ -17,7 +17,7 @@ import ErrorPage from "@/components/Layout/ErrorPage";
 interface WorkerInfo {
   _id: string;
   name: string;
-  profile?: { 
+  profile?: {
     avatar?: string;
     cv?: {
       data: string | object;
@@ -76,13 +76,16 @@ const ApplicationsPage: React.FC = () => {
       url: string;
       type: string;
     }>;
+    uploadProgress?: number;
   };
   const [modernMessages, setModernMessages] = useState<ModernMessage[]>([]);
+  const currentUser = useMemo(() => getStoredUser(), []);
+  const currentUserId = currentUser?._id || "client";
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const user = getStoredUser();
+      const user = currentUser;
       if (!user || !hasRole(user, ["client"])) {
         router.push("/login");
         return;
@@ -102,7 +105,7 @@ const ApplicationsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [jobId, router]);
+  }, [jobId, router, currentUser]);
 
   useEffect(() => {
     if (jobId) load();
@@ -127,9 +130,10 @@ const ApplicationsPage: React.FC = () => {
   const viewWorkerCV = (worker: WorkerInfo) => {
     if (worker.profile?.cv?.data) {
       try {
-        const cvData = typeof worker.profile.cv.data === 'string' 
-          ? JSON.parse(worker.profile.cv.data) 
-          : worker.profile.cv.data;
+        const cvData =
+          typeof worker.profile.cv.data === "string"
+            ? JSON.parse(worker.profile.cv.data)
+            : worker.profile.cv.data;
         setSelectedWorkerCV(cvData);
         setShowCVModal(true);
       } catch {
@@ -139,140 +143,237 @@ const ApplicationsPage: React.FC = () => {
       toast.error("No CV available for this worker");
     }
   };
+  const normalizeChatMessage = useCallback(
+    (message: ChatMessage, fallbackIndex: number): ModernMessage => {
+      const attachments = Array.isArray(message.attachments)
+        ? message.attachments.map((url, index) => {
+            const isImage =
+              /^data:image\//.test(url) ||
+              /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+            const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+            return {
+              id: `${message._id || fallbackIndex}-att-${index}`,
+              name: nameFromUrl || `Attachment ${index + 1}`,
+              url,
+              type: isImage ? "image/*" : "application/octet-stream",
+            };
+          })
+        : [];
 
-  const openMessages = async () => {
+      const senderRole = message.sender?.role;
+      const senderId =
+        message.sender?._id?.toString?.() ||
+        (senderRole === "client" ? currentUserId : "worker");
+      const senderName =
+        message.sender?.name ||
+        (senderRole === "client"
+          ? "You"
+          : senderRole === "worker"
+            ? "Worker"
+            : "Admin");
+
+      return {
+        id: message._id || `msg-${fallbackIndex}`,
+        senderId,
+        senderName,
+        content: message.content,
+        timestamp: message.sentAt,
+        attachments,
+      };
+    },
+    [currentUserId],
+  );
+
+  const fileToDataUrl = useCallback(
+    (file: File, onProgress?: (value: number) => void) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === "string") {
+            resolve(result);
+          } else {
+            reject(new Error("Unable to read file"));
+          }
+        };
+        reader.onerror = () =>
+          reject(reader.error || new Error("File read failed"));
+        reader.onprogress = (event) => {
+          if (!onProgress) return;
+          if (event.lengthComputable) {
+            onProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+        reader.readAsDataURL(file);
+      }),
+    [],
+  );
+
+  const openMessages = useCallback(async () => {
     try {
       setShowChat(true);
       const res = await clientAPI.getJobMessages(jobId);
       const messages = (res.data.data || []) as ChatMessage[];
-      const converted: ModernMessage[] = messages.map((m, index) => {
-        const atts = Array.isArray(m.attachments)
-          ? (m.attachments as string[]).map((url, ai) => {
-              const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
-              const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
-              return {
-                id: `${index}-att-${ai}`,
-                name: nameFromUrl || `Attachment ${ai + 1}`,
-                url,
-                type: isImage ? "image/*" : "application/octet-stream",
-              };
-            })
-          : [];
+      const converted = messages.map((message, index) =>
+        normalizeChatMessage(message, index),
+      );
+      converted.sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
+      setModernMessages(converted);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [jobId, normalizeChatMessage]);
+
+  const sendModernMessage = useCallback(
+    async (content: string, files?: File[]) => {
+      const trimmed = content.trim();
+      const hasAttachments = Boolean(files && files.length > 0);
+      if (!trimmed && !hasAttachments) return;
+
+      const pendingId = `pending-${Date.now()}`;
+      const tempAttachmentUrls: string[] = [];
+      const optimisticAttachments = (files || []).map((file, index) => {
+        const url = URL.createObjectURL(file);
+        tempAttachmentUrls.push(url);
         return {
-          id: `msg-${index}-${Date.now()}`,
-          senderId:
-            m.sender?.role === "client"
-              ? getStoredUser()?._id || "client"
-              : "worker",
-          senderName:
-            m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
-          content: m.content,
-          timestamp: m.sentAt,
-          attachments: atts,
+          id: `${pendingId}-att-${index}`,
+          name: file.name,
+          url,
+          type: file.type || "application/octet-stream",
         };
       });
-      setModernMessages(converted);
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
-  const sendModernMessage = async (content: string, files?: File[]) => {
-    if (!content.trim() && !(files && files.length)) return;
-    const fileToDataURL = (file: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    const optimisticId = `optimistic-${Date.now()}`;
-    const optimisticAttachments = files
-      ? files.map((file, index) => ({
-          id: `${optimisticId}-att-${index}`,
-          name: file.name,
-          url: URL.createObjectURL(file), // Use a temporary blob URL for the preview
-          type: file.type,
-        }))
-      : [];
+      const optimisticMessage: ModernMessage = {
+        id: pendingId,
+        senderId: currentUserId,
+        senderName: "You",
+        content: trimmed,
+        timestamp: new Date().toISOString(),
+        attachments: optimisticAttachments,
+        uploadProgress: hasAttachments ? 5 : undefined,
+      };
 
-    const optimisticMessage: ModernMessage = {
-      id: optimisticId,
-      senderId: getStoredUser()?._id || "client",
-      senderName: "You",
-      content,
-      timestamp: new Date().toISOString(),
-      attachments: optimisticAttachments,
-    };
+      setModernMessages((prev) => [...prev, optimisticMessage]);
 
-    setModernMessages((prev) => [...prev, optimisticMessage]);
+      const updateMessageProgress = (value: number) => {
+        if (!hasAttachments) return;
+        const bounded = Math.max(1, Math.min(99, Math.round(value)));
+        setModernMessages((prev) =>
+          prev.map((message) =>
+            message.id === pendingId
+              ? { ...message, uploadProgress: bounded }
+              : message,
+          ),
+        );
+      };
 
-    try {
-      const attachmentDataUrls = files && files.length
-        ? await Promise.all(files.map((f) => fileToDataURL(f)))
-        : [];
-      await clientAPI.sendJobMessage(jobId, content, attachmentDataUrls);
-      toast.success("Message sent");
-    } catch (e) {
-      console.error(e);
-      toast.error("Failed to send message");
-      // If the API call fails, remove the optimistic message
-      setModernMessages((prev) => prev.filter((m) => m.id !== optimisticId));
-      throw e;
-    }
-  };
+      try {
+        let attachmentDataUrls: string[] | undefined;
+        if (hasAttachments && files) {
+          const total = files.length;
+          attachmentDataUrls = [];
+          for (let index = 0; index < total; index += 1) {
+            const file = files[index];
+            const dataUrl = await fileToDataUrl(file, (progress) => {
+              const base = index / total;
+              const combined = base + (progress / 100) * (1 / total);
+              updateMessageProgress(10 + combined * 60);
+            });
+            attachmentDataUrls.push(dataUrl);
+          }
+          updateMessageProgress(70);
+        }
+
+        const response = await clientAPI.sendJobMessage(
+          jobId,
+          trimmed,
+          attachmentDataUrls,
+          hasAttachments
+            ? {
+                onUploadProgress: (event) => {
+                  if (!event.total) {
+                    updateMessageProgress(90);
+                    return;
+                  }
+                  const ratio = event.loaded / event.total;
+                  updateMessageProgress(70 + ratio * 25);
+                },
+              }
+            : undefined,
+        );
+
+        const apiMessage = response.data?.data as ChatMessage | undefined;
+        if (apiMessage) {
+          if (hasAttachments) {
+            updateMessageProgress(100);
+          }
+          const savedMessage = normalizeChatMessage(apiMessage, 0);
+          setModernMessages((prev) =>
+            prev.map((message) =>
+              message.id === pendingId ? savedMessage : message,
+            ),
+          );
+          toast.success("Message sent");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to send message");
+        setModernMessages((prev) =>
+          prev.filter((message) => message.id !== pendingId),
+        );
+        throw error;
+      } finally {
+        tempAttachmentUrls.forEach((url) => URL.revokeObjectURL(url));
+      }
+    },
+    [currentUserId, fileToDataUrl, jobId, normalizeChatMessage],
+  );
+
   // Poll chat while chat is open
   useEffect(() => {
     if (!showChat) return;
     const interval = setInterval(() => {
-      // No need for a full re-render, just fetch in the background
-      // The main `openMessages` function can be used to manually refresh.
-      clientAPI.getJobMessages(jobId).then(res => {
-        const messages = (res.data.data || []) as ChatMessage[];
-        const converted = messages.map((m, index) => {
-          const atts = Array.isArray(m.attachments)
-            ? (m.attachments as string[]).map((url, ai) => {
-                const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
-                const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
-                return {
-                  id: `${m._id || index}-att-${ai}`,
-                  name: nameFromUrl || `Attachment ${ai + 1}`,
-                  url,
-                  type: isImage ? "image/*" : "application/octet-stream",
-                };
-              })
-            : [];
-          return {
-            id: m._id || `msg-${index}`,
-            senderId:
-              m.sender?.role === "client"
-                ? getStoredUser()?._id || "client"
-                : "worker",
-            senderName:
-              m.sender?.name || (m.sender?.role === "client" ? "You" : "Worker"),
-            content: m.content,
-            timestamp: m.sentAt,
-            attachments: atts,
-          };
+      clientAPI
+        .getJobMessages(jobId)
+        .then((res) => {
+          const messages = (res.data.data || []) as ChatMessage[];
+          const converted = messages.map((message, index) =>
+            normalizeChatMessage(message, index),
+          );
+          converted.sort(
+            (a, b) =>
+              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+          );
+          setModernMessages((prev) => {
+            const pending = prev.filter((message) =>
+              message.id.startsWith("pending-"),
+            );
+            const merged = [...converted, ...pending];
+            merged.sort(
+              (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+            );
+            return merged;
+          });
+        })
+        .catch(() => {
+          /* ignore polling errors */
         });
-        setModernMessages(prev => {
-          // A simple merge strategy to avoid disrupting optimistic messages
-          const existingIds = new Set(prev.map(msg => msg.id));
-          const newMessages = converted.filter(msg => !existingIds.has(msg.id));
-          return [...prev, ...newMessages];
-        });
-      }).catch(() => { /* ignore polling errors */ });
     }, 4000);
     return () => clearInterval(interval);
-  }, [showChat, jobId]);
+  }, [showChat, jobId, normalizeChatMessage]);
 
   // Cleanup blob URLs from optimistic messages
   useEffect(() => {
     return () => {
-      modernMessages.forEach(message => {
+      modernMessages.forEach((message) => {
         if (message.attachments) {
-          message.attachments.forEach(att => {
-            if (att.url.startsWith('blob:')) {
+          message.attachments.forEach((att) => {
+            if (att.url.startsWith("blob:")) {
               URL.revokeObjectURL(att.url);
             }
           });
@@ -354,54 +455,67 @@ const ApplicationsPage: React.FC = () => {
                   )}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold text-lg text-gray-900">{app.worker.name}</h3>
-                      <Badge variant={app.status === 'accepted' ? 'primary' : app.status === 'rejected' ? 'danger' : 'secondary'}>
+                      <h3 className="font-semibold text-lg text-gray-900">
+                        {app.worker.name}
+                      </h3>
+                      <Badge
+                        variant={
+                          app.status === "accepted"
+                            ? "primary"
+                            : app.status === "rejected"
+                              ? "danger"
+                              : "secondary"
+                        }
+                      >
                         {app.status}
                       </Badge>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                       <div className="text-sm text-gray-600">
-                        <span className="font-medium">Proposed Budget:</span> ETB {app.proposedBudget.toFixed(2)}
+                        <span className="font-medium">Proposed Budget:</span>{" "}
+                        ETB {app.proposedBudget.toFixed(2)}
                       </div>
                       {app.worker.workerProfile?.rating && (
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium">Rating:</span> ⭐ {app.worker.workerProfile.rating}/5
+                          <span className="font-medium">Rating:</span> ⭐{" "}
+                          {app.worker.workerProfile.rating}/5
                         </div>
                       )}
                       {app.worker.workerProfile?.skills && (
                         <div className="text-sm text-gray-600 md:col-span-2">
-                          <span className="font-medium">Skills:</span> {app.worker.workerProfile.skills.slice(0, 3).join(", ")}
-                          {app.worker.workerProfile.skills.length > 3 && ` +${app.worker.workerProfile.skills.length - 3} more`}
+                          <span className="font-medium">Skills:</span>{" "}
+                          {app.worker.workerProfile.skills
+                            .slice(0, 3)
+                            .join(", ")}
+                          {app.worker.workerProfile.skills.length > 3 &&
+                            ` +${app.worker.workerProfile.skills.length - 3} more`}
                         </div>
                       )}
                     </div>
-                    
+
                     {app.proposal && (
                       <div className="bg-gray-50 p-3 rounded-md mb-4">
                         <p className="text-sm text-gray-700 leading-relaxed">
-                          <span className="font-medium">Proposal:</span> {app.proposal}
+                          <span className="font-medium">Proposal:</span>{" "}
+                          {app.proposal}
                         </p>
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col gap-2 min-w-max">
                   {app.worker.profile?.cv && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => viewWorkerCV(app.worker)}
                     >
                       <Eye className="h-4 w-4 mr-1" /> View CV
                     </Button>
                   )}
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={openMessages}
-                  >
+                  <Button variant="outline" size="sm" onClick={openMessages}>
                     <MessageCircle className="h-4 w-4 mr-1" /> Message
                   </Button>
                   {app.status !== "accepted" && (
@@ -465,8 +579,8 @@ const ApplicationsPage: React.FC = () => {
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900">Worker CV</h2>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => setShowCVModal(false)}
               >
@@ -474,41 +588,45 @@ const ApplicationsPage: React.FC = () => {
               </Button>
             </div>
             <div className="p-6">
-              <CVDisplay cvData={selectedWorkerCV as {
-                personalInfo: {
-                  fullName: string;
-                  email: string;
-                  phone: string;
-                  address: string;
-                  summary: string;
-                  workerSkills: string[];
-                  workerExperience: string;
-                  workerHourlyRate: number;
-                  portfolio: string;
-                  dateOfBirth: string;
-                  gender: string;
-                };
-                education: Array<{
-                  institution: string;
-                  degree: string;
-                  fieldOfStudy: string;
-                  startDate: string;
-                  endDate: string;
-                  current: boolean;
-                }>;
-                experience: Array<{
-                  company: string;
-                  position: string;
-                  startDate: string;
-                  endDate: string;
-                  current: boolean;
-                  description: string;
-                }>;
-                detailedSkills: Array<{
-                  name: string;
-                  level: string;
-                }>;
-              }} />
+              <CVDisplay
+                cvData={
+                  selectedWorkerCV as {
+                    personalInfo: {
+                      fullName: string;
+                      email: string;
+                      phone: string;
+                      address: string;
+                      summary: string;
+                      workerSkills: string[];
+                      workerExperience: string;
+                      workerHourlyRate: number;
+                      portfolio: string;
+                      dateOfBirth: string;
+                      gender: string;
+                    };
+                    education: Array<{
+                      institution: string;
+                      degree: string;
+                      fieldOfStudy: string;
+                      startDate: string;
+                      endDate: string;
+                      current: boolean;
+                    }>;
+                    experience: Array<{
+                      company: string;
+                      position: string;
+                      startDate: string;
+                      endDate: string;
+                      current: boolean;
+                      description: string;
+                    }>;
+                    detailedSkills: Array<{
+                      name: string;
+                      level: string;
+                    }>;
+                  }
+                }
+              />
             </div>
           </div>
         </div>
