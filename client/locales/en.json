@@ -618,6 +618,7 @@
         "actions": {
           "viewDetails": "View Details",
           "applications": "Applications",
+          "editJob": "Edit Job",
           "requestRevision": "Request Revision",
           "payAndRate": "Pay & Rate",
           "deleteJob": "Delete Job",

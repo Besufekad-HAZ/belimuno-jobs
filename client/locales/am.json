@@ -617,6 +617,7 @@
         "actions": {
           "viewDetails": "ዝርዝሮችን ይመልከቱ",
           "applications": "ማመልከቻዎች",
+          "editJob": "ስራ አስተዳደር",
           "requestRevision": "ማስተካከያ ይጠይቁ",
           "payAndRate": "ይክፈሉ እና ደረጃ ይስጡ",
           "deleteJob": "ስራ ሰርዝ",

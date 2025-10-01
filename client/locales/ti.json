@@ -617,6 +617,7 @@
         "actions": {
           "viewDetails": "ዝርዝራት ርኢ",
           "applications": "ኣመልካቺታት",
+          "editJob": "ስራ ኣስተዳደር",
           "requestRevision": "ምምሕርሻር ሕተት",
           "payAndRate": "ክፍሊትን ደረጃን",
           "deleteJob": "ስራሕ ኣቕርብ",

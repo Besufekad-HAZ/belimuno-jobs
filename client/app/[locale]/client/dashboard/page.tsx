@@ -620,6 +620,19 @@ const ClientDashboard: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() =>
+                            router.push(`/client/jobs/${job._id}/update`)
+                          }
+                          className="w-full sm:w-auto"
+                        >
+                          <span className="text-xs sm:text-sm">
+                            {t("sections.jobs.actions.editJob")}
+                          </span>
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => handleDeleteJob(job)}
                           className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
                         >
