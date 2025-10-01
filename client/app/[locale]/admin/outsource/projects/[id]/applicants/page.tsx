@@ -23,7 +23,13 @@ interface Applicant {
   appliedAt: string;
   proposal: string;
   proposedBudget: number;
-  status: "pending" | "accepted" | "rejected";
+  status:
+    | "pending"
+    | "reviewed"
+    | "shortlisted"
+    | "accepted"
+    | "rejected"
+    | "withdrawn";
 }
 
 const ApplicantsPage = () => {
@@ -65,8 +71,46 @@ const ApplicantsPage = () => {
         return <Badge variant="success">Accepted</Badge>;
       case "rejected":
         return <Badge variant="danger">Rejected</Badge>;
+      case "shortlisted":
+        return <Badge variant="info">Shortlisted</Badge>;
+      case "reviewed":
+        return <Badge variant="secondary">Reviewed</Badge>;
+      case "withdrawn":
+        return <Badge variant="danger">Withdrawn</Badge>;
       default:
         return <Badge variant="warning">Pending</Badge>;
+    }
+  };
+
+  const handleShortlist = async (applicantId: string) => {
+    try {
+      await adminAPI.shortlistApplication(applicantId);
+      // Refresh the applicants list
+      const response = await adminAPI.getJob(params.id as string);
+      const jobData = response.data?.data || response.data;
+      if (jobData?.applicants) {
+        setApplicants(jobData.applicants);
+      }
+    } catch (err) {
+      console.error("Failed to shortlist applicant:", err);
+      setError("Failed to shortlist applicant. Please try again later.");
+    }
+  };
+
+  const handleUnshortlist = async (applicantId: string) => {
+    try {
+      await adminAPI.unshortlistApplication(applicantId);
+      // Refresh the applicants list
+      const response = await adminAPI.getJob(params.id as string);
+      const jobData = response.data?.data || response.data;
+      if (jobData?.applicants) {
+        setApplicants(jobData.applicants);
+      }
+    } catch (err) {
+      console.error("Failed to remove applicant from shortlist:", err);
+      setError(
+        "Failed to remove applicant from shortlist. Please try again later.",
+      );
     }
   };
 
@@ -212,34 +256,38 @@ const ApplicantsPage = () => {
                   )}
 
                   {/* Actions */}
-                  {applicant.status === "pending" && (
-                    <div className="flex space-x-3 pt-4 border-t">
+                  <div className="flex space-x-3 pt-4 border-t">
+                    {applicant.status === "pending" && (
+                      <>
+                        <Button
+                          variant="primary"
+                          onClick={() => handleShortlist(applicant.worker._id)}
+                        >
+                          Shortlist Candidate
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            // TODO: Implement reject applicant
+                            console.log(
+                              "Reject applicant:",
+                              applicant.worker._id,
+                            );
+                          }}
+                        >
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                    {applicant.status === "shortlisted" && (
                       <Button
-                        variant="primary"
-                        onClick={() => {
-                          // TODO: Implement accept applicant
-                          console.log(
-                            "Accept applicant:",
-                            applicant.worker._id,
-                          );
-                        }}
+                        variant="warning"
+                        onClick={() => handleUnshortlist(applicant.worker._id)}
                       >
-                        Accept Application
+                        Remove from Shortlist
                       </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          // TODO: Implement reject applicant
-                          console.log(
-                            "Reject applicant:",
-                            applicant.worker._id,
-                          );
-                        }}
-                      >
-                        Reject
-                      </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </Card>
             ))

@@ -358,6 +358,12 @@ export const adminAPI = {
       hrNotes?: string;
     },
   ) => api.put(`/admin/disputes/${id}`, payload),
+
+  // Application management
+  shortlistApplication: (id: string, notes?: string) =>
+    api.put(`/admin/applications/${id}/shortlist`, { notes }),
+  unshortlistApplication: (id: string) =>
+    api.put(`/admin/applications/${id}/unshortlist`),
 };
 
 // Notifications API

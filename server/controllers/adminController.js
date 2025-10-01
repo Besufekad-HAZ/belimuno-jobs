@@ -1117,6 +1117,77 @@ exports.createDispute = asyncHandler(async (req, res) => {
 // @desc    Update dispute status and resolution
 // @route   PUT /api/admin/disputes/:id
 // @access  Private/Any Admin
+// @desc    Shortlist an application
+// @route   PUT /api/admin/applications/:id/shortlist
+// @access  Private/Super Admin
+exports.shortlistApplication = asyncHandler(async (req, res) => {
+  const { notes } = req.body;
+
+  const application = await Application.findById(req.params.id)
+    .populate("job")
+    .populate("worker");
+
+  if (!application) {
+    return res.status(404).json({
+      success: false,
+      message: "Application not found",
+    });
+  }
+
+  // Update application status
+  application.status = "shortlisted";
+  application.shortlistedAt = new Date();
+  application.shortlistedBy = req.user._id;
+  if (notes) application.shortlistNotes = notes;
+
+  await application.save();
+
+  // Notify the client about the shortlisted candidate
+  await Notification.create({
+    recipient: application.job.client,
+    title: "New Shortlisted Candidate",
+    message: `A new candidate has been shortlisted for your job: ${application.job.title}`,
+    type: "application_shortlisted",
+    relatedJob: application.job._id,
+    relatedUser: application.worker._id,
+    priority: "high",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Application shortlisted successfully",
+    data: application,
+  });
+});
+
+// @desc    Remove application from shortlist
+// @route   PUT /api/admin/applications/:id/unshortlist
+// @access  Private/Super Admin
+exports.unshortlistApplication = asyncHandler(async (req, res) => {
+  const application = await Application.findById(req.params.id);
+
+  if (!application) {
+    return res.status(404).json({
+      success: false,
+      message: "Application not found",
+    });
+  }
+
+  // Reset shortlist status
+  application.status = "reviewed";
+  application.shortlistedAt = undefined;
+  application.shortlistedBy = undefined;
+  application.shortlistNotes = undefined;
+
+  await application.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Application removed from shortlist",
+    data: application,
+  });
+});
+
 exports.updateDispute = asyncHandler(async (req, res) => {
   const { status, resolution, hrNotes } = req.body;
   const updateData = {};
