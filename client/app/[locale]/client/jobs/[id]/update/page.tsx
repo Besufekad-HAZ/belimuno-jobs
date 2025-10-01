@@ -38,7 +38,7 @@ const UpdateJobPage: React.FC = () => {
     location: "",
     workType: "remote",
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState("");
   const [jobStatus, setJobStatus] = useState<string>("");
   const router = useRouter();
@@ -60,7 +60,8 @@ const UpdateJobPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await clientAPI.getJob(jobId);
-        const job = response.data as Job;
+        const job = response.data.data.job as Job;
+        console.log(job);
 
         // Store the job status
         setJobStatus(job.status || "");
@@ -172,7 +173,7 @@ const UpdateJobPage: React.FC = () => {
 
         // Get current job data for comparison
         const response = await clientAPI.getJob(jobId);
-        const currentJob = response.data as Job;
+        const currentJob = response.data.data.job as Job;
 
         const hasRestrictedUpdates = restrictedFields.some((field) => {
           if (field === "skills") {
@@ -263,270 +264,288 @@ const UpdateJobPage: React.FC = () => {
         </div>
 
         <Card>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
-
-            {/* Basic Information */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Basic Information
-              </h3>
-
-              <Input
-                label="Job Title"
-                name="title"
-                type="text"
-                required
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="e.g. Build a React Website"
-              />
-
-              <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Job Description
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={5}
-                  required
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Describe your project in detail..."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="category"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Category
-                  </label>
-                  <select
-                    id="category"
-                    name="category"
-                    required
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <Input
-                  label="Budget (ETB)"
-                  name="budget"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                  value={formData.budget}
-                  onChange={handleChange}
-                  placeholder="0.00"
-                  disabled={isFieldRestricted("budget")}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Input
-                  label="Deadline"
-                  name="deadline"
-                  type="date"
-                  required
-                  value={formData.deadline}
-                  onChange={handleChange}
-                  min={new Date().toISOString().split("T")[0]}
-                  disabled={isFieldRestricted("deadline")}
-                />
-
-                <div>
-                  <label
-                    htmlFor="priority"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Priority
-                  </label>
-                  <select
-                    id="priority"
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="workType"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Work Type
-                  </label>
-                  <select
-                    id="workType"
-                    name="workType"
-                    value={formData.workType}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="remote">Remote</option>
-                    <option value="onsite">On-site</option>
-                    <option value="hybrid">Hybrid</option>
-                  </select>
-                </div>
-              </div>
-
-              <Input
-                label="Location"
-                name="location"
-                type="text"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="e.g. Addis Ababa, Ethiopia"
-              />
-              {/* Region (derived from user) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Region
-                </label>
-                <input
-                  type="text"
-                  disabled
-                  value={(() => {
-                    const u = getStoredUser();
-                    if (!u) return "Not set";
-                    if (typeof u.region === "string") return "Assigned";
-                    return u.region?.name || "Assigned";
-                  })()}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 placeholder-gray-400 focus:outline-none"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Region is taken from your account and required to post a job.
-                </p>
-              </div>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center p-8 space-y-4">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-gray-600">Loading job details...</p>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
 
-            {/* Requirements */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Requirements
-              </h3>
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Basic Information
+                </h3>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Project Requirements
-                </label>
-                {formData.requirements.map((requirement, index) => (
-                  <div key={index} className="flex items-center space-x-2 mb-2">
-                    <input
-                      type="text"
-                      value={requirement}
-                      onChange={(e) =>
-                        handleArrayChange(index, e.target.value, "requirements")
-                      }
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter a requirement..."
-                    />
-                    {formData.requirements.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeArrayItem(index, "requirements")}
-                      >
-                        Remove
-                      </Button>
-                    )}
+                <Input
+                  label="Job Title"
+                  name="title"
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder="e.g. Build a React Website"
+                />
+
+                <div>
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Job Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={5}
+                    required
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Describe your project in detail..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      htmlFor="category"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Category
+                    </label>
+                    <select
+                      id="category"
+                      name="category"
+                      required
+                      value={formData.category}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addArrayItem("requirements")}
-                >
-                  Add Requirement
-                </Button>
+
+                  <Input
+                    label="Budget (ETB)"
+                    name="budget"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                    value={formData.budget}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    disabled={isFieldRestricted("budget")}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Input
+                    label="Deadline"
+                    name="deadline"
+                    type="date"
+                    required
+                    value={formData.deadline}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split("T")[0]}
+                    disabled={isFieldRestricted("deadline")}
+                  />
+
+                  <div>
+                    <label
+                      htmlFor="priority"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Priority
+                    </label>
+                    <select
+                      id="priority"
+                      name="priority"
+                      value={formData.priority}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="workType"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Work Type
+                    </label>
+                    <select
+                      id="workType"
+                      name="workType"
+                      value={formData.workType}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="remote">Remote</option>
+                      <option value="onsite">On-site</option>
+                      <option value="hybrid">Hybrid</option>
+                    </select>
+                  </div>
+                </div>
+
+                <Input
+                  label="Location"
+                  name="location"
+                  type="text"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="e.g. Addis Ababa, Ethiopia"
+                />
+                {/* Region (derived from user) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Region
+                  </label>
+                  <input
+                    type="text"
+                    disabled
+                    value={(() => {
+                      const u = getStoredUser();
+                      if (!u) return "Not set";
+                      if (typeof u.region === "string") return "Assigned";
+                      return u.region?.name || "Assigned";
+                    })()}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 placeholder-gray-400 focus:outline-none"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Region is taken from your account and required to post a
+                    job.
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Required Skills
-                </label>
-                {formData.skills.map((skill, index) => (
-                  <div key={index} className="flex items-center space-x-2 mb-2">
-                    <input
-                      type="text"
-                      value={skill}
-                      onChange={(e) =>
-                        handleArrayChange(index, e.target.value, "skills")
-                      }
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter a required skill..."
-                      disabled={isFieldRestricted("skills")}
-                    />
-                    {formData.skills.length > 1 &&
-                      !isFieldRestricted("skills") && (
+              {/* Requirements */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Requirements
+                </h3>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Project Requirements
+                  </label>
+                  {formData.requirements.map((requirement, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-2 mb-2"
+                    >
+                      <input
+                        type="text"
+                        value={requirement}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            index,
+                            e.target.value,
+                            "requirements",
+                          )
+                        }
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter a requirement..."
+                      />
+                      {formData.requirements.length > 1 && (
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => removeArrayItem(index, "skills")}
+                          onClick={() => removeArrayItem(index, "requirements")}
                         >
                           Remove
                         </Button>
                       )}
-                  </div>
-                ))}
-                {!isFieldRestricted("skills") && (
+                    </div>
+                  ))}
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => addArrayItem("skills")}
+                    onClick={() => addArrayItem("requirements")}
                   >
-                    Add Skill
+                    Add Requirement
                   </Button>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* Submit */}
-            <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push("/client/dashboard")}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" loading={loading}>
-                Update Job
-              </Button>
-            </div>
-          </form>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Required Skills
+                  </label>
+                  {formData.skills.map((skill, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-2 mb-2"
+                    >
+                      <input
+                        type="text"
+                        value={skill}
+                        onChange={(e) =>
+                          handleArrayChange(index, e.target.value, "skills")
+                        }
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter a required skill..."
+                        disabled={isFieldRestricted("skills")}
+                      />
+                      {formData.skills.length > 1 &&
+                        !isFieldRestricted("skills") && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeArrayItem(index, "skills")}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                    </div>
+                  ))}
+                  {!isFieldRestricted("skills") && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addArrayItem("skills")}
+                    >
+                      Add Skill
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push("/client/dashboard")}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" loading={loading}>
+                  Update Job
+                </Button>
+              </div>
+            </form>
+          )}
         </Card>
       </div>
     </div>
