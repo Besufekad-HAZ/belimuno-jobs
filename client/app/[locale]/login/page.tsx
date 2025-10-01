@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authAPI } from "@/lib/api";
-import { setAuth, getRoleDashboardPath } from "@/lib/auth";
+import { setAuth, getRoleDashboardPath, getStoredUser } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useTranslations } from "next-intl";
@@ -71,9 +71,17 @@ const LoginPage: React.FC = () => {
 
     try {
       const response = await authAPI.login(values.email, values.password);
+      console.log("Login response:", response.data);
       const { token, user } = response.data;
 
+      console.log("User data:", user);
       setAuth(token, user);
+      
+      // Verify the user was stored correctly
+      setTimeout(() => {
+        const storedUser = getStoredUser();
+        console.log("Stored user after setAuth:", storedUser);
+      }, 100);
       // Persist remembered email based on user preference
       try {
         if (typeof window !== "undefined") {

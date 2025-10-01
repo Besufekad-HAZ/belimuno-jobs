@@ -186,7 +186,9 @@ const WorkerDashboard: React.FC = () => {
 
   useEffect(() => {
     const user = getStoredUser();
+    console.log("Dashboard - stored user:", user);
     if (!user || !hasRole(user, ["worker"])) {
+      console.log("Dashboard - redirecting to login, user role:", user?.role);
       router.push("/login");
       return;
     }
@@ -383,8 +385,12 @@ const WorkerDashboard: React.FC = () => {
           };
           const atts = Array.isArray(m.attachments)
             ? m.attachments.map((url, ai) => {
-                const isImage = /^data:image\//.test(url) || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
-                const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+                const isImage =
+                  /^data:image\//.test(url) ||
+                  /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+                const nameFromUrl = decodeURIComponent(
+                  url.split("/").pop() || "",
+                );
                 return {
                   id: `${m._id || index}-att-${ai}`,
                   name: nameFromUrl || `Attachment ${ai + 1}`,
@@ -459,9 +465,10 @@ const WorkerDashboard: React.FC = () => {
     setModernChatMessages((prev) => [...prev, optimisticMessage]);
 
     try {
-      const attachmentDataUrls = files && files.length
-        ? await Promise.all(files.map((f) => fileToDataURL(f)))
-        : [];
+      const attachmentDataUrls =
+        files && files.length
+          ? await Promise.all(files.map((f) => fileToDataURL(f)))
+          : [];
 
       const res = await workerAPI.sendJobMessage(
         chatJobId,
@@ -648,7 +655,136 @@ const WorkerDashboard: React.FC = () => {
               </p>
             </div>
           </Card>
+
+          {/* CV Completion Percentage */}
+          <Card className="bg-teal-50 border-teal-200">
+            <div className="text-center">
+              <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-teal-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-teal-600">
+                CV Completion
+              </p>
+              <p className="text-lg sm:text-2xl font-bold text-teal-900">
+                {(() => {
+                  const user = getStoredUser();
+                  if (!user?.profile) return "0%";
+
+                  let completedFields = 0;
+                  let totalFields = 0;
+
+                  // Personal info fields
+                  const personalFields = [
+                    user.profile.firstName,
+                    user.profile.lastName,
+                    user.profile.bio,
+                    user.profile.phone,
+                    user.profile.address?.city,
+                    user.profile.experience,
+                    (user.profile.hourlyRate ?? 0) > 0,
+                    user.profile.dob,
+                    user.profile.gender,
+                  ];
+
+                  totalFields += personalFields.length;
+                  completedFields += personalFields.filter(Boolean).length;
+
+                  // Worker profile fields
+                  if (user.workerProfile) {
+                    const workerFields = [
+                      (user.workerProfile.education?.length ?? 0) > 0,
+                      (user.workerProfile.workHistory?.length ?? 0) > 0,
+                    ];
+                    totalFields += workerFields.length;
+                    completedFields += workerFields.filter(Boolean).length;
+                  }
+
+                  const percentage =
+                    totalFields > 0
+                      ? Math.round((completedFields / totalFields) * 100)
+                      : 0;
+                  return `${percentage}%`;
+                })()}
+              </p>
+            </div>
+          </Card>
         </div>
+
+        {/* Profile Completion Call-to-Action */}
+        {(() => {
+          const user = getStoredUser();
+          if (!user?.profile) return null;
+
+          let completedFields = 0;
+          let totalFields = 0;
+
+          // Personal info fields
+          const personalFields = [
+            user.profile.firstName,
+            user.profile.lastName,
+            user.profile.bio,
+            user.profile.phone,
+            user.profile.address?.city,
+            user.profile.experience,
+            (user.profile.hourlyRate ?? 0) > 0,
+            user.profile.dob,
+            user.profile.gender,
+          ];
+
+          totalFields += personalFields.length;
+          completedFields += personalFields.filter(Boolean).length;
+
+          // Worker profile fields
+          if (user.workerProfile) {
+            const workerFields = [
+              (user.workerProfile.education?.length ?? 0) > 0,
+              (user.workerProfile.workHistory?.length ?? 0) > 0,
+            ];
+            totalFields += workerFields.length;
+            completedFields += workerFields.filter(Boolean).length;
+          }
+
+          const percentage =
+            totalFields > 0
+              ? Math.round((completedFields / totalFields) * 100)
+              : 0;
+
+          if (percentage < 80) {
+            return (
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <AlertTriangle className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-900">
+                        Complete Your Profile to Stand Out
+                      </h3>
+                      <p className="text-sm text-blue-700">
+                        Your profile is {percentage}% complete. Add more
+                        information to increase your chances of getting hired.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => router.push("/profile")}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Complete Profile
+                  </Button>
+                </div>
+                <div className="mt-4">
+                  <ProgressBar
+                    progress={percentage}
+                    className="h-2"
+                    showPercentage={false}
+                    size="sm"
+                  />
+                </div>
+              </Card>
+            );
+          }
+          return null;
+        })()}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Available Jobs */}

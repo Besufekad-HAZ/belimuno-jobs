@@ -46,4 +46,15 @@ const ChatMessageSchema = new mongoose.Schema(
 
 ChatMessageSchema.index({ conversation: 1, createdAt: 1 });
 
+ChatMessageSchema.pre('validate', function validate(next) {
+  const hasContent = this.content && this.content.trim().length > 0;
+  const hasAttachments = Array.isArray(this.attachments) && this.attachments.length > 0;
+
+  if (!hasContent && !hasAttachments) {
+    this.invalidate('content', 'A chat message must include text or an attachment');
+  }
+
+  next();
+});
+
 module.exports = mongoose.model('ChatMessage', ChatMessageSchema);

@@ -7,8 +7,9 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
+import CVDisplay from "@/components/ui/CVDisplay";
 import { toast } from "@/components/ui/sonner";
-import { Search, Filter, Check, X, MessageCircle } from "lucide-react";
+import { Search, Filter, Check, X, MessageCircle, Eye } from "lucide-react";
 import Image from "next/image";
 import LoadingPage from "@/components/Layout/LoadingPage";
 import ErrorPage from "@/components/Layout/ErrorPage";
@@ -16,7 +17,14 @@ import ErrorPage from "@/components/Layout/ErrorPage";
 interface WorkerInfo {
   _id: string;
   name: string;
-  profile?: { avatar?: string };
+  profile?: { 
+    avatar?: string;
+    cv?: {
+      data: string | object;
+      mimeType: string;
+      name: string;
+    };
+  };
   workerProfile?: { rating?: number; skills?: string[] };
 }
 interface Application {
@@ -54,6 +62,8 @@ const ApplicationsPage: React.FC = () => {
   // Removed unused selectedApp state
   const [loading, setLoading] = useState(true);
   const [showChat, setShowChat] = useState(false);
+  const [showCVModal, setShowCVModal] = useState(false);
+  const [selectedWorkerCV, setSelectedWorkerCV] = useState<object | null>(null);
   type ModernMessage = {
     id: string;
     senderId: string;
@@ -112,6 +122,22 @@ const ApplicationsPage: React.FC = () => {
   const reject = async (applicationId: string) => {
     await clientAPI.rejectApplication(jobId, applicationId);
     await load();
+  };
+
+  const viewWorkerCV = (worker: WorkerInfo) => {
+    if (worker.profile?.cv?.data) {
+      try {
+        const cvData = typeof worker.profile.cv.data === 'string' 
+          ? JSON.parse(worker.profile.cv.data) 
+          : worker.profile.cv.data;
+        setSelectedWorkerCV(cvData);
+        setShowCVModal(true);
+      } catch {
+        toast.error("Unable to load CV data");
+      }
+    } else {
+      toast.error("No CV available for this worker");
+    }
   };
 
   const openMessages = async () => {
@@ -309,65 +335,109 @@ const ApplicationsPage: React.FC = () => {
           filtered.map((app) => (
             <Card
               key={app._id}
-              className="p-4 flex items-start justify-between gap-4"
+              className="p-6 border border-gray-200 hover:shadow-lg transition-shadow"
             >
-              <div className="flex items-center gap-3">
-                {app.worker.profile?.avatar ? (
-                  <Image
-                    src={app.worker.profile.avatar}
-                    alt={app.worker.name}
-                    width={40}
-                    height={40}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gray-200" />
-                )}
-                <div>
-                  <div className="font-medium">{app.worker.name}</div>
-                  <div className="text-sm text-gray-500">
-                    Budget: ${app.proposedBudget.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-gray-500 flex items-center gap-2">
-                    Status: <Badge>{app.status}</Badge>
+              <div className="flex items-start justify-between gap-6">
+                <div className="flex items-start gap-4">
+                  {app.worker.profile?.avatar ? (
+                    <Image
+                      src={app.worker.profile.avatar}
+                      alt={app.worker.name}
+                      width={60}
+                      height={60}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="w-15 h-15 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-lg">
+                      {app.worker.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold text-lg text-gray-900">{app.worker.name}</h3>
+                      <Badge variant={app.status === 'accepted' ? 'primary' : app.status === 'rejected' ? 'danger' : 'secondary'}>
+                        {app.status}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Proposed Budget:</span> ETB {app.proposedBudget.toFixed(2)}
+                      </div>
+                      {app.worker.workerProfile?.rating && (
+                        <div className="text-sm text-gray-600">
+                          <span className="font-medium">Rating:</span> ⭐ {app.worker.workerProfile.rating}/5
+                        </div>
+                      )}
+                      {app.worker.workerProfile?.skills && (
+                        <div className="text-sm text-gray-600 md:col-span-2">
+                          <span className="font-medium">Skills:</span> {app.worker.workerProfile.skills.slice(0, 3).join(", ")}
+                          {app.worker.workerProfile.skills.length > 3 && ` +${app.worker.workerProfile.skills.length - 3} more`}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {app.proposal && (
+                      <div className="bg-gray-50 p-3 rounded-md mb-4">
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          <span className="font-medium">Proposal:</span> {app.proposal}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={openMessages}>
-                  <MessageCircle className="h-4 w-4 mr-1" /> Message
-                </Button>
-                {app.status !== "accepted" && (
-                  <Button
-                    onClick={async () => {
-                      try {
-                        await accept(app._id);
-                        toast.success("Application accepted");
-                      } catch (e) {
-                        console.error(e);
-                        toast.error("Failed to accept application");
-                      }
-                    }}
+                
+                <div className="flex flex-col gap-2 min-w-max">
+                  {app.worker.profile?.cv && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => viewWorkerCV(app.worker)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" /> View CV
+                    </Button>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={openMessages}
                   >
-                    <Check className="h-4 w-4 mr-1" /> Accept
+                    <MessageCircle className="h-4 w-4 mr-1" /> Message
                   </Button>
-                )}
-                {app.status !== "rejected" && (
-                  <Button
-                    variant="outline"
-                    onClick={async () => {
-                      try {
-                        await reject(app._id);
-                        toast.success("Application rejected");
-                      } catch (e) {
-                        console.error(e);
-                        toast.error("Failed to reject application");
-                      }
-                    }}
-                  >
-                    <X className="h-4 w-4 mr-1" /> Reject
-                  </Button>
-                )}
+                  {app.status !== "accepted" && (
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await accept(app._id);
+                          toast.success("Application accepted");
+                        } catch (e) {
+                          console.error(e);
+                          toast.error("Failed to accept application");
+                        }
+                      }}
+                    >
+                      <Check className="h-4 w-4 mr-1" /> Accept
+                    </Button>
+                  )}
+                  {app.status !== "rejected" && (
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await reject(app._id);
+                          toast.success("Application rejected");
+                        } catch (e) {
+                          console.error(e);
+                          toast.error("Failed to reject application");
+                        }
+                      }}
+                    >
+                      <X className="h-4 w-4 mr-1" /> Reject
+                    </Button>
+                  )}
+                </div>
               </div>
             </Card>
           ))
@@ -387,6 +457,61 @@ const ApplicationsPage: React.FC = () => {
           title={`Job Messages - ${job.title}`}
           placeholder="Write your message..."
         />
+      )}
+
+      {/* CV Modal */}
+      {showCVModal && selectedWorkerCV && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Worker CV</h2>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowCVModal(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-6">
+              <CVDisplay cvData={selectedWorkerCV as {
+                personalInfo: {
+                  fullName: string;
+                  email: string;
+                  phone: string;
+                  address: string;
+                  summary: string;
+                  workerSkills: string[];
+                  workerExperience: string;
+                  workerHourlyRate: number;
+                  portfolio: string;
+                  dateOfBirth: string;
+                  gender: string;
+                };
+                education: Array<{
+                  institution: string;
+                  degree: string;
+                  fieldOfStudy: string;
+                  startDate: string;
+                  endDate: string;
+                  current: boolean;
+                }>;
+                experience: Array<{
+                  company: string;
+                  position: string;
+                  startDate: string;
+                  endDate: string;
+                  current: boolean;
+                  description: string;
+                }>;
+                detailedSkills: Array<{
+                  name: string;
+                  level: string;
+                }>;
+              }} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

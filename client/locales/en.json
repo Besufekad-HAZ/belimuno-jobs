@@ -696,25 +696,9 @@
             "client": "Client (Employer)"
           }
         },
-        "phone": "Phone",
-        "location": "Location",
-        "bio": {
-          "label": "Bio",
-          "placeholder": "Tell us about yourself..."
-        },
-        "worker": {
-          "skills": {
-            "label": "Skills (comma-separated)",
-            "placeholder": "e.g. JavaScript, React, Node.js"
-          },
-          "experience": "Years of Experience",
-          "hourlyRate": "Hourly Rate (ETB)"
-        },
-        "client": {
-          "company": "Company Name",
-          "industry": "Industry",
-          "website": "Website"
-        },
+        "company": "Company Name",
+        "industry": "Industry",
+        "website": "Website",
         "password": "Password",
         "confirmPassword": "Confirm Password"
       },

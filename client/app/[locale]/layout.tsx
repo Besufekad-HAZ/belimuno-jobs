@@ -55,23 +55,19 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body
-        className={`${manrope.variable} ${notoEthiopic.variable} ${geistMono.variable} antialiased`}
-      >
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <Navbar />
-          <main id="main-content" tabIndex={-1}>
-            {children}
-          </main>
-          <ChatbotComponent />
-          <Footer />
-          <Toaster position="top-right" toastOptions={{ duration: 3500 }} />
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <div className={`${manrope.variable} ${notoEthiopic.variable} ${geistMono.variable} antialiased`}>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      <NextIntlClientProvider messages={messages} locale={locale}>
+        <Navbar />
+        <main id="main-content" tabIndex={-1}>
+          {children}
+        </main>
+        <ChatbotComponent />
+        <Footer />
+        <Toaster position="top-right" toastOptions={{ duration: 3500 }} />
+      </NextIntlClientProvider>
+    </div>
   );
 }
