@@ -188,7 +188,9 @@ const WorkerDashboard: React.FC = () => {
 
   useEffect(() => {
     const user = getStoredUser();
+    console.log("Dashboard - stored user:", user);
     if (!user || !hasRole(user, ["worker"])) {
+      console.log("Dashboard - redirecting to login, user role:", user?.role);
       router.push("/login");
       return;
     }
@@ -400,147 +402,264 @@ const WorkerDashboard: React.FC = () => {
     }
   };
 
-  const openChat = async (jobId: string) => {
-    try {
-      setChatJobId(jobId);
+  const normalizeChatMessage = useCallback(
+    (
+      message: {
+        _id?: string;
+        sender?: { name?: string; role?: string; _id?: string };
+        content: string;
+        sentAt: string;
+        attachments?: string[];
+      },
+      fallbackIndex: number,
+    ) => {
+      const attachments = Array.isArray(message.attachments)
+        ? message.attachments.map((url, index) => {
+            const isImage =
+              /^data:image\//.test(url) ||
+              /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
+            const nameFromUrl = decodeURIComponent(url.split("/").pop() || "");
+            return {
+              id: `${message._id || fallbackIndex}-att-${index}`,
+              name: nameFromUrl || `Attachment ${index + 1}`,
+              url,
+              type: isImage ? "image/*" : "application/octet-stream",
+            };
+          })
+        : [];
 
-      // Find the job details for client info
-      const job = myJobs.find((j: SimpleJob) => j._id === jobId);
-      setCurrentJob(job ?? null);
+      const senderRole = message.sender?.role;
+      const userId = getStoredUser()?._id || "worker";
+      const senderId =
+        message.sender?._id?.toString?.() ||
+        (senderRole === "worker" ? userId : "client");
+      const senderName =
+        message.sender?.name || (senderRole === "worker" ? "You" : "Client");
 
-      const res = await workerAPI.getJobMessages(jobId);
-      const messages = res.data.data || [];
-      setChatMessages(messages);
+      return {
+        id: message._id || `msg-${fallbackIndex}`,
+        senderId,
+        senderName,
+        content: message.content,
+        timestamp: message.sentAt,
+        attachments,
+      };
+    },
+    [],
+  );
 
-      // Convert old messages to new format
-      const convertedMessages = messages.map((msg: unknown, index: number) => {
-        if (typeof msg === "object" && msg !== null) {
-          const m = msg as {
-            _id?: string;
-            sender?: { name?: string; role?: string };
-            content: string;
-            sentAt: string;
-            attachments?: string[];
-          };
-          const atts = Array.isArray(m.attachments)
-            ? m.attachments.map((url, ai) => {
-                const isImage =
-                  /^data:image\//.test(url) ||
-                  /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url);
-                const nameFromUrl = decodeURIComponent(
-                  url.split("/").pop() || "",
-                );
-                return {
-                  id: `${m._id || index}-att-${ai}`,
-                  name: nameFromUrl || `Attachment ${ai + 1}`,
-                  url,
-                  type: isImage ? "image/*" : "application/octet-stream",
-                };
-              })
-            : [];
-          return {
-            id: m._id || `msg-${index}-${Date.now()}`,
-            senderId:
-              m.sender?.role === "worker"
-                ? getStoredUser()?._id || "worker"
-                : "client",
-            senderName:
-              m.sender?.name ||
-              (m.sender?.role === "worker" ? "You" : "Client"),
-            content: m.content,
-            timestamp: m.sentAt,
-            attachments: atts,
-          };
-        }
+  const fileToDataUrl = useCallback(
+    (file: File, onProgress?: (value: number) => void) =>
+      new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === "string") {
+            resolve(result);
+          } else {
+            reject(new Error("Unable to read file"));
+          }
+        };
+        reader.onerror = () =>
+          reject(reader.error || new Error("File read failed"));
+        reader.onprogress = (event) => {
+          if (!onProgress) return;
+          if (event.lengthComputable) {
+            onProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+        reader.readAsDataURL(file);
+      }),
+    [],
+  );
+
+  const openChat = useCallback(
+    async (jobId: string) => {
+      try {
+        setChatJobId(jobId);
+
+        const job = myJobs.find((j: SimpleJob) => j._id === jobId);
+        setCurrentJob(job ?? null);
+
+        const res = await workerAPI.getJobMessages(jobId);
+        const messages = (res.data.data || []) as Array<{
+          _id?: string;
+          sender?: { name?: string; role?: string; _id?: string };
+          content: string;
+          sentAt: string;
+          attachments?: string[];
+        }>;
+
+        setChatMessages(messages);
+
+        const convertedMessages = messages.map((message, index) =>
+          normalizeChatMessage(message, index),
+        );
+        convertedMessages.sort(
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+        );
+        setModernChatMessages(convertedMessages);
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    [myJobs, normalizeChatMessage],
+  );
+
+  const sendModernMessage = useCallback(
+    async (content: string, files?: File[]) => {
+      if (!chatJobId) return;
+      const trimmed = content.trim();
+      const hasAttachments = Boolean(files && files.length);
+      if (!trimmed && !hasAttachments) return;
+
+      const userId = getStoredUser()?._id || "worker";
+      const pendingId = `pending-${Date.now()}`;
+      const tempAttachmentUrls: string[] = [];
+      const optimisticAttachments = (files || []).map((file, index) => {
+        const url = URL.createObjectURL(file);
+        tempAttachmentUrls.push(url);
         return {
-          id: `msg-${index}-${Date.now()}`,
-          senderId: "unknown",
-          senderName: "Unknown",
-          content: "",
-          timestamp: "",
-          attachments: [],
+          id: `${pendingId}-att-${index}`,
+          name: file.name,
+          url,
+          type: file.type || "application/octet-stream",
         };
       });
 
-      setModernChatMessages(convertedMessages);
-    } catch (e) {
-      console.error(e);
-    }
-  };
+      const optimisticMessage = {
+        id: pendingId,
+        senderId: userId,
+        senderName: "You",
+        content: trimmed,
+        timestamp: new Date().toISOString(),
+        attachments: optimisticAttachments,
+        uploadProgress: hasAttachments ? 5 : undefined,
+      };
 
-  // Removed legacy sendChat handler; modern chat uses sendModernMessage
+      setModernChatMessages((prev) => [...prev, optimisticMessage]);
 
-  const sendModernMessage = async (content: string, files?: File[]) => {
-    if (!chatJobId || (!content.trim() && !(files && files.length))) return;
+      const updateMessageProgress = (value: number) => {
+        if (!hasAttachments) return;
+        const bounded = Math.max(1, Math.min(99, Math.round(value)));
+        setModernChatMessages((prev) =>
+          prev.map((message) =>
+            message.id === pendingId
+              ? { ...message, uploadProgress: bounded }
+              : message,
+          ),
+        );
+      };
 
-    const fileToDataURL = (file: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      try {
+        let attachmentDataUrls: string[] | undefined;
+        if (hasAttachments && files) {
+          const total = files.length;
+          attachmentDataUrls = [];
+          for (let index = 0; index < total; index += 1) {
+            const file = files[index];
+            const dataUrl = await fileToDataUrl(file, (progress) => {
+              const base = index / total;
+              const combined = base + (progress / 100) * (1 / total);
+              updateMessageProgress(10 + combined * 60);
+            });
+            attachmentDataUrls.push(dataUrl);
+          }
+          updateMessageProgress(70);
+        }
 
-    // Create an optimistic message to display immediately.
-    const optimisticId = `optimistic-${Date.now()}`;
-    const optimisticAttachments = files
-      ? files.map((file, index) => ({
-          id: `${optimisticId}-att-${index}`,
-          name: file.name,
-          url: URL.createObjectURL(file), // Use a temporary blob URL for the preview
-          type: file.type,
-        }))
-      : [];
+        const response = await workerAPI.sendJobMessage(
+          chatJobId,
+          trimmed,
+          attachmentDataUrls,
+          hasAttachments
+            ? {
+                onUploadProgress: (event) => {
+                  if (!event.total) {
+                    updateMessageProgress(90);
+                    return;
+                  }
+                  const ratio = event.loaded / event.total;
+                  updateMessageProgress(70 + ratio * 25);
+                },
+              }
+            : undefined,
+        );
 
-    const optimisticMessage = {
-      id: optimisticId,
-      senderId: getStoredUser()?._id || "worker",
-      senderName: "You",
-      content: content,
-      timestamp: new Date().toISOString(),
-      attachments: optimisticAttachments,
-    };
+        const apiMessage = response.data?.data as {
+          _id?: string;
+          sender?: { name?: string; role?: string; _id?: string };
+          content: string;
+          sentAt: string;
+          attachments?: string[];
+        } | null;
 
-    setModernChatMessages((prev) => [...prev, optimisticMessage]);
+        if (apiMessage) {
+          if (hasAttachments) {
+            updateMessageProgress(100);
+          }
+          const savedMessage = normalizeChatMessage(apiMessage, 0);
+          setModernChatMessages((prev) =>
+            prev.map((message) =>
+              message.id === pendingId ? savedMessage : message,
+            ),
+          );
+        }
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        setModernChatMessages((prev) =>
+          prev.filter((message) => message.id !== pendingId),
+        );
+        throw error;
+      } finally {
+        tempAttachmentUrls.forEach((url) => URL.revokeObjectURL(url));
+      }
+    },
+    [chatJobId, fileToDataUrl, normalizeChatMessage],
+  );
 
-    try {
-      const attachmentDataUrls =
-        files && files.length
-          ? await Promise.all(files.map((f) => fileToDataURL(f)))
-          : [];
-
-      const res = await workerAPI.sendJobMessage(
-        chatJobId,
-        content,
-        attachmentDataUrls,
-      );
-
-      // Add the new message to the modern chat messages
-      // The optimistic message is now created *before* the API call.
-      // Note: The `UniversalChatSystem` no longer creates its own optimistic message.
-      // The parent component is now the single source of truth for the message list.
-      // After the message is successfully sent, the polling mechanism will fetch the true message from the server.
-      // We are not adding the response `res.data` to the chat messages directly to avoid duplicates.
-      return res.data;
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      throw error;
-    }
-  };
-
-  // Poll chat while modal open
   useEffect(() => {
     if (!chatJobId) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await workerAPI.getJobMessages(chatJobId);
-        setChatMessages(res.data.data || []);
-      } catch {
-        /* ignore */
-      }
+    const interval = setInterval(() => {
+      workerAPI
+        .getJobMessages(chatJobId)
+        .then((res) => {
+          const messages = (res.data.data || []) as Array<{
+            _id?: string;
+            sender?: { name?: string; role?: string; _id?: string };
+            content: string;
+            sentAt: string;
+            attachments?: string[];
+          }>;
+          setChatMessages(messages);
+
+          const converted = messages.map((message, index) =>
+            normalizeChatMessage(message, index),
+          );
+          converted.sort(
+            (a, b) =>
+              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+          );
+          setModernChatMessages((prev) => {
+            const pending = prev.filter((message) =>
+              message.id.startsWith("pending-"),
+            );
+            const merged = [...converted, ...pending];
+            merged.sort(
+              (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+            );
+            return merged;
+          });
+        })
+        .catch(() => {
+          /* ignore polling errors */
+        });
     }, 4000);
     return () => clearInterval(interval);
-  }, [chatJobId]);
+  }, [chatJobId, normalizeChatMessage]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -694,7 +813,136 @@ const WorkerDashboard: React.FC = () => {
               </p>
             </div>
           </Card>
+
+          {/* CV Completion Percentage */}
+          <Card className="bg-teal-50 border-teal-200">
+            <div className="text-center">
+              <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-teal-600 mx-auto mb-1 sm:mb-2" />
+              <p className="text-xs sm:text-sm font-medium text-teal-600">
+                CV Completion
+              </p>
+              <p className="text-lg sm:text-2xl font-bold text-teal-900">
+                {(() => {
+                  const user = getStoredUser();
+                  if (!user?.profile) return "0%";
+
+                  let completedFields = 0;
+                  let totalFields = 0;
+
+                  // Personal info fields
+                  const personalFields = [
+                    user.profile.firstName,
+                    user.profile.lastName,
+                    user.profile.bio,
+                    user.profile.phone,
+                    user.profile.address?.city,
+                    user.profile.experience,
+                    (user.profile.hourlyRate ?? 0) > 0,
+                    user.profile.dob,
+                    user.profile.gender,
+                  ];
+
+                  totalFields += personalFields.length;
+                  completedFields += personalFields.filter(Boolean).length;
+
+                  // Worker profile fields
+                  if (user.workerProfile) {
+                    const workerFields = [
+                      (user.workerProfile.education?.length ?? 0) > 0,
+                      (user.workerProfile.workHistory?.length ?? 0) > 0,
+                    ];
+                    totalFields += workerFields.length;
+                    completedFields += workerFields.filter(Boolean).length;
+                  }
+
+                  const percentage =
+                    totalFields > 0
+                      ? Math.round((completedFields / totalFields) * 100)
+                      : 0;
+                  return `${percentage}%`;
+                })()}
+              </p>
+            </div>
+          </Card>
         </div>
+
+        {/* Profile Completion Call-to-Action */}
+        {(() => {
+          const user = getStoredUser();
+          if (!user?.profile) return null;
+
+          let completedFields = 0;
+          let totalFields = 0;
+
+          // Personal info fields
+          const personalFields = [
+            user.profile.firstName,
+            user.profile.lastName,
+            user.profile.bio,
+            user.profile.phone,
+            user.profile.address?.city,
+            user.profile.experience,
+            (user.profile.hourlyRate ?? 0) > 0,
+            user.profile.dob,
+            user.profile.gender,
+          ];
+
+          totalFields += personalFields.length;
+          completedFields += personalFields.filter(Boolean).length;
+
+          // Worker profile fields
+          if (user.workerProfile) {
+            const workerFields = [
+              (user.workerProfile.education?.length ?? 0) > 0,
+              (user.workerProfile.workHistory?.length ?? 0) > 0,
+            ];
+            totalFields += workerFields.length;
+            completedFields += workerFields.filter(Boolean).length;
+          }
+
+          const percentage =
+            totalFields > 0
+              ? Math.round((completedFields / totalFields) * 100)
+              : 0;
+
+          if (percentage < 80) {
+            return (
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <AlertTriangle className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-900">
+                        Complete Your Profile to Stand Out
+                      </h3>
+                      <p className="text-sm text-blue-700">
+                        Your profile is {percentage}% complete. Add more
+                        information to increase your chances of getting hired.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => router.push("/profile")}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Complete Profile
+                  </Button>
+                </div>
+                <div className="mt-4">
+                  <ProgressBar
+                    progress={percentage}
+                    className="h-2"
+                    showPercentage={false}
+                    size="sm"
+                  />
+                </div>
+              </Card>
+            );
+          }
+          return null;
+        })()}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           <div className="space-y-8">

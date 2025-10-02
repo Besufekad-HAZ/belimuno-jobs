@@ -1,27 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import type { User as BaseUser } from "@/lib/auth";
 import { getStoredUser } from "@/lib/auth";
-import { authAPI } from "@/lib/api";
+import { authAPI, workerAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
-import ProgressBar from "@/components/ui/ProgressBar";
 import BackToDashboard from "@/components/ui/BackToDashboard";
+import EnhancedCVBuilder from "@/components/ui/EnhancedCVBuilder";
+import jsPDF from "jspdf";
+import { toast } from "@/components/ui/sonner";
 import {
   Camera,
   User2,
-  Briefcase,
-  GraduationCap,
   FileText,
-  Sparkles,
   FileUp,
   FileIcon,
   Trash2,
-  Link2,
-  X,
   Eye,
 } from "lucide-react";
 import Cookies from "js-cookie";
@@ -30,23 +28,6 @@ import Cookies from "js-cookie";
 type Role = BaseUser["role"];
 
 type Availability = "full-time" | "part-time" | "freelance";
-
-type Education = {
-  school?: string;
-  degree?: string;
-  field?: string;
-  startDate?: string;
-  endDate?: string;
-  description?: string;
-};
-
-type WorkItem = {
-  company?: string;
-  title?: string;
-  startDate?: string;
-  endDate?: string;
-  description?: string;
-};
 
 type ExtendedUser = BaseUser & {
   isVerified?: boolean;
@@ -65,8 +46,23 @@ type ExtendedUser = BaseUser & {
     portfolio?: string[];
     certifications?: string[];
     languages?: string[];
-    education?: Education[];
-    workHistory?: WorkItem[];
+    education?: Array<{
+      _id?: string;
+      school: string;
+      degree: string;
+      field: string;
+      startDate: string;
+      endDate?: string;
+      description?: string;
+    }>;
+    workHistory?: Array<{
+      _id?: string;
+      company: string;
+      title: string;
+      startDate: string;
+      endDate?: string;
+      description: string;
+    }>;
   };
   clientProfile?: {
     companyName?: string;
@@ -84,174 +80,8 @@ interface ProfileUpdatePayload {
   clientProfile?: Record<string, unknown>;
 }
 
-// Helper UI components (defined before usage to avoid TDZ issues)
-const AddSimple: React.FC<{
-  onAdd: (value: string) => void;
-  placeholder?: string;
-}> = ({ onAdd, placeholder }) => {
-  const [value, setValue] = useState("");
-  return (
-    <div className="flex gap-2">
-      <Input
-        placeholder={placeholder || "Type and add"}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-      />
-      <Button
-        onClick={() => {
-          onAdd(value);
-          setValue("");
-        }}
-      >
-        Add
-      </Button>
-    </div>
-  );
-};
-
-const AddSkill: React.FC<{ onAdd: (skill: string) => void }> = ({ onAdd }) => {
-  const [skill, setSkill] = useState("");
-  return (
-    <div className="flex gap-2">
-      <Input
-        placeholder="e.g., Floor polishing, Deep cleaning"
-        value={skill}
-        onChange={(e) => setSkill(e.target.value)}
-      />
-      <Button
-        onClick={() => {
-          onAdd(skill);
-          setSkill("");
-        }}
-      >
-        Add
-      </Button>
-    </div>
-  );
-};
-
-const AddEducationForm: React.FC<{ onAdd: (item: Education) => void }> = ({
-  onAdd,
-}) => {
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<Education>({});
-  return (
-    <div>
-      {!open ? (
-        <Button variant="outline" onClick={() => setOpen(true)}>
-          + Add education
-        </Button>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            placeholder="School/University"
-            value={form.school || ""}
-            onChange={(e) => setForm({ ...form, school: e.target.value })}
-          />
-          <Input
-            placeholder="Degree"
-            value={form.degree || ""}
-            onChange={(e) => setForm({ ...form, degree: e.target.value })}
-          />
-          <Input
-            placeholder="Field"
-            value={form.field || ""}
-            onChange={(e) => setForm({ ...form, field: e.target.value })}
-          />
-          <Input
-            placeholder="Start (YYYY-MM)"
-            value={form.startDate || ""}
-            onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-          />
-          <Input
-            placeholder="End (YYYY-MM)"
-            value={form.endDate || ""}
-            onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-          />
-          <Input
-            placeholder="Description"
-            value={form.description || ""}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                onAdd(form);
-                setOpen(false);
-                setForm({});
-              }}
-            >
-              Save
-            </Button>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const AddWorkForm: React.FC<{ onAdd: (item: WorkItem) => void }> = ({
-  onAdd,
-}) => {
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<WorkItem>({});
-  return (
-    <div>
-      {!open ? (
-        <Button variant="outline" onClick={() => setOpen(true)}>
-          + Add work
-        </Button>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            placeholder="Company"
-            value={form.company || ""}
-            onChange={(e) => setForm({ ...form, company: e.target.value })}
-          />
-          <Input
-            placeholder="Title/Role"
-            value={form.title || ""}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-          />
-          <Input
-            placeholder="Start (YYYY-MM)"
-            value={form.startDate || ""}
-            onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-          />
-          <Input
-            placeholder="End (YYYY-MM)"
-            value={form.endDate || ""}
-            onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-          />
-          <Input
-            placeholder="Description"
-            value={form.description || ""}
-            onChange={(e) => setForm({ ...form, description: e.target.value })}
-          />
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                onAdd(form);
-                setOpen(false);
-                setForm({});
-              }}
-            >
-              Save
-            </Button>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const ProfilePage = () => {
+  const router = useRouter();
   const [user, setUser] = useState<ExtendedUser | null>(
     getStoredUser() as ExtendedUser | null,
   );
@@ -262,6 +92,45 @@ const ProfilePage = () => {
   const [cvPreview, setCvPreview] = useState<string | null>(
     user?.profile?.cv?.data || null,
   );
+  const [initialCVData, setInitialCVData] = useState<{
+    personalInfo: {
+      fullName: string;
+      email: string;
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      portfolio: string;
+      dateOfBirth: string;
+      gender: string;
+    };
+    education: Array<{
+      id: string;
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+    }>;
+    experience: Array<{
+      id: string;
+      company: string;
+      position: string;
+      startDate: string;
+      endDate: string;
+      current: boolean;
+      description: string;
+    }>;
+    detailedSkills: Array<{
+      id: string;
+      name: string;
+      level: string;
+    }>;
+  } | null>(null);
+  const [cvBuilderLoading, setCvBuilderLoading] = useState(true);
   const [cvObjectUrl, setCvObjectUrl] = useState<string | null>(null);
   const ensureDataUrl = (
     data: string | null | undefined,
@@ -363,48 +232,110 @@ const ProfilePage = () => {
     });
   }, [user?.profile?.cv?.data, user?.profile?.cv?.mimeType]);
 
+  // CV Builder functions
+  const loadExistingCV = useCallback(async () => {
+    try {
+      setCvBuilderLoading(true);
+      const response = await authAPI.getMe();
+      const userData = response.data.user as ExtendedUser;
+      if (!userData) return;
+      const profile = userData.profile || {};
+      const workerProfile = userData.workerProfile || {};
+
+      setInitialCVData({
+        personalInfo: {
+          fullName: userData.name || "",
+          email: userData.email || "",
+          phone: profile.phone || "",
+          address: (
+            profile as { address?: { city?: string; country?: string } }
+          ).address?.city
+            ? `${(profile as { address?: { city?: string; country?: string } }).address?.city}, ${(profile as { address?: { city?: string; country?: string } }).address?.country || "Ethiopia"}`
+            : "",
+          summary: profile.bio || "",
+          workerSkills: profile.skills || [],
+          workerExperience: String(profile.experience || ""),
+          workerHourlyRate: profile.hourlyRate || 0,
+          portfolio: userData.workerProfile?.portfolio?.[0] || "",
+          dateOfBirth: profile.dob ? String(profile.dob).substring(0, 10) : "",
+          gender: (profile as { gender?: string }).gender || "",
+        },
+        education: (workerProfile?.education || []).map(
+          (edu: {
+            _id?: string;
+            school: string;
+            degree: string;
+            field: string;
+            startDate: string;
+            endDate?: string;
+            description?: string;
+          }) => ({
+            id: edu._id || Date.now().toString(),
+            institution: edu.school,
+            degree: edu.degree,
+            fieldOfStudy: edu.field,
+            startDate: edu.startDate,
+            endDate: edu.endDate || "",
+            current: false,
+          }),
+        ),
+        experience: (workerProfile?.workHistory || []).map(
+          (exp: {
+            _id?: string;
+            company: string;
+            title: string;
+            startDate: string;
+            endDate?: string;
+            description: string;
+          }) => ({
+            id: exp._id || Date.now().toString(),
+            company: exp.company,
+            position: exp.title,
+            startDate: exp.startDate,
+            endDate: exp.endDate || "",
+            current: false,
+            description: exp.description,
+          }),
+        ),
+        detailedSkills: (
+          (
+            profile as {
+              detailedSkills?: Array<{
+                _id?: string;
+                name: string;
+                level: string;
+              }>;
+            }
+          ).detailedSkills || []
+        ).map((skill: { _id?: string; name: string; level: string }) => ({
+          id: skill._id || Date.now().toString(),
+          name: skill.name,
+          level: (skill.level || "Beginner") as
+            | "Beginner"
+            | "Intermediate"
+            | "Advanced"
+            | "Expert",
+        })),
+      });
+    } catch (error) {
+      console.error("Failed to load existing CV:", error);
+    } finally {
+      setCvBuilderLoading(false);
+    }
+  }, []);
+
+  // Load CV data on component mount
+  useEffect(() => {
+    if (user?.role === "worker") {
+      loadExistingCV();
+    }
+  }, [user?.role, loadExistingCV]);
+
   if (!user) {
     return <div className="p-8 text-center">You are not logged in.</div>;
   }
 
   const role: Role = user.role;
-
-  const profileCompletion = (() => {
-    if (role === "worker") {
-      const factors = [
-        !!user.profile?.avatar,
-        !!(user.profile?.bio && user.profile.bio.trim().length >= 10),
-        (user.workerProfile?.skills?.length || 0) >= 3,
-        !!(
-          user.workerProfile?.experience &&
-          user.workerProfile.experience.trim().length >= 20
-        ),
-        (user.workerProfile?.certifications?.length || 0) > 0,
-        (user.workerProfile?.languages?.length || 0) > 0,
-        (user.workerProfile?.education?.length || 0) > 0,
-        (user.workerProfile?.workHistory?.length || 0) > 0,
-        !!user.profile?.dob,
-        !!user.profile?.cv,
-      ];
-      return Math.round(
-        (factors.filter(Boolean).length / factors.length) * 100,
-      );
-    }
-    if (role === "client") {
-      const factors = [
-        !!user.profile?.avatar,
-        !!(user.profile?.bio && user.profile.bio.trim().length >= 10),
-        !!user.clientProfile?.companyName,
-        !!user.clientProfile?.website,
-        !!user.clientProfile?.industry,
-      ];
-      return Math.round(
-        (factors.filter(Boolean).length / factors.length) * 100,
-      );
-    }
-    const factors = [!!user.profile?.avatar, !!user.profile?.bio];
-    return Math.round((factors.filter(Boolean).length / factors.length) * 100);
-  })();
 
   const updateLocalUser = (partial: Partial<ExtendedUser>) => {
     const next = { ...user, ...partial } as ExtendedUser;
@@ -460,163 +391,27 @@ const ProfilePage = () => {
     reader.readAsDataURL(file);
   };
 
-  // Worker helpers
-  const addSkill = async (skill: string) => {
-    const list = user.workerProfile?.skills || [];
-    const v = skill.trim();
-    if (!v || list.includes(v)) return;
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, skills: [...list, v] },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({
-      workerProfile: { skills: nextUser.workerProfile?.skills },
-    });
-  };
-  const removeSkill = async (skill: string) => {
-    const list = (user.workerProfile?.skills || []).filter((s) => s !== skill);
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, skills: list },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({ workerProfile: { skills: list } });
-  };
-
-  const setExperienceSummary = async (summary: string) => {
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, experience: summary },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({ workerProfile: { experience: summary } });
-  };
-
-  const addCertification = async (cert: string) => {
-    const list = user.workerProfile?.certifications || [];
-    const v = cert.trim();
-    if (!v || list.includes(v)) return;
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, certifications: [...list, v] },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({
-      workerProfile: { certifications: nextUser.workerProfile?.certifications },
-    });
-  };
-  const removeCertification = async (cert: string) => {
-    const list = (user.workerProfile?.certifications || []).filter(
-      (c) => c !== cert,
-    );
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, certifications: list },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({ workerProfile: { certifications: list } });
-  };
-
-  const addLanguage = async (lang: string) => {
-    const list = user.workerProfile?.languages || [];
-    const v = lang.trim();
-    if (!v || list.includes(v)) return;
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, languages: [...list, v] },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({
-      workerProfile: { languages: nextUser.workerProfile?.languages },
-    });
-  };
-  const removeLanguage = async (lang: string) => {
-    const list = (user.workerProfile?.languages || []).filter(
-      (l) => l !== lang,
-    );
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, languages: list },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({ workerProfile: { languages: list } });
-  };
-
-  const addPortfolioLink = async (url: string) => {
-    const list = user.workerProfile?.portfolio || [];
-    const v = url.trim();
-    if (!v) return;
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, portfolio: [...list, v] },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({
-      workerProfile: { portfolio: nextUser.workerProfile?.portfolio },
-    });
-  };
-  const removePortfolioLink = async (url: string) => {
-    const list = (user.workerProfile?.portfolio || []).filter((u) => u !== url);
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, portfolio: list },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({ workerProfile: { portfolio: list } });
-  };
-
-  const addEducationItem = async (item: Education) => {
-    const list = user.workerProfile?.education || [];
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, education: [...list, item] },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({
-      workerProfile: { education: nextUser.workerProfile?.education },
-    });
-  };
-  const removeEducationItem = async (index: number) => {
-    const list = [...(user.workerProfile?.education || [])];
-    list.splice(index, 1);
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, education: list },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({ workerProfile: { education: list } });
-  };
-
-  const addWorkItem = async (item: WorkItem) => {
-    const list = user.workerProfile?.workHistory || [];
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, workHistory: [...list, item] },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({
-      workerProfile: { workHistory: nextUser.workerProfile?.workHistory },
-    });
-  };
-  const removeWorkItem = async (index: number) => {
-    const list = [...(user.workerProfile?.workHistory || [])];
-    list.splice(index, 1);
-    const nextUser: ExtendedUser = {
-      ...user,
-      workerProfile: { ...user.workerProfile, workHistory: list },
-    };
-    updateLocalUser(nextUser);
-    await saveProfile({ workerProfile: { workHistory: list } });
-  };
-
-  const onDOBBlur = async (value: string) => {
-    await saveProfile({
-      profile: { ...user.profile, dob: value && value.trim() ? value : null },
-    });
-  };
-
   const onCVFile = async (file: File) => {
+    // Check file size (2MB limit)
+    const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+    if (file.size > maxSize) {
+      toast.error("File size must be less than 2MB");
+      return;
+    }
+
+    // Check file type
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/jpeg",
+      "image/jpg",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Please upload a PDF, DOC, DOCX, or JPG file");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = reader.result as string;
@@ -631,7 +426,18 @@ const ProfilePage = () => {
       updateLocalUser({
         profile: { ...(user.profile || {}), cv },
       } as unknown as ExtendedUser);
-      await saveProfile({ profile: { ...user.profile, cv } });
+      await saveProfile({ profile: { cv } });
+
+      // Refresh user data to show the uploaded CV immediately
+      try {
+        const response = await authAPI.getMe();
+        if (response.data.user) {
+          setUser(response.data.user as ExtendedUser);
+        }
+      } catch (error) {
+        console.error("Failed to refresh user data:", error);
+      }
+
       // Reset input to allow selecting the same file again
       if (cvRef.current) cvRef.current.value = "";
     };
@@ -650,8 +456,331 @@ const ProfilePage = () => {
     delete np["cv"];
     const nextProfile = np as NonNullable<ExtendedUser["profile"]>;
     updateLocalUser({ profile: nextProfile } as unknown as ExtendedUser);
-    await saveProfile({ profile: { ...user.profile, cv: null } });
+    await saveProfile({ profile: { cv: null } });
+
+    // Refresh user data to show the CV deletion immediately
+    try {
+      const response = await authAPI.getMe();
+      if (response.data.user) {
+        setUser(response.data.user as ExtendedUser);
+      }
+    } catch (error) {
+      console.error("Failed to refresh user data:", error);
+    }
+
     if (cvRef.current) cvRef.current.value = "";
+  };
+
+  const handleSaveCV = async (cvData: {
+    personalInfo: {
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      dateOfBirth: string;
+      gender: string;
+      fullName: string;
+      portfolio: string;
+    };
+    education: Array<{
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate?: string | null;
+      current: boolean;
+    }>;
+    experience: Array<{
+      company: string;
+      position: string;
+      startDate: string;
+      endDate?: string | null;
+      current: boolean;
+      description: string;
+    }>;
+    detailedSkills?: Array<{
+      name: string;
+      level?: string;
+    }>;
+  }) => {
+    try {
+      setSaving(true);
+
+      const profileUpdate: Record<string, unknown> = {
+        phone: cvData.personalInfo.phone,
+        address: {
+          city: cvData.personalInfo.address.split(",")[0]?.trim() || "",
+          country:
+            cvData.personalInfo.address.split(",")[1]?.trim() || "Ethiopia",
+        },
+        bio: cvData.personalInfo.summary,
+        skills: cvData.personalInfo.workerSkills,
+        experience: cvData.personalInfo.workerExperience,
+        hourlyRate: cvData.personalInfo.workerHourlyRate,
+        dob: cvData.personalInfo.dateOfBirth,
+        gender: cvData.personalInfo.gender,
+        cv: {
+          data: JSON.stringify(cvData),
+          mimeType: "application/json",
+          name: `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.json`,
+        },
+      };
+
+      const workerProfileUpdate: Record<string, unknown> = {
+        education: cvData.education.map((edu) => ({
+          school: edu.institution,
+          degree: edu.degree,
+          field: edu.fieldOfStudy,
+          startDate: edu.startDate,
+          endDate: edu.current ? null : edu.endDate,
+          description: "",
+        })),
+        workHistory: cvData.experience.map((exp) => ({
+          company: exp.company,
+          title: exp.position,
+          startDate: exp.startDate,
+          endDate: exp.current ? null : exp.endDate,
+          description: exp.description,
+        })),
+        portfolio: cvData.personalInfo.portfolio
+          ? [cvData.personalInfo.portfolio]
+          : [],
+      };
+
+      await workerAPI.updateProfile({
+        profile: profileUpdate,
+        workerProfile: workerProfileUpdate,
+      });
+
+      // Refresh user data
+      const response = await authAPI.getMe();
+      setUser(response.data.user as ExtendedUser);
+      Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 });
+
+      console.log("CV saved successfully!");
+
+      // Redirect to jobs page after successful save
+      router.push("/jobs");
+    } catch (error) {
+      console.error("Failed to save CV:", error);
+      throw error;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDownloadPDF = (cvData: {
+    personalInfo: {
+      fullName: string;
+      email: string;
+      phone: string;
+      address: string;
+      summary: string;
+      workerSkills: string[];
+      workerExperience: string;
+      workerHourlyRate: number;
+      portfolio: string;
+      dateOfBirth: string;
+      gender: string;
+    };
+    education: Array<{
+      institution: string;
+      degree: string;
+      fieldOfStudy: string;
+      startDate: string;
+      endDate?: string | null;
+      current: boolean;
+    }>;
+    experience: Array<{
+      company: string;
+      position: string;
+      startDate: string;
+      endDate?: string | null;
+      current: boolean;
+      description: string;
+    }>;
+    detailedSkills: Array<{
+      name: string;
+      level?: string;
+    }>;
+  }) => {
+    const doc = new jsPDF();
+    const margin = 20;
+    let yPosition = margin;
+
+    // Header
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text(cvData.personalInfo.fullName, margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(cvData.personalInfo.email, margin, yPosition);
+    yPosition += 6;
+    if (cvData.personalInfo.phone) {
+      doc.text(cvData.personalInfo.phone, margin, yPosition);
+      yPosition += 6;
+    }
+    if (cvData.personalInfo.address) {
+      doc.text(cvData.personalInfo.address, margin, yPosition);
+      yPosition += 6;
+    }
+    if (cvData.personalInfo.gender) {
+      doc.text(`Gender: ${cvData.personalInfo.gender}`, margin, yPosition);
+      yPosition += 6;
+    }
+    if (cvData.personalInfo.dateOfBirth) {
+      doc.text(
+        `Date of Birth: ${cvData.personalInfo.dateOfBirth}`,
+        margin,
+        yPosition,
+      );
+      yPosition += 10;
+    }
+
+    // Worker Details
+    if (
+      cvData.personalInfo.workerExperience ||
+      cvData.personalInfo.workerHourlyRate
+    ) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("WORKER DETAILS", margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      if (cvData.personalInfo.workerExperience) {
+        doc.text(
+          `Experience: ${cvData.personalInfo.workerExperience}`,
+          margin,
+          yPosition,
+        );
+        yPosition += 5;
+      }
+      if (cvData.personalInfo.workerHourlyRate) {
+        doc.text(
+          `Hourly Rate: ETB ${cvData.personalInfo.workerHourlyRate}`,
+          margin,
+          yPosition,
+        );
+        yPosition += 10;
+      }
+    }
+
+    // Key Skills
+    if (
+      cvData.personalInfo.workerSkills &&
+      cvData.personalInfo.workerSkills.length > 0
+    ) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("KEY SKILLS", margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const skillsText = cvData.personalInfo.workerSkills.join(", ");
+      const splitSkills = doc.splitTextToSize(skillsText, 170);
+      doc.text(splitSkills, margin, yPosition);
+      yPosition += splitSkills.length * 5 + 5;
+    }
+
+    // Summary
+    if (cvData.personalInfo.summary) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("SUMMARY", margin, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const summaryLines = doc.splitTextToSize(
+        cvData.personalInfo.summary,
+        170,
+      );
+      doc.text(summaryLines, margin, yPosition);
+      yPosition += summaryLines.length * 5 + 5;
+    }
+
+    // Education
+    if (cvData.education && cvData.education.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("EDUCATION", margin, yPosition);
+      yPosition += 8;
+
+      cvData.education.forEach((edu) => {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${edu.degree} - ${edu.institution}`, margin, yPosition);
+        yPosition += 6;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        if (edu.fieldOfStudy) {
+          doc.text(`Field: ${edu.fieldOfStudy}`, margin, yPosition);
+          yPosition += 5;
+        }
+        doc.text(
+          `${edu.startDate} - ${edu.endDate || "Present"}`,
+          margin,
+          yPosition,
+        );
+        yPosition += 8;
+      });
+    }
+
+    // Experience
+    if (cvData.experience && cvData.experience.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("EXPERIENCE", margin, yPosition);
+      yPosition += 8;
+
+      cvData.experience.forEach((exp) => {
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${exp.position} - ${exp.company}`, margin, yPosition);
+        yPosition += 6;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          `${exp.startDate} - ${exp.endDate || "Present"}`,
+          margin,
+          yPosition,
+        );
+        yPosition += 5;
+
+        if (exp.description) {
+          const descLines = doc.splitTextToSize(exp.description, 170);
+          doc.text(descLines, margin, yPosition);
+          yPosition += descLines.length * 5;
+        }
+        yPosition += 5;
+      });
+    }
+
+    // Skills
+    if (cvData.detailedSkills && cvData.detailedSkills.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("DETAILED SKILLS", margin, yPosition);
+      yPosition += 8;
+
+      cvData.detailedSkills.forEach((skill) => {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.text(`• ${skill.name} (${skill.level})`, margin, yPosition);
+        yPosition += 5;
+      });
+    }
+
+    doc.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`);
   };
 
   return (
@@ -723,259 +852,46 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left column */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Bio */}
-            <Card>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Bio</h3>
-                  <p className="text-sm text-gray-600">
-                    Add a short, compelling summary about you.
-                  </p>
-                </div>
-                <div className="flex-1">
-                  <textarea
-                    rows={3}
-                    defaultValue={user.profile?.bio || ""}
-                    onBlur={(e) =>
-                      saveProfile({
-                        profile: { ...user.profile, bio: e.target.value },
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Tell clients about yourself, your strengths and achievements"
-                  />
-                </div>
-              </div>
-            </Card>
-
             {/* Worker blocks */}
             {role === "worker" && (
               <>
-                <Card>
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" /> Experience Summary
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Summarize your relevant work experience, achievements, and
-                    tools.
-                  </p>
-                  <textarea
-                    rows={4}
-                    defaultValue={user.workerProfile?.experience || ""}
-                    onBlur={(e) => setExperienceSummary(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., 3+ years in cleaning services, specialized in office and post-construction cleaning..."
-                  />
-                </Card>
-
-                <Card>
-                  <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" /> Skills
-                  </h3>
-                  <AddSkill onAdd={addSkill} />
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {(user.workerProfile?.skills || []).map((s, i) => (
-                      <span
-                        key={i}
-                        className="group inline-flex items-center gap-1 border border-gray-200 rounded-full bg-white px-2 py-1 shadow-sm"
-                      >
-                        <Badge
-                          className="!bg-transparent !border-0 !px-0 !py-0"
-                          variant="secondary"
-                          size="sm"
-                        >
-                          {s}
-                        </Badge>
-                        <button
-                          aria-label={`Remove ${s}`}
-                          className="p-0.5 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => removeSkill(s)}
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </Card>
-
-                <Card>
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <GraduationCap className="h-4 w-4" /> Certifications &
-                    Languages
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-2">
-                        Certifications
-                      </h4>
-                      <AddSimple
-                        onAdd={addCertification}
-                        placeholder="e.g., OSHA Safety, Cleaning Pro Level 2"
-                      />
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {(user.workerProfile?.certifications || []).map(
-                          (c, i) => (
-                            <span
-                              key={i}
-                              className="group inline-flex items-center gap-1 border border-gray-200 rounded-full bg-white px-2 py-1 shadow-sm"
-                            >
-                              <Badge
-                                className="!bg-transparent !border-0 !px-0 !py-0"
-                                variant="secondary"
-                                size="sm"
-                              >
-                                {c}
-                              </Badge>
-                              <button
-                                className="p-0.5 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                                onClick={() => removeCertification(c)}
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-                            </span>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-2">
-                        Languages
-                      </h4>
-                      <AddSimple
-                        onAdd={addLanguage}
-                        placeholder="e.g., Amharic, English"
-                      />
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {(user.workerProfile?.languages || []).map((l, i) => (
-                          <span
-                            key={i}
-                            className="group inline-flex items-center gap-1 border border-gray-200 rounded-full bg-white px-2 py-1 shadow-sm"
-                          >
-                            <Badge
-                              className="!bg-transparent !border-0 !px-0 !py-0"
-                              variant="secondary"
-                              size="sm"
-                            >
-                              {l}
-                            </Badge>
-                            <button
-                              className="p-0.5 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                              onClick={() => removeLanguage(l)}
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
-                          </span>
-                        ))}
+                {/* Integrated CV Builder */}
+                <Card className="p-0">
+                  <div className="p-6 border-b border-gray-200">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                          <FileText className="h-4 w-4" /> CV Builder
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          Create and manage your professional CV directly here.
+                          All changes are automatically saved.
+                        </p>
                       </div>
                     </div>
                   </div>
-                </Card>
 
-                <Card>
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                    <Link2 className="h-4 w-4" /> Portfolio
-                  </h3>
-                  <AddSimple
-                    onAdd={addPortfolioLink}
-                    placeholder="https://your-portfolio-link"
-                  />
-                  <ul className="mt-3 space-y-1 text-sm">
-                    {(user.workerProfile?.portfolio || []).map((url, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center justify-between gap-3 p-2 bg-white rounded border border-gray-200 shadow-sm"
-                      >
-                        <a
-                          className="underline text-blue-700 truncate"
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {url}
-                        </a>
-                        <button
-                          aria-label={`Remove ${url}`}
-                          className="p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => removePortfolioLink(url)}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
-
-                <Card>
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Educational Background
-                  </h3>
-                  <AddEducationForm onAdd={addEducationItem} />
-                  <div className="mt-3 space-y-3">
-                    {(user.workerProfile?.education || []).map((ed, i) => (
-                      <div
-                        key={i}
-                        className="relative p-3 bg-white rounded border border-gray-200 shadow-sm"
-                      >
-                        <button
-                          aria-label="Remove education"
-                          className="absolute top-2 right-2 p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => removeEducationItem(i)}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        <div className="font-medium text-gray-900">
-                          {ed.school} {ed.degree ? `• ${ed.degree}` : ""}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {ed.startDate || "—"} - {ed.endDate || "Present"}
-                        </div>
-                        {ed.field && (
-                          <div className="text-sm text-gray-600">
-                            Field: {ed.field}
-                          </div>
-                        )}
-                        {ed.description && (
-                          <p className="text-sm text-gray-700 mt-1">
-                            {ed.description}
-                          </p>
-                        )}
+                  {cvBuilderLoading ? (
+                    <div className="p-6">
+                      <div className="animate-pulse space-y-4">
+                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                       </div>
-                    ))}
-                  </div>
-                </Card>
-
-                <Card>
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Work Experience
-                  </h3>
-                  <AddWorkForm onAdd={addWorkItem} />
-                  <div className="mt-3 space-y-3">
-                    {(user.workerProfile?.workHistory || []).map((wk, i) => (
-                      <div
-                        key={i}
-                        className="relative p-3 bg-white rounded border border-gray-200 shadow-sm"
-                      >
-                        <button
-                          aria-label="Remove work"
-                          className="absolute top-2 right-2 p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => removeWorkItem(i)}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        <div className="font-medium text-gray-900">
-                          {wk.title} {wk.company ? `• ${wk.company}` : ""}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {wk.startDate || "—"} - {wk.endDate || "Present"}
-                        </div>
-                        {wk.description && (
-                          <p className="text-sm text-gray-700 mt-1">
-                            {wk.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white">
+                      <EnhancedCVBuilder
+                        onSave={handleSaveCV}
+                        onDownload={handleDownloadPDF}
+                        initialData={
+                          (initialCVData as Record<string, unknown>) ||
+                          undefined
+                        }
+                        saving={saving}
+                      />
+                    </div>
+                  )}
                 </Card>
               </>
             )}
@@ -1051,40 +967,23 @@ const ProfilePage = () => {
           {/* Right sidebar */}
           <div className="space-y-6">
             <Card>
-              <h3 className="font-semibold text-gray-900 mb-3">
-                Profile Completion
-              </h3>
-              <ProgressBar progress={profileCompletion} />
-              <p className="text-xs text-gray-500 mt-2">
-                Complete your profile to increase trust and win more jobs.
-              </p>
-              {saving && (
-                <p className="text-xs text-gray-500 mt-1">Saving...</p>
-              )}
-            </Card>
-
-            <Card>
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Date of Birth
-              </h3>
-              <Input
-                type="date"
-                defaultValue={
-                  user.profile?.dob
-                    ? String(user.profile?.dob).substring(0, 10)
-                    : ""
-                }
-                onBlur={(e) => onDOBBlur(e.target.value)}
-              />
-            </Card>
-
-            <Card>
               <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <FileIcon className="h-4 w-4" /> CV
+                <FileIcon className="h-4 w-4" /> CV Upload
               </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Upload your CV file (PDF, DOC, DOCX, or JPG). Maximum file size:
+                2MB. This is for recruiters and admins who need additional
+                information.
+              </p>
               {(() => {
                 const cv = user.profile?.cv;
-                return cv ? (
+                // Only show uploaded files, not JSON CV data
+                const isUploadedFile =
+                  cv &&
+                  cv.mimeType &&
+                  !cv.mimeType.includes("application/json");
+
+                return isUploadedFile ? (
                   <div>
                     <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
                       <FileIcon className="h-4 w-4 text-gray-700" />
@@ -1121,7 +1020,7 @@ const ProfilePage = () => {
                         onClick={() => cvRef.current?.click()}
                       >
                         <FileUp className="h-4 w-4 mr-2" />
-                        Update CV
+                        Upload New CV
                       </Button>
                       <Button variant="danger" onClick={onDeleteCV}>
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -1131,18 +1030,23 @@ const ProfilePage = () => {
                   </div>
                 ) : (
                   <div className="text-sm text-gray-600">
-                    <p className="mb-2">No CV uploaded yet.</p>
-                    <Button onClick={() => cvRef.current?.click()}>
-                      <FileUp className="h-4 w-4 mr-2" />
-                      Upload CV
-                    </Button>
+                    <p className="mb-2">No CV file uploaded yet.</p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => cvRef.current?.click()}
+                      >
+                        <FileUp className="h-4 w-4 mr-2" />
+                        Upload CV
+                      </Button>
+                    </div>
                   </div>
                 );
               })()}
               <input
                 ref={cvRef}
                 type="file"
-                accept="application/pdf,.doc,.docx"
+                accept="application/pdf,.doc,.docx,image/jpeg,image/jpg"
                 className="hidden"
                 onChange={(e) => e.target.files && onCVFile(e.target.files[0])}
               />

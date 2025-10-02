@@ -87,7 +87,7 @@ const Navbar: React.FC = () => {
   const fetchNotifications = async () => {
     try {
       type NotificationItem = { isRead?: boolean; read?: boolean };
-      const response = await notificationsAPI.getAll();
+      const response = await notificationsAPI.getNotifications();
       const notif = ((response?.data as { notifications?: NotificationItem[] })
         ?.notifications ?? []) as NotificationItem[];
       const count = Array.isArray(notif)

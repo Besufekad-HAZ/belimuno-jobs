@@ -1,5 +1,15 @@
 import axios from "axios";
+import type { AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
+import { User } from "@/lib/auth"; // Import User interface
+
+interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: User;
+  data: T;
+}
 
 // Resolve API base URL: prefer env, otherwise try localhost ports (helpful in dev when server auto-binds next free port)
 const envBase =
@@ -10,7 +20,7 @@ const envBase =
 const DEFAULT_BASES = [
   "http://localhost:5000/api",
   // "https://belimuno-jobs.onrender.com/api",
-  // "http://localhost:5001/api",
+  // "http://localhost:5000/api",
   // "http://localhost:5002/api",
   // "http://localhost:5003/api",
   // "http://localhost:5004/api",
@@ -87,12 +97,59 @@ export const authAPI = {
     api.post("/auth/register", userData),
   loginWithGoogle: (credential: string, role?: "worker" | "client") =>
     api.post("/auth/google", role ? { credential, role } : { credential }),
-  getMe: () => api.get("/auth/me"),
-  logout: () => api.post("/auth/logout"),
-  updateProfile: (profileData: Record<string, unknown>) =>
-    api.put("/auth/profile", profileData),
+  getMe: () => api.get<ApiResponse<{ user: User }>>("/auth/me"),
+  logout: () => api.post<ApiResponse<null>>("/auth/logout"),
+  updateProfile: (profileData: {
+    name?: string;
+    phone?: string;
+    notifications?: Record<string, boolean>;
+    region?: string;
+    profile?: {
+      firstName?: string;
+      lastName?: string;
+      avatar?: string;
+      bio?: string;
+      dob?: string | Date;
+      cv?: { name?: string; mimeType?: string; data?: string | object } | null;
+      address?: {
+        street?: string;
+        city?: string;
+        region?: string;
+        country?: string;
+      };
+      skills?: string[];
+      experience?: string;
+      hourlyRate?: number;
+    };
+    workerProfile?: {
+      education?: Array<{
+        school?: string;
+        degree?: string;
+        field?: string;
+        startDate?: string;
+        endDate?: string;
+        description?: string;
+      }>;
+      workHistory?: Array<{
+        company?: string;
+        title?: string;
+        startDate?: string;
+        endDate?: string;
+        description?: string;
+      }>;
+      availability?: string;
+      portfolio?: string[];
+      certifications?: string[];
+      languages?: string[];
+    };
+    clientProfile?: {
+      companyName?: string;
+      industry?: string;
+      website?: string;
+    };
+  }) => api.put<ApiResponse<{ user: User }>>("/auth/profile", profileData),
   forgotPassword: (email: string) =>
-    api.post("/auth/forgot-password", { email }),
+    api.post<ApiResponse<null>>("/auth/forgot-password", { email }),
   resetPassword: (token: string, password: string, confirmPassword: string) =>
     api.post(`/auth/reset-password/${token}`, { password, confirmPassword }),
 };
@@ -153,8 +210,17 @@ export const clientAPI = {
     },
   ) => api.put(`/client/payments/${paymentId}/proof`, payload),
   getJobMessages: (jobId: string) => api.get(`/client/jobs/${jobId}/messages`),
-  sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
-    api.post(`/client/jobs/${jobId}/messages`, { content, attachments }),
+  sendJobMessage: (
+    jobId: string,
+    content: string,
+    attachments?: string[],
+    config?: AxiosRequestConfig,
+  ) =>
+    api.post(
+      `/client/jobs/${jobId}/messages`,
+      { content, attachments },
+      config,
+    ),
 
   // Disputes
   createDispute: (payload: {
@@ -209,12 +275,63 @@ export const workerAPI = {
     }),
   getApplications: () => api.get("/worker/applications"),
   withdrawApplication: (id: string) => api.delete(`/worker/applications/${id}`),
-  updateProfile: (profileData: Record<string, unknown>) =>
-    api.put("/worker/profile", profileData),
+  updateProfile: (profileData: {
+    name?: string;
+    phone?: string;
+    notifications?: Record<string, boolean>;
+    region?: string;
+    profile?: {
+      firstName?: string;
+      lastName?: string;
+      avatar?: string;
+      bio?: string;
+      dob?: string | Date;
+      cv?: { name?: string; mimeType?: string; data?: string | object } | null;
+      address?: {
+        street?: string;
+        city?: string;
+        region?: string;
+        country?: string;
+      };
+      skills?: string[];
+      experience?: string;
+      hourlyRate?: number;
+    };
+    workerProfile?: {
+      education?: Array<{
+        school?: string;
+        degree?: string;
+        field?: string;
+        startDate?: string;
+        endDate?: string;
+        description?: string;
+      }>;
+      workHistory?: Array<{
+        company?: string;
+        title?: string;
+        startDate?: string;
+        endDate?: string;
+        description?: string;
+      }>;
+      availability?: string;
+      portfolio?: string[];
+      certifications?: string[];
+      languages?: string[];
+    };
+  }) => api.put<ApiResponse<{ user: User }>>("/worker/profile", profileData),
   getEarnings: () => api.get("/worker/earnings"),
   getJobMessages: (jobId: string) => api.get(`/worker/jobs/${jobId}/messages`),
-  sendJobMessage: (jobId: string, content: string, attachments?: string[]) =>
-    api.post(`/worker/jobs/${jobId}/messages`, { content, attachments }),
+  sendJobMessage: (
+    jobId: string,
+    content: string,
+    attachments?: string[],
+    config?: AxiosRequestConfig,
+  ) =>
+    api.post(
+      `/worker/jobs/${jobId}/messages`,
+      { content, attachments },
+      config,
+    ),
   declineAssignedJob: (jobId: string) =>
     api.put(`/worker/jobs/${jobId}/decline`),
   acceptAssignedJob: (jobId: string) => api.put(`/worker/jobs/${jobId}/accept`),
@@ -276,40 +393,144 @@ export const workerAPI = {
 export const adminAPI = {
   getDashboard: (params?: Record<string, unknown>) =>
     api.get("/admin/dashboard", { params }),
-  getUsers: (params?: Record<string, unknown>) =>
-    api.get("/admin/users", { params }),
+  getUsers: (params?: {
+    role?: "worker" | "client";
+    status?: "active" | "inactive" | "banned";
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+    select?: string;
+  }) => api.get("/admin/users", { params }),
   getUser: (id: string) => api.get(`/admin/users/${id}`),
-  updateUser: (id: string, userData: Record<string, unknown>) =>
-    api.put(`/admin/users/${id}`, userData),
+  updateUser: (
+    id: string,
+    userData: {
+      name?: string;
+      email?: string;
+      role?:
+        | "worker"
+        | "client"
+        | "admin"
+        | "super_admin"
+        | "admin_hr"
+        | "admin_outsource"
+        | string;
+      status?: "active" | "inactive" | "banned";
+      verified?: boolean;
+      isActive?: boolean;
+      isVerified?: boolean;
+      phone?: string;
+      region?: string;
+      notifications?: Record<string, boolean>;
+    },
+  ) => api.put(`/admin/users/${id}`, userData),
+  verifyWorker: (id: string) => api.put(`/admin/verify-worker/${id}`),
   deactivateUser: (id: string, reason?: string) =>
     api.put(`/admin/users/${id}/deactivate`, { reason }),
   activateUser: (id: string) => api.put(`/admin/users/${id}/activate`),
-  verifyWorker: (id: string) => api.put(`/admin/verify-worker/${id}`),
-  getAllJobs: (params?: Record<string, unknown>) =>
-    api.get("/admin/jobs", { params }),
+  deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
+  getJobs: (params?: {
+    status?: "draft" | "open" | "in_progress" | "completed" | "cancelled";
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+    select?: string;
+  }) => api.get("/admin/jobs", { params }),
+  createJob: (jobData: {
+    title?: string;
+    description?: string;
+    category?: string;
+    budget?: { min: number; max: number } | number;
+    status?:
+      | "draft"
+      | "open"
+      | "posted"
+      | "in_progress"
+      | "completed"
+      | "cancelled"
+      | string;
+    featured?: boolean;
+    deadline?: string;
+    location?: string;
+    tags?: string[];
+  }) => api.post("/admin/jobs", jobData),
+  getAllJobs: (params?: {
+    status?: "draft" | "open" | "in_progress" | "completed" | "cancelled";
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+    select?: string;
+  }) => api.get("/admin/jobs", { params }),
   getJob: (id: string) => api.get(`/admin/jobs/${id}`),
-  createJob: (payload: Record<string, unknown>) =>
-    api.post("/admin/jobs", payload),
-  updateJob: (id: string, payload: Record<string, unknown>) =>
-    api.put(`/admin/jobs/${id}`, payload),
+  updateJob: (
+    id: string,
+    jobData: {
+      title?: string;
+      description?: string;
+      category?: string;
+      budget?: { min: number; max: number } | number;
+      status?:
+        | "draft"
+        | "open"
+        | "posted"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | string;
+      featured?: boolean;
+      deadline?: string;
+      location?: string;
+      tags?: string[];
+    },
+  ) => api.put(`/admin/jobs/${id}`, jobData),
   deleteJob: (id: string) => api.delete(`/admin/jobs/${id}`),
   getPerformance: () => api.get("/admin/performance"),
-  getPayments: (params?: Record<string, unknown>) =>
-    api.get("/admin/payments", { params }),
-  handlePaymentDispute: (
+  getPayments: (params?: {
+    status?: "pending" | "processing" | "completed" | "failed" | "disputed";
+    method?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+    select?: string;
+  }) => api.get("/admin/payments", { params }),
+  getPayment: (id: string) => api.get(`/admin/payments/${id}`),
+  updatePayment: (
     id: string,
+    payload: {
+      status?: "pending" | "processing" | "completed" | "failed";
+      notes?: string;
+    },
+  ) => api.put(`/admin/payments/${id}`, payload),
+  handlePaymentDispute: (
+    paymentId: string,
     action: "refund" | "release" | "partial",
     resolution: string,
-  ) => api.put(`/admin/payments/${id}/dispute`, { action, resolution }),
-  markPaymentPaid: (id: string) => api.put(`/admin/payments/${id}/mark-paid`),
+  ) =>
+    api.put(`/admin/payments/${paymentId}/dispute`, {
+      action,
+      resolution,
+    }),
+  markPaymentPaid: (paymentId: string) =>
+    api.put(`/admin/payments/${paymentId}/mark-paid`),
   // Reviews moderation
-  getReviews: (params?: Record<string, unknown>) =>
-    api.get("/admin/reviews", { params }),
+  getReviews: (params?: {
+    status?: "draft" | "published" | "hidden" | string;
+    moderationStatus?: "pending" | "approved" | "rejected" | string;
+    reviewer?: string;
+    reviewee?: string;
+    page?: number;
+    limit?: number;
+  }) => api.get("/admin/reviews", { params }),
   moderateReview: (
     id: string,
     payload: {
       moderationStatus?: "pending" | "approved" | "rejected";
-      status?: "draft" | "published" | "hidden";
+      status?: "draft" | "published" | "hidden" | string;
       isPublic?: boolean;
     },
   ) => api.put(`/admin/reviews/${id}`, payload),
@@ -353,8 +574,11 @@ export const adminAPI = {
   updateDispute: (
     id: string,
     payload: {
-      status?: "investigating" | "resolved" | "closed";
+      status?: "open" | "investigating" | "resolved" | "closed";
+      priority?: "low" | "medium" | "high" | "urgent";
+      assignedTo?: string;
       resolution?: string;
+      notes?: string;
       hrNotes?: string;
     },
   ) => api.put(`/admin/disputes/${id}`, payload),
@@ -364,53 +588,105 @@ export const adminAPI = {
     api.put(`/admin/applications/${id}/shortlist`, { notes }),
   unshortlistApplication: (id: string) =>
     api.put(`/admin/applications/${id}/unshortlist`),
+
+  // Additional endpoints from second adminAPI
+  getStats: () => api.get("/admin/stats"),
+  getAnalytics: (params?: {
+    period?: "day" | "week" | "month" | "year";
+    startDate?: string;
+    endDate?: string;
+  }) => api.get("/admin/analytics", { params }),
 };
 
 // Notifications API
 export const notificationsAPI = {
-  getAll: () => api.get("/notifications"),
+  getNotifications: (params?: {
+    page?: number;
+    limit?: number;
+    isRead?: boolean;
+  }) => api.get("/notifications", { params }),
+  getAll: (params?: { page?: number; limit?: number; isRead?: boolean }) =>
+    api.get("/notifications", { params }),
   getStats: () => api.get("/notifications/stats"),
-  markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
-  markAllAsRead: () => api.put("/notifications/read-all"),
+  markAsRead: (id: string) =>
+    api.put<ApiResponse<null>>(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put<ApiResponse<null>>("/notifications/read-all"),
   delete: (id: string) => api.delete(`/notifications/${id}`),
   create: (payload: {
     recipients: string[];
     title: string;
     message: string;
     type?: string;
-    priority?: string;
+    priority?: "low" | "medium" | "high" | "urgent" | string;
     relatedJob?: string;
     relatedUser?: string;
-    actionButton?: { text: string; url: string; action: string };
+    relatedPayment?: string;
+    actionButton?: {
+      text: string;
+      url: string;
+      action?: string;
+    };
+    channels?: {
+      inApp?: boolean;
+      email?: boolean;
+      sms?: boolean;
+    };
     expiresAt?: string;
   }) => api.post("/notifications/create", payload),
   sendAnnouncement: (payload: {
     title: string;
     message: string;
-    targetRoles?: string[];
-    priority?: string;
+    targetRoles?: string[] | string;
+    priority?: "low" | "medium" | "high" | "urgent" | string;
     expiresAt?: string;
-  }) =>
-    api.post("/notifications/announcement", {
-      ...payload,
-      // Normalize the UI value 'both' to explicit roles for backward compatibility
-      targetRoles: Array.isArray(payload.targetRoles)
-        ? payload.targetRoles.includes("both")
-          ? ["worker", "client"]
-          : payload.targetRoles
-        : payload.targetRoles,
-    }),
+  }) => api.post("/notifications/announcement", payload),
 };
 
-// Public contact API
+// Chat API for admin collaboration
+export const chatAPI = {
+  getContacts: () => api.get("/chat/contacts"),
+  getConversations: () => api.get("/chat/conversations"),
+  createConversation: (participantIds: string[], title?: string) =>
+    api.post("/chat/conversations", {
+      participantIds,
+      title,
+    }),
+  getMessages: (
+    conversationId: string,
+    params?: { limit?: number; before?: string },
+  ) => api.get(`/chat/conversations/${conversationId}/messages`, { params }),
+  sendMessage: (
+    conversationId: string,
+    payload: {
+      content?: string;
+      attachments?: Array<{
+        name: string;
+        type?: string;
+        url: string;
+        size?: number;
+      }>;
+    },
+    config?: AxiosRequestConfig,
+  ) =>
+    api.post(`/chat/conversations/${conversationId}/messages`, payload, config),
+};
+
+// Contact API
 export const contactAPI = {
-  submit: (payload: {
+  sendMessage: (messageData: {
     name: string;
     email: string;
     phone?: string;
     subject: string;
     message: string;
-  }) => api.post("/contact", payload),
+  }) => api.post("/contact", messageData),
+  submit: (messageData: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject: string;
+    message: string;
+  }) => api.post("/contact", messageData),
 };
 
 export default api;
