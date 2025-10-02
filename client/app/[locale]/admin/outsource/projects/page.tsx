@@ -21,7 +21,7 @@ import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import { formatDistanceToNow } from "date-fns";
 
-interface Project {
+export interface Project {
   _id: string;
   title: string;
   description?: string;
@@ -54,6 +54,7 @@ interface Project {
     dueDate: string;
   }>;
   totalApplicants?: number;
+  applicants?: Applicant[];
 }
 
 interface ProjectStats {
@@ -92,7 +93,7 @@ type JobApi = {
   startDate?: string;
   tags?: string[];
   applicantsCount?: number;
-  applicants?: object[];
+  applicants?: Applicant[];
 };
 
 type StatusFilter =
@@ -103,6 +104,14 @@ type StatusFilter =
   | "completed"
   | "overdue";
 type PriorityFilter = "all" | "urgent" | "high" | "medium" | "low";
+
+interface Applicant {
+  _id: string;
+  name: string;
+  email: string;
+  rating: number;
+  appliedAt: string;
+}
 
 const ProjectOversight: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -160,8 +169,8 @@ const ProjectOversight: React.FC = () => {
         let totalApplicants = 0;
         if (typeof job.applicantsCount === "number") {
           totalApplicants = job.applicantsCount;
-        } else if (Array.isArray((job as any).applicants)) {
-          totalApplicants = (job as any).applicants.length;
+        } else if (Array.isArray((job as Project).applicants)) {
+          totalApplicants = (job as Project).applicants?.length || 0;
         }
 
         return {

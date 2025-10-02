@@ -8,6 +8,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { ArrowLeft, Clock, DollarSign, User } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { Project } from "../../page";
 
 interface Applicant {
   worker: {
@@ -36,7 +37,7 @@ const ApplicantsPage = () => {
   const params = useParams();
   const router = useRouter();
   const [applicants, setApplicants] = useState<Applicant[]>([]);
-  const [jobData, setJobData] = useState<any>(null);
+  const [jobData, setJobData] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
