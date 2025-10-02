@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const ApplicationSchema = new mongoose.Schema({
   // Basic Information
-  job: { type: mongoose.Schema.Types.ObjectId, ref: 'Job', required: true },
-  worker: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  job: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+  worker: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
   // Application Details
   proposal: { type: String, required: true },
@@ -13,9 +13,19 @@ const ApplicationSchema = new mongoose.Schema({
   // Status Tracking
   status: {
     type: String,
-    enum: ['pending', 'reviewed', 'accepted', 'rejected', 'withdrawn'],
-    default: 'pending'
+    enum: [
+      "pending",
+      "reviewed",
+      "shortlisted",
+      "accepted",
+      "rejected",
+      "withdrawn",
+    ],
+    default: "pending",
   },
+  shortlistedAt: Date,
+  shortlistedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  shortlistNotes: String,
 
   // Timeline
   appliedAt: { type: Date, default: Date.now },
@@ -24,19 +34,21 @@ const ApplicationSchema = new mongoose.Schema({
 
   // Additional Information
   coverLetter: String,
-  attachments: [{
-    filename: String,
-    url: String,
-    uploadedAt: { type: Date, default: Date.now }
-  }],
+  attachments: [
+    {
+      filename: String,
+      url: String,
+      uploadedAt: { type: Date, default: Date.now },
+    },
+  ],
 
   // Review by Client/Area Manager
   reviewNotes: String,
-  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
   // Metadata
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // Indexes
@@ -46,9 +58,9 @@ ApplicationSchema.index({ job: 1, status: 1 });
 ApplicationSchema.index({ appliedAt: -1 });
 
 // Pre-save middleware
-ApplicationSchema.pre('save', function(next) {
+ApplicationSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-module.exports = mongoose.model('Application', ApplicationSchema);
+module.exports = mongoose.model("Application", ApplicationSchema);

@@ -46,7 +46,11 @@ interface JobDetail {
 interface ChatMessage {
   _id?: string;
   content: string;
+<<<<<<< HEAD
   sender?: { _id?: string; name?: string; role?: string };
+=======
+  sender?: { name?: string; role?: string; _id?: string };
+>>>>>>> 6e455b34cc23b044ddfa4941b29e08ae249df9bc
   sentAt: string;
   attachments?: string[];
 }
@@ -91,6 +95,7 @@ const ApplicationsPage: React.FC = () => {
         return;
       }
       const jobRes = await clientAPI.getJob(jobId);
+      console.log("jobs", jobRes);
       setJob(
         jobRes.data.job ||
           jobRes.data.data?.job ||
@@ -99,6 +104,7 @@ const ApplicationsPage: React.FC = () => {
       ); // fallback chain
       const apps =
         jobRes.data.applications || jobRes.data.data?.applications || [];
+      console.log("applications", apps);
       setApplications(apps);
     } catch (e) {
       console.error(e);

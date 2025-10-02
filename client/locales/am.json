@@ -669,6 +669,7 @@
         "actions": {
           "viewDetails": "ዝርዝሮችን ይመልከቱ",
           "applications": "ማመልከቻዎች",
+          "editJob": "ስራ አስተዳደር",
           "requestRevision": "ማስተካከያ ይጠይቁ",
           "payAndRate": "ይክፈሉ እና ደረጃ ይስጡ",
           "deleteJob": "ስራ ሰርዝ",
@@ -842,9 +843,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "የሶስተኛ ወገን አስተዳዳሪ ዳሽቦርድ",
-      "subtitle": "ፕሮጀክቶችን፣ ቀጣሪዎችን እና የንግድ ስራዎችን ያስተዳድሩ",
+      "subtitle": "ስራዎችን፣ ቀጣሪዎችን እና የንግድ ስራዎችን ያስተዳድሩ",
       "buttons": {
-        "manageProjects": "ፕሮጀክቶችን ያስተዳድሩ",
+        "manageJobs": "ስራዎችን ያስተዳድሩ",
         "clientManagement": "የቀጣሪዎች አስተዳደር"
       }
     },
@@ -853,9 +854,9 @@
         "title": "ጠቅላላ ቀጣሪዎች",
         "label": "ጠቅላላ ቀጣሪዎች"
       },
-      "activeProjects": {
-        "title": "ክፍት ፕሮጀክቶች",
-        "label": "ክፍት ፕሮጀክቶች"
+      "activeJobs": {
+        "title": "ክፍት ስራዎች",
+        "label": "ክፍት ስራዎች"
       },
       "totalRevenue": {
         "title": "ጠቅላላ ገቢ",
@@ -871,27 +872,28 @@
         "title": "የቀጣሪዎች እርካታ",
         "rating": "ከ5"
       },
-      "projectSuccess": {
-        "title": "የፕሮጀክት ስኬት መጠን"
+      "jobSuccess": {
+        "title": "የስራ ስኬት መጠን"
       },
       "revenueGrowth": {
         "title": "የገቢ እድገት"
       }
     },
-    "projects": {
-      "title": "የቅርብ ጊዜ ፕሮጀክቶች",
+    "jobs": {
+      "title": "የቅርብ ጊዜ ስራዎች",
       "viewAll": "ሁሉንም ይመልከቱ",
       "details": {
         "client": "ቀጣሪ",
         "progress": "እድገት",
-        "title": "የፕሮጀክት ዝርዝሮች",
+        "title": "የስራ ዝርዝሮች",
         "assignedWorker": "የተመደበ ሰራተኛ",
         "deadline": "የመዝጋት ቀን",
         "budget": "በጀት",
         "buttons": {
           "viewDetails": "ዝርዝሮችን ይመልከቱ",
           "contactClient": "ከደንበኛ ይገናኙ",
-          "generateReport": "ሪፖርት ይፍጠሩ"
+          "generateReport": "ሪፖርት ይፍጠሩ",
+          "applicants": "የስራ መለያዎች"
         }
       },
       "status": {
@@ -905,14 +907,14 @@
       "title": "ከፍተኛ ቀጣሪዎች",
       "viewAll": "ሁሉንም ይመልከቱ",
       "metrics": {
-        "projects": "ፕሮጀክቶች"
+        "jobs": "ስራዎች"
       }
     },
     "operations": {
       "title": "የንግድ ስራዎች",
       "buttons": {
         "clientManagement": "የቀጣሪዎች አስተዳደር",
-        "projectOversight": "የፕሮጀክት ቁጥጥር",
+        "jobOversight": "የስራ ቁጥጥር",
         "businessAnalytics": "የንግድ ትንታኔ",
         "financialReports": "የፋይናንስ ሪፖርቶች"
       }
@@ -920,10 +922,10 @@
     "keyMetrics": {
       "title": "መሠረታዊ አባላት",
       "metrics": {
-        "avgProjectValue": "አማካኝ የፕሮጀክት ዋጋ",
+        "avgJobValue": "አማካኝ የስራ ዋጋ",
         "clientRetention": "የቀጣሪዎች መቆየት",
-        "projectCompletionRate": "የፕሮጀክት ማጠናቀቂያ መጠን",
-        "avgProjectDuration": "አማካኝ የፕሮጀክት ቆይታ"
+        "jobCompletionRate": "የስራ ማጠናቀቂያ መጠን",
+        "avgJobDuration": "አማካኝ የስራ ቆይታ"
       }
     },
     "recentActivity": {
