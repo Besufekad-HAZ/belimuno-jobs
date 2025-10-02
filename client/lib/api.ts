@@ -332,10 +332,6 @@ export const workerAPI = {
       { content, attachments },
       config,
     ),
-  reviewClient: (
-    jobId: string,
-    payload: { rating: number; comment?: string },
-  ) => api.post(`/worker/jobs/${jobId}/review`, payload),
   declineAssignedJob: (jobId: string) =>
     api.put(`/worker/jobs/${jobId}/decline`),
   acceptAssignedJob: (jobId: string) => api.put(`/worker/jobs/${jobId}/accept`),
@@ -391,97 +387,6 @@ export const workerAPI = {
       }>;
     },
   ) => api.put(`/worker/disputes/${id}`, payload),
-};
-
-// Notifications API
-export const notificationsAPI = {
-  getNotifications: (params?: {
-    page?: number;
-    limit?: number;
-    isRead?: boolean;
-  }) => api.get("/notifications", { params }),
-  getAll: (params?: { page?: number; limit?: number; isRead?: boolean }) =>
-    api.get("/notifications", { params }),
-  getStats: () => api.get("/notifications/stats"),
-  markAsRead: (id: string) =>
-    api.put<ApiResponse<null>>(`/notifications/${id}/read`),
-  markAllAsRead: () => api.put<ApiResponse<null>>("/notifications/read-all"),
-  delete: (id: string) => api.delete(`/notifications/${id}`),
-  create: (payload: {
-    recipients: string[];
-    title: string;
-    message: string;
-    type?: string;
-    priority?: "low" | "medium" | "high" | "urgent" | string;
-    relatedJob?: string;
-    relatedUser?: string;
-    relatedPayment?: string;
-    actionButton?: {
-      text: string;
-      url: string;
-      action?: string;
-    };
-    channels?: {
-      inApp?: boolean;
-      email?: boolean;
-      sms?: boolean;
-    };
-    expiresAt?: string;
-  }) => api.post("/notifications/create", payload),
-  sendAnnouncement: (payload: {
-    title: string;
-    message: string;
-    targetRoles?: string[] | string;
-    priority?: "low" | "medium" | "high" | "urgent" | string;
-    expiresAt?: string;
-  }) => api.post("/notifications/announcement", payload),
-};
-
-// Chat API for admin collaboration
-export const chatAPI = {
-  getContacts: () => api.get("/chat/contacts"),
-  getConversations: () => api.get("/chat/conversations"),
-  createConversation: (participantIds: string[], title?: string) =>
-    api.post("/chat/conversations", {
-      participantIds,
-      title,
-    }),
-  getMessages: (
-    conversationId: string,
-    params?: { limit?: number; before?: string },
-  ) => api.get(`/chat/conversations/${conversationId}/messages`, { params }),
-  sendMessage: (
-    conversationId: string,
-    payload: {
-      content?: string;
-      attachments?: Array<{
-        name: string;
-        type?: string;
-        url: string;
-        size?: number;
-      }>;
-    },
-    config?: AxiosRequestConfig,
-  ) =>
-    api.post(`/chat/conversations/${conversationId}/messages`, payload, config),
-};
-
-// Contact API
-export const contactAPI = {
-  sendMessage: (messageData: {
-    name: string;
-    email: string;
-    phone?: string;
-    subject: string;
-    message: string;
-  }) => api.post("/contact", messageData),
-  submit: (messageData: {
-    name: string;
-    email: string;
-    phone?: string;
-    subject: string;
-    message: string;
-  }) => api.post("/contact", messageData),
 };
 
 // Admin API
@@ -584,26 +489,7 @@ export const adminAPI = {
     },
   ) => api.put(`/admin/jobs/${id}`, jobData),
   deleteJob: (id: string) => api.delete(`/admin/jobs/${id}`),
-  getDisputes: (params?: {
-    status?: "open" | "investigating" | "resolved" | "closed";
-    priority?: "low" | "medium" | "high" | "urgent";
-    type?: string;
-    page?: number;
-    limit?: number;
-    search?: string;
-  }) => api.get("/admin/disputes", { params }),
-  getDispute: (id: string) => api.get(`/admin/disputes/${id}`),
-  updateDispute: (
-    id: string,
-    payload: {
-      status?: "open" | "investigating" | "resolved" | "closed";
-      priority?: "low" | "medium" | "high" | "urgent";
-      assignedTo?: string;
-      resolution?: string;
-      notes?: string;
-      hrNotes?: string;
-    },
-  ) => api.put(`/admin/disputes/${id}`, payload),
+  getPerformance: () => api.get("/admin/performance"),
   getPayments: (params?: {
     status?: "pending" | "processing" | "completed" | "failed" | "disputed";
     method?: string;
@@ -631,6 +517,7 @@ export const adminAPI = {
     }),
   markPaymentPaid: (paymentId: string) =>
     api.put(`/admin/payments/${paymentId}/mark-paid`),
+  // Reviews moderation
   getReviews: (params?: {
     status?: "draft" | "published" | "hidden" | string;
     moderationStatus?: "pending" | "approved" | "rejected" | string;
@@ -647,12 +534,159 @@ export const adminAPI = {
       isPublic?: boolean;
     },
   ) => api.put(`/admin/reviews/${id}`, payload),
+
+  // Disputes management
+  getDisputes: (params?: {
+    status?: "open" | "investigating" | "resolved" | "closed";
+    priority?: "low" | "medium" | "high" | "urgent";
+    type?:
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other";
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) => api.get("/admin/disputes", { params }),
+  getDispute: (id: string) => api.get(`/admin/disputes/${id}`),
+  createDispute: (payload: {
+    title: string;
+    description: string;
+    type:
+      | "payment"
+      | "quality"
+      | "communication"
+      | "deadline"
+      | "scope"
+      | "other";
+    priority: "low" | "medium" | "high" | "urgent";
+    worker: string;
+    client: string;
+    job?: string;
+    evidence?: Array<{
+      type: "image" | "document" | "message";
+      url: string;
+      description?: string;
+    }>;
+  }) => api.post("/admin/disputes", payload),
+  updateDispute: (
+    id: string,
+    payload: {
+      status?: "open" | "investigating" | "resolved" | "closed";
+      priority?: "low" | "medium" | "high" | "urgent";
+      assignedTo?: string;
+      resolution?: string;
+      notes?: string;
+      hrNotes?: string;
+    },
+  ) => api.put(`/admin/disputes/${id}`, payload),
+
+  // Application management
+  shortlistApplication: (id: string, notes?: string) =>
+    api.put(`/admin/applications/${id}/shortlist`, { notes }),
+  unshortlistApplication: (id: string) =>
+    api.put(`/admin/applications/${id}/unshortlist`),
+
+  // Additional endpoints from second adminAPI
   getStats: () => api.get("/admin/stats"),
   getAnalytics: (params?: {
     period?: "day" | "week" | "month" | "year";
     startDate?: string;
     endDate?: string;
   }) => api.get("/admin/analytics", { params }),
+};
+
+// Notifications API
+export const notificationsAPI = {
+  getNotifications: (params?: {
+    page?: number;
+    limit?: number;
+    isRead?: boolean;
+  }) => api.get("/notifications", { params }),
+  getAll: (params?: { page?: number; limit?: number; isRead?: boolean }) =>
+    api.get("/notifications", { params }),
+  getStats: () => api.get("/notifications/stats"),
+  markAsRead: (id: string) =>
+    api.put<ApiResponse<null>>(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put<ApiResponse<null>>("/notifications/read-all"),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
+  create: (payload: {
+    recipients: string[];
+    title: string;
+    message: string;
+    type?: string;
+    priority?: "low" | "medium" | "high" | "urgent" | string;
+    relatedJob?: string;
+    relatedUser?: string;
+    relatedPayment?: string;
+    actionButton?: {
+      text: string;
+      url: string;
+      action?: string;
+    };
+    channels?: {
+      inApp?: boolean;
+      email?: boolean;
+      sms?: boolean;
+    };
+    expiresAt?: string;
+  }) => api.post("/notifications/create", payload),
+  sendAnnouncement: (payload: {
+    title: string;
+    message: string;
+    targetRoles?: string[] | string;
+    priority?: "low" | "medium" | "high" | "urgent" | string;
+    expiresAt?: string;
+  }) => api.post("/notifications/announcement", payload),
+};
+
+// Chat API for admin collaboration
+export const chatAPI = {
+  getContacts: () => api.get("/chat/contacts"),
+  getConversations: () => api.get("/chat/conversations"),
+  createConversation: (participantIds: string[], title?: string) =>
+    api.post("/chat/conversations", {
+      participantIds,
+      title,
+    }),
+  getMessages: (
+    conversationId: string,
+    params?: { limit?: number; before?: string },
+  ) => api.get(`/chat/conversations/${conversationId}/messages`, { params }),
+  sendMessage: (
+    conversationId: string,
+    payload: {
+      content?: string;
+      attachments?: Array<{
+        name: string;
+        type?: string;
+        url: string;
+        size?: number;
+      }>;
+    },
+    config?: AxiosRequestConfig,
+  ) =>
+    api.post(`/chat/conversations/${conversationId}/messages`, payload, config),
+};
+
+// Contact API
+export const contactAPI = {
+  sendMessage: (messageData: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject: string;
+    message: string;
+  }) => api.post("/contact", messageData),
+  submit: (messageData: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject: string;
+    message: string;
+  }) => api.post("/contact", messageData),
 };
 
 export default api;

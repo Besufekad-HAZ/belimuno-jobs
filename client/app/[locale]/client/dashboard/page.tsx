@@ -48,6 +48,7 @@ const ClientDashboard: React.FC = () => {
     status: string;
     appliedAt: string;
     worker: { name: string };
+    shortlistedBy?: { name: string };
   }
   interface EnrichedJob {
     _id: string;
@@ -583,47 +584,64 @@ const ClientDashboard: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelectedJobForDetails(job)}
-                      className="w-full sm:w-auto"
-                    >
-                      <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                      <span className="text-xs sm:text-sm">
-                        {t("sections.jobs.actions.viewDetails")}
-                      </span>
-                    </Button>
-                    <Link
-                      href={`/client/jobs/${job._id}/applications`}
-                      className="inline-block w-full sm:w-auto"
-                    >
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                      >
-                        <span className="text-xs sm:text-sm">
-                          {t("sections.jobs.actions.applications")}
-                        </span>
-                      </Button>
-                    </Link>
 
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                     {/* Status-based action buttons */}
-                    {/* Client can delete while job is posted (before assignment) */}
+                    {/* Client can view details, see applications and delete while job is posted (before assignment) */}
                     {job.status === "posted" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDeleteJob(job)}
-                        className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
-                      >
-                        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                        <span className="text-xs sm:text-sm">
-                          {t("sections.jobs.actions.deleteJob")}
-                        </span>
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedJobForDetails(job)}
+                          className="w-full sm:w-auto"
+                        >
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          <span className="text-xs sm:text-sm">
+                            {t("sections.jobs.actions.viewDetails")}
+                          </span>
+                        </Button>
+
+                        <Link
+                          href={`/client/jobs/${job._id}/applications`}
+                          className="inline-block w-full sm:w-auto"
+                        >
+                          <Button
+                            size="sm"
+                            variant="primary"
+                            className="w-full sm:w-auto"
+                          >
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.jobs.actions.applications")}
+                            </span>
+                          </Button>
+                        </Link>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            router.push(`/client/jobs/${job._id}/update`)
+                          }
+                          className="w-full sm:w-auto"
+                        >
+                          <span className="text-xs sm:text-sm">
+                            {t("sections.jobs.actions.editJob")}
+                          </span>
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteJob(job)}
+                          className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
+                        >
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                          <span className="text-xs sm:text-sm">
+                            {t("sections.jobs.actions.deleteJob")}
+                          </span>
+                        </Button>
+                      </>
                     )}
 
                     {/* Client can cancel after assignment but before work starts */}
@@ -719,10 +737,16 @@ const ClientDashboard: React.FC = () => {
                                 <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
                                   {application.proposal}
                                 </p>
-                                <p className="text-xs sm:text-sm font-semibold text-green-600">
-                                  ETB{" "}
-                                  {application.proposedBudget?.toLocaleString()}
-                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <p className="text-xs sm:text-sm font-semibold text-green-600">
+                                    ETB{" "}
+                                    {application.proposedBudget?.toLocaleString()}
+                                  </p>
+                                  <span className="text-xs text-gray-500">
+                                    Shortlisted by{" "}
+                                    {application.shortlistedBy?.name}
+                                  </span>
+                                </div>
                               </div>
                               <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                                 <Button

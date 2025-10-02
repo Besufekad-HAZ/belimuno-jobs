@@ -47,7 +47,9 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     // Jobs counters
     Promise.all([
       Job.countDocuments(),
-      Job.countDocuments({ status: { $in: ["posted", "assigned", "in_progress"] } }),
+      Job.countDocuments({
+        status: { $in: ["posted", "assigned", "in_progress"] },
+      }),
       Job.countDocuments({ status: "completed" }),
     ]),
     // Revenue total
@@ -61,8 +63,22 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     minimal
       ? Promise.resolve([])
       : Payment.aggregate([
-          { $match: { status: "completed", createdAt: { $gte: twelveMonthsAgo } } },
-          { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, revenue: { $sum: "$amount" }, count: { $sum: 1 } } },
+          {
+            $match: {
+              status: "completed",
+              createdAt: { $gte: twelveMonthsAgo },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAt" },
+                month: { $month: "$createdAt" },
+              },
+              revenue: { $sum: "$amount" },
+              count: { $sum: 1 },
+            },
+          },
           { $sort: { "_id.year": 1, "_id.month": 1 } },
         ]),
     // Only a few recent users, lean objects
@@ -99,7 +115,7 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     },
     charts: {
       jobsByStatus,
-  monthlyRevenue,
+      monthlyRevenue,
     },
     recent: {
       jobs: recentJobs,
@@ -117,7 +133,16 @@ exports.getDashboard = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/users
 // @access  Private/Super Admin
 exports.getUsers = asyncHandler(async (req, res) => {
-  const { role, isVerified, isActive, page = 1, limit = 20, search, select, sort } = req.query;
+  const {
+    role,
+    isVerified,
+    isActive,
+    page = 1,
+    limit = 20,
+    search,
+    select,
+    sort,
+  } = req.query;
 
   const query = {};
   if (role) query.role = role;
@@ -285,7 +310,15 @@ exports.verifyWorker = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/jobs
 // @access  Private/Super Admin
 exports.getJobs = asyncHandler(async (req, res) => {
-  const { status, category, region, page = 1, limit = 20, select, sort } = req.query;
+  const {
+    status,
+    category,
+    region,
+    page = 1,
+    limit = 20,
+    select,
+    sort,
+  } = req.query;
 
   const query = {};
   if (status) query.status = status;
@@ -304,24 +337,101 @@ exports.getJobs = asyncHandler(async (req, res) => {
   const wantsClient = !projection || /\bclient\b/.test(projection);
   const wantsWorker = !projection || /\bworker\b/.test(projection);
   const wantsRegion = !projection || /\bregion\b/.test(projection);
-  if (wantsClient) jobsQuery.populate({ path: "client", select: "name profile.avatar" });
-  if (wantsWorker) jobsQuery.populate({ path: "worker", select: "name profile.avatar" });
+  if (wantsClient)
+    jobsQuery.populate({ path: "client", select: "name profile.avatar" });
+  if (wantsWorker)
+    jobsQuery.populate({ path: "worker", select: "name profile.avatar" });
   if (wantsRegion) jobsQuery.populate({ path: "region", select: "name" });
 
   const jobs = await jobsQuery;
+
+  // For each job, fetch its applications and attach as applicants[]
+  const jobIds = jobs.map((job) => job._id);
+  // Get all applications for these jobs in one query
+  const applications = await Application.find({ job: { $in: jobIds } })
+    .populate(
+      "worker",
+      "name email profile.avatar workerProfile.rating workerProfile.skills"
+    )
+    .sort({ appliedAt: -1 })
+    .lean();
+
+  // Group applications by job id
+  const appsByJob = {};
+  for (const app of applications) {
+    const jobId = String(app.job);
+    if (!appsByJob[jobId]) appsByJob[jobId] = [];
+    appsByJob[jobId].push({
+      worker: app.worker,
+      appliedAt: app.appliedAt,
+      proposal: app.proposal,
+      proposedBudget: app.proposedBudget,
+      status: app.status,
+    });
+  }
+
+  // Attach applicants to each job
+  const jobsWithApplicants = jobs.map((job) => ({
+    ...job,
+    applicants: appsByJob[String(job._id)] || [],
+  }));
 
   const total = await Job.countDocuments(query);
 
   res.status(200).json({
     success: true,
-    count: jobs.length,
+    count: jobsWithApplicants.length,
     total,
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
       pages: Math.ceil(total / limit),
     },
-    data: jobs,
+    data: jobsWithApplicants,
+  });
+});
+
+// @desc    Get single job by ID
+// @route   GET /api/admin/jobs/:id
+// @access  Private/Super Admin
+exports.getJob = asyncHandler(async (req, res) => {
+  const job = await Job.findById(req.params.id)
+    .populate("client", "name email profile.avatar clientProfile")
+    .populate("worker", "name email profile.avatar workerProfile")
+    .populate("region", "name")
+    .populate("messages.sender", "name role");
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: "Job not found",
+    });
+  }
+
+  // Get applications for this job
+  const applications = await Application.find({ job: job._id })
+    .populate(
+      "worker",
+      "name email profile.avatar workerProfile.rating workerProfile.skills"
+    )
+    .sort({ appliedAt: -1 });
+
+  // Transform applications into the expected format
+  const transformedApplications = applications.map((app) => ({
+    worker: app.worker,
+    appliedAt: app.appliedAt,
+    proposal: app.proposal,
+    proposedBudget: app.proposedBudget,
+    status: app.status,
+  }));
+
+  // Add applications to job data
+  const jobData = job.toObject();
+  jobData.applicants = transformedApplications;
+
+  res.status(200).json({
+    success: true,
+    data: jobData,
   });
 });
 
@@ -1007,6 +1117,77 @@ exports.createDispute = asyncHandler(async (req, res) => {
 // @desc    Update dispute status and resolution
 // @route   PUT /api/admin/disputes/:id
 // @access  Private/Any Admin
+// @desc    Shortlist an application
+// @route   PUT /api/admin/applications/:id/shortlist
+// @access  Private/Super Admin
+exports.shortlistApplication = asyncHandler(async (req, res) => {
+  const { notes } = req.body;
+
+  const application = await Application.findById(req.params.id)
+    .populate("job")
+    .populate("worker");
+
+  if (!application) {
+    return res.status(404).json({
+      success: false,
+      message: "Application not found",
+    });
+  }
+
+  // Update application status
+  application.status = "shortlisted";
+  application.shortlistedAt = new Date();
+  application.shortlistedBy = req.user._id;
+  if (notes) application.shortlistNotes = notes;
+
+  await application.save();
+
+  // Notify the client about the shortlisted candidate
+  await Notification.create({
+    recipient: application.job.client,
+    title: "New Shortlisted Candidate",
+    message: `A new candidate has been shortlisted for your job: ${application.job.title}`,
+    type: "application_shortlisted",
+    relatedJob: application.job._id,
+    relatedUser: application.worker._id,
+    priority: "high",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Application shortlisted successfully",
+    data: application,
+  });
+});
+
+// @desc    Remove application from shortlist
+// @route   PUT /api/admin/applications/:id/unshortlist
+// @access  Private/Super Admin
+exports.unshortlistApplication = asyncHandler(async (req, res) => {
+  const application = await Application.findById(req.params.id);
+
+  if (!application) {
+    return res.status(404).json({
+      success: false,
+      message: "Application not found",
+    });
+  }
+
+  // Reset shortlist status
+  application.status = "reviewed";
+  application.shortlistedAt = undefined;
+  application.shortlistedBy = undefined;
+  application.shortlistNotes = undefined;
+
+  await application.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Application removed from shortlist",
+    data: application,
+  });
+});
+
 exports.updateDispute = asyncHandler(async (req, res) => {
   const { status, resolution, hrNotes } = req.body;
   const updateData = {};

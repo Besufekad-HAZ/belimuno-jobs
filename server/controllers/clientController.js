@@ -25,12 +25,14 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     0
   );
 
-  // Get recent applications for client's jobs
+  // Get recent shortlisted applications for client's jobs
   const recentApplications = await Application.find({
     job: { $in: jobs.map((job) => job._id) },
+    status: { $in: ["shortlisted", "accepted"] }, // Show shortlisted and accepted applications
   })
     .populate("worker", "name profile.avatar workerProfile.rating")
     .populate("job", "title")
+    .populate("shortlistedBy", "name")
     .sort({ appliedAt: -1 })
     .limit(5);
 
@@ -100,8 +102,12 @@ exports.getJobs = asyncHandler(async (req, res) => {
 
   // Fetch application counts & optionally sample applications
   const jobIds = jobs.map((j) => j._id);
-  const applications = await Application.find({ job: { $in: jobIds } })
+  const applications = await Application.find({
+    job: { $in: jobIds },
+    status: { $in: ["shortlisted", "accepted"] }, // Show shortlisted and accepted applications
+  })
     .populate("worker", "name profile.avatar workerProfile.rating")
+    .populate("shortlistedBy", "name")
     .sort({ appliedAt: -1 });
   const appsByJob = applications.reduce((acc, app) => {
     acc[app.job.toString()] = acc[app.job.toString()] || [];
@@ -241,12 +247,16 @@ exports.getJob = asyncHandler(async (req, res) => {
     });
   }
 
-  // Get applications for this job
-  const applications = await Application.find({ job: job._id })
+  // Get only shortlisted applications for this job
+  const applications = await Application.find({
+    job: job._id,
+    status: { $in: ["shortlisted", "accepted"] }, // Show shortlisted and accepted applications
+  })
     .populate(
       "worker",
       "name profile.avatar workerProfile.rating workerProfile.skills"
     )
+    .populate("shortlistedBy", "name") // Include admin who shortlisted
     .sort({ appliedAt: -1 });
 
   res.status(200).json({

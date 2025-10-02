@@ -11,6 +11,7 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
+  Users,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI } from "@/lib/api";
@@ -20,7 +21,7 @@ import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import { formatDistanceToNow } from "date-fns";
 
-interface Project {
+export interface Project {
   _id: string;
   title: string;
   description?: string;
@@ -52,6 +53,8 @@ interface Project {
     completed: boolean;
     dueDate: string;
   }>;
+  totalApplicants?: number;
+  applicants?: Applicant[];
 }
 
 interface ProjectStats {
@@ -62,6 +65,7 @@ interface ProjectStats {
   totalValue: number;
   averageCompletion: number;
   onTimeDelivery: number;
+  totalApplicants: number;
 }
 
 // Minimal job shape from API we rely on
@@ -88,6 +92,8 @@ type JobApi = {
   updatedAt?: string;
   startDate?: string;
   tags?: string[];
+  applicantsCount?: number;
+  applicants?: Applicant[];
 };
 
 type StatusFilter =
@@ -98,6 +104,14 @@ type StatusFilter =
   | "completed"
   | "overdue";
 type PriorityFilter = "all" | "urgent" | "high" | "medium" | "low";
+
+interface Applicant {
+  _id: string;
+  name: string;
+  email: string;
+  rating: number;
+  appliedAt: string;
+}
 
 const ProjectOversight: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -127,6 +141,7 @@ const ProjectOversight: React.FC = () => {
       const response = await adminAPI.getAllJobs();
       const jobsData: JobApi[] =
         response.data?.data || response.data?.jobs || response.data || [];
+      console.log(jobsData);
 
       // Transform jobs to projects with enhanced data
       const projectsData: Project[] = jobsData.map((job: JobApi) => {
@@ -149,6 +164,14 @@ const ProjectOversight: React.FC = () => {
         const computedPriority: Project["priority"] = isOverdue
           ? "urgent"
           : nonUrgent[Math.floor(Math.random() * nonUrgent.length)];
+
+        // Try to get applicants count from job
+        let totalApplicants = 0;
+        if (typeof job.applicantsCount === "number") {
+          totalApplicants = job.applicantsCount;
+        } else if (Array.isArray((job as Project).applicants)) {
+          totalApplicants = (job as Project).applicants?.length || 0;
+        }
 
         return {
           _id: job._id,
@@ -225,6 +248,7 @@ const ProjectOversight: React.FC = () => {
                 new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
             },
           ],
+          totalApplicants, // <-- Added
         };
       });
 
@@ -232,6 +256,10 @@ const ProjectOversight: React.FC = () => {
 
       // Calculate stats
       const now = new Date();
+      const totalApplicants = projectsData.reduce(
+        (sum, p) => sum + (p.totalApplicants || 0),
+        0,
+      );
       const projectStats: ProjectStats = {
         totalProjects: projectsData.length,
         activeProjects: projectsData.filter((p) =>
@@ -247,6 +275,7 @@ const ProjectOversight: React.FC = () => {
           projectsData.reduce((sum, p) => sum + p.progress, 0) /
           Math.max(projectsData.length, 1),
         onTimeDelivery: 85, // Mock data
+        totalApplicants, // <-- Added
       };
 
       setStats(projectStats);
@@ -309,7 +338,7 @@ const ProjectOversight: React.FC = () => {
       case "posted":
         return <Badge variant="secondary">Posted</Badge>;
       case "assigned":
-        return <Badge variant="warning">Assigned</Badge>;
+        return <Badge variant="primary">Assigned</Badge>;
       case "in_progress":
         return <Badge variant="info">In Progress</Badge>;
       case "completed":
@@ -370,11 +399,9 @@ const ProjectOversight: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Project Oversight
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">Job Oversight</h1>
             <p className="text-gray-600">
-              Monitor and manage all client projects and deliverables
+              Monitor and manage all client jobs and deliverables
             </p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
@@ -388,14 +415,12 @@ const ProjectOversight: React.FC = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="p-6">
             <div className="flex items-center">
               <Briefcase className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Total Projects
-                </p>
+                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.totalProjects || 0}
                 </p>
@@ -406,9 +431,7 @@ const ProjectOversight: React.FC = () => {
             <div className="flex items-center">
               <Clock className="h-8 w-8 text-orange-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Active Projects
-                </p>
+                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.activeProjects || 0}
                 </p>
@@ -430,9 +453,22 @@ const ProjectOversight: React.FC = () => {
             <div className="flex items-center">
               <AlertCircle className="h-8 w-8 text-red-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Overdue</p>
+                <p className="text-sm font-medium text-gray-600">Expired</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats?.overdue || 0}
+                </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-indigo-600" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">
+                  Total Applicants
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats?.totalApplicants || 0}
                 </p>
               </div>
             </div>
@@ -443,14 +479,12 @@ const ProjectOversight: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Project Value
+              Job Value
             </h3>
             <div className="text-3xl font-bold text-green-600 mb-2">
               {formatCurrency(stats?.totalValue || 0)}
             </div>
-            <p className="text-sm text-gray-600">
-              Total project portfolio value
-            </p>
+            <p className="text-sm text-gray-600">Total job portfolio value</p>
           </Card>
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -491,7 +525,7 @@ const ProjectOversight: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search projects by title, client, worker, or tags..."
+                  placeholder="Search jobs by title, client, worker, or tags..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -515,7 +549,7 @@ const ProjectOversight: React.FC = () => {
                   <option value="assigned">Assigned</option>
                   <option value="in_progress">In Progress</option>
                   <option value="completed">Completed</option>
-                  <option value="overdue">Overdue</option>
+                  <option value="overdue">Expired</option>
                 </select>
               </div>
 
@@ -545,12 +579,12 @@ const ProjectOversight: React.FC = () => {
             <Card className="p-12 text-center">
               <Briefcase className="h-16 w-16 mx-auto mb-4 text-gray-300" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No projects found
+                No jobs found
               </h3>
               <p className="text-gray-600">
                 {searchQuery
-                  ? "No projects match your search criteria."
-                  : "No projects available."}
+                  ? "No jobs match your search criteria."
+                  : "No jobs available."}
               </p>
             </Card>
           ) : (
@@ -570,12 +604,12 @@ const ProjectOversight: React.FC = () => {
                       {isOverdue(project.deadline, project.status) && (
                         <Badge variant="danger">
                           <AlertCircle className="h-3 w-3 mr-1" />
-                          Overdue
+                          Expired
                         </Badge>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                       <div>
                         <p className="text-sm font-medium text-gray-700">
                           Client
@@ -609,6 +643,16 @@ const ProjectOversight: React.FC = () => {
                         </p>
                         <p className="text-xs text-gray-500">
                           Due: {new Date(project.deadline).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">
+                          Applicants
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {typeof project.totalApplicants === "number"
+                            ? project.totalApplicants
+                            : 0}
                         </p>
                       </div>
                     </div>
@@ -681,6 +725,20 @@ const ProjectOversight: React.FC = () => {
                       <Edit className="h-4 w-4" />
                       <span>Manage</span>
                     </Button>
+
+                    <Button
+                      onClick={() =>
+                        router.push(
+                          `/admin/outsource/projects/${project._id}/applicants`,
+                        )
+                      }
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-2"
+                    >
+                      <Users className="h-4 w-4" />
+                      <span>Applicants</span>
+                    </Button>
                   </div>
                 </div>
               </Card>
@@ -695,7 +753,7 @@ const ProjectOversight: React.FC = () => {
             setShowProjectModal(false);
             setSelectedProject(null);
           }}
-          title="Project Details"
+          title="Job Details"
           size="xl"
         >
           {selectedProject && (
@@ -715,7 +773,7 @@ const ProjectOversight: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold mb-2">Project Information</h4>
+                  <h4 className="font-semibold mb-2">Job Information</h4>
                   <div className="space-y-2 text-sm">
                     <p>
                       <strong>Budget:</strong>{" "}
@@ -735,6 +793,12 @@ const ProjectOversight: React.FC = () => {
                     <p>
                       <strong>Actual Hours:</strong>{" "}
                       {selectedProject.actualHours}
+                    </p>
+                    <p>
+                      <strong>Total Applicants:</strong>{" "}
+                      {typeof selectedProject.totalApplicants === "number"
+                        ? selectedProject.totalApplicants
+                        : 0}
                     </p>
                   </div>
                 </div>
@@ -773,7 +837,7 @@ const ProjectOversight: React.FC = () => {
 
               {selectedProject.milestones && (
                 <div>
-                  <h4 className="font-semibold mb-3">Project Milestones</h4>
+                  <h4 className="font-semibold mb-3">Job Milestones</h4>
                   <div className="space-y-2">
                     {selectedProject.milestones.map((milestone, idx) => (
                       <div
