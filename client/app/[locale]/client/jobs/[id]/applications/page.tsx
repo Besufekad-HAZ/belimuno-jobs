@@ -46,11 +46,7 @@ interface JobDetail {
 interface ChatMessage {
   _id?: string;
   content: string;
-<<<<<<< HEAD
   sender?: { _id?: string; name?: string; role?: string };
-=======
-  sender?: { name?: string; role?: string; _id?: string };
->>>>>>> 6e455b34cc23b044ddfa4941b29e08ae249df9bc
   sentAt: string;
   attachments?: string[];
 }

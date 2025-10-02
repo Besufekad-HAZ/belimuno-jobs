@@ -54,7 +54,7 @@ const ApplicantsPage = () => {
 
         if (jobData?.applicants) {
           setApplicants(jobData.applicants);
-          console.log("applicants", applicants);
+          console.log("applicants", jobData.applicants);
         }
       } catch (err) {
         console.error("Failed to fetch applicants:", err);
