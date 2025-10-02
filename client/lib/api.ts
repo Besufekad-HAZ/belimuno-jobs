@@ -334,7 +334,7 @@ export const workerAPI = {
     ),
   reviewClient: (
     jobId: string,
-    payload: { rating: number; comment?: string },
+    payload: { rating: number; comment?: string; title?: string },
   ) => api.post(`/worker/jobs/${jobId}/review`, payload),
   declineAssignedJob: (jobId: string) =>
     api.put(`/worker/jobs/${jobId}/decline`),
@@ -346,12 +346,6 @@ export const workerAPI = {
   // Jobs for you based on worker skills/category
   getJobsForYou: (params?: Record<string, unknown>) =>
     api.get("/worker/jobs-for-you", { params }),
-  // Reviews
-  reviewClient: (
-    jobId: string,
-    payload: { rating: number; comment: string; title?: string },
-  ) => api.post(`/worker/jobs/${jobId}/review`, payload),
-
   // Disputes
   createDispute: (payload: {
     title: string;
