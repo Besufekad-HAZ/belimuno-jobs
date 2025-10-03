@@ -42,6 +42,21 @@ type FeaturedJob = {
   budget?: number;
 };
 
+const categories = [
+  { name: "Accounting and Finance", count: 154 },
+  { name: "Admin, Secretarial, and Clerical", count: 28 },
+  { name: "Agriculture", count: 30 },
+  { name: "Architecture and Construction", count: 21 },
+  { name: "Automotive", count: 20 },
+  { name: "Banking and Insurance", count: 2 },
+  { name: "Business and Administration", count: 114 },
+  { name: "Business Development", count: 27 },
+  { name: "Communications, Media and Journalism", count: 22 },
+  { name: "Consultancy and Training", count: 18 },
+  { name: "Creative Arts", count: 11 },
+  { name: "Customer Service", count: 14 },
+];
+
 export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
   const [stats, setStats] = useState<Stats>(null);
@@ -333,6 +348,44 @@ export default function Home() {
       </div>
 
       <TrustedBySection />
+
+      {/* Top Categories */}
+      <div className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">
+              {t("categories.title")}
+            </h2>
+            <p className="text-gray-600 mt-4">{t("categories.subtitle")}</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((cat, idx) => (
+              <Card key={idx} className="hover:shadow-lg transition-shadow">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Briefcase className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {cat.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <Badge variant="primary" size="sm">
+                    {cat.count}
+                  </Badge>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Button variant="outline" onClick={() => router.push("/jobs")}>
+              {t("categories.viewAllCategories")}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Testimonials Section */}
       <div className="py-16 bg-gray-50">

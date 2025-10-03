@@ -148,6 +148,11 @@
       "viewAllNews": "View All News",
       "relatedNews": "Related News"
     },
+    "categories": {
+      "title": "Top Job Categories",
+      "subtitle": "Explore opportunities across different industries and specializations",
+      "viewAllCategories": "View All Categories"
+    },
     "cta": {
       "title": "Ready to Start Your Journey?",
       "subtitle": "Join thousands of professionals already using Belimuno Jobs to advance their careers",
