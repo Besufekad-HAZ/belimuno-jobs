@@ -25,6 +25,7 @@ import { useTranslations } from "next-intl";
 import { newsData } from "@/data/news";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import TrustedBySection from "@/components/sections/TrustedBySection";
 
 type StoredUser = { role: string } | null;
 type Stats = {
@@ -330,6 +331,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <TrustedBySection />
 
       {/* Testimonials Section */}
       <div className="py-16 bg-gray-50">

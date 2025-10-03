@@ -35,6 +35,11 @@
       "goToDashboard": "Go to Dashboard",
       "browseJobs": "Browse Jobs"
     },
+    "trustedBy": {
+      "eyebrow": "Trusted by leading organizations",
+      "title": "Global teams rely on Belimuno",
+      "subtitle": "From NGOs to large construction firms, our workforce solutions power mission-critical projects every day."
+    },
     "stats": {
       "title": "Platform Statistics",
       "subtitle": "See the impact we're making across Ethiopia",

@@ -1,0 +1,13 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>Alive &amp; Thrive</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(34 20)">
+    <path d="M58 35c-12.7 0-23 10.3-23 23s10.3 23 23 23 23-10.3 23-23-10.3-23-23-23zm0 7c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16 7.2-16 16-16z" fill="#161b1e"/>
+    <path d="M98 35c-12.7 0-23 10.3-23 23s10.3 23 23 23 23-10.3 23-23-10.3-23-23-23zm0 7c8.8 0 16 7.2 16 16s-7.2 16-16 16-16-7.2-16-16 7.2-16 16-16z" fill="#161b1e"/>
+    <path d="M74 58c0-14.9 12.1-27 27-27s27 12.1 27 27" fill="none" stroke="#161b1e" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(140 58)" fill="#161b1e" font-family="'Playfair Display', 'Georgia', serif">
+    <text x="0" y="32" font-size="40">alive &amp; thrive</text>
+    <text x="2" y="58" font-size="18" letter-spacing="1.5">nourish. nurture. grow.</text>
+  </g>
+</svg>

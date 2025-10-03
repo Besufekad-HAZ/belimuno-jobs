@@ -1,0 +1,17 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>Children Believe</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(32 12)">
+    <path d="M48 110c0-14.4 11.6-26 26-26s26 11.6 26 26" fill="#82368c"/>
+    <path d="M62 58c0-11 9-20 20-20s20 9 20 20-9 20-20 20-20-9-20-20z" fill="#82368c"/>
+    <path d="M74 40c0-8.3 6.7-15 15-15s15 6.7 15 15" fill="#82368c"/>
+    <circle cx="120" cy="20" r="8" fill="#82368c"/>
+    <circle cx="138" cy="12" r="6" fill="#82368c"/>
+    <circle cx="154" cy="24" r="5" fill="#82368c"/>
+  </g>
+  <g transform="translate(160 56)" fill="#1f2937" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif">
+    <text x="0" y="36" font-size="40" font-weight="700">Children</text>
+    <text x="0" y="78" font-size="40" font-weight="700">Believe</text>
+    <text x="2" y="100" font-size="18" letter-spacing="2">Member of ChildFund Alliance</text>
+  </g>
+</svg>

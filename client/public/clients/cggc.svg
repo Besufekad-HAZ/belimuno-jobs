@@ -1,0 +1,12 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>CGGC</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(40 18)">
+    <circle cx="80" cy="62" r="62" fill="none" stroke="#1f4ea3" stroke-width="10"/>
+    <path d="M80 16l42 74H38L80 16z" fill="none" stroke="#1f4ea3" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M32 116h96" stroke="#1f4ea3" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(170 68)" fill="#1f4ea3" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="0" y="28" font-size="48">CGGC</text>
+  </g>
+</svg>

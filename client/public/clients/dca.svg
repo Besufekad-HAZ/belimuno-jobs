@@ -1,0 +1,12 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>DanChurchAid</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(32 32)">
+    <circle cx="56" cy="48" r="48" fill="#e10613"/>
+    <path d="M80 26c-7 11-20.5 23.5-37.5 34.5 12-3 23-7 31-12.5-4.5 7.5-10.5 15-18.5 22.5l16 7.5C93 67 102 52 106 38l-26-12z" fill="#ffffff"/>
+  </g>
+  <g transform="translate(140 60)" fill="#1f2937" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif">
+    <text x="0" y="32" font-size="40" font-weight="700">DCA</text>
+    <text x="0" y="64" font-size="22" letter-spacing="2">DanChurchAid</text>
+  </g>
+</svg>

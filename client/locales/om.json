@@ -140,6 +140,11 @@
       "backButton": "Deebi'i",
       "shareButton": "Qoodsi",
       "backToHome": "Manaatti Deebi'i",
+      "trustedBy": {
+        "eyebrow": "Dhaabbilee duraa irraa amanamne",
+        "title": "Gareen addunyaa Belimuno irratti hirkatu",
+        "subtitle": "NGOwwan irraa kaasee hanga dhaabbilee ijaarsa guddaatti, tajaajilli qacarrii keenya projektoota murteessaa guyyaa guyyaatti deeggaru."
+      },
       "viewAllNews": "Oduu Hundaa Ilaali",
       "relatedNews": "Oduu Walqabataa"
     },
