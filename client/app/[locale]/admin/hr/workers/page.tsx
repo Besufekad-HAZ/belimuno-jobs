@@ -19,6 +19,12 @@ import {
   SlidersHorizontal,
   RefreshCw,
   Sparkles,
+  Briefcase,
+  GraduationCap,
+  History,
+  FileText,
+  FileWarning,
+  Languages,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
@@ -897,70 +903,148 @@ const WorkerManagement: React.FC = () => {
           size="xl"
         >
           {selectedWorker && (
-            <div className="space-y-6 max-h-96 overflow-y-auto">
-              {/* Basic Info */}
-              <div className="flex items-start space-x-4">
-                <div className="h-20 w-20 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                  {selectedWorker.profile?.avatar ? (
-                    <Image
-                      src={selectedWorker.profile.avatar}
-                      alt={selectedWorker.name}
-                      width={80}
-                      height={80}
-                      className="h-20 w-20 rounded-full object-cover"
-                    />
-                  ) : (
-                    <Users className="h-10 w-10 text-gray-600" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-semibold">
-                    {selectedWorker.name}
-                  </h3>
-                  <p className="text-gray-600">{selectedWorker.email}</p>
-                  {selectedWorker.phone && (
-                    <p className="text-gray-600">{selectedWorker.phone}</p>
-                  )}
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    {getWorkerStatusBadge(selectedWorker)}
-                    {selectedWorker.__meta?.category && (
-                      <Badge variant="secondary">
-                        {selectedWorker.__meta.category}
-                      </Badge>
-                    )}
+            <div className="space-y-6 max-h-[32rem] overflow-y-auto pr-1">
+              <div className="rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 p-[1px] shadow-xl shadow-blue-200/50">
+                <div className="rounded-[calc(1.5rem-1px)] bg-white/95 p-6 sm:p-7 backdrop-blur">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center">
+                      <div className="relative h-20 w-20 flex-shrink-0">
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-200 via-indigo-200 to-purple-200 blur-sm" />
+                        <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-inner">
+                          {selectedWorker.profile?.avatar ? (
+                            <Image
+                              src={selectedWorker.profile.avatar}
+                              alt={selectedWorker.name}
+                              width={80}
+                              height={80}
+                              className="h-20 w-20 rounded-full object-cover"
+                            />
+                          ) : (
+                            <Users className="h-10 w-10 text-blue-500" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-2xl font-semibold text-slate-900">
+                          {selectedWorker.name}
+                        </h3>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                          <span className="inline-flex items-center gap-1">
+                            <Mail className="h-4 w-4 text-blue-500" />
+                            {selectedWorker.email}
+                          </span>
+                          {selectedWorker.phone && (
+                            <span className="inline-flex items-center gap-1">
+                              <Phone className="h-4 w-4 text-blue-500" />
+                              {selectedWorker.phone}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          {getWorkerStatusBadge(selectedWorker)}
+                          {selectedWorker.__meta?.category && (
+                            <Badge variant="secondary">
+                              {selectedWorker.__meta.category}
+                            </Badge>
+                          )}
+                          <Badge
+                            variant="info"
+                            size="sm"
+                            className="flex items-center gap-1"
+                          >
+                            <Clock className="h-3.5 w-3.5" />
+                            Joined{" "}
+                            {formatDistanceToNow(
+                              new Date(selectedWorker.createdAt),
+                              { addSuffix: true },
+                            )}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="grid w-full grid-cols-2 gap-3 sm:w-auto sm:grid-cols-3">
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          Rating
+                        </p>
+                        <p className="mt-1 text-lg font-semibold text-slate-900">
+                          {selectedWorker.workerProfile?.rating ?? 0}
+                          <span className="text-sm font-medium text-slate-500">
+                            /5
+                          </span>
+                        </p>
+                      </div>
+                      <div className="rounded-2xl bg-slate-50 px-4 py-3 text-center shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          Completed
+                        </p>
+                        <p className="mt-1 text-lg font-semibold text-slate-900">
+                          {selectedWorker.workerProfile?.completedJobs ?? 0}
+                          <span className="ml-1 text-sm font-medium text-slate-500">
+                            /{selectedWorker.workerProfile?.totalJobs ?? 0}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="col-span-2 rounded-2xl bg-slate-50 px-4 py-3 text-center shadow-sm sm:col-span-1">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          Hourly Rate
+                        </p>
+                        <p className="mt-1 text-lg font-semibold text-slate-900">
+                          {selectedWorker.workerProfile?.hourlyRate
+                            ? `$${selectedWorker.workerProfile.hourlyRate}/hr`
+                            : "Not set"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Profile Info */}
-              {selectedWorker.profile && (
-                <div>
-                  <h4 className="font-semibold mb-3">Personal Information</h4>
-                  <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-2 gap-4">
+              {selectedWorker.profile ? (
+                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                    <Users className="h-4 w-4 text-blue-500" />
+                    Personal Information
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {selectedWorker.profile.firstName && (
-                      <p>
-                        <strong>First Name:</strong>{" "}
-                        {selectedWorker.profile.firstName}
-                      </p>
+                      <div className="space-y-1">
+                        <span className="text-xs uppercase tracking-wide text-slate-500">
+                          First Name
+                        </span>
+                        <p className="text-sm font-medium text-slate-900">
+                          {selectedWorker.profile.firstName}
+                        </p>
+                      </div>
                     )}
                     {selectedWorker.profile.lastName && (
-                      <p>
-                        <strong>Last Name:</strong>{" "}
-                        {selectedWorker.profile.lastName}
-                      </p>
+                      <div className="space-y-1">
+                        <span className="text-xs uppercase tracking-wide text-slate-500">
+                          Last Name
+                        </span>
+                        <p className="text-sm font-medium text-slate-900">
+                          {selectedWorker.profile.lastName}
+                        </p>
+                      </div>
                     )}
                     {selectedWorker.profile.dob && (
-                      <p>
-                        <strong>Date of Birth:</strong>{" "}
-                        {new Date(
-                          selectedWorker.profile.dob,
-                        ).toLocaleDateString()}
-                      </p>
+                      <div className="space-y-1">
+                        <span className="text-xs uppercase tracking-wide text-slate-500">
+                          Date of Birth
+                        </span>
+                        <p className="text-sm font-medium text-slate-900">
+                          {new Date(
+                            selectedWorker.profile.dob,
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
                     )}
                     {selectedWorker.profile.address && (
-                      <div className="col-span-2">
-                        <strong>Address:</strong>
-                        <p className="text-sm text-gray-600">
+                      <div className="space-y-1 sm:col-span-2">
+                        <span className="text-xs uppercase tracking-wide text-slate-500">
+                          Address
+                        </span>
+                        <p className="text-sm text-slate-600">
                           {[
                             selectedWorker.profile.address.street,
                             selectedWorker.profile.address.city,
@@ -973,126 +1057,153 @@ const WorkerManagement: React.FC = () => {
                       </div>
                     )}
                     {selectedWorker.profile.bio && (
-                      <div className="col-span-2">
-                        <strong>Bio:</strong>
-                        <p className="text-sm text-gray-600 mt-1">
+                      <div className="space-y-1 sm:col-span-2">
+                        <span className="text-xs uppercase tracking-wide text-slate-500">
+                          Bio
+                        </span>
+                        <p className="text-sm leading-relaxed text-slate-600">
                           {selectedWorker.profile.bio}
                         </p>
                       </div>
                     )}
                   </div>
                 </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+                  This worker hasn&apos;t completed their personal profile yet.
+                </div>
               )}
 
-              {/* Worker Profile */}
-              {selectedWorker.workerProfile && (
-                <div>
-                  <h4 className="font-semibold mb-3">
-                    Professional Information
-                  </h4>
-                  <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                    <div className="grid grid-cols-2 gap-4">
-                      <p>
-                        <strong>Category:</strong>{" "}
+              {selectedWorker.workerProfile ? (
+                <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                  <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                    <Briefcase className="h-4 w-4 text-indigo-500" />
+                    Professional Snapshot
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <span className="text-xs uppercase tracking-wide text-slate-500">
+                        Category
+                      </span>
+                      <p className="text-sm font-medium text-slate-900">
                         {selectedWorker.__meta?.category ||
                           DEFAULT_WORKER_CATEGORY}
                       </p>
-                      <p>
-                        <strong>Experience:</strong>{" "}
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs uppercase tracking-wide text-slate-500">
+                        Experience
+                      </span>
+                      <p className="text-sm font-medium text-slate-900">
                         {selectedWorker.__meta?.experience ||
                           selectedWorker.workerProfile.experience ||
                           NOT_SPECIFIED_EXPERIENCE}
                       </p>
-                      <p>
-                        <strong>Hourly Rate:</strong> $
-                        {selectedWorker.workerProfile.hourlyRate ?? "Not set"}
-                      </p>
-                      <p>
-                        <strong>Availability:</strong>{" "}
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs uppercase tracking-wide text-slate-500">
+                        Availability
+                      </span>
+                      <p className="text-sm font-medium text-slate-900">
                         {selectedWorker.workerProfile.availability ||
                           "Not specified"}
                       </p>
-                      <p>
-                        <strong>Rating:</strong>{" "}
-                        {selectedWorker.workerProfile.rating ?? 0}/5 ⭐
-                      </p>
-                      <p>
-                        <strong>Total Jobs:</strong>{" "}
-                        {selectedWorker.workerProfile.totalJobs ?? 0}
-                      </p>
-                      <p>
-                        <strong>Completed Jobs:</strong>{" "}
-                        {selectedWorker.workerProfile.completedJobs ?? 0}
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-xs uppercase tracking-wide text-slate-500">
+                        Belimuno Score
+                      </span>
+                      <p className="text-sm font-medium text-slate-900">
+                        {calculateWorkerScore(selectedWorker)}/10
                       </p>
                     </div>
-
-                    {selectedWorker.workerProfile.skills &&
-                      selectedWorker.workerProfile.skills.length > 0 && (
-                        <div>
-                          <strong>Skills:</strong>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {selectedWorker.workerProfile.skills.map(
-                              (skill, idx) => (
-                                <Badge key={idx} variant="info" size="sm">
-                                  {skill}
-                                </Badge>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                    {selectedWorker.workerProfile.languages &&
-                      selectedWorker.workerProfile.languages.length > 0 && (
-                        <div>
-                          <strong>Languages:</strong>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {selectedWorker.workerProfile.languages.map(
-                              (lang, idx) => (
-                                <Badge key={idx} variant="success" size="sm">
-                                  {lang}
-                                </Badge>
-                              ),
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                    {selectedWorker.workerProfile.certifications &&
-                      selectedWorker.workerProfile.certifications.length >
-                        0 && (
-                        <div>
-                          <strong>Certifications:</strong>
-                          <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
-                            {selectedWorker.workerProfile.certifications.map(
-                              (cert, idx) => (
-                                <li key={idx}>{cert}</li>
-                              ),
-                            )}
-                          </ul>
-                        </div>
-                      )}
                   </div>
+
+                  {selectedWorker.workerProfile.skills &&
+                    selectedWorker.workerProfile.skills.length > 0 && (
+                      <div className="mt-5">
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          <Sparkles className="h-4 w-4 text-amber-500" />
+                          Core Skills
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedWorker.workerProfile.skills.map(
+                            (skill, idx) => (
+                              <Badge key={idx} variant="info" size="sm">
+                                {skill}
+                              </Badge>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  {selectedWorker.workerProfile.languages &&
+                    selectedWorker.workerProfile.languages.length > 0 && (
+                      <div className="mt-5">
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          <Languages className="h-4 w-4 text-emerald-500" />
+                          Languages
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedWorker.workerProfile.languages.map(
+                            (lang, idx) => (
+                              <Badge key={idx} variant="success" size="sm">
+                                {lang}
+                              </Badge>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  {selectedWorker.workerProfile.certifications &&
+                    selectedWorker.workerProfile.certifications.length > 0 && (
+                      <div className="mt-5">
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          <Award className="h-4 w-4 text-blue-500" />
+                          Certifications
+                        </div>
+                        <ul className="mt-2 space-y-1 text-sm text-slate-600">
+                          {selectedWorker.workerProfile.certifications.map(
+                            (cert, idx) => (
+                              <li key={idx} className="leading-relaxed">
+                                {cert}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+                  No professional information has been provided yet.
                 </div>
               )}
 
-              {/* Education */}
               {selectedWorker.workerProfile?.education &&
                 selectedWorker.workerProfile.education.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Education</h4>
-                    <div className="space-y-3">
+                  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                      <GraduationCap className="h-4 w-4 text-purple-500" />
+                      Education
+                    </div>
+                    <div className="mt-4 space-y-3">
                       {selectedWorker.workerProfile.education.map(
                         (edu, idx) => (
-                          <div key={idx} className="bg-gray-50 p-3 rounded-lg">
-                            <h5 className="font-medium">
+                          <div
+                            key={idx}
+                            className="rounded-xl border border-slate-200 bg-white/70 p-4 shadow-sm"
+                          >
+                            <p className="text-base font-semibold text-slate-900">
                               {edu.degree} in {edu.field}
-                            </h5>
-                            <p className="text-sm text-gray-600">
+                            </p>
+                            <p className="text-sm text-slate-600">
                               {edu.school}
                             </p>
-                            <p className="text-sm text-gray-600">
-                              {edu.startDate} - {edu.endDate}
+                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                              {edu.startDate} – {edu.endDate}
                             </p>
                           </div>
                         ),
@@ -1101,24 +1212,31 @@ const WorkerManagement: React.FC = () => {
                   </div>
                 )}
 
-              {/* Work History */}
               {selectedWorker.workerProfile?.workHistory &&
                 selectedWorker.workerProfile.workHistory.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Work History</h4>
-                    <div className="space-y-3">
+                  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                    <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                      <History className="h-4 w-4 text-rose-500" />
+                      Work History
+                    </div>
+                    <div className="mt-4 space-y-3">
                       {selectedWorker.workerProfile.workHistory.map(
                         (work, idx) => (
-                          <div key={idx} className="bg-gray-50 p-3 rounded-lg">
-                            <h5 className="font-medium">{work.title}</h5>
-                            <p className="text-sm text-gray-600">
+                          <div
+                            key={idx}
+                            className="rounded-xl border border-slate-200 bg-white/70 p-4 shadow-sm"
+                          >
+                            <p className="text-base font-semibold text-slate-900">
+                              {work.title}
+                            </p>
+                            <p className="text-sm text-slate-600">
                               {work.company}
                             </p>
-                            <p className="text-sm text-gray-600">
-                              {work.startDate} - {work.endDate}
+                            <p className="text-xs uppercase tracking-wide text-slate-500">
+                              {work.startDate} – {work.endDate}
                             </p>
                             {work.description && (
-                              <p className="text-sm text-gray-600 mt-1">
+                              <p className="mt-2 text-sm leading-relaxed text-slate-600">
                                 {work.description}
                               </p>
                             )}
@@ -1129,25 +1247,56 @@ const WorkerManagement: React.FC = () => {
                   </div>
                 )}
 
-              {/* CV Download */}
-              {selectedWorker.profile?.cv && (
-                <div>
-                  <h4 className="font-semibold mb-3">Documents</h4>
-                  <Button
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.href = selectedWorker.profile!.cv!.data;
-                      link.download = selectedWorker.profile!.cv!.name;
-                      link.click();
-                    }}
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Download CV ({selectedWorker.profile.cv.name})</span>
-                  </Button>
-                </div>
-              )}
+              <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 p-5 shadow-inner">
+                {selectedWorker.profile?.cv ? (
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
+                        <FileText className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h5 className="text-base font-semibold text-slate-900">
+                          Curriculum Vitae
+                        </h5>
+                        <p className="text-sm text-slate-600">
+                          Latest upload: {selectedWorker.profile.cv.name}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Ready for download and review.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        const link = document.createElement("a");
+                        link.href = selectedWorker.profile!.cv!.data;
+                        link.download = selectedWorker.profile!.cv!.name;
+                        link.click();
+                      }}
+                      variant="primary"
+                      className="gap-2 shadow-md shadow-blue-300/60"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Download CV</span>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-3 text-slate-600">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                      <FileWarning className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h5 className="text-base font-semibold text-slate-900">
+                        No CV Uploaded
+                      </h5>
+                      <p className="text-sm text-slate-600">
+                        This worker hasn&apos;t uploaded any CV yet. Reach out
+                        and encourage them to add one for faster placement.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </Modal>
