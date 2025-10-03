@@ -28,11 +28,13 @@ import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import TrustedBySection from "@/components/sections/TrustedBySection";
 
 type StoredUser = { role: string } | null;
+
 type Stats = {
   totalUsers?: number;
   totalJobs?: number;
   completedJobs?: number;
 } | null;
+
 type FeaturedJob = {
   _id: string;
   title: string;
@@ -42,25 +44,16 @@ type FeaturedJob = {
   budget?: number;
 };
 
-const categories = [
-  { name: "Accounting and Finance", count: 154 },
-  { name: "Admin, Secretarial, and Clerical", count: 28 },
-  { name: "Agriculture", count: 30 },
-  { name: "Architecture and Construction", count: 21 },
-  { name: "Automotive", count: 20 },
-  { name: "Banking and Insurance", count: 2 },
-  { name: "Business and Administration", count: 114 },
-  { name: "Business Development", count: 27 },
-  { name: "Communications, Media and Journalism", count: 22 },
-  { name: "Consultancy and Training", count: 18 },
-  { name: "Creative Arts", count: 11 },
-  { name: "Customer Service", count: 14 },
-];
+type Category = {
+  _id: string;
+  count: number;
+};
 
 export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
   const [stats, setStats] = useState<Stats>(null);
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const router = useRouter();
   const t = useTranslations("Home");
@@ -81,6 +74,7 @@ export default function Home() {
 
       setStats(statsResponse.data);
       setFeaturedJobs(jobsResponse.data.data || []);
+      setCategories(statsResponse.data.data?.jobsByCategory || []);
     } catch (error) {
       console.error("Failed to fetch public data:", error);
     }
@@ -359,25 +353,45 @@ export default function Home() {
             <p className="text-gray-600 mt-4">{t("categories.subtitle")}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((cat, idx) => (
-              <Card key={idx} className="hover:shadow-lg transition-shadow">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Briefcase className="h-5 w-5 text-blue-600" />
+            {categories.length === 0
+              ? // Loading skeletons
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <Card
+                    key={idx}
+                    className="hover:shadow-lg transition-shadow animate-pulse"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <div className="h-5 w-5 bg-blue-200 rounded-full" />
+                        </div>
+                        <div>
+                          <div className="h-4 w-24 bg-gray-200 rounded mb-1" />
+                        </div>
+                      </div>
+                      <div className="h-6 w-8 bg-blue-200 rounded" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {cat.name}
-                      </h3>
+                  </Card>
+                ))
+              : categories.map((cat, idx) => (
+                  <Card key={idx} className="hover:shadow-lg transition-shadow">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <Briefcase className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">
+                            {cat._id}
+                          </h3>
+                        </div>
+                      </div>
+                      <Badge variant="primary" size="sm">
+                        {cat.count || 0}
+                      </Badge>
                     </div>
-                  </div>
-                  <Badge variant="primary" size="sm">
-                    {cat.count}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
+                  </Card>
+                ))}
           </div>
           <div className="text-center mt-8">
             <Button variant="outline" onClick={() => router.push("/jobs")}>
