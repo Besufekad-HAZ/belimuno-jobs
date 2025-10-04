@@ -148,6 +148,11 @@
       "viewAllNews": "Oduu Hundaa Ilaali",
       "relatedNews": "Oduu Walqabataa"
     },
+    "categories": {
+      "title": "Gosa Waa'ee Hojiiwwan",
+      "subtitle": "Carraawwan garaagaraa keessatti gosa hojiiwwan fi qophiiwwan adda addaa keessatti argadhu",
+      "viewAllCategories": "Gosa Hunda Ilaali"
+    },
     "cta": {
       "title": "Imalaa Keessan Jalqabuu Ready Ta'anii?",
       "subtitle": "Kumoota hojjettoota mijataa career isaanii fudhachuuf Belimuno Jobs fayyadamuu keessatti walitti qabanii.",

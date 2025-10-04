@@ -28,11 +28,13 @@ import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import TrustedBySection from "@/components/sections/TrustedBySection";
 
 type StoredUser = { role: string } | null;
+
 type Stats = {
   totalUsers?: number;
   totalJobs?: number;
   completedJobs?: number;
 } | null;
+
 type FeaturedJob = {
   _id: string;
   title: string;
@@ -42,10 +44,16 @@ type FeaturedJob = {
   budget?: number;
 };
 
+type Category = {
+  _id: string;
+  count: number;
+};
+
 export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
   const [stats, setStats] = useState<Stats>(null);
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const router = useRouter();
   const t = useTranslations("Home");
@@ -66,6 +74,7 @@ export default function Home() {
 
       setStats(statsResponse.data);
       setFeaturedJobs(jobsResponse.data.data || []);
+      setCategories(statsResponse.data.data?.jobsByCategory || []);
     } catch (error) {
       console.error("Failed to fetch public data:", error);
     }
@@ -333,6 +342,84 @@ export default function Home() {
       </div>
 
       <TrustedBySection />
+
+      {/* Top Job Categories */}
+      <div className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">
+              {t("categories.title")}
+            </h2>
+            <p className="text-gray-600 mt-4">{t("categories.subtitle")}</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.length === 0
+              ? // Loading skeletons
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <Card
+                    key={idx}
+                    className="hover:shadow-lg transition-shadow animate-pulse"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <div className="h-5 w-5 bg-blue-200 rounded-full" />
+                        </div>
+                        <div>
+                          <div className="h-4 w-24 bg-gray-200 rounded mb-1" />
+                        </div>
+                      </div>
+                      <div className="h-6 w-8 bg-blue-200 rounded" />
+                    </div>
+                  </Card>
+                ))
+              : categories.map((cat, idx) => (
+                  <Card
+                    key={idx}
+                    className="hover:shadow-lg transition-all duration-300 group cursor-pointer border-l-4 border-l-blue-500"
+                  >
+                    <div
+                      className="flex justify-between items-center"
+                      onClick={() =>
+                        router.push(
+                          `/jobs?category=${encodeURIComponent(cat._id)}`,
+                        )
+                      }
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
+                          <Briefcase className="h-6 w-6 text-blue-600 group-hover:text-blue-700 transition-colors duration-300" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                            {cat._id}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            Available positions
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <Badge variant="primary" size="sm" className="mb-1">
+                          {cat.count || 0}
+                        </Badge>
+                        <span className="text-xs text-gray-400">jobs</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+          </div>
+          <div className="text-center mt-8">
+            <Button
+              variant="outline"
+              onClick={() => router.push("/jobs")}
+              className="border-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-300"
+            >
+              {t("categories.viewAllCategories")}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Testimonials Section */}
       <div className="py-16 bg-gray-50">
