@@ -2,6 +2,7 @@
 
 import React from "react";
 import ClientsGrid from "@/components/clients/ClientsGrid";
+import TrustedBySection from "@/components/sections/TrustedBySection";
 import { CLIENTS } from "@/data/clients";
 import { useTranslations } from "next-intl";
 
@@ -15,6 +16,8 @@ const ClientsPage: React.FC = () => {
           <p className="text-blue-100 mt-2 max-w-3xl">{t("hero.subtitle")}</p>
         </div>
       </div>
+
+      <TrustedBySection />
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
