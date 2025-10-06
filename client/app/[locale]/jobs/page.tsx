@@ -152,7 +152,6 @@ const JobsPage: React.FC = () => {
 
   useEffect(() => {
     const currentUser = getStoredUser();
-    console.log("currentUser", currentUser);
     setUser(currentUser);
 
     // Get category from URL if present
