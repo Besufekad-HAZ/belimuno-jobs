@@ -37,6 +37,11 @@ type ExtendedUser = BaseUser & {
     bio?: string;
     dob?: string | Date;
     cv?: { name?: string; mimeType?: string; data?: string };
+    detailedSkills?: Array<{
+      _id?: string;
+      name: string;
+      level: string;
+    }>;
   };
   workerProfile?: {
     skills?: string[];
@@ -322,9 +327,9 @@ const ProfilePage = () => {
             (profile.skills || [])
               .filter(
                 (skillName) =>
-                  !((profile as any).detailedSkills || []).some(
-                    (ds: { name: string }) => ds.name === skillName,
-                  ),
+                  !(
+                    (profile as ExtendedUser["profile"])?.detailedSkills || []
+                  ).some((ds: { name: string }) => ds.name === skillName),
               )
               .map((skillName) => ({
                 id: Date.now().toString() + Math.random(),
