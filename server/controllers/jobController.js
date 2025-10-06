@@ -1,9 +1,9 @@
-const Job = require('../models/Job');
-const User = require('../models/User');
-const Application = require('../models/Application');
-const Notification = require('../models/Notification');
-const NotificationService = require('../utils/notificationService');
-const asyncHandler = require('../utils/asyncHandler');
+const Job = require("../models/Job");
+const User = require("../models/User");
+const Application = require("../models/Application");
+const Notification = require("../models/Notification");
+const NotificationService = require("../utils/notificationService");
+const asyncHandler = require("../utils/asyncHandler");
 
 // @desc    Get all jobs (public/filtered)
 // @route   GET /api/jobs
@@ -19,13 +19,13 @@ exports.getJobs = asyncHandler(async (req, res) => {
     skills,
     page = 1,
     limit = 10,
-    sort = '-createdAt'
+    sort = "-createdAt",
   } = req.query;
 
   // Build query
   const query = {
-    status: 'posted',
-    isPublic: true
+    status: "posted",
+    isPublic: true,
   };
 
   if (category) query.category = category;
@@ -40,14 +40,14 @@ exports.getJobs = asyncHandler(async (req, res) => {
   }
 
   if (skills) {
-    const skillsArray = skills.split(',').map(skill => skill.trim());
+    const skillsArray = skills.split(",").map((skill) => skill.trim());
     query.requiredSkills = { $in: skillsArray };
   }
 
   const jobs = await Job.find(query)
-    .populate('client', 'name profile.avatar clientProfile.companyName')
-    .populate('region', 'name')
-    .select('-applicants -messages -payment.chapaTransactionId')
+    .populate("client", "name profile.avatar clientProfile.companyName")
+    .populate("region", "name")
+    .select("-applicants -messages -payment.chapaTransactionId")
     .sort(sort)
     .limit(limit * 1)
     .skip((page - 1) * limit);
@@ -61,9 +61,9 @@ exports.getJobs = asyncHandler(async (req, res) => {
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit),
     },
-    data: jobs
+    data: jobs,
   });
 });
 
@@ -72,14 +72,14 @@ exports.getJobs = asyncHandler(async (req, res) => {
 // @access  Public
 exports.getJob = asyncHandler(async (req, res) => {
   const job = await Job.findById(req.params.id)
-    .populate('client', 'name profile clientProfile.companyName')
-    .populate('region', 'name')
-    .populate('worker', 'name profile.avatar workerProfile.rating');
+    .populate("client", "name profile clientProfile.companyName")
+    .populate("region", "name")
+    .populate("worker", "name profile.avatar workerProfile.rating");
 
   if (!job) {
     return res.status(404).json({
       success: false,
-      message: 'Job not found'
+      message: "Job not found",
     });
   }
 
@@ -90,15 +90,18 @@ exports.getJob = asyncHandler(async (req, res) => {
     messages: undefined,
     payment: {
       totalAmount: job.payment?.totalAmount,
-      paymentStatus: job.payment?.paymentStatus
-    }
+      paymentStatus: job.payment?.paymentStatus,
+    },
   };
 
   // If user is authenticated, show more details based on role
   if (req.user) {
     const isClient = req.user._id.toString() === job.client._id.toString();
-    const isWorker = job.worker && req.user._id.toString() === job.worker._id.toString();
-  const isAdmin = ['super_admin', 'admin_hr', 'admin_outsource'].includes(req.user.role);
+    const isWorker =
+      job.worker && req.user._id.toString() === job.worker._id.toString();
+    const isAdmin = ["super_admin", "admin_hr", "admin_outsource"].includes(
+      req.user.role
+    );
 
     if (isClient || isWorker || isAdmin) {
       // Show full job details for authorized users
@@ -110,7 +113,7 @@ exports.getJob = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: publicJob
+    data: publicJob,
   });
 });
 
@@ -127,27 +130,27 @@ exports.applyForJob = asyncHandler(async (req, res) => {
   if (!job) {
     return res.status(404).json({
       success: false,
-      message: 'Job not found'
+      message: "Job not found",
     });
   }
 
-  if (job.status !== 'posted') {
+  if (job.status !== "posted") {
     return res.status(400).json({
       success: false,
-      message: 'Job is no longer accepting applications'
+      message: "Job is no longer accepting applications",
     });
   }
 
   // Check if worker already applied
   const existingApplication = await Application.findOne({
     job: jobId,
-    worker: workerId
+    worker: workerId,
   });
 
   if (existingApplication) {
     return res.status(400).json({
       success: false,
-      message: 'You have already applied for this job'
+      message: "You have already applied for this job",
     });
   }
 
@@ -155,7 +158,7 @@ exports.applyForJob = asyncHandler(async (req, res) => {
   if (!req.user.isVerified) {
     return res.status(403).json({
       success: false,
-      message: 'You must be verified to apply for jobs'
+      message: "You must be verified to apply for jobs",
     });
   }
 
@@ -163,7 +166,7 @@ exports.applyForJob = asyncHandler(async (req, res) => {
   if (!proposal || !proposedBudget) {
     return res.status(400).json({
       success: false,
-      message: 'Proposal and proposed budget are required'
+      message: "Proposal and proposed budget are required",
     });
   }
 
@@ -174,24 +177,27 @@ exports.applyForJob = asyncHandler(async (req, res) => {
     proposal,
     proposedBudget,
     estimatedDuration,
-    coverLetter
+    coverLetter,
   });
 
   // Populate application with worker details
-  await application.populate('worker', 'name profile.avatar workerProfile.rating workerProfile.skills');
+  await application.populate(
+    "worker",
+    "name profile.avatar workerProfile.rating workerProfile.skills"
+  );
 
   // Use NotificationService to create notification for client
   try {
     await NotificationService.notifyJobApplication(jobId, workerId, job.client);
   } catch (error) {
-    console.error('Failed to create job application notification:', error);
+    console.error("Failed to create job application notification:", error);
     // Don't fail the application if notification fails
   }
 
   res.status(201).json({
     success: true,
-    message: 'Application submitted successfully',
-    data: application
+    message: "Application submitted successfully",
+    data: application,
   });
 });
 
@@ -202,46 +208,101 @@ exports.getCategories = asyncHandler(async (req, res) => {
   // This could be stored in database or configuration
   const categories = [
     {
-      name: 'Technology',
-      subcategories: ['Web Development', 'Mobile Development', 'Data Science', 'AI/ML', 'DevOps', 'Cybersecurity']
+      name: "Technology",
+      subcategories: [
+        "Web Development",
+        "Mobile Development",
+        "Data Science",
+        "AI/ML",
+        "DevOps",
+        "Cybersecurity",
+      ],
     },
     {
-      name: 'Design',
-      subcategories: ['Graphic Design', 'UI/UX Design', 'Brand Design', 'Illustration', 'Video Editing']
+      name: "Design",
+      subcategories: [
+        "Graphic Design",
+        "UI/UX Design",
+        "Brand Design",
+        "Illustration",
+        "Video Editing",
+      ],
     },
     {
-      name: 'Writing & Translation',
-      subcategories: ['Content Writing', 'Copywriting', 'Technical Writing', 'Translation', 'Proofreading']
+      name: "Writing & Translation",
+      subcategories: [
+        "Content Writing",
+        "Copywriting",
+        "Technical Writing",
+        "Translation",
+        "Proofreading",
+      ],
     },
     {
-      name: 'Marketing',
-      subcategories: ['Digital Marketing', 'SEO', 'Social Media', 'Email Marketing', 'Market Research']
+      name: "Marketing",
+      subcategories: [
+        "Digital Marketing",
+        "SEO",
+        "Social Media",
+        "Email Marketing",
+        "Market Research",
+      ],
     },
     {
-      name: 'Business',
-      subcategories: ['Consulting', 'Project Management', 'Business Analysis', 'Financial Analysis', 'HR']
+      name: "Business",
+      subcategories: [
+        "Consulting",
+        "Project Management",
+        "Business Analysis",
+        "Financial Analysis",
+        "HR",
+      ],
     },
     {
-      name: 'Construction',
-      subcategories: ['Residential Construction', 'Commercial Construction', 'Renovation', 'Electrical', 'Plumbing']
+      name: "Construction",
+      subcategories: [
+        "Residential Construction",
+        "Commercial Construction",
+        "Renovation",
+        "Electrical",
+        "Plumbing",
+      ],
     },
     {
-      name: 'Healthcare',
-      subcategories: ['Nursing', 'Medical Assistant', 'Healthcare Administration', 'Therapy', 'Medical Research']
+      name: "Healthcare",
+      subcategories: [
+        "Nursing",
+        "Medical Assistant",
+        "Healthcare Administration",
+        "Therapy",
+        "Medical Research",
+      ],
     },
     {
-      name: 'Education',
-      subcategories: ['Tutoring', 'Curriculum Development', 'Online Teaching', 'Training', 'Educational Content']
+      name: "Education",
+      subcategories: [
+        "Tutoring",
+        "Curriculum Development",
+        "Online Teaching",
+        "Training",
+        "Educational Content",
+      ],
     },
     {
-      name: 'Other',
-      subcategories: ['General Labor', 'Customer Service', 'Data Entry', 'Virtual Assistant', 'Research']
-    }
+      name: "Other",
+      subcategories: [
+        "General Labor",
+        "Customer Service",
+        "Data Entry",
+        "Virtual Assistant",
+        "Research",
+      ],
+    },
   ];
 
   res.status(200).json({
     success: true,
-    data: categories
+    data: categories,
   });
 });
 
@@ -250,19 +311,22 @@ exports.getCategories = asyncHandler(async (req, res) => {
 // @access  Public
 exports.getJobStats = asyncHandler(async (req, res) => {
   const totalJobs = await Job.countDocuments();
-  const activeJobs = await Job.countDocuments({ status: { $in: ['posted', 'assigned', 'in_progress'] } });
-  const completedJobs = await Job.countDocuments({ status: 'completed' });
+  const activeJobs = await Job.countDocuments({
+    status: { $in: ["posted", "assigned", "in_progress"] },
+  });
+  const completedJobs = await Job.countDocuments({ status: "completed" });
 
-  // Get jobs by category
+  // Get jobs by category (only posted jobs)
   const jobsByCategory = await Job.aggregate([
-    { $group: { _id: '$category', count: { $sum: 1 } } },
-    { $sort: { count: -1 } }
+    { $match: { status: "posted" } },
+    { $group: { _id: "$category", count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
   ]);
 
   // Get average budget by category
   const avgBudgetByCategory = await Job.aggregate([
-    { $group: { _id: '$category', avgBudget: { $avg: '$budget' } } },
-    { $sort: { avgBudget: -1 } }
+    { $group: { _id: "$category", avgBudget: { $avg: "$budget" } } },
+    { $sort: { avgBudget: -1 } },
   ]);
 
   // Get recent job trends (last 30 days)
@@ -270,7 +334,7 @@ exports.getJobStats = asyncHandler(async (req, res) => {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const recentJobs = await Job.countDocuments({
-    createdAt: { $gte: thirtyDaysAgo }
+    createdAt: { $gte: thirtyDaysAgo },
   });
 
   res.status(200).json({
@@ -280,11 +344,11 @@ exports.getJobStats = asyncHandler(async (req, res) => {
         totalJobs,
         activeJobs,
         completedJobs,
-        recentJobs
+        recentJobs,
       },
       jobsByCategory,
-      avgBudgetByCategory
-    }
+      avgBudgetByCategory,
+    },
   });
 });
 
@@ -297,14 +361,14 @@ exports.searchJobs = asyncHandler(async (req, res) => {
   if (!q) {
     return res.status(400).json({
       success: false,
-      message: 'Search query is required'
+      message: "Search query is required",
     });
   }
 
-  const searchRegex = new RegExp(q, 'i');
+  const searchRegex = new RegExp(q, "i");
 
   const query = {
-    status: 'posted',
+    status: "posted",
     isPublic: true,
     $or: [
       { title: searchRegex },
@@ -312,14 +376,14 @@ exports.searchJobs = asyncHandler(async (req, res) => {
       { category: searchRegex },
       { subcategory: searchRegex },
       { requiredSkills: { $in: [searchRegex] } },
-      { tags: { $in: [searchRegex] } }
-    ]
+      { tags: { $in: [searchRegex] } },
+    ],
   };
 
   const jobs = await Job.find(query)
-    .populate('client', 'name profile.avatar clientProfile.companyName')
-    .populate('region', 'name')
-    .select('-applicants -messages -payment.chapaTransactionId')
+    .populate("client", "name profile.avatar clientProfile.companyName")
+    .populate("region", "name")
+    .select("-applicants -messages -payment.chapaTransactionId")
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip((page - 1) * limit);
@@ -333,9 +397,9 @@ exports.searchJobs = asyncHandler(async (req, res) => {
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit),
     },
-    data: jobs
+    data: jobs,
   });
 });
 
@@ -348,9 +412,9 @@ exports.getRecommendedJobs = asyncHandler(async (req, res) => {
 
   // Build recommendation query based on worker's skills and preferences
   const query = {
-    status: 'posted',
+    status: "posted",
     isPublic: true,
-    region: worker.region // Jobs in worker's region
+    region: worker.region, // Jobs in worker's region
   };
 
   // Match jobs that require worker's skills
@@ -359,9 +423,9 @@ exports.getRecommendedJobs = asyncHandler(async (req, res) => {
   }
 
   const jobs = await Job.find(query)
-    .populate('client', 'name profile.avatar clientProfile.companyName')
-    .populate('region', 'name')
-    .select('-applicants -messages -payment.chapaTransactionId')
+    .populate("client", "name profile.avatar clientProfile.companyName")
+    .populate("region", "name")
+    .select("-applicants -messages -payment.chapaTransactionId")
     .sort({ createdAt: -1 })
     .limit(limit * 1)
     .skip((page - 1) * limit);
@@ -375,8 +439,8 @@ exports.getRecommendedJobs = asyncHandler(async (req, res) => {
     pagination: {
       page: parseInt(page),
       limit: parseInt(limit),
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit),
     },
-    data: jobs
+    data: jobs,
   });
 });
