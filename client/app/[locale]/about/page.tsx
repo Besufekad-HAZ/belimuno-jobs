@@ -18,6 +18,18 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
+const getInitials = (name: string) => {
+  return (
+    name
+      .replace(/\([^)]*\)/g, "")
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || name.slice(0, 2).toUpperCase()
+  );
+};
+
 const AboutPage: React.FC = () => {
   const t = useTranslations("AboutPage");
 
@@ -28,14 +40,19 @@ const AboutPage: React.FC = () => {
       role: "MULUSEW ASRES",
     },
     {
+      name: "Admin & Finance Department",
+      department: "Administration",
+      role: "WONDWOSSEN TEKA",
+    },
+    {
+      name: "Finance Division",
+      department: "Finance",
+      role: "W/MARIYAM BEREHE",
+    },
+    {
       name: "Human Resource Department Head",
       department: "HR",
       role: "ELIAS KETEMA",
-    },
-    {
-      name: "Manpower Supply Division",
-      department: "Operations",
-      role: "SENAIT AYALEW",
     },
     {
       name: "Outsourced Service Management Dept",
@@ -48,19 +65,14 @@ const AboutPage: React.FC = () => {
       role: "FIKIR TADESSE",
     },
     {
-      name: "Finance Division",
-      department: "Finance",
-      role: "W/MARIYAM BEREHE",
+      name: "Manpower Supply Division",
+      department: "Operations",
+      role: "SENAIT AYALEW",
     },
     {
       name: "Other Crew Division",
       department: "Operations",
       role: "C.T. ALEMAYEHU NEGASH",
-    },
-    {
-      name: "Admin & Finance Department",
-      department: "Administration",
-      role: "WONDWOSSEN TEKA",
     },
   ];
 
@@ -259,39 +271,122 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* Our Team */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+      <section className="relative py-24 bg-slate-950 text-slate-100 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+          <div className="absolute -bottom-32 -right-32 h-[22rem] w-[22rem] rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto mb-16 flex max-w-4xl flex-col items-center text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1 text-lg font-semibold uppercase tracking-wide text-slate-200/90 shadow-lg shadow-cyan-500/20 backdrop-blur">
+              <Users className="h-3.5 w-3.5" />
               {t("team.title")}
+            </span>
+            <h2 className="mt-6 text-4xl font-bold leading-tight text-white sm:text-5xl">
+              {t("team.heading")}
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 mx-auto mb-6"></div>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              {t("team.description")}
+            <p className="mt-6 text-lg text-slate-200/80 sm:text-xl">
+              {t("team.lede")}
             </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-300/80 lg:text-sm">
+              {[
+                "Administration & Finance",
+                "Human Resources",
+                "Outsourced Services",
+                "Project Delivery",
+              ].map((pill) => (
+                <span
+                  key={pill}
+                  className="rounded-full border border-white/5 bg-white/5 px-4 py-1 tracking-[0.18em] uppercase"
+                >
+                  {pill}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {teamMembers.map((member, index) => (
-              <Card
-                key={index}
-                className="p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-8 w-8 text-white" />
+          {(() => {
+            const [executiveLead, ...coreTeam] = teamMembers;
+            return (
+              <>
+                {executiveLead && (
+                  <div className="relative mb-20 overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.06] p-8 md:p-12 backdrop-blur-2xl shadow-[0_30px_120px_rgba(56,189,248,0.18)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-cyan-500/10" />
+                    <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
+                      <div className="relative mx-auto md:mx-0">
+                        <div className="absolute inset-0 h-36 w-36 rounded-full bg-cyan-400/40 blur-2xl" />
+                        <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-700 ring-2 ring-white/30 ring-offset-4 ring-offset-slate-950 shadow-xl" />
+                        <span className="absolute inset-0 flex items-center justify-center text-3xl font-semibold tracking-wide text-white/90">
+                          {getInitials(executiveLead.role)}
+                        </span>
+                      </div>
+                      <div className="text-center md:text-left">
+                        <Badge className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
+                          {executiveLead.department}
+                        </Badge>
+                        <h3 className="mt-4 text-3xl font-semibold text-white">
+                          {executiveLead.role}
+                        </h3>
+                        <p className="mt-2 text-lg font-medium text-slate-200/90">
+                          {executiveLead.name}
+                        </p>
+                        <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm md:justify-start">
+                          {[
+                            "Strategic growth",
+                            "People-first leadership",
+                            "Operational excellence",
+                          ].map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full border border-white/10 bg-white/5 px-4 py-1 text-slate-200/90"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-gray-900 mb-2">
-                    {member.name}
-                  </h3>
-                  <Badge variant="primary" className="mb-2">
-                    {member.department}
-                  </Badge>
-                  <p className="text-sm text-gray-600">{member.role}</p>
+                )}
+
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {coreTeam.map((member, index) => (
+                    <div
+                      key={`${member.role}-${index}`}
+                      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-cyan-300/50 hover:bg-white/[0.08]"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-cyan-400/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                      <div className="relative flex flex-col items-center text-center">
+                        <div className="relative mb-6">
+                          <div className="absolute -inset-3 rounded-full bg-cyan-400/20 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
+                          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-800 ring-2 ring-white/20">
+                            <span className="text-2xl font-semibold tracking-wide text-white/90">
+                              {getInitials(member.role)}
+                            </span>
+                          </div>
+                        </div>
+                        <Badge className="mb-3 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-100">
+                          {member.department}
+                        </Badge>
+                        <h4 className="text-xl font-semibold text-white">
+                          {member.role}
+                        </h4>
+                        <p className="mt-2 text-sm uppercase tracking-[0.3em] text-slate-300">
+                          {member.name}
+                        </p>
+                        <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                        <p className="mt-4 text-sm text-slate-200/70">
+                          Building resilient teams and unforgettable client
+                          experiences.
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </Card>
-            ))}
-          </div>
+              </>
+            );
+          })()}
         </div>
       </section>
 
