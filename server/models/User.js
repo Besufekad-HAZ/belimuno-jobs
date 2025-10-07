@@ -37,6 +37,16 @@ const UserSchema = new mongoose.Schema({
     phone: String,
     location: String,
     skills: [String],
+    detailedSkills: [
+      {
+        name: String,
+        level: {
+          type: String,
+          enum: ["Beginner", "Intermediate", "Advanced", "Expert"],
+          default: "Beginner",
+        },
+      },
+    ],
     experience: String,
     hourlyRate: Number,
     gender: String,

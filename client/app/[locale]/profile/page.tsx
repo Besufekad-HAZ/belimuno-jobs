@@ -548,12 +548,13 @@ const ProfilePage = () => {
             ),
           ]),
         ],
-        // Store detailed skills separately to preserve proficiency levels
-        detailedSkills:
-          cvData.detailedSkills?.map((skill) => ({
+        // Store detailed skills with their levels in the profile
+        detailedSkills: (cvData.detailedSkills || [])
+          .filter((skill) => skill.name.trim()) // Only include skills with names
+          .map((skill) => ({
             name: skill.name,
             level: skill.level || "Beginner",
-          })) || [],
+          })),
         experience: cvData.personalInfo.workerExperience,
         hourlyRate: cvData.personalInfo.workerHourlyRate,
         dob: cvData.personalInfo.dateOfBirth,
