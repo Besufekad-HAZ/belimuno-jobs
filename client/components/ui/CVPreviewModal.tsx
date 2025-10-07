@@ -55,7 +55,7 @@ const CVPreviewModal: React.FC<CVPreviewModalProps> = ({
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             No CV Available
           </h3>
-          <p className="text-gray-600">This user hasn't uploaded a CV yet.</p>
+          <p className="text-gray-600">This user has not uploaded a CV yet.</p>
         </div>
       </Modal>
     );
