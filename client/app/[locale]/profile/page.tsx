@@ -37,6 +37,11 @@ type ExtendedUser = BaseUser & {
     bio?: string;
     dob?: string | Date;
     cv?: { name?: string; mimeType?: string; data?: string };
+    detailedSkills?: Array<{
+      _id?: string;
+      name: string;
+      level: string;
+    }>;
   };
   workerProfile?: {
     skills?: string[];
@@ -307,15 +312,31 @@ const ProfilePage = () => {
               }>;
             }
           ).detailedSkills || []
-        ).map((skill: { _id?: string; name: string; level: string }) => ({
-          id: skill._id || Date.now().toString(),
-          name: skill.name,
-          level: (skill.level || "Beginner") as
-            | "Beginner"
-            | "Intermediate"
-            | "Advanced"
-            | "Expert",
-        })),
+        )
+          .map((skill: { _id?: string; name: string; level: string }) => ({
+            id: skill._id || Date.now().toString(),
+            name: skill.name,
+            level: (skill.level || "Beginner") as
+              | "Beginner"
+              | "Intermediate"
+              | "Advanced"
+              | "Expert",
+          }))
+          .concat(
+            // Also add any skills from the skills array that aren't in detailedSkills
+            (profile.skills || [])
+              .filter(
+                (skillName) =>
+                  !(
+                    (profile as ExtendedUser["profile"])?.detailedSkills || []
+                  ).some((ds: { name: string }) => ds.name === skillName),
+              )
+              .map((skillName) => ({
+                id: Date.now().toString() + Math.random(),
+                name: skillName,
+                level: "Beginner" as const,
+              })),
+          ),
       });
     } catch (error) {
       console.error("Failed to load existing CV:", error);
@@ -516,7 +537,21 @@ const ProfilePage = () => {
             cvData.personalInfo.address.split(",")[1]?.trim() || "Ethiopia",
         },
         bio: cvData.personalInfo.summary,
-        skills: cvData.personalInfo.workerSkills,
+        // Combine both skill arrays - detailed skills and any existing worker skills
+        skills: [
+          ...new Set([
+            ...(cvData.personalInfo.workerSkills || []),
+            ...(cvData.detailedSkills?.map((skill) => skill.name) || []).filter(
+              Boolean,
+            ),
+          ]),
+        ],
+        // Store detailed skills separately to preserve proficiency levels
+        detailedSkills:
+          cvData.detailedSkills?.map((skill) => ({
+            name: skill.name,
+            level: skill.level || "Beginner",
+          })) || [],
         experience: cvData.personalInfo.workerExperience,
         hourlyRate: cvData.personalInfo.workerHourlyRate,
         dob: cvData.personalInfo.dateOfBirth,

@@ -16,7 +16,7 @@ exports.getJobsForYou = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
   // Get worker's skills
-  const workerSkills = worker.workerProfile?.skills || [];
+  const workerSkills = worker.profile?.skills || [];
 
   // If no skills, return empty result
   if (workerSkills.length === 0) {
