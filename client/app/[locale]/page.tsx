@@ -17,7 +17,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { getStoredUser, getRoleDashboardPath } from "@/lib/auth";
-import { jobsAPI } from "@/lib/api";
+import { jobsAPI, workerAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
@@ -42,6 +42,21 @@ type FeaturedJob = {
   budget?: number;
 };
 
+type JobsForYouJob = {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  deadline?: string | Date;
+  budget?: number;
+  priority?: string;
+  requiredSkills?: string[];
+  createdAt?: string | Date;
+  workType?: string;
+  location?: string;
+  applications?: unknown[];
+};
+
 type Category = {
   _id: string;
   count: number;
@@ -51,6 +66,8 @@ export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
   const [stats, setStats] = useState<Stats>(null);
   const [featuredJobs, setFeaturedJobs] = useState<FeaturedJob[]>([]);
+  const [jobsForYou, setJobsForYou] = useState<JobsForYouJob[]>([]);
+  const [jobsForYouLoading, setJobsForYouLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
   const router = useRouter();
@@ -58,9 +75,15 @@ export default function Home() {
 
   useEffect(() => {
     const currentUser = getStoredUser();
+    console.log("currentUser", currentUser);
     setUser(currentUser);
 
     fetchPublicData();
+
+    // Fetch jobs for you if user is a worker
+    if (currentUser?.role === "worker") {
+      fetchJobsForYou();
+    }
   }, []);
 
   const fetchPublicData = async () => {
@@ -75,6 +98,42 @@ export default function Home() {
       setCategories(statsResponse.data.data?.jobsByCategory || []);
     } catch (error) {
       console.error("Failed to fetch public data:", error);
+    }
+  };
+
+  const fetchJobsForYou = async () => {
+    try {
+      setJobsForYouLoading(true);
+      const response = await workerAPI.getJobsForYou({ limit: 6 });
+      const payload = response.data;
+      console.log("payload", payload);
+      const list = (payload.data || []) as unknown as Array<
+        Record<string, unknown>
+      >;
+      console.log("list", list);
+      setJobsForYou(
+        list.map((j) => ({
+          _id: String(j._id),
+          title: String(j.title || ""),
+          description: String(j.description || ""),
+          category: String(j.category || ""),
+          deadline:
+            (j.deadline as string | Date | undefined) ||
+            new Date().toISOString(),
+          budget: Number(j.budget || 0),
+          priority: j.priority as string | undefined,
+          requiredSkills: j.requiredSkills as string[] | undefined,
+          createdAt: j.createdAt as string | Date | undefined,
+          workType: j.workType as string | undefined,
+          location: j.location as string | undefined,
+          applications: j.applications as unknown[] | undefined,
+        })),
+      );
+    } catch (error) {
+      console.error("Failed to fetch jobs for you:", error);
+      setJobsForYou([]);
+    } finally {
+      setJobsForYouLoading(false);
     }
   };
 
@@ -471,6 +530,87 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Jobs for You Section - Only show for workers */}
+      {user?.role === "worker" && (
+        <>
+          {jobsForYouLoading ? (
+            <div className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12">
+                  <div className="flex items-center justify-center mb-4">
+                    <Briefcase className="h-8 w-8 text-blue-600 mr-3" />
+                    <h2 className="text-3xl font-bold text-gray-900">
+                      Jobs for You
+                    </h2>
+                  </div>
+                  <p className="text-gray-600 mt-4">
+                    Personalized job recommendations based on your skills and
+                    preferences
+                  </p>
+                </div>
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+                </div>
+              </div>
+            </div>
+          ) : jobsForYou.length > 0 ? (
+            <div className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12">
+                  <div className="flex items-center justify-center mb-4">
+                    <Briefcase className="h-8 w-8 text-blue-600 mr-3" />
+                    <h2 className="text-3xl font-bold text-gray-900">
+                      Jobs for You
+                    </h2>
+                  </div>
+                  <p className="text-gray-600 mt-4">
+                    Personalized job recommendations based on your skills and
+                    preferences
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {jobsForYou.map((job) => (
+                    <Card
+                      key={job._id}
+                      className="hover:shadow-lg transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-semibold text-gray-900 text-lg">
+                          {job.title}
+                        </h3>
+                        <span className="text-green-600 font-bold">
+                          ETB {job.budget?.toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                        {job.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="primary" size="sm">
+                            {job.category}
+                          </Badge>
+                          {job.deadline && (
+                            <span className="text-xs text-gray-500">
+                              Due: {new Date(job.deadline).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                        <Link href={`/jobs/${job._id}`}>
+                          <Button size="sm" className="shadow-sm">
+                            View Details
+                          </Button>
+                        </Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
 
       {/* Regions Where We Operate */}
       <div className="relative py-20 bg-slate-950 text-slate-100 overflow-hidden">

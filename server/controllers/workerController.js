@@ -369,6 +369,22 @@ exports.updateProfile = asyncHandler(async (req, res) => {
   const updateData = {};
   Object.keys(req.body).forEach((key) => {
     if (allowedFields.includes(key)) {
+      // Special handling for workerProfile to ensure arrays are properly updated
+      if (key === "workerProfile") {
+        const workerProfile = req.body[key];
+        if (workerProfile.education) {
+          // Filter out any invalid education entries
+          workerProfile.education = workerProfile.education.filter(
+            (edu) => edu && edu.school && edu.degree && edu.startDate
+          );
+        }
+        if (workerProfile.workHistory) {
+          // Filter out any invalid work history entries
+          workerProfile.workHistory = workerProfile.workHistory.filter(
+            (work) => work && work.company && work.title && work.startDate
+          );
+        }
+      }
       updateData[key] = req.body[key];
     }
   });

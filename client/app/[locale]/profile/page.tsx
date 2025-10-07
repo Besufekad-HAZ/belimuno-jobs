@@ -506,6 +506,7 @@ const ProfilePage = () => {
       portfolio: string;
     };
     education: Array<{
+      id: string;
       institution: string;
       degree: string;
       fieldOfStudy: string;
@@ -514,6 +515,7 @@ const ProfilePage = () => {
       current: boolean;
     }>;
     experience: Array<{
+      id: string;
       company: string;
       position: string;
       startDate: string;
@@ -546,12 +548,13 @@ const ProfilePage = () => {
             ),
           ]),
         ],
-        // Store detailed skills separately to preserve proficiency levels
-        detailedSkills:
-          cvData.detailedSkills?.map((skill) => ({
+        // Store detailed skills with their levels in the profile
+        detailedSkills: (cvData.detailedSkills || [])
+          .filter((skill) => skill.name.trim()) // Only include skills with names
+          .map((skill) => ({
             name: skill.name,
             level: skill.level || "Beginner",
-          })) || [],
+          })),
         experience: cvData.personalInfo.workerExperience,
         hourlyRate: cvData.personalInfo.workerHourlyRate,
         dob: cvData.personalInfo.dateOfBirth,
@@ -564,24 +567,38 @@ const ProfilePage = () => {
       };
 
       const workerProfileUpdate: Record<string, unknown> = {
-        education: cvData.education.map((edu) => ({
-          school: edu.institution,
-          degree: edu.degree,
-          field: edu.fieldOfStudy,
-          startDate: edu.startDate,
-          endDate: edu.current ? null : edu.endDate,
-          description: "",
-        })),
-        workHistory: cvData.experience.map((exp) => ({
-          company: exp.company,
-          title: exp.position,
-          startDate: exp.startDate,
-          endDate: exp.current ? null : exp.endDate,
-          description: exp.description,
-        })),
+        // Map education entries without ids (let Mongoose generate them)
+        education: cvData.education
+          .filter((edu) => edu.institution && edu.degree && edu.startDate) // Only include complete entries
+          .map((edu) => ({
+            school: edu.institution,
+            degree: edu.degree,
+            field: edu.fieldOfStudy || "",
+            startDate: edu.startDate,
+            endDate: edu.current ? null : edu.endDate || null,
+            description: "", // Optional field
+          })),
+
+        // Map work history entries without ids (let Mongoose generate them)
+        workHistory: cvData.experience
+          .filter((exp) => exp.company && exp.position && exp.startDate) // Only include complete entries
+          .map((exp) => ({
+            company: exp.company,
+            title: exp.position,
+            startDate: exp.startDate,
+            endDate: exp.current ? null : exp.endDate || null,
+            description: exp.description || "",
+          })),
+
+        // Update portfolio
         portfolio: cvData.personalInfo.portfolio
           ? [cvData.personalInfo.portfolio]
           : [],
+
+        // Include availability if it exists in the current profile
+        ...(user.workerProfile?.availability
+          ? { availability: user.workerProfile.availability }
+          : {}),
       };
 
       await workerAPI.updateProfile({
