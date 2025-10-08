@@ -1322,7 +1322,7 @@ exports.getTeamMembers = asyncHandler(async (req, res) => {
   const numericLimit = Math.min(Math.max(parseInt(String(limit), 10) || 20, 1), 100);
   const numericPage = Math.max(parseInt(String(page), 10) || 1, 1);
 
-  const [members, total] = await Promise.all([
+  const [rawMembers, rawTotal] = await Promise.all([
     TeamMember.find(query)
       .sort(sortCriteria)
       .limit(numericLimit)
@@ -1331,14 +1331,50 @@ exports.getTeamMembers = asyncHandler(async (req, res) => {
     TeamMember.countDocuments(query),
   ]);
 
+  // Deduplicate by normalized name + role to avoid showing duplicates
+  const normalizeKey = (m) => {
+    const name = (m.name || "").toString().trim().toLowerCase();
+    const role = (m.role || "").toString().trim().toLowerCase();
+    return `${name}::${role}`;
+  };
+
+  const dedupeMap = new Map();
+  for (const m of rawMembers) {
+    const key = normalizeKey(m);
+    if (!dedupeMap.has(key)) {
+      dedupeMap.set(key, m);
+      continue;
+    }
+
+    // prefer the member with the lower display order, then earlier createdAt
+    const existing = dedupeMap.get(key);
+    const existingOrder = typeof existing.order === "number" ? existing.order : Number.POSITIVE_INFINITY;
+    const incomingOrder = typeof m.order === "number" ? m.order : Number.POSITIVE_INFINITY;
+
+    if (incomingOrder < existingOrder) {
+      dedupeMap.set(key, m);
+    } else if (incomingOrder === existingOrder) {
+      const existingCreated = existing.createdAt ? new Date(existing.createdAt) : new Date(0);
+      const incomingCreated = m.createdAt ? new Date(m.createdAt) : new Date(0);
+      if (incomingCreated < existingCreated) {
+        dedupeMap.set(key, m);
+      }
+    }
+  }
+
+  const members = Array.from(dedupeMap.values());
+
+  // Recompute pagination based on deduped total when returning full pages
+  const dedupedTotal = members.length;
+
   res.status(200).json({
     success: true,
     count: members.length,
-    total,
+    total: dedupedTotal,
     pagination: {
       page: numericPage,
       limit: numericLimit,
-      pages: Math.ceil(total / numericLimit) || 1,
+      pages: Math.ceil(dedupedTotal / numericLimit) || 1,
     },
     data: members,
   });
