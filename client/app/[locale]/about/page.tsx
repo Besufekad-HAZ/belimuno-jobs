@@ -17,6 +17,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 const getInitials = (name: string) => {
   return (
@@ -35,44 +36,50 @@ const AboutPage: React.FC = () => {
 
   const teamMembers = [
     {
-      name: "Managing Director",
+      name: "Mulusew Asres",
       department: "Management",
-      role: "MULUSEW ASRES",
+      role: "Managing Director",
     },
     {
-      name: "Admin & Finance Department",
+      name: "Wondwossen Teka",
       department: "Administration",
-      role: "WONDWOSSEN TEKA",
+      role: "Admin & Finance Department",
+      image: "/team/Wondewosen Teka.jpg",
     },
     {
-      name: "Finance Division",
+      name: "W/Mariyam Berehe",
       department: "Finance",
-      role: "W/MARIYAM BEREHE",
+      role: "Finance Division",
     },
     {
-      name: "Human Resource Department Head",
+      name: "Elias Ketema",
       department: "HR",
-      role: "ELIAS KETEMA",
+      role: "Human Resource Department Head",
+      image: "/team/Elias Ketema.jpg",
     },
     {
-      name: "Outsourced Service Management Dept",
+      name: "Assaminew Haregewin",
       department: "Operations",
-      role: "ASSAMINEW HAREGEWOIN",
+      role: "Outsourced Service Management Dept",
+      image: "/team/Assaminew Haregewin.jpg",
     },
     {
-      name: "Outsourced Service Management Dept",
+      name: "Fikir Tadesse",
       department: "Operations",
-      role: "FIKIR TADESSE",
+      role: "Outsourced Service Management Dept",
+      image: "/team/Fikir Tadesse.jpg",
     },
     {
-      name: "Manpower Supply Division",
+      name: "Senait Ayalew",
       department: "Operations",
-      role: "SENAIT AYALEW",
+      role: "Manpower Supply Division",
+      image: "/team/Senait Ayalew.jpg",
     },
     {
-      name: "Other Crew Division",
+      name: "C.T. Alemayehu Negash",
       department: "Operations",
-      role: "C.T. ALEMAYEHU NEGASH",
+      role: "Other Crew Division",
+      image: "/team/Alemayehu Negash.jpg",
     },
   ];
 
@@ -316,10 +323,23 @@ const AboutPage: React.FC = () => {
                     <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
                       <div className="relative mx-auto md:mx-0">
                         <div className="absolute inset-0 h-36 w-36 rounded-full bg-cyan-300/40 blur-2xl" />
-                        <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl" />
-                        <span className="absolute inset-0 flex items-center justify-center text-3xl font-semibold tracking-wide text-slate-800">
-                          {getInitials(executiveLead.role)}
-                        </span>
+                        {executiveLead.image ? (
+                          <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
+                            <Image
+                              src={executiveLead.image}
+                              alt={executiveLead.name}
+                              fill
+                              sizes="128px"
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
+                            <span className="absolute inset-0 flex items-center justify-center text-3xl font-semibold tracking-wide text-slate-800">
+                              {getInitials(executiveLead.name)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="text-center md:text-left">
                         <Badge className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-800">
@@ -360,11 +380,23 @@ const AboutPage: React.FC = () => {
                       <div className="relative flex flex-col items-center text-center">
                         <div className="relative mb-6">
                           <div className="absolute -inset-3 rounded-full bg-cyan-200/40 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
-                          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
-                            <span className="text-2xl font-semibold tracking-wide text-slate-800">
-                              {getInitials(member.role)}
-                            </span>
-                          </div>
+                          {member.image ? (
+                            <div className="relative h-28 w-28 overflow-hidden rounded-full ring-2 ring-cyan-200/70">
+                              <Image
+                                src={member.image}
+                                alt={member.name}
+                                fill
+                                sizes="96px"
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
+                              <span className="text-2xl font-semibold tracking-wide text-slate-800">
+                                {getInitials(member.name)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <Badge className="mb-3 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
                           {member.department}
