@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
+const path = require("path");
 const connectDB = require("./config/db");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
@@ -23,6 +24,15 @@ app.use(compression());
 
 // Cookie parser middleware
 app.use(cookieParser());
+
+// Serve uploaded media assets
+app.use(
+	"/uploads",
+	express.static(path.join(__dirname, "uploads"), {
+		maxAge: "7d",
+		fallthrough: true,
+	}),
+);
 
 // CORS configuration (supports multiple comma-separated origins and Vercel previews)
 const rawOrigins = (

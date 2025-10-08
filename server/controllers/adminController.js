@@ -6,12 +6,64 @@ const Region = require("../models/Region");
 const Notification = require("../models/Notification");
 const Report = require("../models/Report");
 const Dispute = require("../models/Dispute");
+const TeamMember = require("../models/TeamMember");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
 // Lightweight in-memory cache for dashboard
 const __dashboardCache = { data: null, ts: 0 };
+
+const ensureDirectory = (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
+const teamUploadsDir = path.join(__dirname, "..", "uploads", "team");
+ensureDirectory(teamUploadsDir);
+
+const teamPhotoStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, teamUploadsDir);
+  },
+  filename: (_req, file, cb) => {
+    const timestamp = Date.now();
+    const cleanedOriginal = file.originalname
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const ext = path.extname(cleanedOriginal) || ".jpg";
+    const baseName = cleanedOriginal
+      ? cleanedOriginal.replace(ext, "")
+      : "team-member";
+    cb(null, `${timestamp}-${baseName}${ext}`);
+  },
+});
+
+const teamPhotoUpload = multer({
+  storage: teamPhotoStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed."));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+const buildTeamPhotoUrl = (req, filename) => {
+  const base =
+    process.env.FILE_BASE_URL || `${req.protocol}://${req.get("host")}`;
+  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  return `${normalizedBase}/uploads/team/${filename}`;
+};
 
 // @desc    Get admin dashboard (optimized)
 // @route   GET /api/admin/dashboard
@@ -1238,5 +1290,259 @@ exports.updateDispute = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: dispute,
+  });
+});
+
+// @desc    Get all team members
+// @route   GET /api/admin/team
+// @access  Private/Admin HR or Super Admin
+exports.getTeamMembers = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, sort = "order", status } = req.query;
+
+  const query = {};
+  if (status && ["active", "archived"].includes(String(status))) {
+    query.status = status;
+  }
+
+  const sortTokens = String(sort)
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  const sortCriteria = sortTokens.length
+    ? Object.fromEntries(
+        sortTokens.map((token) => {
+          const direction = token.startsWith("-") ? -1 : 1;
+          const key = token.replace(/^[-+]/, "");
+          return [key || "order", direction];
+        }),
+      )
+    : { order: 1, createdAt: -1 };
+
+  const numericLimit = Math.min(Math.max(parseInt(String(limit), 10) || 20, 1), 100);
+  const numericPage = Math.max(parseInt(String(page), 10) || 1, 1);
+
+  const [members, total] = await Promise.all([
+    TeamMember.find(query)
+      .sort(sortCriteria)
+      .limit(numericLimit)
+      .skip((numericPage - 1) * numericLimit)
+      .lean(),
+    TeamMember.countDocuments(query),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    count: members.length,
+    total,
+    pagination: {
+      page: numericPage,
+      limit: numericLimit,
+      pages: Math.ceil(total / numericLimit) || 1,
+    },
+    data: members,
+  });
+});
+
+// @desc    Upload a team member profile photo
+// @route   POST /api/admin/team/upload-photo
+// @access  Private/Admin HR or Super Admin
+exports.uploadTeamMemberPhoto = (req, res) => {
+  teamPhotoUpload.single("photo")(req, res, (err) => {
+    if (err) {
+      let message = err.message || "Unable to upload profile photo.";
+      if (err.code === "LIMIT_FILE_SIZE" || err.message === "File too large") {
+        message = "Image exceeds the 5MB limit.";
+      }
+      return res.status(400).json({
+        success: false,
+        message,
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please attach an image file in the 'photo' field.",
+      });
+    }
+
+    const fileUrl = buildTeamPhotoUrl(req, req.file.filename);
+
+    return res.status(201).json({
+      success: true,
+      message: "Profile photo uploaded successfully.",
+      data: {
+        url: fileUrl,
+        filename: req.file.filename,
+        size: req.file.size,
+        mimeType: req.file.mimetype,
+      },
+    });
+  });
+};
+
+// @desc    Create a new team member
+// @route   POST /api/admin/team
+// @access  Private/Admin HR or Super Admin
+exports.createTeamMember = asyncHandler(async (req, res) => {
+  const { name, role, department, photoUrl, email, phone, bio } = req.body;
+  let { order } = req.body;
+
+  if (!name || !role || !department) {
+    return res.status(400).json({
+      success: false,
+      message: "Name, role, and department are required",
+    });
+  }
+
+  const trimmedName = name.trim();
+  const trimmedRole = role.trim();
+  const trimmedDepartment = department.trim();
+
+  const existingMember = await TeamMember.findOne({
+    name: trimmedName,
+    role: trimmedRole,
+  });
+
+  if (existingMember) {
+    return res.status(409).json({
+      success: false,
+      message: "A team member with this name and role already exists.",
+      data: existingMember,
+    });
+  }
+
+  let resolvedOrder;
+  if (order !== undefined && order !== null && order !== "") {
+    const parsedOrder = Number(order);
+    if (Number.isNaN(parsedOrder) || parsedOrder < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Display order must be a positive number",
+      });
+    }
+    resolvedOrder = parsedOrder;
+  } else {
+    const highest = await TeamMember.findOne({}, "order")
+      .sort({ order: -1 })
+      .lean();
+    resolvedOrder =
+      highest && typeof highest.order === "number"
+        ? highest.order + 1
+        : 1;
+  }
+
+  const member = await TeamMember.create({
+    name: trimmedName,
+    role: trimmedRole,
+    department: trimmedDepartment,
+    photoUrl: photoUrl?.trim() || undefined,
+    email: email?.trim() || undefined,
+    phone: phone?.trim() || undefined,
+    bio: bio?.trim() || undefined,
+    order: resolvedOrder,
+    createdBy: req.user?._id,
+    updatedBy: req.user?._id,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Team member created successfully",
+    data: member,
+  });
+});
+
+// @desc    Update a team member
+// @route   PUT /api/admin/team/:id
+// @access  Private/Admin HR or Super Admin
+exports.updateTeamMember = asyncHandler(async (req, res) => {
+  const allowedFields = [
+    "name",
+    "role",
+    "department",
+    "photoUrl",
+    "email",
+    "phone",
+    "bio",
+    "order",
+    "status",
+  ];
+
+  const updateData = {};
+  for (const key of allowedFields) {
+    if (Object.prototype.hasOwnProperty.call(req.body, key)) {
+      updateData[key] = req.body[key];
+    }
+  }
+
+  if (updateData.name) updateData.name = String(updateData.name).trim();
+  if (updateData.role) updateData.role = String(updateData.role).trim();
+  if (updateData.department)
+    updateData.department = String(updateData.department).trim();
+  if (updateData.photoUrl)
+    updateData.photoUrl = String(updateData.photoUrl).trim();
+  if (updateData.email) updateData.email = String(updateData.email).trim();
+  if (updateData.phone) updateData.phone = String(updateData.phone).trim();
+  if (updateData.bio) updateData.bio = String(updateData.bio).trim();
+  if (updateData.order !== undefined && updateData.order !== null) {
+    const parsedOrder = Number(updateData.order);
+    if (Number.isNaN(parsedOrder) || parsedOrder < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Display order must be a positive number",
+      });
+    }
+    updateData.order = parsedOrder;
+  }
+
+  if (updateData.status) {
+    const normalizedStatus = String(updateData.status);
+    if (!["active", "archived"].includes(normalizedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be either active or archived",
+      });
+    }
+    updateData.status = normalizedStatus;
+  }
+
+  updateData.updatedBy = req.user?._id;
+
+  const member = await TeamMember.findByIdAndUpdate(req.params.id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!member) {
+    return res.status(404).json({
+      success: false,
+      message: "Team member not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Team member updated successfully",
+    data: member,
+  });
+});
+
+// @desc    Delete a team member
+// @route   DELETE /api/admin/team/:id
+// @access  Private/Admin HR or Super Admin
+exports.deleteTeamMember = asyncHandler(async (req, res) => {
+  const member = await TeamMember.findByIdAndDelete(req.params.id);
+
+  if (!member) {
+    return res.status(404).json({
+      success: false,
+      message: "Team member not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Team member removed successfully",
   });
 });

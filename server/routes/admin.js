@@ -22,9 +22,15 @@ const {
   getDispute,
   updateDispute,
   createDispute,
+  getTeamMembers,
+  createTeamMember,
+  updateTeamMember,
+  deleteTeamMember,
+  uploadTeamMemberPhoto,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
 const {
+  authorize,
   requireSuperAdmin,
   requireAnyAdmin,
 } = require("../middleware/roleCheck");
@@ -69,5 +75,22 @@ router.get("/disputes", getDisputes);
 router.get("/disputes/:id", getDispute);
 router.post("/disputes", createDispute);
 router.put("/disputes/:id", updateDispute);
+
+router.post(
+  "/team/upload-photo",
+  authorize("super_admin", "admin_hr"),
+  uploadTeamMemberPhoto,
+);
+
+// Team management (HR & Super Admin)
+router
+  .route("/team")
+  .get(authorize("super_admin", "admin_hr"), getTeamMembers)
+  .post(authorize("super_admin", "admin_hr"), createTeamMember);
+
+router
+  .route("/team/:id")
+  .put(authorize("super_admin", "admin_hr"), updateTeamMember)
+  .delete(authorize("super_admin", "admin_hr"), deleteTeamMember);
 
 module.exports = router;

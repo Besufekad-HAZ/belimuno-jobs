@@ -292,6 +292,7 @@
     "sections": {
       "company": "Kaampaanii",
       "contact": "Bilbila",
+      "addTeamMember": "Hojjetaa Dabaluu",
       "followUs": "Nu Hordofaa"
     },
     "links": {
@@ -1127,6 +1128,7 @@
     "actions": {
       "title": "Dalagaa HR",
       "buttons": {
+        "manageTeam": "Garee Bulchiisi",
         "workerManagement": "Bulchiinsa Hojjettootaa",
         "disputeResolution": "Furmaata Wal Dhabdamuu",
         "performanceReviews": "Qorannoo Dalagaa"
@@ -1321,6 +1323,36 @@
         "payWorker": "Hojjetaa Kaffali",
         "investigate": "Qorannoo Godhaa"
       }
+    }
+  },
+  "HRManageTeam": {
+    "title": "Garee Bulchiisi",
+    "subtitle": "Muudamtoota Fuula About irratti mul'atan itti dabali yookaan balleessi.",
+    "buttons": {
+      "back": "Deebi'i Daashbooraa HR",
+      "addMember": "Hojjetaa Garee Dabaluu"
+    },
+    "list": {
+      "title": "Tarree Leenjii fi Aadaa",
+      "subtitle": "Tarreen kun fuula About balbala uummataa wajjin akka wal simatu godhi."
+    },
+    "empty": {
+      "title": "Hojjettoonni garee hin jiran",
+      "description": "Hojjetaa jalqabaa dabaluuf qabduu gubbaa jiru fayyadami."
+    },
+    "modal": {
+      "title": "Hojjetaa Garee Dabaluu",
+      "submit": "Hojjetaa Ol kaa'i",
+      "cancel": "Haquu"
+    },
+    "messages": {
+      "loadError": "Hojjettoota garee fe'uu hin dandeenye. Itti yaali booddee.",
+      "createSuccess": "{name} gareetti dabalameera.",
+      "deleteSuccess": "{name} gareerraa haqameera.",
+      "deleteError": "Hojjetaa kana ammatti balleessuu hin dandeenye.",
+      "seedSuccess": "Tarree hoggansaa duraan jiru gara sirnaatti dabalameera.",
+      "seedError": "Tarree hoggansaa duraan jiru ofumaan galchuu hin milkoofne.",
+      "seedFallback": "Ammas tarreen hoggansaa duraan jiru agarsiifamaa jira. Haaromsuuf miseensota dabaluu ykn gulaaluu dandeessu."
     }
   }
 }

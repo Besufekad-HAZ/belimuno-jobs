@@ -211,6 +211,7 @@
     "sections": {
       "company": "ኩባንያ",
       "contact": "አግኙን",
+      "addTeamMember": "አባል ያክሉ",
       "followUs": "ይከተሉን"
     },
     "links": {
@@ -1046,6 +1047,7 @@
     "actions": {
       "title": "የሰው ሃብት እርምጃዎች",
       "buttons": {
+        "manageTeam": "የቡድን አስተዳደር",
         "workerManagement": "የሰራተኞች አስተዳደር",
         "disputeResolution": "የግጭት መፍትሄ",
         "performanceReviews": "የአፈጻጸም ግምገማዎች"
@@ -1240,6 +1242,36 @@
         "payWorker": "ሠራተኛውን ይክፈሉ",
         "investigate": "ይመረምሩ"
       }
+    }
+  },
+  "HRManageTeam": {
+    "title": "የቡድን አባላትን ያስተዳድሩ",
+    "subtitle": "በአባውት ገፅ ላይ የሚታዩትን መሪዎች ያክሉ ወይም ያስወግዱ።",
+    "buttons": {
+      "back": "ወደ HR ዳሽቦርድ ተመለስ",
+      "addMember": "አባል ያክሉ"
+    },
+    "list": {
+      "title": "የመሪነት እና ባህል አባላት",
+      "subtitle": "ይህን ዝርዝር ከህዝብ ጋር የሚጋራውን አባውት ገፅ ጋር በሚታወቀው ሁኔታ ያድሱ።"
+    },
+    "empty": {
+      "title": "ገና የቡድን አባላት የሉም",
+      "description": "የመጀመሪያውን አባል ለመጨመር ከላይ ያለውን ቁልፍ ይጠቀሙ።"
+    },
+    "modal": {
+      "title": "አባል ያክሉ",
+      "submit": "አባልን ያቀርቡ",
+      "cancel": "ይቅር"
+    },
+    "messages": {
+      "loadError": "የቡድን አባላትን ማቅረብ አልተቻለም። እባክዎ በኋላ ይሞክሩ።",
+      "createSuccess": "{name} ወደ ቡድኑ ተጨምሯል።",
+      "deleteSuccess": "{name} ከቡድኑ ተወግዷል።",
+      "deleteError": "ይህን አባል ጊዜው ላይ ማስወገድ አልተቻለም።",
+      "seedSuccess": "የተለመዱትን የመሪነት ዝርዝሮች ወደ ዳይሬክቶሪው ጨምረናል።",
+      "seedError": "የመሪነት ዝርዝሮቹን በራስ-ሰር ማደስ አልተቻለም።",
+      "seedFallback": "እንደ መደበኛው የመሪነት ዝርዝር በመስክ ላይ ነው። ያዘምኑት እንዲቆይ አባላትን ያክሉ ወይም ያሻሽሉ።"
     }
   }
 }

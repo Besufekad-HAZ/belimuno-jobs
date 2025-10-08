@@ -18,6 +18,7 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { DEFAULT_TEAM_MEMBERS } from "@/data/defaultTeamMembers";
 
 const getInitials = (name: string) => {
   return (
@@ -34,54 +35,7 @@ const getInitials = (name: string) => {
 const AboutPage: React.FC = () => {
   const t = useTranslations("AboutPage");
 
-  const teamMembers = [
-    {
-      name: "Mulusew Asres",
-      department: "Management",
-      role: "Managing Director",
-    },
-    {
-      name: "Wondwossen Teka",
-      department: "Administration",
-      role: "Admin & Finance Department",
-      image: "/team/Wondewosen Teka.jpg",
-    },
-    {
-      name: "W/Mariyam Berehe",
-      department: "Finance",
-      role: "Finance Division",
-    },
-    {
-      name: "Elias Ketema",
-      department: "HR",
-      role: "Human Resource Department Head",
-      image: "/team/Elias Ketema.jpg",
-    },
-    {
-      name: "Assaminew Haregewin",
-      department: "Operations",
-      role: "Outsourced Service Management Dept",
-      image: "/team/Assaminew Haregewin.jpg",
-    },
-    {
-      name: "Fikir Tadesse",
-      department: "Operations",
-      role: "Outsourced Service Management Dept",
-      image: "/team/Fikir Tadesse.jpg",
-    },
-    {
-      name: "Senait Ayalew",
-      department: "Operations",
-      role: "Manpower Supply Division",
-      image: "/team/Senait Ayalew.jpg",
-    },
-    {
-      name: "C.T. Alemayehu Negash",
-      department: "Operations",
-      role: "Other Crew Division",
-      image: "/team/Alemayehu Negash.jpg",
-    },
-  ];
+  const teamMembers = DEFAULT_TEAM_MEMBERS;
 
   const values = [
     {

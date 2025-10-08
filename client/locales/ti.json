@@ -216,6 +216,7 @@
     "sections": {
       "company": "ኩባንያ",
       "contact": "ርኸብ",
+      "addTeamMember": "ኣባል ኣኽል",
       "followUs": "ተኸታተልና"
     },
     "links": {
@@ -1051,6 +1052,7 @@
     "actions": {
       "title": "እማዞም ሰብኣዊ ሃብቲ",
       "buttons": {
+        "manageTeam": "ቡድን ኣስተዳደር",
         "workerManagement": "ኣስተዳደር ሰራሕተኛ",
         "disputeResolution": "ፍታሕ ግጭት",
         "performanceReviews": "ግምገማ ኣፈጻጸም"
@@ -1245,6 +1247,36 @@
         "payWorker": "ሰራሕተኛ ክፈል",
         "investigate": "ምርመራ"
       }
+    }
+  },
+  "HRManageTeam": {
+    "title": "ኣባላት ቡድን ኣስተዳደር",
+    "subtitle": "ኣብ ሓበሬታ About ዝተሓተቱ መሪታት ያእትዱን ወይ ይለውጡን።",
+    "buttons": {
+      "back": "ናብ ዳሽቦርድ HR ተመለስ",
+      "addMember": "ኣባል ወስኽ"
+    },
+    "list": {
+      "title": "መሪነትን ባህሊን ዝያዳምሩ ኣባላት",
+      "subtitle": "ዝርዝሩን ናይ ሕቶ ዝተዋህዱ መረዳእታታት ጋር ልክዕ ኣድርጉ።"
+    },
+    "empty": {
+      "title": "ኣብዚ ጊዜ ኣባላት ኣልቦም",
+      "description": "ኣባል መጀመርታ ለመጨመር ቁልፊ ላዕሊ ዝርዝር ተጠቀሙ።"
+    },
+    "modal": {
+      "title": "ኣባል ወስኽ",
+      "submit": "ኣባል ኣድልዎ",
+      "cancel": "ሰርዝ"
+    },
+    "messages": {
+      "loadError": "ኣባላት ቡድን ምጽናዕ ኣልተቻለን። በድሕሪ ግዜ ይሞክሩ።",
+      "createSuccess": "{name} ናብ ቡድን ተጨመረ።",
+      "deleteSuccess": "{name} ኣብ ቡድን ካብ እዚ ወጺኡ።",
+      "deleteError": "እዚ ኣባል ኣብዚ ሰዓት ምስወጣን ኣይከኣልን።",
+      "seedSuccess": "መደበኛ ዝርዝር መሪነትና ናብ ስርዓት ኣተኻኽለና።",
+      "seedError": "መደበኛ ዝርዝር መሪነትና ብራስና ምቅላስ ኣልተቻለን።",
+      "seedFallback": "ሕጂ እቲ መደበኛ ዝርዝር መሪነት ይተሓየሽ እዩ። ሓድስኩም ንምምሕዳስ ኣባላት ይውሳዱ ወይ ይጻሕፉ።"
     }
   }
 }
