@@ -271,25 +271,25 @@ const AboutPage: React.FC = () => {
       </section>
 
       {/* Our Team */}
-      <section className="relative py-24 bg-slate-950 text-slate-100 overflow-hidden">
+      <section className="relative py-24 bg-gradient-to-br from-white via-blue-50/40 to-cyan-50 text-slate-900 overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-          <div className="absolute -bottom-32 -right-32 h-[22rem] w-[22rem] rounded-full bg-blue-500/10 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" />
+          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-200/40 blur-3xl" />
+          <div className="absolute -bottom-32 -right-32 h-[22rem] w-[22rem] rounded-full bg-blue-200/30 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-200/40" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-16 flex max-w-4xl flex-col items-center text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1 text-lg font-semibold uppercase tracking-wide text-slate-200/90 shadow-lg shadow-cyan-500/20 backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white px-4 py-1 text-lg font-semibold uppercase tracking-wide text-cyan-700 shadow-lg shadow-cyan-500/15">
               <Users className="h-3.5 w-3.5" />
               {t("team.title")}
             </span>
-            <h2 className="mt-6 text-4xl font-bold leading-tight text-white sm:text-5xl">
+            <h2 className="mt-6 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
               {t("team.heading")}
             </h2>
-            <p className="mt-6 text-lg text-slate-200/80 sm:text-xl">
+            <p className="mt-6 text-lg text-slate-600 sm:text-xl">
               {t("team.lede")}
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-300/80 lg:text-sm">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-cyan-700/80 lg:text-sm">
               {[
                 "Administration & Finance",
                 "Human Resources",
@@ -298,7 +298,7 @@ const AboutPage: React.FC = () => {
               ].map((pill) => (
                 <span
                   key={pill}
-                  className="rounded-full border border-white/5 bg-white/5 px-4 py-1 tracking-[0.18em] uppercase"
+                  className="rounded-full border border-cyan-100 bg-white px-4 py-1 tracking-[0.18em] uppercase text-cyan-700 shadow-sm"
                 >
                   {pill}
                 </span>
@@ -311,24 +311,24 @@ const AboutPage: React.FC = () => {
             return (
               <>
                 {executiveLead && (
-                  <div className="relative mb-20 overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/[0.06] p-8 md:p-12 backdrop-blur-2xl shadow-[0_30px_120px_rgba(56,189,248,0.18)]">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-cyan-500/10" />
+                  <div className="relative mb-20 overflow-hidden rounded-[2.5rem] border border-cyan-200 bg-white/90 p-8 md:p-12 backdrop-blur-xl shadow-[0_30px_120px_rgba(136,192,255,0.18)]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100" />
                     <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
                       <div className="relative mx-auto md:mx-0">
-                        <div className="absolute inset-0 h-36 w-36 rounded-full bg-cyan-400/40 blur-2xl" />
-                        <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-700 ring-2 ring-white/30 ring-offset-4 ring-offset-slate-950 shadow-xl" />
-                        <span className="absolute inset-0 flex items-center justify-center text-3xl font-semibold tracking-wide text-white/90">
+                        <div className="absolute inset-0 h-36 w-36 rounded-full bg-cyan-300/40 blur-2xl" />
+                        <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl" />
+                        <span className="absolute inset-0 flex items-center justify-center text-3xl font-semibold tracking-wide text-slate-800">
                           {getInitials(executiveLead.role)}
                         </span>
                       </div>
                       <div className="text-center md:text-left">
-                        <Badge className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-100">
+                        <Badge className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-800">
                           {executiveLead.department}
                         </Badge>
-                        <h3 className="mt-4 text-3xl font-semibold text-white">
+                        <h3 className="mt-4 text-3xl font-semibold text-slate-900">
                           {executiveLead.role}
                         </h3>
-                        <p className="mt-2 text-lg font-medium text-slate-200/90">
+                        <p className="mt-2 text-lg font-medium text-slate-700">
                           {executiveLead.name}
                         </p>
                         <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm md:justify-start">
@@ -339,7 +339,7 @@ const AboutPage: React.FC = () => {
                           ].map((tag) => (
                             <span
                               key={tag}
-                              className="rounded-full border border-white/10 bg-white/5 px-4 py-1 text-slate-200/90"
+                              className="rounded-full border border-cyan-100 bg-white px-4 py-1 text-cyan-800 shadow-sm"
                             >
                               {tag}
                             </span>
@@ -354,29 +354,29 @@ const AboutPage: React.FC = () => {
                   {coreTeam.map((member, index) => (
                     <div
                       key={`${member.role}-${index}`}
-                      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-cyan-300/50 hover:bg-white/[0.08]"
+                      className="group relative overflow-hidden rounded-3xl border border-cyan-100 bg-white/80 p-6 backdrop-blur transition-all duration-500 hover:-translate-y-2 hover:border-cyan-300 hover:bg-white shadow-[0_20px_60px_rgba(15,98,254,0.12)]"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-cyan-400/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                       <div className="relative flex flex-col items-center text-center">
                         <div className="relative mb-6">
-                          <div className="absolute -inset-3 rounded-full bg-cyan-400/20 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
-                          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-800 ring-2 ring-white/20">
-                            <span className="text-2xl font-semibold tracking-wide text-white/90">
+                          <div className="absolute -inset-3 rounded-full bg-cyan-200/40 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
+                          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
+                            <span className="text-2xl font-semibold tracking-wide text-slate-800">
                               {getInitials(member.role)}
                             </span>
                           </div>
                         </div>
-                        <Badge className="mb-3 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-100">
+                        <Badge className="mb-3 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
                           {member.department}
                         </Badge>
-                        <h4 className="text-xl font-semibold text-white">
+                        <h4 className="text-xl font-semibold text-slate-900">
                           {member.role}
                         </h4>
-                        <p className="mt-2 text-sm uppercase tracking-[0.3em] text-slate-300">
+                        <p className="mt-2 text-sm uppercase tracking-[0.3em] text-slate-500">
                           {member.name}
                         </p>
-                        <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                        <p className="mt-4 text-sm text-slate-200/70">
+                        <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
+                        <p className="mt-4 text-sm text-slate-600">
                           Building resilient teams and unforgettable client
                           experiences.
                         </p>
