@@ -321,10 +321,10 @@ const AboutPage: React.FC = () => {
                   <div className="relative mb-20 overflow-hidden rounded-[2.5rem] border border-cyan-200 bg-white/90 p-8 md:p-12 backdrop-blur-xl shadow-[0_30px_120px_rgba(136,192,255,0.18)]">
                     <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100" />
                     <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
-                      <div className="relative mx-auto md:mx-0">
-                        <div className="absolute inset-0 h-36 w-36 rounded-full bg-cyan-300/40 blur-2xl" />
+                      <div className="relative mx-auto mt-4 md:mt-0 md:mx-0">
+                        <div className="absolute inset-0 h-40 w-40 rounded-full bg-cyan-300/40 blur-2xl" />
                         {executiveLead.image ? (
-                          <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
+                          <div className="relative h-36 w-36 overflow-hidden rounded-full ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
                             <Image
                               src={executiveLead.image}
                               alt={executiveLead.name}
@@ -334,8 +334,8 @@ const AboutPage: React.FC = () => {
                             />
                           </div>
                         ) : (
-                          <div className="relative h-32 w-32 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
-                            <span className="absolute inset-0 flex items-center justify-center text-3xl font-semibold tracking-wide text-slate-800">
+                          <div className="relative h-36 w-36 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
+                            <span className="absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-wide text-slate-800">
                               {getInitials(executiveLead.name)}
                             </span>
                           </div>
@@ -378,34 +378,34 @@ const AboutPage: React.FC = () => {
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                       <div className="relative flex flex-col items-center text-center">
-                        <div className="relative mb-6">
+                        <div className="relative mb-6 mt-4">
                           <div className="absolute -inset-3 rounded-full bg-cyan-200/40 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
                           {member.image ? (
-                            <div className="relative h-28 w-28 overflow-hidden rounded-full ring-2 ring-cyan-200/70">
+                            <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-cyan-200/70">
                               <Image
                                 src={member.image}
                                 alt={member.name}
                                 fill
-                                sizes="96px"
+                                sizes="128px"
                                 className="object-cover"
                               />
                             </div>
                           ) : (
-                            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
-                              <span className="text-2xl font-semibold tracking-wide text-slate-800">
+                            <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
+                              <span className="text-3xl font-semibold tracking-normal text-slate-800">
                                 {getInitials(member.name)}
                               </span>
                             </div>
                           )}
                         </div>
-                        <Badge className="mb-3 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
+                        <Badge className="mt-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-cyan-700">
                           {member.department}
                         </Badge>
-                        <h4 className="text-xl font-semibold text-slate-900">
-                          {member.role}
-                        </h4>
-                        <p className="mt-2 text-sm uppercase tracking-[0.3em] text-slate-500">
+                        <h4 className="mt-4 text-xl font-semibold text-slate-900">
                           {member.name}
+                        </h4>
+                        <p className="mt-1 text-sm font-medium uppercase tracking-[0.15em] text-slate-500">
+                          {member.role}
                         </p>
                         <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
                         <p className="mt-4 text-sm text-slate-600">
