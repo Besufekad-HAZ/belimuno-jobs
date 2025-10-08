@@ -613,22 +613,22 @@ export default function Home() {
       )}
 
       {/* Regions Where We Operate */}
-      <div className="relative py-20 bg-slate-950 text-slate-100 overflow-hidden">
+      <div className="relative py-20 bg-white text-slate-900 overflow-hidden">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-[20rem] w-[20rem] rounded-full bg-blue-500/15 blur-[160px]" />
-          <div className="absolute top-1/3 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full border border-white/10" />
+          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-200/10 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-[20rem] w-[20rem] rounded-full bg-blue-200/8 blur-[160px]" />
+          <div className="absolute top-1/3 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full border border-slate-100/40" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-16 flex max-w-4xl flex-col items-center text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-slate-200/90 shadow-lg shadow-cyan-500/10 backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700 shadow-sm">
               <MapPin className="h-4 w-4" />
               {t("regions.title")}
             </span>
-            <h2 className="mt-6 text-4xl font-bold text-white sm:text-5xl">
+            <h2 className="mt-6 text-4xl font-bold text-slate-900 sm:text-5xl">
               {t("regions.subtitle")}
             </h2>
-            <p className="mt-4 text-base text-slate-200/80 max-w-2xl">
+            <p className="mt-4 text-base text-slate-600 max-w-2xl">
               {t("regions.description")}
             </p>
           </div>
@@ -700,29 +700,30 @@ export default function Home() {
             ).map(({ key, border, icon }) => (
               <Card
                 key={key}
-                className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-white/20 hover:bg-white/[0.08] ${border}`}
+                className={`group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition-all duration-500 hover:-translate-y-2 hover:border-cyan-200 hover:shadow-lg ${border}`}
               >
-                <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-cyan-400/10" />
+                <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none z-0">
+                  {/* subtle darker overlay to give cards a gentle contrast on the white section */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900/6 via-transparent to-slate-900/10 z-0" />
                 </div>
-                <div className="relative flex items-start space-x-4">
-                  <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                    <MapPin className={`h-6 w-6 ${icon}`} />
-                    <div className="absolute -inset-2 rounded-3xl bg-white/10 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="relative flex items-start space-x-4 z-10">
+                  <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50">
+                    <MapPin className={`h-6 w-6 ${icon} z-10`} />
+                    <div className="absolute -inset-2 rounded-3xl bg-cyan-50 opacity-0 transition-opacity duration-500 group-hover:opacity-100 z-0 pointer-events-none" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <Badge className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-100">
+                      <Badge className="rounded-full bg-cyan-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.32em] text-cyan-700 border border-slate-100">
                         {t(`regions.${key}.tagline`)}
                       </Badge>
                     </div>
-                    <h3 className="mt-3 text-xl font-semibold text-white group-hover:text-cyan-100">
+                    <h3 className="mt-3 text-xl font-semibold text-slate-900 group-hover:text-cyan-700">
                       {t(`regions.${key}.name`)}
                     </h3>
-                    <p className="mt-2 text-sm text-slate-200/75">
+                    <p className="mt-2 text-sm text-slate-600">
                       {t(`regions.${key}.description`)}
                     </p>
-                    <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200/80">
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
                       <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                       {t(`regions.${key}.jobs`)}
                     </div>
