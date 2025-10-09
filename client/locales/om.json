@@ -588,6 +588,7 @@
     },
     "form": {
       "title": "Ergaa Ergaa",
+      "subtitle": "Please share a few details and teamni keenya si quunnama baay'ee salphaatti.",
       "fields": {
         "name": "Maqaa Guutuu",
         "email": "Imeelii",
@@ -602,7 +603,8 @@
       "status": {
         "success": "Ergaa ergame. Galatoomaa!",
         "error": "Ergamuu hin dandeenye. Irra deebi'i."
-      }
+      },
+      "helper": "We typically respond within one business day."
     },
     "office": {
       "title": "Biroo",
@@ -612,6 +614,10 @@
         "phone": "Bilbila",
         "pobox": "P.O.Box",
         "website": "Website"
+      },
+      "map": {
+        "title": "Bakka keenya irratti argadhu",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },

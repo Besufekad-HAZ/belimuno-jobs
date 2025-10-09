@@ -507,6 +507,7 @@
     },
     "form": {
       "title": "Send a message",
+      "subtitle": "Fill in the details below and our team will get back to you shortly.",
       "fields": {
         "name": "Full name",
         "email": "Email",
@@ -521,7 +522,8 @@
       "status": {
         "success": "Message sent. Thank you!",
         "error": "Failed to send. Try again."
-      }
+      },
+      "helper": "We typically respond within one business day."
     },
     "office": {
       "title": "Office",
@@ -531,6 +533,10 @@
         "phone": "Phone",
         "pobox": "P.O.Box",
         "website": "Website"
+      },
+      "map": {
+        "title": "Find us on the map",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },

@@ -159,6 +159,17 @@ const ManageTeamPage: React.FC = () => {
   const router = useRouter();
   const t = useTranslations("HRManageTeam");
 
+  const safeTranslate = useCallback(
+    (key: string, fallback: string) => {
+      const value = t(key);
+      if (!value || value === key || value === `HRManageTeam.${key}`) {
+        return fallback;
+      }
+      return value;
+    },
+    [t],
+  );
+
   const resetPhotoState = useCallback(() => {
     setPhotoPreview((prev) => {
       if (prev && prev.startsWith("blob:")) {
@@ -780,7 +791,11 @@ const ManageTeamPage: React.FC = () => {
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
-        title={editingMember ? t("modal.editTitle") : t("modal.title")}
+        title={
+          editingMember
+            ? safeTranslate("modal.editTitle", "Edit team member")
+            : safeTranslate("modal.title", "Add a team member")
+        }
         size="lg"
       >
         {formMessage && (
@@ -951,7 +966,7 @@ const ManageTeamPage: React.FC = () => {
               onClick={handleCloseModal}
               className="min-w-[110px]"
             >
-              {t("modal.cancel")}
+              {safeTranslate("modal.cancel", "Cancel")}
             </Button>
             <Button
               type="submit"
@@ -961,12 +976,16 @@ const ManageTeamPage: React.FC = () => {
               {editingMember ? (
                 <>
                   <Save className="h-4 w-4" />
-                  <span>{t("modal.update")}</span>
+                  <span>
+                    {safeTranslate("modal.update", "Update team member")}
+                  </span>
                 </>
               ) : (
                 <>
                   <UserPlus className="h-4 w-4" />
-                  <span>{t("modal.submit")}</span>
+                  <span>
+                    {safeTranslate("modal.submit", "Save team member")}
+                  </span>
                 </>
               )}
             </Button>

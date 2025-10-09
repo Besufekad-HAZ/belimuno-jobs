@@ -512,6 +512,7 @@
     },
     "form": {
       "title": "መልእኽቲ ስደዱ",
+      "subtitle": "ብዝሒ ዝተፈለጠ ዝርዝር ሙሉእ ክትህቡ ንዓቢ እናለና ብቅልጡፍ ንእልሰልኩም።",
       "fields": {
         "name": "ምሉእ ስም",
         "email": "ኢ-መይል",
@@ -526,7 +527,8 @@
       "status": {
         "success": "መልእኽቲኹም ተደይቡ። የቅንየለይ!",
         "error": "ኣይተደይበን። ደጊምኩም ፈትኑ።"
-      }
+      },
+      "helper": "ብዋናው ንሳብ ሓደ መስከረም መዓልቲ ብዙሕ እናመልስ ኢና።"
     },
     "office": {
       "title": "ቤት ጽሕፈት",
@@ -536,6 +538,10 @@
         "phone": "ተሌፎን",
         "pobox": "ፖ.ሳ.ቁ",
         "website": "ወብሳይት"
+      },
+      "map": {
+        "title": "ቦታናን በኣብ ካርታ ርኢ",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },
