@@ -27,6 +27,11 @@ const {
   updateTeamMember,
   deleteTeamMember,
   uploadTeamMemberPhoto,
+  getNews,
+  getNewsArticle,
+  createNews,
+  updateNews,
+  deleteNews,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
 const {
@@ -79,7 +84,7 @@ router.put("/disputes/:id", updateDispute);
 router.post(
   "/team/upload-photo",
   authorize("super_admin", "admin_hr"),
-  uploadTeamMemberPhoto,
+  uploadTeamMemberPhoto
 );
 
 // Public team route (no auth) for the About page and public site
@@ -96,5 +101,12 @@ router
   .route("/team/:id")
   .put(authorize("super_admin", "admin_hr"), updateTeamMember)
   .delete(authorize("super_admin", "admin_hr"), deleteTeamMember);
+
+// News management (any admin)
+router.get("/news", getNews);
+router.get("/news/:id", getNewsArticle);
+router.post("/news", createNews);
+router.put("/news/:id", updateNews);
+router.delete("/news/:id", deleteNews);
 
 module.exports = router;

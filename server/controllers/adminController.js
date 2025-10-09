@@ -7,6 +7,7 @@ const Notification = require("../models/Notification");
 const Report = require("../models/Report");
 const Dispute = require("../models/Dispute");
 const TeamMember = require("../models/TeamMember");
+const News = require("../models/News");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
@@ -1315,11 +1316,14 @@ exports.getTeamMembers = asyncHandler(async (req, res) => {
           const direction = token.startsWith("-") ? -1 : 1;
           const key = token.replace(/^[-+]/, "");
           return [key || "order", direction];
-        }),
+        })
       )
     : { order: 1, createdAt: -1 };
 
-  const numericLimit = Math.min(Math.max(parseInt(String(limit), 10) || 20, 1), 100);
+  const numericLimit = Math.min(
+    Math.max(parseInt(String(limit), 10) || 20, 1),
+    100
+  );
   const numericPage = Math.max(parseInt(String(page), 10) || 1, 1);
 
   const [rawMembers, rawTotal] = await Promise.all([
@@ -1348,13 +1352,19 @@ exports.getTeamMembers = asyncHandler(async (req, res) => {
 
     // prefer the member with the lower display order, then earlier createdAt
     const existing = dedupeMap.get(key);
-    const existingOrder = typeof existing.order === "number" ? existing.order : Number.POSITIVE_INFINITY;
-    const incomingOrder = typeof m.order === "number" ? m.order : Number.POSITIVE_INFINITY;
+    const existingOrder =
+      typeof existing.order === "number"
+        ? existing.order
+        : Number.POSITIVE_INFINITY;
+    const incomingOrder =
+      typeof m.order === "number" ? m.order : Number.POSITIVE_INFINITY;
 
     if (incomingOrder < existingOrder) {
       dedupeMap.set(key, m);
     } else if (incomingOrder === existingOrder) {
-      const existingCreated = existing.createdAt ? new Date(existing.createdAt) : new Date(0);
+      const existingCreated = existing.createdAt
+        ? new Date(existing.createdAt)
+        : new Date(0);
       const incomingCreated = m.createdAt ? new Date(m.createdAt) : new Date(0);
       if (incomingCreated < existingCreated) {
         dedupeMap.set(key, m);
@@ -1464,9 +1474,7 @@ exports.createTeamMember = asyncHandler(async (req, res) => {
       .sort({ order: -1 })
       .lean();
     resolvedOrder =
-      highest && typeof highest.order === "number"
-        ? highest.order + 1
-        : 1;
+      highest && typeof highest.order === "number" ? highest.order + 1 : 1;
   }
 
   const member = await TeamMember.create({
@@ -1580,5 +1588,187 @@ exports.deleteTeamMember = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Team member removed successfully",
+  });
+});
+
+// @desc    Get all news articles with filtering
+// @route   GET /api/admin/news
+// @access  Private/Any Admin
+exports.getNews = asyncHandler(async (req, res) => {
+  const {
+    status,
+    category,
+    page = 1,
+    limit = 20,
+    search,
+    sort = "-date",
+  } = req.query;
+
+  const query = {};
+  if (status) query.status = status;
+  if (category) query.category = category;
+
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { excerpt: { $regex: search, $options: "i" } },
+      { content: { $regex: search, $options: "i" } },
+      { author: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const sortBy = sort ? String(sort).split(",").join(" ") : "-date";
+  const newsQuery = News.find(query)
+    .sort(sortBy)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
+
+  const news = await newsQuery;
+  const total = await News.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: news.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit),
+    },
+    data: news,
+  });
+});
+
+// @desc    Get single news article
+// @route   GET /api/admin/news/:id
+// @access  Private/Any Admin
+exports.getNewsArticle = asyncHandler(async (req, res) => {
+  const news = await News.findById(req.params.id);
+
+  if (!news) {
+    return res.status(404).json({
+      success: false,
+      message: "News article not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: news,
+  });
+});
+
+// @desc    Create a new news article
+// @route   POST /api/admin/news
+// @access  Private/Any Admin
+exports.createNews = asyncHandler(async (req, res) => {
+  const {
+    title,
+    excerpt,
+    content,
+    date,
+    category,
+    imageUrl,
+    readTime,
+    author,
+  } = req.body;
+
+  if (!title || !excerpt || !category) {
+    return res.status(400).json({
+      success: false,
+      message: "Title, excerpt, and category are required",
+    });
+  }
+
+  const newsData = {
+    title: title.trim(),
+    excerpt: excerpt.trim(),
+    category: category.trim(),
+    createdBy: req.user._id,
+    updatedBy: req.user._id,
+  };
+
+  if (content) newsData.content = content.trim();
+  if (date) newsData.date = new Date(date);
+  if (imageUrl) newsData.imageUrl = imageUrl.trim();
+  if (readTime) newsData.readTime = readTime.trim();
+  if (author) newsData.author = author.trim();
+
+  const news = await News.create(newsData);
+
+  res.status(201).json({
+    success: true,
+    message: "News article created successfully",
+    data: news,
+  });
+});
+
+// @desc    Update a news article
+// @route   PUT /api/admin/news/:id
+// @access  Private/Any Admin
+exports.updateNews = asyncHandler(async (req, res) => {
+  const allowedFields = [
+    "title",
+    "excerpt",
+    "content",
+    "date",
+    "category",
+    "imageUrl",
+    "readTime",
+    "author",
+    "status",
+  ];
+
+  const updateData = {};
+  Object.keys(req.body).forEach((key) => {
+    if (allowedFields.includes(key)) {
+      if (key === "date" && req.body[key]) {
+        updateData[key] = new Date(req.body[key]);
+      } else if (typeof req.body[key] === "string") {
+        updateData[key] = req.body[key].trim();
+      } else {
+        updateData[key] = req.body[key];
+      }
+    }
+  });
+
+  updateData.updatedBy = req.user._id;
+
+  const news = await News.findByIdAndUpdate(req.params.id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!news) {
+    return res.status(404).json({
+      success: false,
+      message: "News article not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "News article updated successfully",
+    data: news,
+  });
+});
+
+// @desc    Delete a news article
+// @route   DELETE /api/admin/news/:id
+// @access  Private/Any Admin
+exports.deleteNews = asyncHandler(async (req, res) => {
+  const news = await News.findByIdAndDelete(req.params.id);
+
+  if (!news) {
+    return res.status(404).json({
+      success: false,
+      message: "News article not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "News article deleted successfully",
   });
 });
