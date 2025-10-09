@@ -139,8 +139,11 @@ const ManageTeamPage: React.FC = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TeamMember | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const hasFetchedRef = useRef(false);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const firstFieldRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const t = useTranslations("HRManageTeam");
 
@@ -294,6 +297,8 @@ const ManageTeamPage: React.FC = () => {
     setFormMessage(null);
     resetPhotoState();
     setShowModal(true);
+    // Focus first field after next paint
+    setTimeout(() => firstFieldRef.current?.focus(), 0);
   };
 
   const handleCloseModal = () => {
@@ -476,34 +481,34 @@ const ManageTeamPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (member: TeamMember) => {
-    if (!member._id) {
-      return;
-    }
+  const requestDelete = (member: TeamMember) => {
+    if (!member._id) return;
+    setDeleteTarget(member);
+  };
 
-    const confirmed = window.confirm(
-      `Remove ${member.name} from the leadership directory?`,
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+  const confirmDelete = async () => {
+    if (!deleteTarget || !deleteTarget._id) return;
+    setDeleting(true);
     try {
-      await adminAPI.deleteTeamMember(member._id);
-      setTeamMembers((prev) => prev.filter((item) => item._id !== member._id));
+      await adminAPI.deleteTeamMember(deleteTarget._id);
+      setTeamMembers((prev) => prev.filter((m) => m._id !== deleteTarget._id));
       toast.success(
-        t("messages.deleteSuccess", { name: member.name }) ||
-          `${member.name} has been removed from the team.`,
+        t("messages.deleteSuccess", { name: deleteTarget.name }) ||
+          `${deleteTarget.name} has been removed from the team.`,
       );
+      setDeleteTarget(null);
     } catch (error) {
       console.error("Failed to delete team member:", error);
       toast.error(
         t("messages.deleteError") ||
           "Unable to remove this team member right now.",
       );
+    } finally {
+      setDeleting(false);
     }
   };
+
+  const cancelDelete = () => setDeleteTarget(null);
 
   useEffect(() => {
     const user = getStoredUser();
@@ -642,7 +647,7 @@ const ManageTeamPage: React.FC = () => {
                             variant="ghost"
                             size="sm"
                             className="text-red-500 hover:text-red-600"
-                            onClick={() => handleDelete(member)}
+                            onClick={() => requestDelete(member)}
                             aria-label={`Remove ${member.name}`}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -696,6 +701,7 @@ const ManageTeamPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
+              ref={firstFieldRef}
               label="Full name"
               value={form.name}
               onChange={(event) =>
@@ -864,6 +870,40 @@ const ManageTeamPage: React.FC = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={!!deleteTarget}
+        onClose={deleting ? () => {} : cancelDelete}
+        title={deleteTarget ? `Remove ${deleteTarget.name}?` : "Confirm"}
+        size="sm"
+        preventCloseOnOutsideClick={deleting}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            This will permanently remove the team member from the directory. You
+            can re-add them later, but their ordering information may change.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={deleting ? undefined : cancelDelete}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              type="button"
+              onClick={confirmDelete}
+              loading={deleting}
+              disabled={deleting}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

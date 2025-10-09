@@ -82,6 +82,10 @@ router.post(
   uploadTeamMemberPhoto,
 );
 
+// Public team route (no auth) for the About page and public site
+const { getPublicTeamMembers } = require("../controllers/publicController");
+router.get("/public/team", getPublicTeamMembers);
+
 // Team management (HR & Super Admin)
 router
   .route("/team")

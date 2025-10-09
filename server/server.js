@@ -80,9 +80,11 @@ const job = require('./routes/job');
 const notification = require('./routes/notification');
 const contact = require('./routes/contact');
 const chat = require('./routes/chat');
+const publicRoutes = require('./routes/public');
 
 // API Info route
 app.get("/api", (req, res) => {
+	const publicRoutes = require("./routes/public");
 	res.status(200).json({
 		success: true,
 		message: "Belimuno Jobs API",
@@ -164,6 +166,7 @@ app.use("/api/jobs", job);
 app.use("/api/notifications", notification);
 app.use("/api/contact", contact);
 app.use("/api/chat", chat);
+app.use("/api", publicRoutes);
 
 // Catch 404 routes
 app.all("*", (req, res) => {

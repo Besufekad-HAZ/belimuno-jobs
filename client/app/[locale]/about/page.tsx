@@ -19,6 +19,19 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { DEFAULT_TEAM_MEMBERS } from "@/data/defaultTeamMembers";
+import type { DefaultTeamMember } from "@/data/defaultTeamMembers";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+
+type TeamMember = {
+  _id?: string;
+  name: string;
+  role: string;
+  department?: string;
+  image?: string;
+  photoUrl?: string;
+  order?: number;
+};
 
 const getInitials = (name: string) => {
   return (
@@ -32,10 +45,99 @@ const getInitials = (name: string) => {
   );
 };
 
+const mapDefaultMember = (member: DefaultTeamMember): TeamMember => {
+  const photo = member.image?.trim();
+  return {
+    ...member,
+    photoUrl: photo,
+    image: photo,
+  };
+};
+
+const DEFAULT_TEAM_FALLBACK: TeamMember[] =
+  DEFAULT_TEAM_MEMBERS.map(mapDefaultMember);
+
 const AboutPage: React.FC = () => {
   const t = useTranslations("AboutPage");
 
-  const teamMembers = DEFAULT_TEAM_MEMBERS;
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
+    DEFAULT_TEAM_FALLBACK,
+  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    const normalizeKey = (m: TeamMember) => {
+      const name = (m.name || "").toString().trim().toLowerCase();
+      const role = (m.role || "").toString().trim().toLowerCase();
+      return `${name}::${role}`;
+    };
+
+    const hydrateMember = (member: TeamMember): TeamMember => {
+      const fallbackImage = member.photoUrl?.trim() || member.image?.trim();
+      return {
+        ...member,
+        photoUrl: fallbackImage,
+        image: fallbackImage,
+      };
+    };
+
+    const fetchTeam = async () => {
+      try {
+        const res = await api.get("/team");
+        const data = res.data?.data || [];
+        if (!Array.isArray(data) || data.length === 0) {
+          return;
+        }
+
+        // Merge persisted members with defaults (persisted first)
+        const map = new Map<string, TeamMember>();
+        (data as TeamMember[])
+          .map(hydrateMember)
+          .forEach((m) => map.set(normalizeKey(m), m));
+
+        DEFAULT_TEAM_FALLBACK.forEach((m) => {
+          const key = normalizeKey(m);
+          if (!map.has(key)) {
+            map.set(key, m);
+            return;
+          }
+
+          const existing = map.get(key);
+          if (!existing) {
+            map.set(key, m);
+            return;
+          }
+
+          if ((!existing.image || !existing.image.trim()) && m.image) {
+            map.set(key, {
+              ...existing,
+              image: m.image,
+              photoUrl: existing.photoUrl || m.image,
+            });
+          }
+        });
+
+        const merged = Array.from(map.values()).sort(
+          (a: TeamMember, b: TeamMember) => {
+            const ao = typeof a.order === "number" ? a.order : 999;
+            const bo = typeof b.order === "number" ? b.order : 999;
+            return ao - bo;
+          },
+        );
+
+        if (mounted) setTeamMembers(merged);
+      } catch (err) {
+        // keep defaults on error
+        console.warn("Could not load persisted team members:", err);
+      }
+    };
+
+    fetchTeam();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const values = [
     {
@@ -84,6 +186,9 @@ const AboutPage: React.FC = () => {
       color: "bg-yellow-50 border-yellow-200 text-yellow-800",
     },
   ];
+
+  const [executiveLead, ...coreTeam] = teamMembers;
+  const executiveLeadPhoto = executiveLead?.photoUrl || executiveLead?.image;
 
   return (
     <div className="min-h-screen bg-gradient-background">
@@ -267,112 +372,108 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
 
-          {(() => {
-            const [executiveLead, ...coreTeam] = teamMembers;
-            return (
-              <>
-                {executiveLead && (
-                  <div className="relative mb-20 overflow-hidden rounded-[2.5rem] border border-cyan-200 bg-white/90 p-8 md:p-12 backdrop-blur-xl shadow-[0_30px_120px_rgba(136,192,255,0.18)]">
-                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100" />
-                    <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
-                      <div className="relative mx-auto mt-4 md:mt-0 md:mx-0">
-                        <div className="absolute inset-0 h-40 w-40 rounded-full bg-cyan-300/40 blur-2xl" />
-                        {executiveLead.image ? (
-                          <div className="relative h-36 w-36 overflow-hidden rounded-full ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
-                            <Image
-                              src={executiveLead.image}
-                              alt={executiveLead.name}
-                              fill
-                              sizes="128px"
-                              className="object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="relative h-36 w-36 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
-                            <span className="absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-wide text-slate-800">
-                              {getInitials(executiveLead.name)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-center md:text-left">
-                        <Badge className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-800">
-                          {executiveLead.department}
-                        </Badge>
-                        <h3 className="mt-4 text-3xl font-semibold text-slate-900">
-                          {executiveLead.role}
-                        </h3>
-                        <p className="mt-2 text-lg font-medium text-slate-700">
-                          {executiveLead.name}
-                        </p>
-                        <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm md:justify-start">
-                          {[
-                            "Strategic growth",
-                            "People-first leadership",
-                            "Operational excellence",
-                          ].map((tag) => (
-                            <span
-                              key={tag}
-                              className="rounded-full border border-cyan-100 bg-white px-4 py-1 text-cyan-800 shadow-sm"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+          {executiveLead && (
+            <div className="relative mb-20 overflow-hidden rounded-[2.5rem] border border-cyan-200 bg-white/90 p-8 md:p-12 backdrop-blur-xl shadow-[0_30px_120px_rgba(136,192,255,0.18)]">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100" />
+              <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
+                <div className="relative mx-auto mt-4 md:mt-0 md:mx-0">
+                  <div className="absolute inset-0 h-40 w-40 rounded-full bg-cyan-300/40 blur-2xl" />
+                  {executiveLeadPhoto ? (
+                    <div className="relative h-36 w-36 overflow-hidden rounded-full ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
+                      <Image
+                        src={executiveLeadPhoto}
+                        alt={executiveLead.name}
+                        fill
+                        sizes="128px"
+                        className="object-cover"
+                      />
                     </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {coreTeam.map((member, index) => (
-                    <div
-                      key={`${member.role}-${index}`}
-                      className="group relative overflow-hidden rounded-3xl border border-cyan-100 bg-white/80 p-6 backdrop-blur transition-all duration-500 hover:-translate-y-2 hover:border-cyan-300 hover:bg-white shadow-[0_20px_60px_rgba(15,98,254,0.12)]"
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                      <div className="relative flex flex-col items-center text-center">
-                        <div className="relative mb-6 mt-4">
-                          <div className="absolute -inset-3 rounded-full bg-cyan-200/40 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
-                          {member.image ? (
-                            <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-cyan-200/70">
-                              <Image
-                                src={member.image}
-                                alt={member.name}
-                                fill
-                                sizes="128px"
-                                className="object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
-                              <span className="text-3xl font-semibold tracking-normal text-slate-800">
-                                {getInitials(member.name)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <Badge className="mt-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-cyan-700">
-                          {member.department}
-                        </Badge>
-                        <h4 className="mt-4 text-xl font-semibold text-slate-900">
-                          {member.name}
-                        </h4>
-                        <p className="mt-1 text-sm font-medium uppercase tracking-[0.15em] text-slate-500">
-                          {member.role}
-                        </p>
-                        <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
-                        <p className="mt-4 text-sm text-slate-600">
-                          Building resilient teams and unforgettable client
-                          experiences.
-                        </p>
-                      </div>
+                  ) : (
+                    <div className="relative h-36 w-36 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
+                      <span className="absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-wide text-slate-800">
+                        {getInitials(executiveLead.name)}
+                      </span>
                     </div>
-                  ))}
+                  )}
                 </div>
-              </>
-            );
-          })()}
+                <div className="text-center md:text-left">
+                  <Badge className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-800">
+                    {executiveLead.department}
+                  </Badge>
+                  <h3 className="mt-4 text-3xl font-semibold text-slate-900">
+                    {executiveLead.role}
+                  </h3>
+                  <p className="mt-2 text-lg font-medium text-slate-700">
+                    {executiveLead.name}
+                  </p>
+                  <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm md:justify-start">
+                    {[
+                      "Strategic growth",
+                      "People-first leadership",
+                      "Operational excellence",
+                    ].map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full border border-cyan-100 bg-white px-4 py-1 text-cyan-800 shadow-sm"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {coreTeam.map((member, index) => {
+              const photo = member.photoUrl || member.image;
+              return (
+                <div
+                  key={`${member.role}-${index}`}
+                  className="group relative overflow-hidden rounded-3xl border border-cyan-100 bg-white/80 p-6 backdrop-blur transition-all duration-500 hover:-translate-y-2 hover:border-cyan-300 hover:bg-white shadow-[0_20px_60px_rgba(15,98,254,0.12)]"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  <div className="relative flex flex-col items-center text-center">
+                    <div className="relative mb-6 mt-4">
+                      <div className="absolute -inset-3 rounded-full bg-cyan-200/40 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
+                      {photo ? (
+                        <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-cyan-200/70">
+                          <Image
+                            src={photo}
+                            alt={member.name}
+                            fill
+                            sizes="128px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
+                          <span className="text-3xl font-semibold tracking-normal text-slate-800">
+                            {getInitials(member.name)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <Badge className="mt-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-cyan-700">
+                      {member.department}
+                    </Badge>
+                    <h4 className="mt-4 text-xl font-semibold text-slate-900">
+                      {member.name}
+                    </h4>
+                    <p className="mt-1 text-sm font-medium uppercase tracking-[0.15em] text-slate-500">
+                      {member.role}
+                    </p>
+                    <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
+                    <p className="mt-4 text-sm text-slate-600">
+                      Building resilient teams and unforgettable client
+                      experiences.
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
