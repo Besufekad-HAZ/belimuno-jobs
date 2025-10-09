@@ -1118,6 +1118,7 @@
       "title": "HR Actions",
       "buttons": {
         "manageTeam": "Manage Team",
+        "manageNews": "Manage News",
         "workerManagement": "Worker Management",
         "disputeResolution": "Dispute Resolution",
         "performanceReviews": "Performance Reviews"
