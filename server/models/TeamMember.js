@@ -24,6 +24,11 @@ const TeamMemberSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    photoKey: {
+      type: String,
+      trim: true,
+      maxlength: 180,
+    },
     email: {
       type: String,
       trim: true,

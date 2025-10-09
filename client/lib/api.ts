@@ -599,6 +599,7 @@ export const adminAPI = {
     role: string;
     department: string;
     photoUrl?: string;
+    photoKey?: string | null;
     email?: string;
     phone?: string;
     bio?: string;
@@ -611,6 +612,7 @@ export const adminAPI = {
       role?: string;
       department?: string;
       photoUrl?: string;
+      photoKey?: string | null;
       email?: string;
       phone?: string;
       bio?: string;

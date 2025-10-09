@@ -1249,7 +1249,8 @@
     "subtitle": "በአባውት ገፅ ላይ የሚታዩትን መሪዎች ያክሉ ወይም ያስወግዱ።",
     "buttons": {
       "back": "ወደ HR ዳሽቦርድ ተመለስ",
-      "addMember": "አባል ያክሉ"
+      "addMember": "አባል ያክሉ",
+      "editMember": "ያስተካክሉ"
     },
     "list": {
       "title": "የመሪነት እና ባህል አባላት",
@@ -1261,12 +1262,15 @@
     },
     "modal": {
       "title": "አባል ያክሉ",
+      "editTitle": "አባል ያስተካክሉ",
       "submit": "አባልን ያቀርቡ",
+      "update": "አባልን ያድሱ",
       "cancel": "ይቅር"
     },
     "messages": {
       "loadError": "የቡድን አባላትን ማቅረብ አልተቻለም። እባክዎ በኋላ ይሞክሩ።",
       "createSuccess": "{name} ወደ ቡድኑ ተጨምሯል።",
+      "updateSuccess": "{name} ተዘምኗል።",
       "deleteSuccess": "{name} ከቡድኑ ተወግዷል።",
       "deleteError": "ይህን አባል ጊዜው ላይ ማስወገድ አልተቻለም።",
       "seedSuccess": "የተለመዱትን የመሪነት ዝርዝሮች ወደ ዳይሬክቶሪው ጨምረናል።",

@@ -14,6 +14,8 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 
+const fsPromises = fs.promises;
+
 // Lightweight in-memory cache for dashboard
 const __dashboardCache = { data: null, ts: 0 };
 
@@ -25,6 +27,41 @@ const ensureDirectory = (dir) => {
 
 const teamUploadsDir = path.join(__dirname, "..", "uploads", "team");
 ensureDirectory(teamUploadsDir);
+
+const normalizePhotoKey = (rawKey) => {
+  if (!rawKey) {
+    return undefined;
+  }
+  const trimmed = String(rawKey).trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return path.basename(trimmed).replace(/[^a-zA-Z0-9._-]/g, "-");
+};
+
+const inferManagedPhotoKey = (url) => {
+  if (!url || typeof url !== "string") {
+    return undefined;
+  }
+  const cleaned = url.split("?")[0]?.split("#")[0] || "";
+  if (!cleaned.includes("/uploads/team/")) {
+    return undefined;
+  }
+  return path.basename(cleaned);
+};
+
+const deleteTeamPhoto = async (photoKey) => {
+  if (!photoKey) {
+    return;
+  }
+  try {
+    await fsPromises.unlink(path.join(teamUploadsDir, photoKey));
+  } catch (error) {
+    if (error && error.code !== "ENOENT") {
+      console.warn("Failed to delete team member photo", photoKey, error);
+    }
+  }
+};
 
 const teamPhotoStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {
@@ -1422,7 +1459,8 @@ exports.uploadTeamMemberPhoto = (req, res) => {
 // @route   POST /api/admin/team
 // @access  Private/Admin HR or Super Admin
 exports.createTeamMember = asyncHandler(async (req, res) => {
-  const { name, role, department, photoUrl, email, phone, bio } = req.body;
+  const { name, role, department, photoUrl, photoKey, email, phone, bio } =
+    req.body;
   let { order } = req.body;
 
   if (!name || !role || !department) {
@@ -1469,11 +1507,16 @@ exports.createTeamMember = asyncHandler(async (req, res) => {
         : 1;
   }
 
+  const sanitizedPhotoUrl = photoUrl?.trim() || undefined;
+  const sanitizedPhotoKey = normalizePhotoKey(photoKey) ||
+    inferManagedPhotoKey(sanitizedPhotoUrl);
+
   const member = await TeamMember.create({
     name: trimmedName,
     role: trimmedRole,
     department: trimmedDepartment,
-    photoUrl: photoUrl?.trim() || undefined,
+    photoUrl: sanitizedPhotoUrl,
+    photoKey: sanitizedPhotoKey,
     email: email?.trim() || undefined,
     phone: phone?.trim() || undefined,
     bio: bio?.trim() || undefined,
@@ -1493,68 +1536,130 @@ exports.createTeamMember = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/team/:id
 // @access  Private/Admin HR or Super Admin
 exports.updateTeamMember = asyncHandler(async (req, res) => {
-  const allowedFields = [
-    "name",
-    "role",
-    "department",
-    "photoUrl",
-    "email",
-    "phone",
-    "bio",
-    "order",
-    "status",
-  ];
-
-  const updateData = {};
-  for (const key of allowedFields) {
-    if (Object.prototype.hasOwnProperty.call(req.body, key)) {
-      updateData[key] = req.body[key];
-    }
-  }
-
-  if (updateData.name) updateData.name = String(updateData.name).trim();
-  if (updateData.role) updateData.role = String(updateData.role).trim();
-  if (updateData.department)
-    updateData.department = String(updateData.department).trim();
-  if (updateData.photoUrl)
-    updateData.photoUrl = String(updateData.photoUrl).trim();
-  if (updateData.email) updateData.email = String(updateData.email).trim();
-  if (updateData.phone) updateData.phone = String(updateData.phone).trim();
-  if (updateData.bio) updateData.bio = String(updateData.bio).trim();
-  if (updateData.order !== undefined && updateData.order !== null) {
-    const parsedOrder = Number(updateData.order);
-    if (Number.isNaN(parsedOrder) || parsedOrder < 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Display order must be a positive number",
-      });
-    }
-    updateData.order = parsedOrder;
-  }
-
-  if (updateData.status) {
-    const normalizedStatus = String(updateData.status);
-    if (!["active", "archived"].includes(normalizedStatus)) {
-      return res.status(400).json({
-        success: false,
-        message: "Status must be either active or archived",
-      });
-    }
-    updateData.status = normalizedStatus;
-  }
-
-  updateData.updatedBy = req.user?._id;
-
-  const member = await TeamMember.findByIdAndUpdate(req.params.id, updateData, {
-    new: true,
-    runValidators: true,
-  });
+  const member = await TeamMember.findById(req.params.id);
 
   if (!member) {
     return res.status(404).json({
       success: false,
       message: "Team member not found",
     });
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "name")) {
+    const trimmedName = String(req.body.name || "").trim();
+    if (!trimmedName) {
+      return res.status(400).json({
+        success: false,
+        message: "Name cannot be empty",
+      });
+    }
+    member.name = trimmedName;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "role")) {
+    const trimmedRole = String(req.body.role || "").trim();
+    if (!trimmedRole) {
+      return res.status(400).json({
+        success: false,
+        message: "Role cannot be empty",
+      });
+    }
+    member.role = trimmedRole;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "department")) {
+    const trimmedDepartment = String(req.body.department || "").trim();
+    if (!trimmedDepartment) {
+      return res.status(400).json({
+        success: false,
+        message: "Department cannot be empty",
+      });
+    }
+    member.department = trimmedDepartment;
+  }
+
+  const previousPhotoKey = member.photoKey;
+
+  let photoUrlProvided = false;
+  let photoKeyProvided = false;
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "photoUrl")) {
+    photoUrlProvided = true;
+    const trimmedUrl = String(req.body.photoUrl || "").trim();
+    member.photoUrl = trimmedUrl || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "photoKey")) {
+    photoKeyProvided = true;
+    const rawKey = req.body.photoKey;
+    if (rawKey === null || rawKey === "") {
+      member.photoKey = undefined;
+    } else {
+      member.photoKey = normalizePhotoKey(rawKey);
+    }
+  }
+
+  if (photoUrlProvided && !photoKeyProvided) {
+    if (!member.photoUrl) {
+      member.photoKey = undefined;
+    } else {
+      const inferredKey = inferManagedPhotoKey(member.photoUrl);
+      if (inferredKey) {
+        member.photoKey = inferredKey;
+      }
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "email")) {
+    const trimmedEmail = String(req.body.email || "").trim();
+    member.email = trimmedEmail || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "phone")) {
+    const trimmedPhone = String(req.body.phone || "").trim();
+    member.phone = trimmedPhone || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "bio")) {
+    const trimmedBio = String(req.body.bio || "").trim();
+    member.bio = trimmedBio || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "order")) {
+    const incoming = req.body.order;
+    if (incoming === null || incoming === undefined || incoming === "") {
+      member.order = undefined;
+    } else {
+      const parsedOrder = Number(incoming);
+      if (Number.isNaN(parsedOrder) || parsedOrder < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Display order must be a positive number",
+        });
+      }
+      member.order = parsedOrder;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "status")) {
+    const normalizedStatus = String(req.body.status || "").trim();
+    if (normalizedStatus && !["active", "archived"].includes(normalizedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be either active or archived",
+      });
+    }
+    if (normalizedStatus) {
+      member.status = normalizedStatus;
+    }
+  }
+
+  member.updatedBy = req.user?._id;
+
+  await member.save();
+
+  if (previousPhotoKey && previousPhotoKey !== member.photoKey) {
+    await deleteTeamPhoto(previousPhotoKey);
   }
 
   res.status(200).json({
@@ -1575,6 +1680,11 @@ exports.deleteTeamMember = asyncHandler(async (req, res) => {
       success: false,
       message: "Team member not found",
     });
+  }
+
+  const managedPhotoKey = member.photoKey || inferManagedPhotoKey(member.photoUrl);
+  if (managedPhotoKey) {
+    await deleteTeamPhoto(managedPhotoKey);
   }
 
   res.status(200).json({

@@ -1319,7 +1319,8 @@
     "subtitle": "Add or remove the leaders who appear on the About page.",
     "buttons": {
       "back": "Back to HR Dashboard",
-      "addMember": "Add Team Member"
+      "addMember": "Add Team Member",
+      "editMember": "Edit"
     },
     "list": {
       "title": "Leadership & Culture Directory",
@@ -1331,12 +1332,15 @@
     },
     "modal": {
       "title": "Add a Team Member",
+      "editTitle": "Edit Team Member",
       "submit": "Save team member",
+      "update": "Update team member",
       "cancel": "Cancel"
     },
     "messages": {
       "loadError": "We couldn't load team members. Please try again shortly.",
       "createSuccess": "{name} has been added to the team.",
+      "updateSuccess": "{name} has been updated.",
       "deleteSuccess": "{name} has been removed from the team.",
       "deleteError": "Unable to remove this team member right now.",
       "seedSuccess": "Loaded the default leadership roster into the directory.",

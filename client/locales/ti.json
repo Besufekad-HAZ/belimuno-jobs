@@ -1254,7 +1254,8 @@
     "subtitle": "ኣብ ሓበሬታ About ዝተሓተቱ መሪታት ያእትዱን ወይ ይለውጡን።",
     "buttons": {
       "back": "ናብ ዳሽቦርድ HR ተመለስ",
-      "addMember": "ኣባል ወስኽ"
+      "addMember": "ኣባል ወስኽ",
+      "editMember": "ጽሓፍ"
     },
     "list": {
       "title": "መሪነትን ባህሊን ዝያዳምሩ ኣባላት",
@@ -1266,12 +1267,15 @@
     },
     "modal": {
       "title": "ኣባል ወስኽ",
+      "editTitle": "ኣባል ጽሓፍ",
       "submit": "ኣባል ኣድልዎ",
+      "update": "ኣባል ኣሻሽል",
       "cancel": "ሰርዝ"
     },
     "messages": {
       "loadError": "ኣባላት ቡድን ምጽናዕ ኣልተቻለን። በድሕሪ ግዜ ይሞክሩ።",
       "createSuccess": "{name} ናብ ቡድን ተጨመረ።",
+      "updateSuccess": "{name} ተሻሽለ።",
       "deleteSuccess": "{name} ኣብ ቡድን ካብ እዚ ወጺኡ።",
       "deleteError": "እዚ ኣባል ኣብዚ ሰዓት ምስወጣን ኣይከኣልን።",
       "seedSuccess": "መደበኛ ዝርዝር መሪነትና ናብ ስርዓት ኣተኻኽለና።",
