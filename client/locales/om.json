@@ -31,7 +31,7 @@
         "part2": "Carraawwan waliin hidhu"
       },
       "description": "Belimuno Jobs platformaa hiree HRaa Itoophiyaa keessatti kan caaltuudha, hojjettoota qophaa'aan qaban waliin daldaltoota magaalaa hunda keessatti hidha. Kumoota hojjettoota mijataa hojii isaanii ijaaruu keessatti walitti qabanii.",
-      "getStarted": "Jalqabi",
+      "register": "galmeessuu",
       "goToDashboard": "Daashboorotti deemi",
       "browseJobs": "Hojiiwwan ilaali"
     },
@@ -66,6 +66,82 @@
         "title": "Kaffaltiidhaan Argadhu",
         "description": "Proojektota xumuri fi kaffaltii nagaa platformaa keenya irraa argadhu"
       }
+    },
+    "testimonials": {
+      "eyebrow": "Mirkaneessa",
+      "title": "Hirmaattoonni Belimuno irratti amanan akkana jedhu",
+      "subtitle": "Hoggantoota HR fi hojjettoonni Belimuno fayyadamuun projektoota Itoophiyaa keessatti akkamitti milkeessan dhaggeeffadhaa.",
+      "metrics": "Guutuu biyyaatti maamiloota fi ogeeyyii <count>{total}</count> biratti jaalatame.",
+      "controls": {
+        "previous": "Mirkaneessa dura",
+        "next": "Mirkaneessa itti aanuu",
+        "goTo": "Slayidii mirkaneessa {index} bira galu"
+      },
+      "testimonial1": {
+        "content": "Belimuno bakka hojii barbaachisaa guyyaa muraasa keessatti nuuf guute, torbanootiin hin turre.",
+        "name": "Meron Alemu",
+        "role": "Bulchaa Dalagaa",
+        "company": "EthioLogistics"
+      },
+      "testimonial2": {
+        "content": "Projektii guddaa hundaaf ogeeyyii amanamoo argachuuf Belimuno irratti abdanna.",
+        "name": "Samuel Kebede",
+        "role": "Daayirektara Pirojektii",
+        "company": "Blue Nile Construction"
+      },
+      "testimonial3": {
+        "content": "Platformichi filannoo fi kaffaltii garee fagoo keenyaaf salphaa taasise.",
+        "name": "Hanna Tesfaye",
+        "role": "Adda Durtii HR",
+        "company": "Habesha Foods"
+      }
+    },
+    "regions": {
+      "title": "Naannolee keessatti hojjenne",
+      "subtitle": "Itoophiyaa guutuu keessatti hojjettoota fi maamiltoota walitti nu fidna",
+      "addisAbaba": {
+        "name": "Finfinnee",
+        "description": "Kutaa faayinaansii, tekinooloojii fi bulchiinsaaf bu'uura.",
+        "jobs": "Hojii 120+ hojjetamaa jiru"
+      },
+      "oromia": {
+        "name": "Oromiyaa",
+        "description": "Ogeeyyii lojistiksii, qonnaa fi projektii lafa irrati hojjetan.",
+        "jobs": "Hojii 80+ hojjetamaa jiru"
+      },
+      "amhara": {
+        "name": "Amaaraa",
+        "description": "Carraa tajaajila imalaa, barnootaa fi fayyaa.",
+        "jobs": "Hojii 60+ hojjetamaa jiru"
+      },
+      "tigray": {
+        "name": "Tigraay",
+        "description": "Hojii ijaarsa haaromsaa, tajaajilaa fi bulchiinsa.",
+        "jobs": "Hojii 40+ hojjetamaa jiru"
+      },
+      "snnp": {
+        "name": "SNNP",
+        "description": "Bakka oomisha, hoteelaa fi projektoota aadaa.",
+        "jobs": "Hojii 55+ hojjetamaa jiru"
+      },
+      "sidama": {
+        "name": "Siidaamaa",
+        "description": "Tokkummaa qonnaa, daldalaa fi tajaajila maamilaa.",
+        "jobs": "Hojii 45+ hojjetamaa jiru"
+      }
+    },
+    "news": {
+      "title": "Waan Haaraa Maal Jira?",
+      "subtitle": "Oduu dhiyaataa, fooyya'iinsa, fi beeksisaawwan Belimuno Jobs irraa dhufanii walitti qabaa",
+      "readMore": "Dabalataa Dubbisi",
+      "viewAllNews": "Oduu Hundaa Ilaali"
+    },
+    "NewsDetail": {
+      "backButton": "Deebi'i",
+      "shareButton": "Qoodsi",
+      "backToHome": "Manaatti Deebi'i",
+      "viewAllNews": "Oduu Hundaa Ilaali",
+      "relatedNews": "Oduu Walqabataa"
     },
     "cta": {
       "title": "Imalaa Keessan Jalqabuu Ready Ta'anii?",
@@ -308,6 +384,17 @@
       "of": "irraa",
       "next": "Itti Aanu"
     },
+    "jobsForYou": {
+      "title": "Hojiiwwan Siif Jiru",
+      "subtitle": "Hojiiwwan dandeettii kee waliin walqabatan",
+      "matchingJobs": "hojiiwwan walqabatan",
+      "viewAll": "Hunda Ilalaa",
+      "more": "dabalataa"
+    },
+    "searchAndJobs": {
+      "title": "Hojiiwwan Barbaadi fi Ilalaa",
+      "subtitle": "Hojiiwwan dandeettii fi fedhii kee waliin walqabatan barbaadi"
+    },
     "categories": {
       "1": "Fooyya'insa Weebsaayitii",
       "2": "Fooyya'insa Mobiila",
@@ -320,6 +407,42 @@
       "9": "Gorsaa",
       "10": "Kan Biroo"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "Hojii Hinargamne",
+      "description": "Hojii barbaachisaa kee hinjiru ykn darbameera.",
+      "backButton": "Hojiiwwan Irraa Deebi'i"
+    },
+    "loading": "Galmaa'aa...",
+    "backToJobs": "Hojiiwwan Irraa Deebi'i",
+    "saveJob": "Hojii Qusadhu",
+    "saved": "Qusatame",
+    "share": "Qoodaa",
+    "jobDetails": "Faallaawwan Hojii",
+    "category": "Gosa",
+    "budget": "Baajeta",
+    "deadline": "Guyyaa Xumuraa",
+    "location": "Bakka",
+    "experienceLevel": "Sadarkaa Ogummaa",
+    "posted": "Maxxanfame",
+    "requiredSkills": "Dandeettii Barbaachisaa",
+    "tags": "Mallattoolee",
+    "deliverables": "Wantoota Fudhatamaa",
+    "attachments": "Faayiliiwwan Walqabatan",
+    "clientInfo": "Odeeffannoo Maamilaa",
+    "viewClientProfile": "Seenaa Maamilaa Ilalaa",
+    "actions": "Hojiiwwan",
+    "applyNow": "Amma Applii Godhaa",
+    "manageJob": "Hojii Bulchi",
+    "loginToApply": "Applii Godhuuf Seenuu",
+    "jobStatus": "Haala Hojii",
+    "status": "Haala",
+    "priority": "Dur-sammuu",
+    "public": "Ummataa",
+    "progress": "Fooyya'iinsa",
+    "yes": "Eeyyee",
+    "no": "Lakki"
   },
   "ContactPage": {
     "hero": {
@@ -493,6 +616,16 @@
           "placeholder": "Ergaa barreessi"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "Hojiiwwan Siif Jiru",
+      "subtitle": "Hojiiwwan dandeettii kee waliin walqabatan",
+      "matchingJobs": "hojiiwwan walqabatan",
+      "viewAll": "Hunda Ilali",
+      "more": "Dabalataa",
+      "viewDetails": "Faallaawwan Ilali",
+      "applyNow": "Amma Applii Godhaa",
+      "applied": "Applii Godhame"
     }
   },
   "ClientDashboard": {
@@ -536,6 +669,7 @@
         "actions": {
           "viewDetails": "Faallaawwan Ilali",
           "applications": "Appliiwwan",
+          "editJob": "Hojii Dahaa",
           "requestRevision": "Deebii Kadhadhu",
           "payAndRate": "Kaffaltiifii Sadarkaa",
           "deleteJob": "Hojii Dhiisi",
@@ -709,9 +843,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "Daashbooraa Bulchinsa Ala Tajaajilaa",
-      "subtitle": "Pirojeektota, maamiloota, fi dalagaa daldalaa bulchiisi",
+      "subtitle": "Hojiiwwan, maamiloota, fi dalagaa daldalaa bulchiisi",
       "buttons": {
-        "manageProjects": "Pirojeektota Bulchiisi",
+        "manageJobs": "Hojiiwwan Bulchiisi",
         "clientManagement": "Bulchiinsa Maamilaa"
       }
     },
@@ -720,9 +854,9 @@
         "title": "Maamiloota Waliigalaa",
         "label": "Maamiloota Waliigalaa"
       },
-      "activeProjects": {
-        "title": "Pirojeektota Hojii Irra Jiran",
-        "label": "Pirojeektota Hojii Irra Jiran"
+      "activeJobs": {
+        "title": "Hojiiwwan Hojii Irra Jiran",
+        "label": "Hojiiwwan Hojii Irra Jiran"
       },
       "totalRevenue": {
         "title": "Argatta Waliigalaa",
@@ -738,27 +872,28 @@
         "title": "Qo'annoo Maamilaa",
         "rating": "irraa 5"
       },
-      "projectSuccess": {
-        "title": "Sadarkaa Milkaa'ina Pirojeektii"
+      "jobSuccess": {
+        "title": "Sadarkaa Milkaa'ina Hojii"
       },
       "revenueGrowth": {
         "title": "Guddina Argattaa"
       }
     },
-    "projects": {
-      "title": "Pirojeektota Duraanii",
+    "jobs": {
+      "title": "Hojiiwwan Duraanii",
       "viewAll": "Hunda Ilali",
       "details": {
         "client": "Maamilaa",
         "progress": "Itti Fufiinsa",
-        "title": "Faallaawwan Pirojeektii",
+        "title": "Faallaawwan Hojii",
         "assignedWorker": "Hojjetaa Kenname",
         "deadline": "Yeroo Xumuraa",
         "budget": "Baajeta",
         "buttons": {
           "viewDetails": "Faallaawwan Ilali",
           "contactClient": "Maamilaa Qunnamaa",
-          "generateReport": "Ripoorii Uumi"
+          "generateReport": "Ripoorii Uumi",
+          "applicants": "Appliiwwan"
         }
       },
       "status": {
@@ -772,14 +907,14 @@
       "title": "Maamiloota Ol'aanaa",
       "viewAll": "Hunda Ilali",
       "metrics": {
-        "projects": "pirojeektota"
+        "jobs": "hojiiwwan"
       }
     },
     "operations": {
       "title": "Dalagaa Daldalaa",
       "buttons": {
         "clientManagement": "Bulchiinsa Maamilaa",
-        "projectOversight": "Ilaalcha Pirojeektii",
+        "jobOversight": "Ilaalcha Hojii",
         "businessAnalytics": "Qorannoo Daldalaa",
         "financialReports": "Ripoorota Qabeenyaa"
       }
@@ -787,10 +922,10 @@
     "keyMetrics": {
       "title": "Meetirika Gurguddoo",
       "metrics": {
-        "avgProjectValue": "Giddugaleessaa Gatii Pirojeektii",
+        "avgJobValue": "Giddugaleessaa Gatii Hojii",
         "clientRetention": "Dhaabbannaa Maamilaa",
-        "projectCompletionRate": "Sadarkaa Xumura Pirojeektii",
-        "avgProjectDuration": "Giddugaleessaa Yeroo Pirojeektii"
+        "jobCompletionRate": "Sadarkaa Xumura Hojii",
+        "avgJobDuration": "Giddugaleessaa Yeroo Hojii"
       }
     },
     "recentActivity": {

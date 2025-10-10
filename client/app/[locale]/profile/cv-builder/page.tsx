@@ -55,20 +55,22 @@ const CVBuilderPage: React.FC = () => {
       level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
     }>;
   } | null>(null);
-  const [availableJobs, setAvailableJobs] = useState<Array<{
-    _id: string;
-    title: string;
-    description: string;
-    budget: { min: number; max: number };
-    category: string;
-    location: string;
-    createdAt: string;
-    deadline: string;
-    client: {
-      name: string;
-      companyName?: string;
-    };
-  }>>([]);
+  const [availableJobs, setAvailableJobs] = useState<
+    Array<{
+      _id: string;
+      title: string;
+      description: string;
+      budget: { min: number; max: number };
+      category: string;
+      location: string;
+      createdAt: string;
+      deadline: string;
+      client: {
+        name: string;
+        companyName?: string;
+      };
+    }>
+  >([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const router = useRouter();
 
@@ -89,13 +91,13 @@ const CVBuilderPage: React.FC = () => {
       setLoading(true);
       const response = await authAPI.getMe();
       const userData = response.data?.user;
-      
+
       if (!userData) {
         throw new Error("No user data found");
       }
-      
+
       const profile = userData.profile;
-      
+
       // Define extended user data interface
       interface ExtendedUserData {
         workerProfile?: {
@@ -119,7 +121,7 @@ const CVBuilderPage: React.FC = () => {
           portfolio?: string[];
         };
       }
-      
+
       interface ExtendedProfile {
         cv?: {
           data?: string | object;
@@ -136,17 +138,16 @@ const CVBuilderPage: React.FC = () => {
           level: string;
         }>;
       }
-      
+
       const extendedUserData = userData as ExtendedUserData;
       const workerProfile = extendedUserData.workerProfile;
       const extendedProfile = profile as ExtendedProfile;
-      
+
       // Check if CV data exists in profile
       const cvData = extendedProfile?.cv?.data;
       if (cvData) {
-        const parsedCVData = typeof cvData === 'string' 
-          ? JSON.parse(cvData) 
-          : cvData;
+        const parsedCVData =
+          typeof cvData === "string" ? JSON.parse(cvData) : cvData;
         setInitialCVData(parsedCVData);
       } else {
         // Initialize with user's basic info
@@ -155,16 +156,16 @@ const CVBuilderPage: React.FC = () => {
             fullName: user?.name || "",
             email: user?.email || "",
             phone: profile?.phone || "",
-            address: extendedProfile?.address?.city 
-              ? `${extendedProfile.address.city}, ${extendedProfile.address.country || 'Ethiopia'}` 
+            address: extendedProfile?.address?.city
+              ? `${extendedProfile.address.city}, ${extendedProfile.address.country || "Ethiopia"}`
               : "",
             summary: profile?.bio || "",
             workerSkills: profile?.skills || [],
             workerExperience: String(profile?.experience || ""),
             workerHourlyRate: profile?.hourlyRate || 0,
             portfolio: workerProfile?.portfolio?.[0] || "",
-            dateOfBirth: extendedProfile?.dob 
-              ? String(extendedProfile.dob).substring(0, 10) 
+            dateOfBirth: extendedProfile?.dob
+              ? String(extendedProfile.dob).substring(0, 10)
               : "",
             gender: extendedProfile?.gender || "",
           },
@@ -187,13 +188,24 @@ const CVBuilderPage: React.FC = () => {
             current: false, // Assuming 'current' status needs to be re-evaluated or handled differently
             description: exp.description,
           })),
-          detailedSkills: (extendedProfile?.detailedSkills || []).map((skill) => ({
-            id: skill._id || Date.now().toString(),
-            name: skill.name,
-            level: (["Beginner", "Intermediate", "Advanced", "Expert"].includes(skill.level) 
-              ? skill.level 
-              : "Beginner") as "Beginner" | "Intermediate" | "Advanced" | "Expert",
-          })),
+          detailedSkills: (extendedProfile?.detailedSkills || []).map(
+            (skill) => ({
+              id: skill._id || Date.now().toString(),
+              name: skill.name,
+              level: ([
+                "Beginner",
+                "Intermediate",
+                "Advanced",
+                "Expert",
+              ].includes(skill.level)
+                ? skill.level
+                : "Beginner") as
+                | "Beginner"
+                | "Intermediate"
+                | "Advanced"
+                | "Expert",
+            }),
+          ),
         });
       }
     } catch (error) {
@@ -232,16 +244,20 @@ const CVBuilderPage: React.FC = () => {
       degree: string;
       fieldOfStudy: string;
       startDate: string;
-      endDate: string | undefined;
+      endDate?: string | null;
       current: boolean;
     }>;
     experience: Array<{
       company: string;
       position: string;
       startDate: string;
-      endDate: string | undefined;
+      endDate?: string | null;
       current: boolean;
       description: string;
+    }>;
+    detailedSkills?: Array<{
+      name: string;
+      level?: string;
     }>;
   }) => {
     try {
@@ -250,8 +266,9 @@ const CVBuilderPage: React.FC = () => {
       const profileUpdate: Record<string, unknown> = {
         phone: cvData.personalInfo.phone,
         address: {
-          city: cvData.personalInfo.address.split(',')[0]?.trim() || "",
-          country: cvData.personalInfo.address.split(',')[1]?.trim() || "Ethiopia",
+          city: cvData.personalInfo.address.split(",")[0]?.trim() || "",
+          country:
+            cvData.personalInfo.address.split(",")[1]?.trim() || "Ethiopia",
         },
         bio: cvData.personalInfo.summary,
         skills: cvData.personalInfo.workerSkills,
@@ -261,13 +278,13 @@ const CVBuilderPage: React.FC = () => {
         cv: {
           data: JSON.stringify(cvData),
           mimeType: "application/json",
-          name: `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.json`,
-        }
+          name: `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.json`,
+        },
       };
 
       // Add workerProfile specific fields
       const workerProfileUpdate: Record<string, unknown> = {
-        education: cvData.education.map(edu => ({
+        education: cvData.education.map((edu) => ({
           school: edu.institution,
           degree: edu.degree,
           field: edu.fieldOfStudy,
@@ -275,7 +292,7 @@ const CVBuilderPage: React.FC = () => {
           endDate: edu.current ? null : edu.endDate,
           description: "", // Description is not in CV builder Education, can be added if needed
         })),
-        workHistory: cvData.experience.map(exp => ({
+        workHistory: cvData.experience.map((exp) => ({
           company: exp.company,
           title: exp.position,
           startDate: exp.startDate,
@@ -285,7 +302,10 @@ const CVBuilderPage: React.FC = () => {
         // Detailed skills are stored separately in cvData.detailedSkills, not workerProfile.skills
       };
 
-      await authAPI.updateProfile({ profile: profileUpdate, workerProfile: workerProfileUpdate });
+      await authAPI.updateProfile({
+        profile: profileUpdate,
+        workerProfile: workerProfileUpdate,
+      });
       toast.success("CV saved successfully!");
     } catch (error) {
       console.error("Failed to save CV:", error);
@@ -339,39 +359,49 @@ const CVBuilderPage: React.FC = () => {
       const lineHeight = 6;
 
       // Helper function to add text with word wrapping
-      const addText = (text: string, fontSize: number = 10, isBold: boolean = false) => {
+      const addText = (
+        text: string,
+        fontSize: number = 10,
+        isBold: boolean = false,
+      ) => {
         pdf.setFontSize(fontSize);
         pdf.setFont("helvetica", isBold ? "bold" : "normal");
-        
+
         const lines = pdf.splitTextToSize(text, pageWidth - 2 * margin);
-        
+
         // Check if we need a new page
-        if (yPosition + (lines.length * lineHeight) > pageHeight - margin) {
+        if (yPosition + lines.length * lineHeight > pageHeight - margin) {
           pdf.addPage();
           yPosition = margin;
         }
-        
+
         pdf.text(lines, margin, yPosition);
         yPosition += lines.length * lineHeight + 3;
       };
 
       // Header
       addText(cvData.personalInfo.fullName || "Professional CV", 20, true);
-      
+
       // Contact Info
       const contactInfo = [
         cvData.personalInfo.email && `Email: ${cvData.personalInfo.email}`,
         cvData.personalInfo.phone && `Phone: ${cvData.personalInfo.phone}`,
-        cvData.personalInfo.address && `Address: ${cvData.personalInfo.address}`,
-      ].filter(Boolean).join(" | ");
-      
+        cvData.personalInfo.address &&
+          `Address: ${cvData.personalInfo.address}`,
+      ]
+        .filter(Boolean)
+        .join(" | ");
+
       if (contactInfo) {
         addText(contactInfo, 10);
         yPosition += 5;
       }
 
       // Worker Specific Info
-      if (cvData.personalInfo.workerExperience || cvData.personalInfo.workerHourlyRate > 0) {
+      if (
+        cvData.personalInfo.workerExperience ||
+        cvData.personalInfo.workerHourlyRate > 0
+      ) {
         addText("WORKER DETAILS", 14, true);
         if (cvData.personalInfo.workerExperience) {
           addText(`Experience: ${cvData.personalInfo.workerExperience} Years`);
@@ -390,7 +420,10 @@ const CVBuilderPage: React.FC = () => {
       }
 
       // Main Skills (from workerSkills array in personalInfo)
-      if (cvData.personalInfo.workerSkills && cvData.personalInfo.workerSkills.length > 0) {
+      if (
+        cvData.personalInfo.workerSkills &&
+        cvData.personalInfo.workerSkills.length > 0
+      ) {
         addText("KEY SKILLS", 14, true);
         addText(cvData.personalInfo.workerSkills.join(", "), 10);
         yPosition += 5;
@@ -399,14 +432,14 @@ const CVBuilderPage: React.FC = () => {
       // Work Experience
       if (cvData.experience && cvData.experience.length > 0) {
         addText("WORK EXPERIENCE", 14, true);
-        
+
         cvData.experience.forEach((exp) => {
-          const title = `${exp.position || 'Position'} at ${exp.company || 'Company'}`;
-          const dates = `${exp.startDate || ''} - ${exp.current ? 'Present' : exp.endDate || ''}`;
-          
+          const title = `${exp.position || "Position"} at ${exp.company || "Company"}`;
+          const dates = `${exp.startDate || ""} - ${exp.current ? "Present" : exp.endDate || ""}`;
+
           addText(title, 12, true);
           addText(dates, 10);
-          
+
           if (exp.description) {
             addText(exp.description);
           }
@@ -418,12 +451,12 @@ const CVBuilderPage: React.FC = () => {
       // Education
       if (cvData.education && cvData.education.length > 0) {
         addText("EDUCATION", 14, true);
-        
+
         cvData.education.forEach((edu) => {
-          const degree = `${edu.degree || 'Degree'}${edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}`;
-          const school = edu.institution || 'Institution';
-          const dates = `${edu.startDate || ''} - ${edu.current ? 'Present' : edu.endDate || ''}`;
-          
+          const degree = `${edu.degree || "Degree"}${edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ""}`;
+          const school = edu.institution || "Institution";
+          const dates = `${edu.startDate || ""} - ${edu.current ? "Present" : edu.endDate || ""}`;
+
           addText(degree, 12, true);
           addText(school, 10);
           addText(dates, 10);
@@ -435,25 +468,33 @@ const CVBuilderPage: React.FC = () => {
       // Skills
       if (cvData.detailedSkills && cvData.detailedSkills.length > 0) {
         addText("SKILLS", 14, true);
-        
-        const skillsByLevel = cvData.detailedSkills.reduce((acc: Record<string, string[]>, skill: {
-          name: string;
-          level: string;
-        }) => {
-          if (!acc[skill.level]) acc[skill.level] = [];
-          acc[skill.level].push(skill.name);
-          return acc;
-        }, {});
 
-        Object.entries(skillsByLevel).forEach(([level, skills]: [string, string[]]) => {
-          addText(`${level}: ${skills.join(', ')}`, 10);
-        });
+        const skillsByLevel = cvData.detailedSkills.reduce(
+          (
+            acc: Record<string, string[]>,
+            skill: {
+              name: string;
+              level: string;
+            },
+          ) => {
+            if (!acc[skill.level]) acc[skill.level] = [];
+            acc[skill.level].push(skill.name);
+            return acc;
+          },
+          {},
+        );
+
+        Object.entries(skillsByLevel).forEach(
+          ([level, skills]: [string, string[]]) => {
+            addText(`${level}: ${skills.join(", ")}`, 10);
+          },
+        );
       }
 
       // Save the PDF
-      const fileName = `${cvData.personalInfo.fullName?.replace(/\s+/g, '_') || 'Professional'}_CV.pdf`;
+      const fileName = `${cvData.personalInfo.fullName?.replace(/\s+/g, "_") || "Professional"}_CV.pdf`;
       pdf.save(fileName);
-      
+
       toast.success("CV downloaded successfully!");
     } catch (error) {
       console.error("Failed to generate PDF:", error);
@@ -482,7 +523,7 @@ const CVBuilderPage: React.FC = () => {
               saving={saving}
             />
           </div>
-          
+
           {/* Jobs Sidebar - Takes up 1 column */}
           <div className="lg:col-span-1">
             <Card className="sticky top-6">
@@ -490,7 +531,7 @@ const CVBuilderPage: React.FC = () => {
                 <Briefcase className="h-5 w-5 mr-2" />
                 Available Jobs
               </h3>
-              
+
               {jobsLoading ? (
                 <div className="space-y-3">
                   {[...Array(3)].map((_, i) => (
@@ -502,55 +543,64 @@ const CVBuilderPage: React.FC = () => {
                 </div>
               ) : availableJobs.length > 0 ? (
                 <div className="space-y-4">
-                  {availableJobs.slice(0, 5).map((job: {
-                    _id: string;
-                    title: string;
-                    description: string;
-                    budget: { min: number; max: number };
-                    category: string;
-                    location: string;
-                    createdAt: string;
-                    deadline: string;
-                    client: {
-                      name: string;
-                      companyName?: string;
-                    };
-                  }) => (
-                    <div key={job._id} className="border-b border-gray-100 pb-3 last:border-b-0">
-                      <h4 className="font-medium text-gray-900 text-sm mb-1 line-clamp-2">
-                        {job.title}
-                      </h4>
-                      <div className="flex items-center text-xs text-gray-500 mb-2">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>{job.location || 'Remote'}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                        <div className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          <span>Due: {new Date(job.deadline).toLocaleDateString()}</span>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">
-                          ETB {job.budget?.toLocaleString()}
-                        </Badge>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs"
-                        onClick={() => window.open(`/jobs/${job._id}`, '_blank')}
+                  {availableJobs.slice(0, 5).map(
+                    (job: {
+                      _id: string;
+                      title: string;
+                      description: string;
+                      budget: { min: number; max: number };
+                      category: string;
+                      location: string;
+                      createdAt: string;
+                      deadline: string;
+                      client: {
+                        name: string;
+                        companyName?: string;
+                      };
+                    }) => (
+                      <div
+                        key={job._id}
+                        className="border-b border-gray-100 pb-3 last:border-b-0"
                       >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View Details
-                      </Button>
-                    </div>
-                  ))}
-                  
+                        <h4 className="font-medium text-gray-900 text-sm mb-1 line-clamp-2">
+                          {job.title}
+                        </h4>
+                        <div className="flex items-center text-xs text-gray-500 mb-2">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          <span>{job.location || "Remote"}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                          <div className="flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            <span>
+                              Due: {new Date(job.deadline).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            ETB {job.budget?.toLocaleString()}
+                          </Badge>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs"
+                          onClick={() =>
+                            window.open(`/jobs/${job._id}`, "_blank")
+                          }
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          View Details
+                        </Button>
+                      </div>
+                    ),
+                  )}
+
                   <div className="pt-3 border-t border-gray-100">
                     <Button
                       variant="primary"
                       size="sm"
                       className="w-full"
-                      onClick={() => window.open('/jobs', '_blank')}
+                      onClick={() => window.open("/jobs", "_blank")}
                     >
                       See More Jobs
                     </Button>

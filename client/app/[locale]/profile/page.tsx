@@ -29,7 +29,6 @@ type Role = BaseUser["role"];
 
 type Availability = "full-time" | "part-time" | "freelance";
 
-
 type ExtendedUser = BaseUser & {
   isVerified?: boolean;
   isActive?: boolean;
@@ -47,23 +46,23 @@ type ExtendedUser = BaseUser & {
     portfolio?: string[];
     certifications?: string[];
     languages?: string[];
-  education?: Array<{
-    _id?: string;
-    school: string;
-    degree: string;
-    field: string;
-    startDate: string;
-    endDate?: string;
-    description?: string;
-  }>;
-  workHistory?: Array<{
-    _id?: string;
-    company: string;
-    title: string;
-    startDate: string;
-    endDate?: string;
-    description: string;
-  }>;
+    education?: Array<{
+      _id?: string;
+      school: string;
+      degree: string;
+      field: string;
+      startDate: string;
+      endDate?: string;
+      description?: string;
+    }>;
+    workHistory?: Array<{
+      _id?: string;
+      company: string;
+      title: string;
+      startDate: string;
+      endDate?: string;
+      description: string;
+    }>;
   };
   clientProfile?: {
     companyName?: string;
@@ -80,7 +79,6 @@ interface ProfileUpdatePayload {
   workerProfile?: Record<string, unknown>;
   clientProfile?: Record<string, unknown>;
 }
-
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -183,6 +181,7 @@ const ProfilePage = () => {
       try {
         const res = await authAPI.getMe();
         const serverUser = res.data?.user as ExtendedUser | undefined;
+        console.log(serverUser);
         if (serverUser) {
           setUser(serverUser);
           setCvPreview(
@@ -248,7 +247,11 @@ const ProfilePage = () => {
           fullName: userData.name || "",
           email: userData.email || "",
           phone: profile.phone || "",
-          address: (profile as { address?: { city?: string; country?: string } }).address?.city ? `${(profile as { address?: { city?: string; country?: string } }).address?.city}, ${(profile as { address?: { city?: string; country?: string } }).address?.country || 'Ethiopia'}` : "",
+          address: (
+            profile as { address?: { city?: string; country?: string } }
+          ).address?.city
+            ? `${(profile as { address?: { city?: string; country?: string } }).address?.city}, ${(profile as { address?: { city?: string; country?: string } }).address?.country || "Ethiopia"}`
+            : "",
           summary: profile.bio || "",
           workerSkills: profile.skills || [],
           workerExperience: String(profile.experience || ""),
@@ -257,47 +260,61 @@ const ProfilePage = () => {
           dateOfBirth: profile.dob ? String(profile.dob).substring(0, 10) : "",
           gender: (profile as { gender?: string }).gender || "",
         },
-        education: (workerProfile?.education || []).map((edu: {
-          _id?: string;
-          school: string;
-          degree: string;
-          field: string;
-          startDate: string;
-          endDate?: string;
-          description?: string;
-        }) => ({
-          id: edu._id || Date.now().toString(),
-          institution: edu.school,
-          degree: edu.degree,
-          fieldOfStudy: edu.field,
-          startDate: edu.startDate,
-          endDate: edu.endDate || "",
-          current: false,
-        })),
-        experience: (workerProfile?.workHistory || []).map((exp: {
-          _id?: string;
-          company: string;
-          title: string;
-          startDate: string;
-          endDate?: string;
-          description: string;
-        }) => ({
-          id: exp._id || Date.now().toString(),
-          company: exp.company,
-          position: exp.title,
-          startDate: exp.startDate,
-          endDate: exp.endDate || "",
-          current: false,
-          description: exp.description,
-        })),
-        detailedSkills: ((profile as { detailedSkills?: Array<{ _id?: string; name: string; level: string }> }).detailedSkills || []).map((skill: {
-          _id?: string;
-          name: string;
-          level: string;
-        }) => ({
+        education: (workerProfile?.education || []).map(
+          (edu: {
+            _id?: string;
+            school: string;
+            degree: string;
+            field: string;
+            startDate: string;
+            endDate?: string;
+            description?: string;
+          }) => ({
+            id: edu._id || Date.now().toString(),
+            institution: edu.school,
+            degree: edu.degree,
+            fieldOfStudy: edu.field,
+            startDate: edu.startDate,
+            endDate: edu.endDate || "",
+            current: false,
+          }),
+        ),
+        experience: (workerProfile?.workHistory || []).map(
+          (exp: {
+            _id?: string;
+            company: string;
+            title: string;
+            startDate: string;
+            endDate?: string;
+            description: string;
+          }) => ({
+            id: exp._id || Date.now().toString(),
+            company: exp.company,
+            position: exp.title,
+            startDate: exp.startDate,
+            endDate: exp.endDate || "",
+            current: false,
+            description: exp.description,
+          }),
+        ),
+        detailedSkills: (
+          (
+            profile as {
+              detailedSkills?: Array<{
+                _id?: string;
+                name: string;
+                level: string;
+              }>;
+            }
+          ).detailedSkills || []
+        ).map((skill: { _id?: string; name: string; level: string }) => ({
           id: skill._id || Date.now().toString(),
           name: skill.name,
-          level: (skill.level || "Beginner") as "Beginner" | "Intermediate" | "Advanced" | "Expert",
+          level: (skill.level || "Beginner") as
+            | "Beginner"
+            | "Intermediate"
+            | "Advanced"
+            | "Expert",
         })),
       });
     } catch (error) {
@@ -309,7 +326,7 @@ const ProfilePage = () => {
 
   // Load CV data on component mount
   useEffect(() => {
-    if (user?.role === 'worker') {
+    if (user?.role === "worker") {
       loadExistingCV();
     }
   }, [user?.role, loadExistingCV]);
@@ -319,7 +336,6 @@ const ProfilePage = () => {
   }
 
   const role: Role = user.role;
-
 
   const updateLocalUser = (partial: Partial<ExtendedUser>) => {
     const next = { ...user, ...partial } as ExtendedUser;
@@ -375,8 +391,6 @@ const ProfilePage = () => {
     reader.readAsDataURL(file);
   };
 
-
-
   const onCVFile = async (file: File) => {
     // Check file size (2MB limit)
     const maxSize = 2 * 1024 * 1024; // 2MB in bytes
@@ -386,7 +400,13 @@ const ProfilePage = () => {
     }
 
     // Check file type
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg'];
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/jpeg",
+      "image/jpg",
+    ];
     if (!allowedTypes.includes(file.type)) {
       toast.error("Please upload a PDF, DOC, DOCX, or JPG file");
       return;
@@ -407,7 +427,7 @@ const ProfilePage = () => {
         profile: { ...(user.profile || {}), cv },
       } as unknown as ExtendedUser);
       await saveProfile({ profile: { cv } });
-      
+
       // Refresh user data to show the uploaded CV immediately
       try {
         const response = await authAPI.getMe();
@@ -417,7 +437,7 @@ const ProfilePage = () => {
       } catch (error) {
         console.error("Failed to refresh user data:", error);
       }
-      
+
       // Reset input to allow selecting the same file again
       if (cvRef.current) cvRef.current.value = "";
     };
@@ -437,7 +457,7 @@ const ProfilePage = () => {
     const nextProfile = np as NonNullable<ExtendedUser["profile"]>;
     updateLocalUser({ profile: nextProfile } as unknown as ExtendedUser);
     await saveProfile({ profile: { cv: null } });
-    
+
     // Refresh user data to show the CV deletion immediately
     try {
       const response = await authAPI.getMe();
@@ -447,10 +467,9 @@ const ProfilePage = () => {
     } catch (error) {
       console.error("Failed to refresh user data:", error);
     }
-    
+
     if (cvRef.current) cvRef.current.value = "";
   };
-
 
   const handleSaveCV = async (cvData: {
     personalInfo: {
@@ -470,26 +489,31 @@ const ProfilePage = () => {
       degree: string;
       fieldOfStudy: string;
       startDate: string;
-      endDate: string;
+      endDate?: string | null;
       current: boolean;
     }>;
     experience: Array<{
       company: string;
       position: string;
       startDate: string;
-      endDate: string;
+      endDate?: string | null;
       current: boolean;
       description: string;
+    }>;
+    detailedSkills?: Array<{
+      name: string;
+      level?: string;
     }>;
   }) => {
     try {
       setSaving(true);
-      
+
       const profileUpdate: Record<string, unknown> = {
         phone: cvData.personalInfo.phone,
         address: {
-          city: cvData.personalInfo.address.split(',')[0]?.trim() || "",
-          country: cvData.personalInfo.address.split(',')[1]?.trim() || "Ethiopia",
+          city: cvData.personalInfo.address.split(",")[0]?.trim() || "",
+          country:
+            cvData.personalInfo.address.split(",")[1]?.trim() || "Ethiopia",
         },
         bio: cvData.personalInfo.summary,
         skills: cvData.personalInfo.workerSkills,
@@ -500,8 +524,8 @@ const ProfilePage = () => {
         cv: {
           data: JSON.stringify(cvData),
           mimeType: "application/json",
-          name: `${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.json`,
-        }
+          name: `${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.json`,
+        },
       };
 
       const workerProfileUpdate: Record<string, unknown> = {
@@ -520,18 +544,23 @@ const ProfilePage = () => {
           endDate: exp.current ? null : exp.endDate,
           description: exp.description,
         })),
-        portfolio: cvData.personalInfo.portfolio ? [cvData.personalInfo.portfolio] : [],
+        portfolio: cvData.personalInfo.portfolio
+          ? [cvData.personalInfo.portfolio]
+          : [],
       };
 
-      await workerAPI.updateProfile({ profile: profileUpdate, workerProfile: workerProfileUpdate });
-      
+      await workerAPI.updateProfile({
+        profile: profileUpdate,
+        workerProfile: workerProfileUpdate,
+      });
+
       // Refresh user data
       const response = await authAPI.getMe();
       setUser(response.data.user as ExtendedUser);
       Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 });
-      
+
       console.log("CV saved successfully!");
-      
+
       // Redirect to jobs page after successful save
       router.push("/jobs");
     } catch (error) {
@@ -561,20 +590,20 @@ const ProfilePage = () => {
       degree: string;
       fieldOfStudy: string;
       startDate: string;
-      endDate: string;
+      endDate?: string | null;
       current: boolean;
     }>;
     experience: Array<{
       company: string;
       position: string;
       startDate: string;
-      endDate: string;
+      endDate?: string | null;
       current: boolean;
       description: string;
     }>;
     detailedSkills: Array<{
       name: string;
-      level: string;
+      level?: string;
     }>;
   }) => {
     const doc = new jsPDF();
@@ -604,12 +633,19 @@ const ProfilePage = () => {
       yPosition += 6;
     }
     if (cvData.personalInfo.dateOfBirth) {
-      doc.text(`Date of Birth: ${cvData.personalInfo.dateOfBirth}`, margin, yPosition);
+      doc.text(
+        `Date of Birth: ${cvData.personalInfo.dateOfBirth}`,
+        margin,
+        yPosition,
+      );
       yPosition += 10;
     }
 
     // Worker Details
-    if (cvData.personalInfo.workerExperience || cvData.personalInfo.workerHourlyRate) {
+    if (
+      cvData.personalInfo.workerExperience ||
+      cvData.personalInfo.workerHourlyRate
+    ) {
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text("WORKER DETAILS", margin, yPosition);
@@ -618,17 +654,28 @@ const ProfilePage = () => {
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       if (cvData.personalInfo.workerExperience) {
-        doc.text(`Experience: ${cvData.personalInfo.workerExperience}`, margin, yPosition);
+        doc.text(
+          `Experience: ${cvData.personalInfo.workerExperience}`,
+          margin,
+          yPosition,
+        );
         yPosition += 5;
       }
       if (cvData.personalInfo.workerHourlyRate) {
-        doc.text(`Hourly Rate: ETB ${cvData.personalInfo.workerHourlyRate}`, margin, yPosition);
+        doc.text(
+          `Hourly Rate: ETB ${cvData.personalInfo.workerHourlyRate}`,
+          margin,
+          yPosition,
+        );
         yPosition += 10;
       }
     }
 
     // Key Skills
-    if (cvData.personalInfo.workerSkills && cvData.personalInfo.workerSkills.length > 0) {
+    if (
+      cvData.personalInfo.workerSkills &&
+      cvData.personalInfo.workerSkills.length > 0
+    ) {
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text("KEY SKILLS", margin, yPosition);
@@ -651,7 +698,10 @@ const ProfilePage = () => {
 
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      const summaryLines = doc.splitTextToSize(cvData.personalInfo.summary, 170);
+      const summaryLines = doc.splitTextToSize(
+        cvData.personalInfo.summary,
+        170,
+      );
       doc.text(summaryLines, margin, yPosition);
       yPosition += summaryLines.length * 5 + 5;
     }
@@ -663,14 +713,7 @@ const ProfilePage = () => {
       doc.text("EDUCATION", margin, yPosition);
       yPosition += 8;
 
-      cvData.education.forEach((edu: {
-        degree: string;
-        institution: string;
-        fieldOfStudy: string;
-        startDate: string;
-        endDate: string;
-        current: boolean;
-      }) => {
+      cvData.education.forEach((edu) => {
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`${edu.degree} - ${edu.institution}`, margin, yPosition);
@@ -682,7 +725,11 @@ const ProfilePage = () => {
           doc.text(`Field: ${edu.fieldOfStudy}`, margin, yPosition);
           yPosition += 5;
         }
-        doc.text(`${edu.startDate} - ${edu.endDate || "Present"}`, margin, yPosition);
+        doc.text(
+          `${edu.startDate} - ${edu.endDate || "Present"}`,
+          margin,
+          yPosition,
+        );
         yPosition += 8;
       });
     }
@@ -694,14 +741,7 @@ const ProfilePage = () => {
       doc.text("EXPERIENCE", margin, yPosition);
       yPosition += 8;
 
-      cvData.experience.forEach((exp: {
-        position: string;
-        company: string;
-        startDate: string;
-        endDate: string;
-        current: boolean;
-        description: string;
-      }) => {
+      cvData.experience.forEach((exp) => {
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`${exp.position} - ${exp.company}`, margin, yPosition);
@@ -709,7 +749,11 @@ const ProfilePage = () => {
 
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text(`${exp.startDate} - ${exp.endDate || "Present"}`, margin, yPosition);
+        doc.text(
+          `${exp.startDate} - ${exp.endDate || "Present"}`,
+          margin,
+          yPosition,
+        );
         yPosition += 5;
 
         if (exp.description) {
@@ -728,10 +772,7 @@ const ProfilePage = () => {
       doc.text("DETAILED SKILLS", margin, yPosition);
       yPosition += 8;
 
-      cvData.detailedSkills.forEach((skill: {
-        name: string;
-        level: string;
-      }) => {
+      cvData.detailedSkills.forEach((skill) => {
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.text(`• ${skill.name} (${skill.level})`, margin, yPosition);
@@ -739,10 +780,8 @@ const ProfilePage = () => {
       });
     }
 
-    doc.save(`${cvData.personalInfo.fullName.replace(/\s+/g, '_')}_CV.pdf`);
+    doc.save(`${cvData.personalInfo.fullName.replace(/\s+/g, "_")}_CV.pdf`);
   };
-
-  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -813,46 +852,46 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left column */}
           <div className="lg:col-span-2 space-y-6">
-
             {/* Worker blocks */}
             {role === "worker" && (
               <>
-
                 {/* Integrated CV Builder */}
                 <Card className="p-0">
                   <div className="p-6 border-b border-gray-200">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                        <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                           <FileText className="h-4 w-4" /> CV Builder
-                  </h3>
+                        </h3>
                         <p className="text-sm text-gray-600">
-                          Create and manage your professional CV directly here. All changes are automatically saved.
+                          Create and manage your professional CV directly here.
+                          All changes are automatically saved.
                         </p>
                       </div>
-                      
+                    </div>
                   </div>
-                    
-                      </div>
-                  
+
                   {cvBuilderLoading ? (
                     <div className="p-6">
                       <div className="animate-pulse space-y-4">
                         <div className="h-4 bg-gray-200 rounded w-1/3"></div>
                         <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                         <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                    </div>
                       </div>
+                    </div>
                   ) : (
                     <div className="bg-white">
                       <EnhancedCVBuilder
                         onSave={handleSaveCV}
                         onDownload={handleDownloadPDF}
-                        initialData={initialCVData as Record<string, unknown> || undefined}
+                        initialData={
+                          (initialCVData as Record<string, unknown>) ||
+                          undefined
+                        }
                         saving={saving}
                       />
-                          </div>
-                        )}
+                    </div>
+                  )}
                 </Card>
               </>
             )}
@@ -927,21 +966,23 @@ const ProfilePage = () => {
 
           {/* Right sidebar */}
           <div className="space-y-6">
-
-
             <Card>
               <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <FileIcon className="h-4 w-4" /> CV Upload
               </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Upload your CV file (PDF, DOC, DOCX, or JPG). Maximum file size: 2MB.
-                This is for recruiters and admins who need additional information.
+                Upload your CV file (PDF, DOC, DOCX, or JPG). Maximum file size:
+                2MB. This is for recruiters and admins who need additional
+                information.
               </p>
               {(() => {
                 const cv = user.profile?.cv;
                 // Only show uploaded files, not JSON CV data
-                const isUploadedFile = cv && cv.mimeType && !cv.mimeType.includes('application/json');
-                
+                const isUploadedFile =
+                  cv &&
+                  cv.mimeType &&
+                  !cv.mimeType.includes("application/json");
+
                 return isUploadedFile ? (
                   <div>
                     <div className="flex items-center gap-2 p-2 bg-gray-50 rounded border">
@@ -991,13 +1032,13 @@ const ProfilePage = () => {
                   <div className="text-sm text-gray-600">
                     <p className="mb-2">No CV file uploaded yet.</p>
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         variant="outline"
                         onClick={() => cvRef.current?.click()}
                       >
-                      <FileUp className="h-4 w-4 mr-2" />
-                      Upload CV
-                    </Button>
+                        <FileUp className="h-4 w-4 mr-2" />
+                        Upload CV
+                      </Button>
                     </div>
                   </div>
                 );

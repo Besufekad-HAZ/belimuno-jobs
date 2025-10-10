@@ -13,6 +13,7 @@ import {
   UserCheck,
   Download,
   BarChart3,
+  MessageSquarePlus,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI } from "@/lib/api";
@@ -265,6 +266,15 @@ const AdminDashboard: React.FC = () => {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <Button
+                variant="primary"
+                onClick={() => router.push("/admin/chat")}
+                className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
+                size="sm"
+              >
+                <MessageSquarePlus className="h-4 w-4 mr-2" />
+                Team Chat
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => setShowReportsModal(true)}

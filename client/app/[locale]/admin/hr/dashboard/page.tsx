@@ -12,6 +12,7 @@ import {
   XCircle,
   Eye,
   Bell,
+  MessageSquarePlus,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI, notificationsAPI } from "@/lib/api";
@@ -266,6 +267,14 @@ const HRAdminDashboard: React.FC = () => {
             <p className="text-gray-600">{t("header.subtitle")}</p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
+            <Button
+              onClick={() => router.push("/admin/chat")}
+              variant="outline"
+              className="flex items-center space-x-2"
+            >
+              <MessageSquarePlus className="h-4 w-4" />
+              <span>Team Chat</span>
+            </Button>
             <Button
               onClick={() => setShowAnnouncementModal(true)}
               variant="primary"

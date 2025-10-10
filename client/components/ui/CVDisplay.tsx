@@ -3,7 +3,15 @@
 import React from "react";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
-import { Mail, Phone, MapPin, Calendar, Building, GraduationCap, Award } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Building,
+  GraduationCap,
+  Award,
+} from "lucide-react";
 
 interface PersonalInfo {
   fullName: string;
@@ -17,7 +25,7 @@ interface PersonalInfo {
 }
 
 interface Education {
-  id: string;
+  id?: string;
   institution: string;
   degree: string;
   fieldOfStudy: string;
@@ -27,7 +35,7 @@ interface Education {
 }
 
 interface Experience {
-  id: string;
+  id?: string;
   company: string;
   position: string;
   startDate: string;
@@ -37,9 +45,9 @@ interface Experience {
 }
 
 interface Skill {
-  id: string;
+  id?: string;
   name: string;
-  level: "Beginner" | "Intermediate" | "Advanced" | "Expert";
+  level: "Beginner" | "Intermediate" | "Advanced" | "Expert" | string;
 }
 
 interface CVData {
@@ -58,7 +66,10 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr + "-01");
-    return date.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+    });
   };
 
   const getSkillColor = (level: string) => {
@@ -107,12 +118,16 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
           <div className="mt-2 flex flex-wrap justify-center items-center gap-4 text-sm text-gray-600">
             <div className="flex items-center">
               <Award className="h-4 w-4 mr-2 text-purple-600" />
-              <span>Experience: {cvData.personalInfo.workerExperience} Years</span>
+              <span>
+                Experience: {cvData.personalInfo.workerExperience} Years
+              </span>
             </div>
             {cvData.personalInfo.workerHourlyRate > 0 && (
               <div className="flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-orange-600" />
-                <span>Hourly Rate: ETB {cvData.personalInfo.workerHourlyRate}</span>
+                <span>
+                  Hourly Rate: ETB {cvData.personalInfo.workerHourlyRate}
+                </span>
               </div>
             )}
           </div>
@@ -133,21 +148,25 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
       )}
 
       {/* Main Skills (from workerSkills array in personalInfo) */}
-      {cvData.personalInfo.workerSkills && cvData.personalInfo.workerSkills.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-            <div className="w-1 h-6 bg-yellow-600 mr-3"></div>
-            Key Skills
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {cvData.personalInfo.workerSkills.map((skill, index) => (
-              <Badge key={index} variant="default" className="bg-yellow-100 text-yellow-800 text-sm">
-                {skill}
-              </Badge>
-            ))}
+      {cvData.personalInfo.workerSkills &&
+        cvData.personalInfo.workerSkills.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+              <div className="w-1 h-6 bg-yellow-600 mr-3"></div>
+              Key Skills
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {cvData.personalInfo.workerSkills.map((skill, index) => (
+                <Badge
+                  key={index}
+                  className="bg-yellow-100 text-yellow-800 text-sm"
+                >
+                  {skill}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Work Experience */}
       {cvData.experience.length > 0 && (
@@ -158,14 +177,14 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
           </h2>
           <div className="space-y-4">
             {cvData.experience.map((exp, index) => (
-              <div key={exp.id} className="relative pl-6 pb-4">
+              <div key={exp.id || index} className="relative pl-6 pb-4">
                 {/* Timeline line */}
                 {index < cvData.experience.length - 1 && (
                   <div className="absolute left-2 top-8 w-0.5 h-full bg-gray-300"></div>
                 )}
                 {/* Timeline dot */}
                 <div className="absolute left-0 top-2 w-4 h-4 bg-green-600 rounded-full border-2 border-white shadow"></div>
-                
+
                 <div className="bg-white border border-gray-200 rounded-lg p-4 ml-4 shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -181,14 +200,15 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
                       {exp.current ? "Current" : "Past"}
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center text-sm text-gray-500 mb-3">
                     <Calendar className="h-4 w-4 mr-2" />
                     <span>
-                      {formatDate(exp.startDate)} - {exp.current ? "Present" : formatDate(exp.endDate)}
+                      {formatDate(exp.startDate)} -{" "}
+                      {exp.current ? "Present" : formatDate(exp.endDate)}
                     </span>
                   </div>
-                  
+
                   {exp.description && (
                     <p className="text-gray-700 text-sm leading-relaxed">
                       {exp.description}
@@ -210,14 +230,14 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
           </h2>
           <div className="space-y-4">
             {cvData.education.map((edu, index) => (
-              <div key={edu.id} className="relative pl-6 pb-4">
+              <div key={edu.id || index} className="relative pl-6 pb-4">
                 {/* Timeline line */}
                 {index < cvData.education.length - 1 && (
                   <div className="absolute left-2 top-8 w-0.5 h-full bg-gray-300"></div>
                 )}
                 {/* Timeline dot */}
                 <div className="absolute left-0 top-2 w-4 h-4 bg-purple-600 rounded-full border-2 border-white shadow"></div>
-                
+
                 <div className="bg-white border border-gray-200 rounded-lg p-4 ml-4 shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -234,11 +254,12 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
                       {edu.current ? "Ongoing" : "Completed"}
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center text-sm text-gray-500">
                     <Calendar className="h-4 w-4 mr-2" />
                     <span>
-                      {formatDate(edu.startDate)} - {edu.current ? "Present" : formatDate(edu.endDate)}
+                      {formatDate(edu.startDate)} -{" "}
+                      {edu.current ? "Present" : formatDate(edu.endDate)}
                     </span>
                   </div>
                 </div>
@@ -256,9 +277,9 @@ const CVDisplay: React.FC<CVDisplayProps> = ({ cvData, className = "" }) => {
             Skills & Competencies
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {cvData.detailedSkills.map((skill) => (
+            {cvData.detailedSkills.map((skill, index) => (
               <div
-                key={skill.id}
+                key={skill.id || `${skill.name}-${index}`}
                 className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3 shadow-sm"
               >
                 <div className="flex items-center">

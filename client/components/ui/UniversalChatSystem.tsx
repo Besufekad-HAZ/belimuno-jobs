@@ -18,7 +18,7 @@ import {
   Video,
   MoreVertical,
 } from "lucide-react";
-import NextImage from 'next/image';
+import NextImage from "next/image";
 
 interface ChatMessage {
   id: string;
@@ -32,6 +32,7 @@ interface ChatMessage {
     url: string;
     type: string;
   }>;
+  uploadProgress?: number;
 }
 
 interface UniversalChatSystemProps {
@@ -336,15 +337,24 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                 <div className="mt-2 space-y-2">
                   {message.attachments.map((attachment) => {
                     const isImage =
-                      (attachment.type && attachment.type.startsWith("image/")) ||
+                      (attachment.type &&
+                        attachment.type.startsWith("image/")) ||
                       /^data:image\//.test(attachment.url) ||
                       /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(attachment.url);
                     return (
-                      <div key={attachment.id} className={`
+                      <div
+                        key={attachment.id}
+                        className={`
                         group border rounded-lg overflow-hidden ${isSent ? "bg-white/20 border-white/30" : "bg-gray-50 border-gray-200"}
-                      `}>
+                      `}
+                      >
                         {isImage ? (
-                          <a href={attachment.url} target="_blank" rel="noreferrer" className="block">
+                          <a
+                            href={attachment.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block"
+                          >
                             <NextImage
                               src={attachment.url}
                               alt={attachment.name}
@@ -354,7 +364,9 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                             />
                             <div className="flex items-center gap-2 px-2 py-1 text-xs text-gray-700 bg-white/80">
                               <Paperclip className="w-3 h-3" />
-                              <span className="truncate">{attachment.name}</span>
+                              <span className="truncate">
+                                {attachment.name}
+                              </span>
                             </div>
                           </a>
                         ) : (
@@ -374,15 +386,44 @@ const UniversalChatSystem: React.FC<UniversalChatSystemProps> = ({
                   })}
                 </div>
               )}
+
+              {message.id.startsWith("pending-") &&
+                typeof message.uploadProgress === "number" && (
+                  <div className="mt-3 space-y-1">
+                    <div
+                      className={`h-1.5 rounded-full overflow-hidden ${isSent ? "bg-white/30" : "bg-gray-200"}`}
+                    >
+                      <div
+                        className={`${isSent ? "bg-white" : "bg-blue-500"} h-full rounded-full transition-all duration-200`}
+                        style={{
+                          width: `${Math.min(99, Math.max(0, message.uploadProgress))}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <p
+                      className={`text-xs ${
+                        isSent ? "text-white/80" : "text-gray-500"
+                      }`}
+                    >
+                      Uploading{" "}
+                      {Math.min(
+                        99,
+                        Math.max(0, Math.round(message.uploadProgress)),
+                      )}
+                      %
+                    </p>
+                  </div>
+                )}
             </div>
 
             <div
               className={`flex items-center mt-1 ${isSent ? "justify-end" : "justify-start"}`}
             >
               <span className="text-xs text-gray-400 flex items-center gap-2">
-                {message.id.startsWith("pending-") && (
-                  <span className="inline-block animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-transparent"></span>
-                )}
+                {message.id.startsWith("pending-") &&
+                  typeof message.uploadProgress !== "number" && (
+                    <span className="inline-block animate-spin rounded-full h-3 w-3 border-2 border-gray-300 border-t-transparent"></span>
+                  )}
                 {formatTime(message.timestamp)}
               </span>
             </div>

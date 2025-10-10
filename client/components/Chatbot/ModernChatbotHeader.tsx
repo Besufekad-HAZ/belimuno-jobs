@@ -20,9 +20,9 @@ const ModernChatbotHeader: React.FC<ModernChatbotHeaderProps> = ({
   return (
     <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-blue-700 to-blue-500 text-white rounded-t-2xl border-b border-white/10">
       <div className="flex items-center gap-2 min-w-0">
-        <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden">
+        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center overflow-hidden">
           <Image
-            src="/belimuno.png"
+            src="/belimuno-logo.png"
             alt="Belimuno"
             width={32}
             height={32}

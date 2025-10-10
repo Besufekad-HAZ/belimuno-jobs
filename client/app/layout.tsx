@@ -24,9 +24,9 @@ export const metadata: Metadata = {
   title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
+    shortcut: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
+    apple: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
   },
 };
 

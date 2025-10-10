@@ -31,7 +31,7 @@
         "part2": "Opportunities"
       },
       "description": "Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country. Join thousands of professionals building their careers.",
-      "getStarted": "Register",
+      "register": "Register",
       "goToDashboard": "Go to Dashboard",
       "browseJobs": "Browse Jobs"
     },
@@ -68,63 +68,80 @@
       }
     },
     "testimonials": {
-      "title": "What Our Users Say",
-      "subtitle": "Hear from professionals who have found success with Belimuno Jobs",
+      "eyebrow": "Testimonials",
+      "title": "Stories from teams who trust Belimuno",
+      "subtitle": "Hear how HR leaders and workers use Belimuno to deliver reliable projects across Ethiopia.",
+      "metrics": "Loved by <count>{total}</count> clients and professionals nationwide.",
+      "controls": {
+        "previous": "Previous testimonials",
+        "next": "Next testimonials",
+        "goTo": "Go to testimonial slide {index}"
+      },
       "testimonial1": {
-        "name": "Meron Tadesse",
-        "role": "Software Developer",
-        "company": "Tech Solutions Ethiopia",
-        "content": "Belimuno Jobs helped me find my dream job as a software developer. The platform is professional and the support team is amazing.",
-        "rating": 5
+        "content": "Belimuno helped us staff critical roles in days instead of weeks.",
+        "name": "Meron Alemu",
+        "role": "Operations Manager",
+        "company": "EthioLogistics"
       },
       "testimonial2": {
-        "name": "Daniel Bekele",
-        "role": "Marketing Manager",
-        "company": "Digital Marketing Co.",
-        "content": "As a client, I've found excellent talent through Belimuno. The quality of workers and the ease of use makes it my go-to platform.",
-        "rating": 5
+        "content": "I trust Belimuno for vetted professionals on every major project.",
+        "name": "Samuel Kebede",
+        "role": "Project Director",
+        "company": "Blue Nile Construction"
       },
       "testimonial3": {
-        "name": "Hanan Ahmed",
-        "role": "Graphic Designer",
-        "company": "Creative Agency",
-        "content": "The platform connected me with multiple clients and helped me build a steady income. Highly recommended for freelancers!",
-        "rating": 5
+        "content": "Their platform streamlines hiring and payment for our remote teams.",
+        "name": "Hanna Tesfaye",
+        "role": "HR Lead",
+        "company": "Habesha Foods"
       }
     },
     "regions": {
-      "title": "Regions Where We Operate",
-      "subtitle": "We connect talent with opportunities across Ethiopia's major regions",
+      "title": "Regions we operate in",
+      "subtitle": "Connecting workers and employers across Ethiopia's major regions",
       "addisAbaba": {
         "name": "Addis Ababa",
-        "description": "The capital and largest commercial hub with the highest concentration of opportunities",
-        "jobs": "500+ Active Jobs"
+        "description": "Finance, technology and administration talent hub.",
+        "jobs": "120+ active jobs"
       },
       "oromia": {
         "name": "Oromia",
-        "description": "Ethiopia's largest region with growing opportunities in agriculture and manufacturing",
-        "jobs": "200+ Active Jobs"
+        "description": "Logistics, agriculture and field project specialists.",
+        "jobs": "80+ active jobs"
       },
       "amhara": {
         "name": "Amhara",
-        "description": "Historic region with expanding infrastructure and development projects",
-        "jobs": "150+ Active Jobs"
+        "description": "Tourism, education and healthcare opportunities.",
+        "jobs": "60+ active jobs"
       },
       "tigray": {
         "name": "Tigray",
-        "description": "Northern region with opportunities in reconstruction and development",
-        "jobs": "80+ Active Jobs"
+        "description": "Reconstruction, services and operations roles.",
+        "jobs": "40+ active jobs"
       },
       "snnp": {
         "name": "SNNP",
-        "description": "Southern region with diverse opportunities in agriculture and tourism",
-        "jobs": "120+ Active Jobs"
+        "description": "Manufacturing, hospitality and cultural projects.",
+        "jobs": "55+ active jobs"
       },
       "sidama": {
         "name": "Sidama",
-        "description": "Coffee-growing region with opportunities in agriculture and processing",
-        "jobs": "60+ Active Jobs"
+        "description": "Agri-business, retail and customer support roles.",
+        "jobs": "45+ active jobs"
       }
+    },
+    "news": {
+      "title": "What's New",
+      "subtitle": "Stay updated with the latest news, updates, and announcements from Belimuno Jobs",
+      "readMore": "Read More",
+      "viewAllNews": "View All News"
+    },
+    "NewsDetail": {
+      "backButton": "Back",
+      "shareButton": "Share",
+      "backToHome": "Back to Home",
+      "viewAllNews": "View All News",
+      "relatedNews": "Related News"
     },
     "cta": {
       "title": "Ready to Start Your Journey?",
@@ -368,6 +385,17 @@
       "of": "of",
       "next": "Next"
     },
+    "jobsForYou": {
+      "title": "Jobs for You",
+      "subtitle": "Jobs that match your skills",
+      "matchingJobs": "matching jobs",
+      "viewAll": "View All",
+      "more": "more"
+    },
+    "searchAndJobs": {
+      "title": "Search & Browse Jobs",
+      "subtitle": "Find the perfect job opportunity that matches your skills and interests"
+    },
     "categories": {
       "1": "Web Development",
       "2": "Mobile Development",
@@ -380,6 +408,42 @@
       "9": "Consulting",
       "10": "Other"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "Job Not Found",
+      "description": "The job you're looking for doesn't exist or has been removed.",
+      "backButton": "Back to Jobs"
+    },
+    "loading": "Loading...",
+    "backToJobs": "Back to Jobs",
+    "saveJob": "Save Job",
+    "saved": "Saved",
+    "share": "Share",
+    "jobDetails": "Job Details",
+    "category": "Category",
+    "budget": "Budget",
+    "deadline": "Deadline",
+    "location": "Location",
+    "experienceLevel": "Experience Level",
+    "posted": "Posted",
+    "requiredSkills": "Required Skills",
+    "tags": "Tags",
+    "deliverables": "Deliverables",
+    "attachments": "Attachments",
+    "clientInfo": "Client Information",
+    "viewClientProfile": "View Client Profile",
+    "actions": "Actions",
+    "applyNow": "Apply Now",
+    "manageJob": "Manage Job",
+    "loginToApply": "Login to Apply",
+    "jobStatus": "Job Status",
+    "status": "Status",
+    "priority": "Priority",
+    "public": "Public",
+    "progress": "Progress",
+    "yes": "Yes",
+    "no": "No"
   },
   "ContactPage": {
     "hero": {
@@ -553,6 +617,16 @@
           "placeholder": "Type a message"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "Jobs for You",
+      "subtitle": "Jobs that match your skills",
+      "matchingJobs": "matching jobs",
+      "viewAll": "View All",
+      "more": "more",
+      "viewDetails": "View Details",
+      "applyNow": "Apply Now",
+      "applied": "Applied"
     }
   },
   "ClientDashboard": {
@@ -596,6 +670,7 @@
         "actions": {
           "viewDetails": "View Details",
           "applications": "Applications",
+          "editJob": "Edit Job",
           "requestRevision": "Request Revision",
           "payAndRate": "Pay & Rate",
           "deleteJob": "Delete Job",
@@ -839,9 +914,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "Outsourcing Admin Dashboard",
-      "subtitle": "Manage projects, clients, and business operations",
+      "subtitle": "Manage jobs, clients, and business operations",
       "buttons": {
-        "manageProjects": "Manage Projects",
+        "manageJobs": "Manage Jobs",
         "clientManagement": "Client Management"
       }
     },
@@ -850,9 +925,9 @@
         "title": "Total Clients",
         "label": "Total Clients"
       },
-      "activeProjects": {
-        "title": "Active Projects",
-        "label": "Active Projects"
+      "activeJobs": {
+        "title": "Active Jobs",
+        "label": "Active Jobs"
       },
       "totalRevenue": {
         "title": "Total Revenue",
@@ -868,27 +943,28 @@
         "title": "Client Satisfaction",
         "rating": "out of 5"
       },
-      "projectSuccess": {
-        "title": "Project Success Rate"
+      "jobSuccess": {
+        "title": "Job Success Rate"
       },
       "revenueGrowth": {
         "title": "Revenue Growth"
       }
     },
-    "projects": {
-      "title": "Recent Projects",
+    "jobs": {
+      "title": "Recent Jobs",
       "viewAll": "View All",
       "details": {
         "client": "Client",
         "progress": "Progress",
-        "title": "Project Details",
+        "title": "Job Details",
         "assignedWorker": "Assigned Worker",
         "deadline": "Deadline",
         "budget": "Budget",
         "buttons": {
           "viewDetails": "View Details",
           "contactClient": "Contact Client",
-          "generateReport": "Generate Report"
+          "generateReport": "Generate Report",
+          "applicants": "Applicants"
         }
       },
       "status": {
@@ -902,14 +978,14 @@
       "title": "Top Clients",
       "viewAll": "View All",
       "metrics": {
-        "projects": "projects"
+        "jobs": "jobs"
       }
     },
     "operations": {
       "title": "Business Operations",
       "buttons": {
         "clientManagement": "Client Management",
-        "projectOversight": "Project Oversight",
+        "jobOversight": "Job Oversight",
         "businessAnalytics": "Business Analytics",
         "financialReports": "Financial Reports"
       }
@@ -917,10 +993,10 @@
     "keyMetrics": {
       "title": "Key Metrics",
       "metrics": {
-        "avgProjectValue": "Avg. Project Value",
+        "avgJobValue": "Avg. Job Value",
         "clientRetention": "Client Retention",
-        "projectCompletionRate": "Project Completion Rate",
-        "avgProjectDuration": "Avg. Project Duration"
+        "jobCompletionRate": "Job Completion Rate",
+        "avgJobDuration": "Avg. Job Duration"
       }
     },
     "recentActivity": {

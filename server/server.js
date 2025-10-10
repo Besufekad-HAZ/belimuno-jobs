@@ -62,13 +62,14 @@ app.use((req, res, next) => {
 });
 
 // Route files
-const auth = require("./routes/auth");
-const admin = require("./routes/admin");
-const worker = require("./routes/worker");
-const client = require("./routes/client");
-const job = require("./routes/job");
-const notification = require("./routes/notification");
-const contact = require("./routes/contact");
+const auth = require('./routes/auth');
+const admin = require('./routes/admin');
+const worker = require('./routes/worker');
+const client = require('./routes/client');
+const job = require('./routes/job');
+const notification = require('./routes/notification');
+const contact = require('./routes/contact');
+const chat = require('./routes/chat');
 
 // API Info route
 app.get("/api", (req, res) => {
@@ -123,6 +124,13 @@ app.get("/api", (req, res) => {
 				markAllRead: "PUT /api/notifications/read-all",
 				stats: "GET /api/notifications/stats",
 			},
+			chat: {
+				contacts: "GET /api/chat/contacts",
+				conversations: "GET /api/chat/conversations",
+				createConversation: "POST /api/chat/conversations",
+				messages: "GET /api/chat/conversations/:conversationId/messages",
+				sendMessage: "POST /api/chat/conversations/:conversationId/messages",
+			},
 		},
 	});
 });
@@ -145,6 +153,7 @@ app.use("/api/client", client);
 app.use("/api/jobs", job);
 app.use("/api/notifications", notification);
 app.use("/api/contact", contact);
+app.use("/api/chat", chat);
 
 // Catch 404 routes
 app.all("*", (req, res) => {
@@ -157,7 +166,7 @@ app.all("*", (req, res) => {
 // Error handler middleware (must be last)
 app.use(errorHandler);
 
-const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 5001;
+const DEFAULT_PORT = parseInt(process.env.PORT, 10) || 5000;
 let server; // http.Server
 
 const startServer = (port, attemptsLeft = 5) => {

@@ -31,7 +31,7 @@
         "part2": "ዅንታታት ምትእስሳር"
       },
       "description": "ቤሊሙኖ ዮብስ ናይ ኢትዮጵያ ቀዳማይ HR ኣውትሶርሲንግ ፕላትፎርም እያ፣ ክኢላታት ዘለዎም ሰራሕተኛታት ምስ ኩሉ ናብ ሃገር ዝስፍሓ ንግዲታት ትትኣሳሰር። ሽዱሽተ ሚልዮን ሞግсаጽቲ ሞግсаጽቶም ከም ዝሃንጹ ብምክትል ከጥፍኡ።",
-      "getStarted": "ጅምር",
+      "register": "ተመዝገብ",
       "goToDashboard": "ናብ ዳሽቦርድ ኪድ",
       "browseJobs": "ስራሓት ኣርእይ"
     },
@@ -66,6 +66,82 @@
         "title": "ክፍሊት ረክብ",
         "description": "ፕሮጀክትታት ወድእ ከምኡውን ብኣመሻሽልና ኣመንዝራዊ ክፍሊት ረክብ"
       }
+    },
+    "testimonials": {
+      "eyebrow": "መስክር",
+      "title": "ብቤሊሙኖ ዝተሓሳስሉ ቡድናት ታሪኻት",
+      "subtitle": "ሓሳባት HR መሪታትን ሰራሕተኛታትን ቤሊሙኖ ንምጥቃም እንታይ ይብል ስምዕ.",
+      "metrics": "ኣብ መላእ ሃገር ብ <count>{total}</count> ክሊኦታትን ሞግсаጽቲን ዝደለወ እዩ።",
+      "controls": {
+        "previous": "ዝቐየረ መስክር",
+        "next": "ዝቕጽል መስክር",
+        "goTo": "ናብ መስክር ስላይድ {index} ኪድ"
+      },
+      "testimonial1": {
+        "content": "ቤሊሙኖ ዝያዳ ሳምንታት ኣይወስድናን ግን ብመዓልታት ኣስፈላጊ ኣቦልትታት ኣስተናገደልና።",
+        "name": "መሮን ኣለሙ",
+        "role": "ሓላፍነት ኦፕሬሽን",
+        "company": "EthioLogistics"
+      },
+      "testimonial2": {
+        "content": "ንእዋናዊ ፕሮጀክታትና ዝተመረጹ ባለሙያታት ንምርካብ ቤሊሙኖ ኣብዚ ኣመና።",
+        "name": "ሳሙኤል ቀበደ",
+        "role": "ዳይሬክተር ፕሮጀክት",
+        "company": "Blue Nile Construction"
+      },
+      "testimonial3": {
+        "content": "ፕላትፎርሙ ምርጫን ክፍሊትን ንቡድና ርትዕት ቀሊል ኣድርጎልና።",
+        "name": "ሓና ተስፋዬ",
+        "role": "ሓላፍነት HR",
+        "company": "Habesha Foods"
+      }
+    },
+    "regions": {
+      "title": "ክልሎታት ኣብዚ ንሰርሕ",
+      "subtitle": "ሰራሕተኛታትን ንግዲታትን ኣብ ናይ ኢትዮጵያ ቀንዲ ክልሎታት ንምትእስሳር",
+      "addisAbaba": {
+        "name": "ኣዲስ ኣበባ",
+        "description": "መዓልቲ ፋይናንስ፣ ቴክኖሎጂን ምምሕዳርን ዘለዎ ማእከል።",
+        "jobs": "120+ ንቑሓት ስራሓት"
+      },
+      "oromia": {
+        "name": "ኦሮሚያ",
+        "description": "ሎጂስቲክስ፣ ሕብረት ምርትን ዘርከቡ መመርሒታት ፕሮጀክት።",
+        "jobs": "80+ ንቑሓት ስራሓት"
+      },
+      "amhara": {
+        "name": "ኣማራ",
+        "description": "ንቱሪዝም፣ ትምህርቲን ጥዕናን ዘለዎ ኣጋጣምታት።",
+        "jobs": "60+ ንቑሓት ስራሓት"
+      },
+      "tigray": {
+        "name": "ትግራይ",
+        "description": "መለስኻ ሕንጻ፣ ኣገልግሎትን ምምሕዳርን ዘለዎ ስራሓት።",
+        "jobs": "40+ ንቑሓት ስራሓት"
+      },
+      "snnp": {
+        "name": "SNNP",
+        "description": "ማኑፋክቸሪንግ፣ ሆቴላትን ፕሮጀክታት ባህሊን ዘለዎ።",
+        "jobs": "55+ ንቑሓት ስራሓት"
+      },
+      "sidama": {
+        "name": "ሲዳማ",
+        "description": "ንሕብረት ሕብረት፣ ንግዲን ኣገልግሎት ደንበኛን ዘለዎ ስራሓት።",
+        "jobs": "45+ ንቑሓት ስራሓት"
+      }
+    },
+    "news": {
+      "title": "እንታይ ሓድሽ ኣሎ?",
+      "subtitle": "ካብ ቤሊሙኖ ዮብስ ዝመጽእ ዘሎ ዓወታም ዜናታት፣ ምዝማዛታት፣ ከምኡውን ሓበሬታታት ምስ ተራኸቡ",
+      "readMore": "ዝያዳ ኣንብብ",
+      "viewAllNews": "ኩሉ ዜናታት ርአ"
+    },
+    "NewsDetail": {
+      "backButton": "ምምላስ",
+      "shareButton": "ኣጋራ",
+      "backToHome": "ናብ ገዛ ምምላስ",
+      "viewAllNews": "ኩሉ ዜናታት ርአ",
+      "relatedNews": "ዝተሓሓዙ ዜናታት"
     },
     "cta": {
       "title": "ንጕዓዝኻ ንምጅማር ድሉው ዲኻ?",
@@ -308,6 +384,17 @@
       "of": "ካብ",
       "next": "ቀጺሉ"
     },
+    "jobsForYou": {
+      "title": "ስራሓት ንኣኻ",
+      "subtitle": "ስራሓት ምስ ብልክዕታትካ ዝሰማማዕ",
+      "matchingJobs": "ስራሓት ዝሰማማዕ",
+      "viewAll": "ኩሎም ርኣይ",
+      "more": "ዝያዳ"
+    },
+    "searchAndJobs": {
+      "title": "ስራሓት ምድላው እና ምርኣይ",
+      "subtitle": "ስራሕ ምስ ብልክዕታትካን ድሌታትካን ዝሰማማዕ ፍጹም ኣጋጣሚ ረኸብ"
+    },
     "categories": {
       "1": "ዳቨሎፕመንት ወብሳይት",
       "2": "ዳቨሎፕመንት ሞባይል",
@@ -320,6 +407,42 @@
       "9": "ኮንሳልቲንግ",
       "10": "ካልእ"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "ስራሕ ኣይተረኽበን",
+      "description": "እቲ ዝደሊኻዮ ስራሕ ኣይተረኽበን ወይ ተሰሪዑ።",
+      "backButton": "ናብ ስራሓት ተመለስ"
+    },
+    "loading": "ይጽዓን...",
+    "backToJobs": "ናብ ስራሓት ተመለስ",
+    "saveJob": "ስራሕ ኣስቀምጥ",
+    "saved": "ተቐሚጡ",
+    "share": "ኣጋራ",
+    "jobDetails": "ዝርዝር ስራሕ",
+    "category": "መደብ",
+    "budget": "በጀት",
+    "deadline": "መወዳእታ ዕለት",
+    "location": "ኣካባቢ",
+    "experienceLevel": "ደረጃ ተመክሮ",
+    "posted": "ተለጢፈ",
+    "requiredSkills": "ዘድሊ ብልክዕታት",
+    "tags": "መለዋወጺታት",
+    "deliverables": "ዝምሓሱ ነገራት",
+    "attachments": "ዝተሓሓዙ ፋይላት",
+    "clientInfo": "ሓበሬታ ደንበኛ",
+    "viewClientProfile": "መገለጺ ደንበኛ ርኣይ",
+    "actions": "ተግባራት",
+    "applyNow": "ሕጂ ኣመልክት",
+    "manageJob": "ስራሕ ኣስተዳድር",
+    "loginToApply": "ንምመልከት ኣብ ውሽጢ እተ",
+    "jobStatus": "ሁኔታ ስራሕ",
+    "status": "ሁኔታ",
+    "priority": "ቅድሚት",
+    "public": "ህዝባዊ",
+    "progress": "ምዕባለ",
+    "yes": "እወ",
+    "no": "ኣይኮነን"
   },
   "ContactPage": {
     "hero": {
@@ -493,6 +616,16 @@
           "placeholder": "መልእኽቲ ጽሓፍ"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "ስራሓት ንኣኻ",
+      "subtitle": "ስራሓት ምስ ብልክዕታትካ ዝሰማማዕ",
+      "matchingJobs": "ስራሓት ዝሰማማዕ",
+      "viewAll": "ኩሉ ርኢ",
+      "more": "ዝያዳ",
+      "viewDetails": "ዝርዝራት ርኢ",
+      "applyNow": "ሕጂ ኣመልክት",
+      "applied": "ተመደበ"
     }
   },
   "ClientDashboard": {
@@ -536,6 +669,7 @@
         "actions": {
           "viewDetails": "ዝርዝራት ርኢ",
           "applications": "ኣመልካቺታት",
+          "editJob": "ስራ ኣስተዳደር",
           "requestRevision": "ምምሕርሻር ሕተት",
           "payAndRate": "ክፍሊትን ደረጃን",
           "deleteJob": "ስራሕ ኣቕርብ",
@@ -709,9 +843,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "ዳሽቦርድ ኣስተዳደሪ ኣውትሶርሲንግ",
-      "subtitle": "ፕሮጀክትታት፣ ደንበኛታትን ንግዳዊ ንጥፈታትን ኣስተድሕን",
+      "subtitle": "ስራታት፣ ደንበኛታትን ንግዳዊ ንጥፈታትን ኣስተድሕን",
       "buttons": {
-        "manageProjects": "ፕሮጀክትታት ኣስተድሕን",
+        "manageJobs": "ስራታት ኣስተድሕን",
         "clientManagement": "ኣስተዳደር ደንበኛ"
       }
     },
@@ -720,9 +854,9 @@
         "title": "ጠቕላላ ደንበኛታት",
         "label": "ጠቕላላ ደንበኛታት"
       },
-      "activeProjects": {
-        "title": "ንቑሓት ፕሮጀክትታት",
-        "label": "ንቑሓት ፕሮጀክትታት"
+      "activeJobs": {
+        "title": "ንቑሓት ስራታት",
+        "label": "ንቑሓት ስራታት"
       },
       "totalRevenue": {
         "title": "ጠቕላላ እታኻ",
@@ -738,27 +872,28 @@
         "title": "ርእሚ ደንበኛ",
         "rating": "ካብ 5"
       },
-      "projectSuccess": {
-        "title": "ናብ ስኬት ዝወስድ መጠን ፕሮጀክት"
+      "jobSuccess": {
+        "title": "ናብ ስኬት ዝወስድ መጠን ስራ"
       },
       "revenueGrowth": {
         "title": "ዕብየት እታኻ"
       }
     },
-    "projects": {
-      "title": "ቀረባ ፕሮጀክትታት",
+    "jobs": {
+      "title": "ቀረባ ስራታት",
       "viewAll": "ኩሉ ርኢ",
       "details": {
         "client": "ደንበኛ",
         "progress": "ምዕባለ",
-        "title": "ዝርዝራት ፕሮጀክት",
+        "title": "ዝርዝራት ስራ",
         "assignedWorker": "ዝተመደበ ሰራሕተኛ",
         "deadline": "ዕለት መዛግብቲ",
         "budget": "በጀት",
         "buttons": {
           "viewDetails": "ዝርዝራት ርኢ",
           "contactClient": "ምስ ደንበኛ ተራኸብ",
-          "generateReport": "ሪፖርት ፍጠር"
+          "generateReport": "ሪፖርት ፍጠር",
+          "applicants": "የስራ መለያዎች"
         }
       },
       "status": {
@@ -772,14 +907,14 @@
       "title": "ልዑላት ደንበኛታት",
       "viewAll": "ኩሉ ርኢ",
       "metrics": {
-        "projects": "ፕሮጀክትታት"
+        "jobs": "ስራታት"
       }
     },
     "operations": {
       "title": "ንግዳዊ ንጥፈታት",
       "buttons": {
         "clientManagement": "ኣስተዳደር ደንበኛ",
-        "projectOversight": "ቁጽጽር ፕሮጀክት",
+        "jobOversight": "ቁጽጽር ስራ",
         "businessAnalytics": "ትንታነ ንግዲ",
         "financialReports": "ፋይናንሻል ሪፖርት"
       }
@@ -787,10 +922,10 @@
     "keyMetrics": {
       "title": "ኣገደስቲ መለክዒታት",
       "metrics": {
-        "avgProjectValue": "ኣማካይ ዋጋ ፕሮጀክት",
+        "avgJobValue": "ኣማካይ ዋጋ ስራ",
         "clientRetention": "ምዕጻው ደንበኛ",
-        "projectCompletionRate": "መጠን ምውዳእ ፕሮጀክት",
-        "avgProjectDuration": "ኣማካይ ንውሓት ፕሮጀክት"
+        "jobCompletionRate": "መጠን ምውዳእ ስራ",
+        "avgJobDuration": "ኣማካይ ንውሓት ስራ"
       }
     },
     "recentActivity": {

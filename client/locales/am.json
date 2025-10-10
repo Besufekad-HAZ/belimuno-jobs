@@ -31,7 +31,7 @@
         "part2": "እድሎች ጋር ያገናኙ"
       },
       "description": "ቤሊሙኖ ስራዎች የኢትዮጵያ ከበሬታ ያለው የሰው ሃብት አውታረመረብ ፕላትፎርም ነው፣ ብቃት ያላቸው ሰራተኞች ከሀገሪቱ ዙሪያ ካሉ ንግዶች ጋር ያገናኛል። ሥራዎቻቸውን እየገነቡ ከሚገኙ በሺዎች የሚቆጠሩ ባለሙያዎች ጋር ይቀላቀሉ።",
-      "getStarted": "ጀምር",
+      "register": "ተመዝገብ",
       "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ",
       "browseJobs": "ስራዎችን ይፈልጉ"
     },
@@ -66,6 +66,82 @@
         "title": "ክፍያ ይቀበሉ",
         "description": "ፕሮጀክቶችን ይጨርሱ እና በእኛ ፕላትፎርም ደህንነቱ የተጠበቀ ክፍያ ይቀበሉ"
       }
+    },
+    "testimonials": {
+      "eyebrow": "ምስክሮች",
+      "title": "በቤሊሙኖ የሚታመኑ ቡድኖች ታሪኮች",
+      "subtitle": "የሰው ሀብት መሪዎችና ሰራተኞች ቤሊሙኖን እንዴት እንደሚጠቀሙ ይስማሙ.",
+      "metrics": "በሀገር አቀፍ ያሉ <count>{total}</count> ደንበኞችና ባለሙያዎች የተወደደ።",
+      "controls": {
+        "previous": "የቀድሞ ምስክርነት",
+        "next": "ቀጣይ ምስክርነት",
+        "goTo": "ወደ ምስክርነት ስላይድ {index} ይሂዱ"
+      },
+      "testimonial1": {
+        "content": "ቤሊሙኖ አስፈላጊ ቦታዎችን በቀናት ሳይሆን በሳምንታት እንዳንደርስ አስተናግዶናል።",
+        "name": "መሮን አለሙ",
+        "role": "የኦፕሬሽን አስተዳዳሪ",
+        "company": "ኢትዮ ሎጂስቲክስ"
+      },
+      "testimonial2": {
+        "content": "በአንዱም ታላቅ ፕሮጀክት ላይ የተመረጡ ባለሙያዎችን ለማግኘት ቤሊሙኖን እናምናለን።",
+        "name": "ሳሙኤል ከበደ",
+        "role": "የፕሮጀክት ዳይሬክተር",
+        "company": "ብሉ ናይል ኮንስትራክሽን"
+      },
+      "testimonial3": {
+        "content": "የእነሱ ፕላትፎርም ለርቀት ቡድኖቻችን ቅጥርንና ክፍያን ቀላል አድርጎናል።",
+        "name": "ሀና ተስፋዬ",
+        "role": "የሰው ሀብት ኃላፊ",
+        "company": "ሀበሻ ፉድስ"
+      }
+    },
+    "regions": {
+      "title": "የምንሰራባቸው ክልሎች",
+      "subtitle": "የኢትዮጵያ ዋና ክልሎች ውስጥ ሰራተኞችንና ተቀጣሪዎችን እናገናኛለን",
+      "addisAbaba": {
+        "name": "አዲስ አበባ",
+        "description": "የፋይናንስ፣ ቴክኖሎጂ እና አስተዳደር ችሎታዎች ማዕከል።",
+        "jobs": "120+ በተንቀሳቃሽ ስራዎች"
+      },
+      "oromia": {
+        "name": "ኦሮሚያ",
+        "description": "ሎጂስቲክስ፣ ግብርና እና የመስክ ፕሮጀክት ባለሙያዎች።",
+        "jobs": "80+ በተንቀሳቃሽ ስራዎች"
+      },
+      "amhara": {
+        "name": "አማራ",
+        "description": "ቱሪዝም፣ ትምህርት እና ጤና እድሎች።",
+        "jobs": "60+ በተንቀሳቃሽ ስራዎች"
+      },
+      "tigray": {
+        "name": "ትግራይ",
+        "description": "ዳግም ግንባታ፣ አገልግሎትና የኦፕሬሽን ሥራዎች።",
+        "jobs": "40+ በተንቀሳቃሽ ስራዎች"
+      },
+      "snnp": {
+        "name": "ደቡብ",
+        "description": "ማኑፋክቸሪንግ፣ ሆቴልና ባህላዊ ፕሮጀክቶች።",
+        "jobs": "55+ በተንቀሳቃሽ ስራዎች"
+      },
+      "sidama": {
+        "name": "ሲዳማ",
+        "description": "እርሻ ኢንዱስትሪ፣ ችርቻሮ እና የደንበኛ አገልግሎት ስራዎች።",
+        "jobs": "45+ በተንቀሳቃሽ ስራዎች"
+      }
+    },
+    "news": {
+      "title": "ምን አዲስ ነገር አለ?",
+      "subtitle": "ከቤሊሙኖ ስራዎች ከተመለከተው የቅርብ ጊዜ ዜናዎች፣ ዝመናዎች እና ማስታወቂያዎች ጋር ይተዋወቁ",
+      "readMore": "ተጨማሪ ያንብቡ",
+      "viewAllNews": "ሁሉንም ዜናዎች ይመልከቱ"
+    },
+    "NewsDetail": {
+      "backButton": "ተመለስ",
+      "shareButton": "አጋራ",
+      "backToHome": "ወደ አገር ቤት ተመለስ",
+      "viewAllNews": "ሁሉንም ዜናዎች ይመልከቱ",
+      "relatedNews": "የተዛመዱ ዜናዎች"
     },
     "cta": {
       "title": "ጉዞዎን ለመጀመር ዝግጁ ነዎት?",
@@ -308,6 +384,17 @@
       "of": "ከ",
       "next": "ቀጣይ"
     },
+    "jobsForYou": {
+      "title": "ለእርስዎ የሚሆኑ ስራዎች",
+      "subtitle": "ከችሎታዎችዎ ጋር የሚስማሙ ስራዎች",
+      "matchingJobs": "የሚስማሙ ስራዎች",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "more": "ተጨማሪ"
+    },
+    "searchAndJobs": {
+      "title": "ስራዎችን ይፈልጉ እና ይሰራሩ",
+      "subtitle": "ከችሎታዎችዎ እና ፍላጎቶችዎ ጋር የሚመሳሰል ፍጹም የስራ እድልን ያግኙ"
+    },
     "categories": {
       "1": "ዌብሳይት ማበልፀግ",
       "2": "የሞባይል አፕሊኬሽን ማበልፀግ",
@@ -320,6 +407,42 @@
       "9": "ኮንሳልቲንግ",
       "10": "ሌላ"
     }
+  },
+  "JobDetailPage": {
+    "notFound": {
+      "title": "ስራ አልተገኘም",
+      "description": "የሚፈልጉት ስራ አልተገኘም ወይም ተወግዷል።",
+      "backButton": "ወደ ስራዎች ተመለስ"
+    },
+    "loading": "በመጫን ላይ...",
+    "backToJobs": "ወደ ስራዎች ተመለስ",
+    "saveJob": "ስራ አስቀምጥ",
+    "saved": "ተቀምጧል",
+    "share": "አጋራ",
+    "jobDetails": "የስራ ዝርዝሮች",
+    "category": "ምድብ",
+    "budget": "በጀት",
+    "deadline": "መጨረሻ ቀን",
+    "location": "አካባቢ",
+    "experienceLevel": "የልምድ ደረጃ",
+    "posted": "ተለጠፈ",
+    "requiredSkills": "የሚያስፈልጉ ችሎታዎች",
+    "tags": "መለያዎች",
+    "deliverables": "የሚያቀርቡ ነገሮች",
+    "attachments": "ተያያዥ ፋይሎች",
+    "clientInfo": "የደንበኛ መረጃ",
+    "viewClientProfile": "የደንበኛ መገለጫ ይመልከቱ",
+    "actions": "ድርጊቶች",
+    "applyNow": "አሁን ያመልክቱ",
+    "manageJob": "ስራ አስተዳድር",
+    "loginToApply": "ለመመልከት ይግቡ",
+    "jobStatus": "የስራ ሁኔታ",
+    "status": "ሁኔታ",
+    "priority": "ቅድሚያ",
+    "public": "የህዝብ",
+    "progress": "እድገት",
+    "yes": "አዎ",
+    "no": "አይ"
   },
   "ContactPage": {
     "hero": {
@@ -493,6 +616,16 @@
           "placeholder": "መልእክት ይፃፉ"
         }
       }
+    },
+    "jobsForYou": {
+      "title": "ለእርስዎ የሚሆኑ ስራዎች",
+      "subtitle": "ከችሎታዎችዎ ጋር የሚስማሙ ስራዎች",
+      "matchingJobs": "የሚስማሙ ስራዎች",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "more": "ተጨማሪ",
+      "viewDetails": "ዝርዝሮችን ይመልከቱ",
+      "applyNow": "አሁን ያመልክቱ",
+      "applied": "ተመልክቷል"
     }
   },
   "ClientDashboard": {
@@ -536,6 +669,7 @@
         "actions": {
           "viewDetails": "ዝርዝሮችን ይመልከቱ",
           "applications": "ማመልከቻዎች",
+          "editJob": "ስራ አስተዳደር",
           "requestRevision": "ማስተካከያ ይጠይቁ",
           "payAndRate": "ይክፈሉ እና ደረጃ ይስጡ",
           "deleteJob": "ስራ ሰርዝ",
@@ -709,9 +843,9 @@
   "OutsourceAdminDashboard": {
     "header": {
       "title": "የሶስተኛ ወገን አስተዳዳሪ ዳሽቦርድ",
-      "subtitle": "ፕሮጀክቶችን፣ ቀጣሪዎችን እና የንግድ ስራዎችን ያስተዳድሩ",
+      "subtitle": "ስራዎችን፣ ቀጣሪዎችን እና የንግድ ስራዎችን ያስተዳድሩ",
       "buttons": {
-        "manageProjects": "ፕሮጀክቶችን ያስተዳድሩ",
+        "manageJobs": "ስራዎችን ያስተዳድሩ",
         "clientManagement": "የቀጣሪዎች አስተዳደር"
       }
     },
@@ -720,9 +854,9 @@
         "title": "ጠቅላላ ቀጣሪዎች",
         "label": "ጠቅላላ ቀጣሪዎች"
       },
-      "activeProjects": {
-        "title": "ክፍት ፕሮጀክቶች",
-        "label": "ክፍት ፕሮጀክቶች"
+      "activeJobs": {
+        "title": "ክፍት ስራዎች",
+        "label": "ክፍት ስራዎች"
       },
       "totalRevenue": {
         "title": "ጠቅላላ ገቢ",
@@ -738,27 +872,28 @@
         "title": "የቀጣሪዎች እርካታ",
         "rating": "ከ5"
       },
-      "projectSuccess": {
-        "title": "የፕሮጀክት ስኬት መጠን"
+      "jobSuccess": {
+        "title": "የስራ ስኬት መጠን"
       },
       "revenueGrowth": {
         "title": "የገቢ እድገት"
       }
     },
-    "projects": {
-      "title": "የቅርብ ጊዜ ፕሮጀክቶች",
+    "jobs": {
+      "title": "የቅርብ ጊዜ ስራዎች",
       "viewAll": "ሁሉንም ይመልከቱ",
       "details": {
         "client": "ቀጣሪ",
         "progress": "እድገት",
-        "title": "የፕሮጀክት ዝርዝሮች",
+        "title": "የስራ ዝርዝሮች",
         "assignedWorker": "የተመደበ ሰራተኛ",
         "deadline": "የመዝጋት ቀን",
         "budget": "በጀት",
         "buttons": {
           "viewDetails": "ዝርዝሮችን ይመልከቱ",
           "contactClient": "ከደንበኛ ይገናኙ",
-          "generateReport": "ሪፖርት ይፍጠሩ"
+          "generateReport": "ሪፖርት ይፍጠሩ",
+          "applicants": "የስራ መለያዎች"
         }
       },
       "status": {
@@ -772,14 +907,14 @@
       "title": "ከፍተኛ ቀጣሪዎች",
       "viewAll": "ሁሉንም ይመልከቱ",
       "metrics": {
-        "projects": "ፕሮጀክቶች"
+        "jobs": "ስራዎች"
       }
     },
     "operations": {
       "title": "የንግድ ስራዎች",
       "buttons": {
         "clientManagement": "የቀጣሪዎች አስተዳደር",
-        "projectOversight": "የፕሮጀክት ቁጥጥር",
+        "jobOversight": "የስራ ቁጥጥር",
         "businessAnalytics": "የንግድ ትንታኔ",
         "financialReports": "የፋይናንስ ሪፖርቶች"
       }
@@ -787,10 +922,10 @@
     "keyMetrics": {
       "title": "መሠረታዊ አባላት",
       "metrics": {
-        "avgProjectValue": "አማካኝ የፕሮጀክት ዋጋ",
+        "avgJobValue": "አማካኝ የስራ ዋጋ",
         "clientRetention": "የቀጣሪዎች መቆየት",
-        "projectCompletionRate": "የፕሮጀክት ማጠናቀቂያ መጠን",
-        "avgProjectDuration": "አማካኝ የፕሮጀክት ቆይታ"
+        "jobCompletionRate": "የስራ ማጠናቀቂያ መጠን",
+        "avgJobDuration": "አማካኝ የስራ ቆይታ"
       }
     },
     "recentActivity": {

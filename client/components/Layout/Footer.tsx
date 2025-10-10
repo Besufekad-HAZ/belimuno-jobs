@@ -100,32 +100,20 @@ const Footer = () => {
         <div>
           <h4 className="font-semibold mb-3">{t("sections.followUs")}</h4>
           <div className="flex items-center gap-3 text-blue-100">
-            <a
-              href="#"
-              className="hover:text-white"
-              aria-label={t("social.facebook")}
-            >
+            <a href="#" className="hover:text-white" aria-label="Facebook">
               <Facebook className="h-5 w-5" />
             </a>
-            <a
-              href="#"
-              className="hover:text-white"
-              aria-label={t("social.linkedin")}
-            >
+            <a href="#" className="hover:text-white" aria-label="LinkedIn">
               <Linkedin className="h-5 w-5" />
             </a>
-            <a
-              href="#"
-              className="hover:text-white"
-              aria-label={t("social.twitter")}
-            >
+            <a href="#" className="hover:text-white" aria-label="Twitter">
               <Twitter className="h-5 w-5" />
             </a>
             <a
               href="https://t.me/belimunojobs"
               target="_blank"
               className="hover:text-white"
-              aria-label={t("social.telegram")}
+              aria-label="Telegram"
             >
               <Send className="h-5 w-5" />
             </a>

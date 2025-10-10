@@ -5,6 +5,8 @@ export interface User {
   name: string;
   email: string;
   role: "super_admin" | "admin_hr" | "admin_outsource" | "worker" | "client";
+  isVerified?: boolean;
+  isActive?: boolean;
   // Region can be populated (object) or just an id string depending on auth response
   region?:
     | {
@@ -14,15 +16,23 @@ export interface User {
       }
     | string;
   profile?: {
+    firstName?: string;
+    lastName?: string;
     bio?: string;
     skills?: string[];
-    experience?: number;
+    experience?: number | string;
     location?: string;
     phone?: string;
+    address?: {
+      street?: string;
+      city?: string;
+      region?: string;
+      country?: string;
+    };
     region?: string;
     hourlyRate?: number;
     availability?: string;
-    portfolio?: string[];
+    portfolio?: string[] | string;
     verified?: boolean;
     rating?: number;
     completedJobs?: number;
@@ -32,6 +42,59 @@ export interface User {
     website?: string;
     managedRegion?: string;
     permissions?: string[];
+    dob?: string;
+    gender?: string;
+    isVerified?: boolean;
+    isActive?: boolean;
+    avatar?: string;
+    cv?: {
+      name?: string;
+      mimeType?: string;
+      data?: string;
+    };
+  };
+  workerProfile?: {
+    education?: Array<{
+      school?: string;
+      degree?: string;
+      field?: string;
+      startDate?: string;
+      endDate?: string | null;
+      description?: string;
+      gpa?: string;
+    }>;
+    workHistory?: Array<{
+      company?: string;
+      title?: string;
+      startDate?: string;
+      endDate?: string | null;
+      description?: string;
+    }>;
+    skills?: string[];
+    languages?: string[];
+    certifications?: string[];
+    portfolio?: string[];
+    rating?: number;
+    totalJobs?: number;
+    completedJobs?: number;
+    availability?: string;
+    hourlyRate?: number;
+    experience?: string | number;
+    verifiedAt?: string;
+  };
+  clientProfile?: {
+    company?: string;
+    companyName?: string;
+    industry?: string;
+    companySize?: string;
+    website?: string;
+    totalProjects?: number;
+    projectsCompleted?: number;
+    totalSpent?: number;
+    lastProjectDate?: string;
+    score?: number;
+    phone?: string;
+    address?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -57,7 +120,7 @@ export const getStoredToken = (): string | null => {
 
 export const setAuth = (token: string, user: User) => {
   Cookies.set("token", token, { expires: 30 });
-  
+
   // Store only essential user data to avoid cookie size limits
   const essentialUser = {
     _id: user._id,
@@ -65,20 +128,24 @@ export const setAuth = (token: string, user: User) => {
     email: user.email,
     role: user.role,
     isVerified: user.isVerified,
-    isActive: user.isActive
+    isActive: user.isActive,
   };
-  
+
   try {
     Cookies.set("user", JSON.stringify(essentialUser), { expires: 30 });
   } catch (error) {
     console.error("Failed to store user in cookies:", error);
     // Fallback: try with even smaller object
-    Cookies.set("user", JSON.stringify({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    }), { expires: 30 });
+    Cookies.set(
+      "user",
+      JSON.stringify({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }),
+      { expires: 30 },
+    );
   }
 };
 
