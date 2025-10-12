@@ -332,6 +332,10 @@ export const workerAPI = {
       { content, attachments },
       config,
     ),
+  reviewClient: (
+    jobId: string,
+    payload: { rating: number; comment?: string; title?: string },
+  ) => api.post(`/worker/jobs/${jobId}/review`, payload),
   declineAssignedJob: (jobId: string) =>
     api.put(`/worker/jobs/${jobId}/decline`),
   acceptAssignedJob: (jobId: string) => api.put(`/worker/jobs/${jobId}/accept`),
@@ -342,12 +346,6 @@ export const workerAPI = {
   // Jobs for you based on worker skills/category
   getJobsForYou: (params?: Record<string, unknown>) =>
     api.get("/worker/jobs-for-you", { params }),
-  // Reviews
-  reviewClient: (
-    jobId: string,
-    payload: { rating: number; comment: string; title?: string },
-  ) => api.post(`/worker/jobs/${jobId}/review`, payload),
-
   // Disputes
   createDispute: (payload: {
     title: string;
@@ -588,6 +586,49 @@ export const adminAPI = {
     api.put(`/admin/applications/${id}/shortlist`, { notes }),
   unshortlistApplication: (id: string) =>
     api.put(`/admin/applications/${id}/unshortlist`),
+
+  // Team management
+  getTeamMembers: (params?: {
+    page?: number;
+    limit?: number;
+    sort?: string;
+    status?: string;
+  }) => api.get("/admin/team", { params }),
+  createTeamMember: (payload: {
+    name: string;
+    role: string;
+    department: string;
+    photoUrl?: string;
+    photoKey?: string | null;
+    email?: string;
+    phone?: string;
+    bio?: string;
+    order?: number;
+  }) => api.post("/admin/team", payload),
+  updateTeamMember: (
+    id: string,
+    payload: {
+      name?: string;
+      role?: string;
+      department?: string;
+      photoUrl?: string;
+      photoKey?: string | null;
+      email?: string;
+      phone?: string;
+      bio?: string;
+      order?: number;
+    },
+  ) => api.put(`/admin/team/${id}`, payload),
+  deleteTeamMember: (id: string) => api.delete(`/admin/team/${id}`),
+  uploadTeamPhoto: (file: File) => {
+    const formData = new FormData();
+    formData.append("photo", file);
+    return api.post("/admin/team/upload-photo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 
   // Additional endpoints from second adminAPI
   getStats: () => api.get("/admin/stats"),

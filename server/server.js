@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
+const path = require("path");
 const connectDB = require("./config/db");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
@@ -23,6 +24,15 @@ app.use(compression());
 
 // Cookie parser middleware
 app.use(cookieParser());
+
+// Serve uploaded media assets
+app.use(
+	"/uploads",
+	express.static(path.join(__dirname, "uploads"), {
+		maxAge: "7d",
+		fallthrough: true,
+	}),
+);
 
 // CORS configuration (supports multiple comma-separated origins and Vercel previews)
 const rawOrigins = (
@@ -70,9 +80,11 @@ const job = require('./routes/job');
 const notification = require('./routes/notification');
 const contact = require('./routes/contact');
 const chat = require('./routes/chat');
+const publicRoutes = require('./routes/public');
 
 // API Info route
 app.get("/api", (req, res) => {
+	const publicRoutes = require("./routes/public");
 	res.status(200).json({
 		success: true,
 		message: "Belimuno Jobs API",
@@ -154,6 +166,7 @@ app.use("/api/jobs", job);
 app.use("/api/notifications", notification);
 app.use("/api/contact", contact);
 app.use("/api/chat", chat);
+app.use("/api", publicRoutes);
 
 // Catch 404 routes
 app.all("*", (req, res) => {

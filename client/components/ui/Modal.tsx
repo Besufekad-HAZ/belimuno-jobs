@@ -33,6 +33,12 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  // keep latest onClose in a ref so we don't need to re-run the focus effect
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -43,7 +49,7 @@ const Modal: React.FC<ModalProps> = ({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
       }
       if (e.key === "Tab") {
         // simple focus trap
@@ -67,7 +73,7 @@ const Modal: React.FC<ModalProps> = ({
       document.removeEventListener("keydown", onKeyDown);
       previouslyFocused.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const sizes = {
     sm: "max-w-sm",
@@ -79,7 +85,7 @@ const Modal: React.FC<ModalProps> = ({
   return isOpen ? (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4"
-      aria-hidden="true"
+      role="presentation"
       onClick={preventCloseOnOutsideClick ? undefined : onClose}
     >
       <div

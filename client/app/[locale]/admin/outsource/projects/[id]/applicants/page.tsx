@@ -6,9 +6,11 @@ import { adminAPI } from "@/lib/api";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import { ArrowLeft, Clock, DollarSign, User } from "lucide-react";
+import CVPreviewModal from "@/components/ui/CVPreviewModal";
+import { ArrowLeft, Clock, DollarSign, User, FileText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Project } from "../../page";
+import { User as UserType } from "@/lib/auth";
 
 interface Applicant {
   worker: {
@@ -40,6 +42,11 @@ const ApplicantsPage = () => {
   const [jobData, setJobData] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cvModalOpen, setCvModalOpen] = useState(false);
+  const [selectedApplicant, setSelectedApplicant] = useState<UserType | null>(
+    null,
+  );
+  const [cvLoading, setCvLoading] = useState(false);
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -54,7 +61,7 @@ const ApplicantsPage = () => {
 
         if (jobData?.applicants) {
           setApplicants(jobData.applicants);
-          console.log("applicants", applicants);
+          console.log("applicants", jobData.applicants);
         }
       } catch (err) {
         console.error("Failed to fetch applicants:", err);
@@ -136,6 +143,27 @@ const ApplicantsPage = () => {
       setError(
         "Failed to remove applicant from shortlist. Please try again later.",
       );
+    }
+  };
+
+  const handleViewCV = async (applicantId: string) => {
+    try {
+      setCvLoading(true);
+      setCvModalOpen(true);
+
+      // Fetch the user data using adminAPI.getUser
+      const response = await adminAPI.getUser(applicantId);
+      const userData =
+        response.data?.data.user || (response.data.user as UserType);
+      console.log("userData", userData);
+
+      setSelectedApplicant(userData);
+    } catch (err) {
+      console.error("Failed to fetch user CV:", err);
+      setError("Failed to load CV. Please try again later.");
+      setCvModalOpen(false);
+    } finally {
+      setCvLoading(false);
     }
   };
 
@@ -287,6 +315,14 @@ const ApplicantsPage = () => {
 
                   {/* Actions */}
                   <div className="flex space-x-3 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleViewCV(applicant.worker._id)}
+                      className="flex items-center space-x-2"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span>View CV</span>
+                    </Button>
                     {applicant.status === "pending" && (
                       <>
                         <div className="relative group">
@@ -340,6 +376,17 @@ const ApplicantsPage = () => {
           )}
         </div>
       </div>
+
+      {/* CV Preview Modal */}
+      <CVPreviewModal
+        isOpen={cvModalOpen}
+        onClose={() => {
+          setCvModalOpen(false);
+          setSelectedApplicant(null);
+        }}
+        user={selectedApplicant}
+        loading={cvLoading}
+      />
     </div>
   );
 };

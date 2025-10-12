@@ -6,12 +6,101 @@ const Region = require("../models/Region");
 const Notification = require("../models/Notification");
 const Report = require("../models/Report");
 const Dispute = require("../models/Dispute");
+const TeamMember = require("../models/TeamMember");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+
+const fsPromises = fs.promises;
 
 // Lightweight in-memory cache for dashboard
 const __dashboardCache = { data: null, ts: 0 };
+
+const ensureDirectory = (dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+};
+
+const teamUploadsDir = path.join(__dirname, "..", "uploads", "team");
+ensureDirectory(teamUploadsDir);
+
+const normalizePhotoKey = (rawKey) => {
+  if (!rawKey) {
+    return undefined;
+  }
+  const trimmed = String(rawKey).trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  return path.basename(trimmed).replace(/[^a-zA-Z0-9._-]/g, "-");
+};
+
+const inferManagedPhotoKey = (url) => {
+  if (!url || typeof url !== "string") {
+    return undefined;
+  }
+  const cleaned = url.split("?")[0]?.split("#")[0] || "";
+  if (!cleaned.includes("/uploads/team/")) {
+    return undefined;
+  }
+  return path.basename(cleaned);
+};
+
+const deleteTeamPhoto = async (photoKey) => {
+  if (!photoKey) {
+    return;
+  }
+  try {
+    await fsPromises.unlink(path.join(teamUploadsDir, photoKey));
+  } catch (error) {
+    if (error && error.code !== "ENOENT") {
+      console.warn("Failed to delete team member photo", photoKey, error);
+    }
+  }
+};
+
+const teamPhotoStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, teamUploadsDir);
+  },
+  filename: (_req, file, cb) => {
+    const timestamp = Date.now();
+    const cleanedOriginal = file.originalname
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const ext = path.extname(cleanedOriginal) || ".jpg";
+    const baseName = cleanedOriginal
+      ? cleanedOriginal.replace(ext, "")
+      : "team-member";
+    cb(null, `${timestamp}-${baseName}${ext}`);
+  },
+});
+
+const teamPhotoUpload = multer({
+  storage: teamPhotoStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed."));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+const buildTeamPhotoUrl = (req, filename) => {
+  const base =
+    process.env.FILE_BASE_URL || `${req.protocol}://${req.get("host")}`;
+  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  return `${normalizedBase}/uploads/team/${filename}`;
+};
 
 // @desc    Get admin dashboard (optimized)
 // @route   GET /api/admin/dashboard
@@ -1238,5 +1327,368 @@ exports.updateDispute = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: dispute,
+  });
+});
+
+// @desc    Get all team members
+// @route   GET /api/admin/team
+// @access  Private/Admin HR or Super Admin
+exports.getTeamMembers = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, sort = "order", status } = req.query;
+
+  const query = {};
+  if (status && ["active", "archived"].includes(String(status))) {
+    query.status = status;
+  }
+
+  const sortTokens = String(sort)
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  const sortCriteria = sortTokens.length
+    ? Object.fromEntries(
+        sortTokens.map((token) => {
+          const direction = token.startsWith("-") ? -1 : 1;
+          const key = token.replace(/^[-+]/, "");
+          return [key || "order", direction];
+        }),
+      )
+    : { order: 1, createdAt: -1 };
+
+  const numericLimit = Math.min(Math.max(parseInt(String(limit), 10) || 20, 1), 100);
+  const numericPage = Math.max(parseInt(String(page), 10) || 1, 1);
+
+  const [rawMembers, rawTotal] = await Promise.all([
+    TeamMember.find(query)
+      .sort(sortCriteria)
+      .limit(numericLimit)
+      .skip((numericPage - 1) * numericLimit)
+      .lean(),
+    TeamMember.countDocuments(query),
+  ]);
+
+  // Deduplicate by normalized name + role to avoid showing duplicates
+  const normalizeKey = (m) => {
+    const name = (m.name || "").toString().trim().toLowerCase();
+    const role = (m.role || "").toString().trim().toLowerCase();
+    return `${name}::${role}`;
+  };
+
+  const dedupeMap = new Map();
+  for (const m of rawMembers) {
+    const key = normalizeKey(m);
+    if (!dedupeMap.has(key)) {
+      dedupeMap.set(key, m);
+      continue;
+    }
+
+    // prefer the member with the lower display order, then earlier createdAt
+    const existing = dedupeMap.get(key);
+    const existingOrder = typeof existing.order === "number" ? existing.order : Number.POSITIVE_INFINITY;
+    const incomingOrder = typeof m.order === "number" ? m.order : Number.POSITIVE_INFINITY;
+
+    if (incomingOrder < existingOrder) {
+      dedupeMap.set(key, m);
+    } else if (incomingOrder === existingOrder) {
+      const existingCreated = existing.createdAt ? new Date(existing.createdAt) : new Date(0);
+      const incomingCreated = m.createdAt ? new Date(m.createdAt) : new Date(0);
+      if (incomingCreated < existingCreated) {
+        dedupeMap.set(key, m);
+      }
+    }
+  }
+
+  const members = Array.from(dedupeMap.values());
+
+  // Recompute pagination based on deduped total when returning full pages
+  const dedupedTotal = members.length;
+
+  res.status(200).json({
+    success: true,
+    count: members.length,
+    total: dedupedTotal,
+    pagination: {
+      page: numericPage,
+      limit: numericLimit,
+      pages: Math.ceil(dedupedTotal / numericLimit) || 1,
+    },
+    data: members,
+  });
+});
+
+// @desc    Upload a team member profile photo
+// @route   POST /api/admin/team/upload-photo
+// @access  Private/Admin HR or Super Admin
+exports.uploadTeamMemberPhoto = (req, res) => {
+  teamPhotoUpload.single("photo")(req, res, (err) => {
+    if (err) {
+      let message = err.message || "Unable to upload profile photo.";
+      if (err.code === "LIMIT_FILE_SIZE" || err.message === "File too large") {
+        message = "Image exceeds the 5MB limit.";
+      }
+      return res.status(400).json({
+        success: false,
+        message,
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please attach an image file in the 'photo' field.",
+      });
+    }
+
+    const fileUrl = buildTeamPhotoUrl(req, req.file.filename);
+
+    return res.status(201).json({
+      success: true,
+      message: "Profile photo uploaded successfully.",
+      data: {
+        url: fileUrl,
+        filename: req.file.filename,
+        size: req.file.size,
+        mimeType: req.file.mimetype,
+      },
+    });
+  });
+};
+
+// @desc    Create a new team member
+// @route   POST /api/admin/team
+// @access  Private/Admin HR or Super Admin
+exports.createTeamMember = asyncHandler(async (req, res) => {
+  const { name, role, department, photoUrl, photoKey, email, phone, bio } =
+    req.body;
+  let { order } = req.body;
+
+  if (!name || !role || !department) {
+    return res.status(400).json({
+      success: false,
+      message: "Name, role, and department are required",
+    });
+  }
+
+  const trimmedName = name.trim();
+  const trimmedRole = role.trim();
+  const trimmedDepartment = department.trim();
+
+  const existingMember = await TeamMember.findOne({
+    name: trimmedName,
+    role: trimmedRole,
+  });
+
+  if (existingMember) {
+    return res.status(409).json({
+      success: false,
+      message: "A team member with this name and role already exists.",
+      data: existingMember,
+    });
+  }
+
+  let resolvedOrder;
+  if (order !== undefined && order !== null && order !== "") {
+    const parsedOrder = Number(order);
+    if (Number.isNaN(parsedOrder) || parsedOrder < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Display order must be a positive number",
+      });
+    }
+    resolvedOrder = parsedOrder;
+  } else {
+    const highest = await TeamMember.findOne({}, "order")
+      .sort({ order: -1 })
+      .lean();
+    resolvedOrder =
+      highest && typeof highest.order === "number"
+        ? highest.order + 1
+        : 1;
+  }
+
+  const sanitizedPhotoUrl = photoUrl?.trim() || undefined;
+  const sanitizedPhotoKey = normalizePhotoKey(photoKey) ||
+    inferManagedPhotoKey(sanitizedPhotoUrl);
+
+  const member = await TeamMember.create({
+    name: trimmedName,
+    role: trimmedRole,
+    department: trimmedDepartment,
+    photoUrl: sanitizedPhotoUrl,
+    photoKey: sanitizedPhotoKey,
+    email: email?.trim() || undefined,
+    phone: phone?.trim() || undefined,
+    bio: bio?.trim() || undefined,
+    order: resolvedOrder,
+    createdBy: req.user?._id,
+    updatedBy: req.user?._id,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Team member created successfully",
+    data: member,
+  });
+});
+
+// @desc    Update a team member
+// @route   PUT /api/admin/team/:id
+// @access  Private/Admin HR or Super Admin
+exports.updateTeamMember = asyncHandler(async (req, res) => {
+  const member = await TeamMember.findById(req.params.id);
+
+  if (!member) {
+    return res.status(404).json({
+      success: false,
+      message: "Team member not found",
+    });
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "name")) {
+    const trimmedName = String(req.body.name || "").trim();
+    if (!trimmedName) {
+      return res.status(400).json({
+        success: false,
+        message: "Name cannot be empty",
+      });
+    }
+    member.name = trimmedName;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "role")) {
+    const trimmedRole = String(req.body.role || "").trim();
+    if (!trimmedRole) {
+      return res.status(400).json({
+        success: false,
+        message: "Role cannot be empty",
+      });
+    }
+    member.role = trimmedRole;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "department")) {
+    const trimmedDepartment = String(req.body.department || "").trim();
+    if (!trimmedDepartment) {
+      return res.status(400).json({
+        success: false,
+        message: "Department cannot be empty",
+      });
+    }
+    member.department = trimmedDepartment;
+  }
+
+  const previousPhotoKey = member.photoKey;
+
+  let photoUrlProvided = false;
+  let photoKeyProvided = false;
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "photoUrl")) {
+    photoUrlProvided = true;
+    const trimmedUrl = String(req.body.photoUrl || "").trim();
+    member.photoUrl = trimmedUrl || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "photoKey")) {
+    photoKeyProvided = true;
+    const rawKey = req.body.photoKey;
+    if (rawKey === null || rawKey === "") {
+      member.photoKey = undefined;
+    } else {
+      member.photoKey = normalizePhotoKey(rawKey);
+    }
+  }
+
+  if (photoUrlProvided && !photoKeyProvided) {
+    if (!member.photoUrl) {
+      member.photoKey = undefined;
+    } else {
+      const inferredKey = inferManagedPhotoKey(member.photoUrl);
+      if (inferredKey) {
+        member.photoKey = inferredKey;
+      }
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "email")) {
+    const trimmedEmail = String(req.body.email || "").trim();
+    member.email = trimmedEmail || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "phone")) {
+    const trimmedPhone = String(req.body.phone || "").trim();
+    member.phone = trimmedPhone || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "bio")) {
+    const trimmedBio = String(req.body.bio || "").trim();
+    member.bio = trimmedBio || undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "order")) {
+    const incoming = req.body.order;
+    if (incoming === null || incoming === undefined || incoming === "") {
+      member.order = undefined;
+    } else {
+      const parsedOrder = Number(incoming);
+      if (Number.isNaN(parsedOrder) || parsedOrder < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Display order must be a positive number",
+        });
+      }
+      member.order = parsedOrder;
+    }
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "status")) {
+    const normalizedStatus = String(req.body.status || "").trim();
+    if (normalizedStatus && !["active", "archived"].includes(normalizedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be either active or archived",
+      });
+    }
+    if (normalizedStatus) {
+      member.status = normalizedStatus;
+    }
+  }
+
+  member.updatedBy = req.user?._id;
+
+  await member.save();
+
+  if (previousPhotoKey && previousPhotoKey !== member.photoKey) {
+    await deleteTeamPhoto(previousPhotoKey);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Team member updated successfully",
+    data: member,
+  });
+});
+
+// @desc    Delete a team member
+// @route   DELETE /api/admin/team/:id
+// @access  Private/Admin HR or Super Admin
+exports.deleteTeamMember = asyncHandler(async (req, res) => {
+  const member = await TeamMember.findByIdAndDelete(req.params.id);
+
+  if (!member) {
+    return res.status(404).json({
+      success: false,
+      message: "Team member not found",
+    });
+  }
+
+  const managedPhotoKey = member.photoKey || inferManagedPhotoKey(member.photoUrl);
+  if (managedPhotoKey) {
+    await deleteTeamPhoto(managedPhotoKey);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Team member removed successfully",
   });
 });

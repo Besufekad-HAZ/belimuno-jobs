@@ -103,7 +103,11 @@ const HRAdminDashboard: React.FC = () => {
       return;
     }
 
-    fetchDashboardData();
+    const load = async () => {
+      await fetchDashboardData();
+    };
+
+    load();
   }, [router]);
 
   const fetchDashboardData = async () => {
@@ -498,6 +502,14 @@ const HRAdminDashboard: React.FC = () => {
               {t("actions.title")}
             </h2>
             <div className="space-y-3">
+              <Button
+                onClick={() => router.push("/admin/hr/team")}
+                variant="primary"
+                className="w-full justify-start"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                {t("actions.buttons.manageTeam")}
+              </Button>
               <Button
                 onClick={() => router.push("/admin/hr/workers")}
                 variant="outline"

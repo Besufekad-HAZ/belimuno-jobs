@@ -153,7 +153,18 @@ const JobsPage: React.FC = () => {
   useEffect(() => {
     const currentUser = getStoredUser();
     setUser(currentUser);
-    fetchJobs();
+
+    // Get category from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get("category");
+
+    if (categoryParam && categoryParam !== "all") {
+      setCategoryFilter(categoryParam);
+      fetchJobs({ category: categoryParam });
+    } else {
+      fetchJobs();
+    }
+
     fetchJobsForYou();
     (async () => {
       try {

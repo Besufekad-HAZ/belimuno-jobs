@@ -1,0 +1,13 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>Addis Guzo</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(32 20)">
+    <path d="M75 14c32 0 58 26 58 58 0 4.3-0.5 8.5-1.4 12.6L88 107l-16-22-18 22-30-18c-3.3-7-5.2-14.9-5.2-23.2 0-32 26-58 58-58z" fill="#d4a019"/>
+    <circle cx="75" cy="42" r="12" fill="#fff3c4"/>
+    <path d="M64 75c0-12.1 9.9-22 22-22s22 9.9 22 22h-44z" fill="#fff3c4"/>
+  </g>
+  <g transform="translate(150 68)" fill="#374151" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif" text-anchor="middle">
+    <text x="0" y="0" font-size="32" font-weight="600">Addis Guzo</text>
+    <text x="0" y="28" font-size="18" letter-spacing="2">MOVING FORWARD TOGETHER</text>
+  </g>
+</svg>

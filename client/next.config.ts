@@ -11,8 +11,13 @@ const nextConfig: NextConfig = {
         hostname: "lh3.googleusercontent.com",
       },
       {
+        protocol: "http",
+        hostname: "localhost",
+        port: "5000",
+      },
+      {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "belimuno-jobs.onrender.com",
       },
     ],
   },

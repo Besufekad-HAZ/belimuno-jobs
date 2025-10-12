@@ -1,0 +1,11 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>Oxfam</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(36 26)">
+    <circle cx="56" cy="56" r="56" fill="#76b72a"/>
+    <path d="M56 28c16 0 28 12 28 28s-12 28-28 28-28-12-28-28 12-28 28-28zm0 18c-6.6 0-12 5.4-12 12s5.4 12 12 12 12-5.4 12-12-5.4-12-12-12z" fill="#ffffff"/>
+  </g>
+  <g transform="translate(150 82)" fill="#76b72a" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif" font-weight="700" text-anchor="start">
+    <text x="0" y="24" font-size="60">OXFAM</text>
+  </g>
+</svg>

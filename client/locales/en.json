@@ -35,6 +35,11 @@
       "goToDashboard": "Go to Dashboard",
       "browseJobs": "Browse Jobs"
     },
+    "trustedBy": {
+      "eyebrow": "Trusted by leading organizations",
+      "title": "Global teams rely on Belimuno",
+      "subtitle": "From NGOs to large construction firms, our workforce solutions power mission-critical projects every day."
+    },
     "stats": {
       "title": "Platform Statistics",
       "subtitle": "See the impact we're making across Ethiopia",
@@ -99,35 +104,78 @@
     "regions": {
       "title": "Regions we operate in",
       "subtitle": "Connecting workers and employers across Ethiopia's major regions",
+      "description": "From city centers to emerging corridors, our recruiters mobilize talent everywhere Belimuno partners grow.",
       "addisAbaba": {
         "name": "Addis Ababa",
         "description": "Finance, technology and administration talent hub.",
-        "jobs": "120+ active jobs"
+        "jobs": "120+ active jobs",
+        "tagline": "Capital headquarters"
       },
       "oromia": {
         "name": "Oromia",
         "description": "Logistics, agriculture and field project specialists.",
-        "jobs": "80+ active jobs"
+        "jobs": "80+ active jobs",
+        "tagline": "Agriculture & logistics"
       },
       "amhara": {
         "name": "Amhara",
         "description": "Tourism, education and healthcare opportunities.",
-        "jobs": "60+ active jobs"
+        "jobs": "60+ active jobs",
+        "tagline": "Tourism & social impact"
       },
       "tigray": {
         "name": "Tigray",
         "description": "Reconstruction, services and operations roles.",
-        "jobs": "40+ active jobs"
+        "jobs": "40+ active jobs",
+        "tagline": "Rebuilding capacity"
       },
       "snnp": {
         "name": "SNNP",
         "description": "Manufacturing, hospitality and cultural projects.",
-        "jobs": "55+ active jobs"
+        "jobs": "55+ active jobs",
+        "tagline": "Manufacturing corridor"
       },
       "sidama": {
         "name": "Sidama",
         "description": "Agri-business, retail and customer support roles.",
-        "jobs": "45+ active jobs"
+        "jobs": "45+ active jobs",
+        "tagline": "Coffee & service"
+      },
+      "gambela": {
+        "name": "Gambela",
+        "description": "Humanitarian response, warehousing and logistics support.",
+        "jobs": "30+ active jobs",
+        "tagline": "Humanitarian hub"
+      },
+      "afar": {
+        "name": "Afar",
+        "description": "Energy, infrastructure maintenance and field operations.",
+        "jobs": "25+ active jobs",
+        "tagline": "Energy corridor"
+      },
+      "benishangul": {
+        "name": "Benishangul-Gumuz",
+        "description": "Large-scale projects and dam operations workforce.",
+        "jobs": "28+ active jobs",
+        "tagline": "Dam & mega projects"
+      },
+      "direDawa": {
+        "name": "Dire Dawa",
+        "description": "Industrial park staffing, supply chain and aviation services.",
+        "jobs": "38+ active jobs",
+        "tagline": "Industrial gateway"
+      },
+      "harari": {
+        "name": "Harari",
+        "description": "Cultural tourism, hospitality and civic administration roles.",
+        "jobs": "22+ active jobs",
+        "tagline": "Heritage city"
+      },
+      "somali": {
+        "name": "Somali (Jijiga)",
+        "description": "Cross-border trade, logistics and NGO programme support.",
+        "jobs": "35+ active jobs",
+        "tagline": "Eastern trade routes"
       }
     },
     "news": {
@@ -143,6 +191,11 @@
       "viewAllNews": "View All News",
       "relatedNews": "Related News"
     },
+    "categories": {
+      "title": "Top Job Categories",
+      "subtitle": "Explore opportunities across different industries and specializations",
+      "viewAllCategories": "View All Categories"
+    },
     "cta": {
       "title": "Ready to Start Your Journey?",
       "subtitle": "Join thousands of professionals already using Belimuno Jobs to advance their careers",
@@ -153,7 +206,7 @@
   "Footer": {
     "brand": {
       "name": "Belimuno Jobs",
-      "description": "HR outsourcing and recruiting partner connecting talent with opportunities across Ethiopia since 2011. We help businesses scale with flexible, high-quality workforce solutions."
+      "description": "HR outsourcing and recruiting partner connecting talent with opportunities across Ethiopia since 2012. We help businesses scale with flexible, high-quality workforce solutions."
     },
     "sections": {
       "company": "Company",
@@ -179,13 +232,13 @@
   "AboutPage": {
     "hero": {
       "title": "About Belimuno",
-      "subtitle": "HR Outsourcing Solution - Connecting talent with opportunities across Ethiopia since 2011",
+      "subtitle": "HR Outsourcing Solution - Connecting talent with opportunities across Ethiopia since 2012",
       "motto": "Work Smarter Not Harder!"
     },
     "executiveSummary": {
       "title": "Executive Summary",
       "content": {
-        "part1": "Belimuno HR outsourcing solution was established in 2011 as Belimuno recruiting service to provide manpower outsourcing services. Since then it has been outsourcing security guards, cleaners and construction workers for various renowned organizations. During its course of operation, Belimuno expanded its services to include professional manpower supply, consultancy and HR training services which in turn made it improve its name to Belimuno HR outsourcing solution.",
+        "part1": "Belimuno HR outsourcing solution was established in 2012 as Belimuno recruiting service to provide manpower outsourcing services. Since then it has been outsourcing security guards, cleaners and construction workers for various renowned organizations. During its course of operation, Belimuno expanded its services to include professional manpower supply, consultancy and HR training services which in turn made it improve its name to Belimuno HR outsourcing solution.",
         "part2": "The company currently has an annual turnover of about 200 million birr and is one of the fast growing firms in the sector. Its clients include international NGOs like WFP, NRS and FHI; International construction firms like China Genzuba group, Dong Fang electrics, Kalpataru group and Alec fitout engineering. Belimuno is currently managing over 3000 employees for 36 organizations."
       }
     },
@@ -253,7 +306,9 @@
     },
     "team": {
       "title": "Our Team",
-      "description": "BELIMUNO is divided into three main departments: administration and finance, human resources, and outsourced service management. Each department handles administrative tasks, procurements, and financial activities, while the outsourced service management department manages outsourced staff and projects."
+      "description": "BELIMUNO is divided into three main departments: administration and finance, human resources, and outsourced service management. Each department handles administrative tasks, procurements, and financial activities, while the outsourced service management department manages outsourced staff and projects.",
+      "heading": "Leaders and specialists powering Belimuno",
+      "lede": "Strategic thinkers, people champions, and operations experts collaborating to deliver exceptional workforce solutions."
     },
     "clients": {
       "title": "Our Clients",
@@ -321,7 +376,7 @@
   "ClientsPage": {
     "hero": {
       "title": "Our Clients",
-      "subtitle": "We have been trusted by international NGOs and leading construction companies since 2011."
+      "subtitle": "We have been trusted by international NGOs and leading construction companies since 2012."
     }
   },
   "JobsPage": {
@@ -452,6 +507,7 @@
     },
     "form": {
       "title": "Send a message",
+      "subtitle": "Fill in the details below and our team will get back to you shortly.",
       "fields": {
         "name": "Full name",
         "email": "Email",
@@ -466,7 +522,8 @@
       "status": {
         "success": "Message sent. Thank you!",
         "error": "Failed to send. Try again."
-      }
+      },
+      "helper": "We typically respond within one business day."
     },
     "office": {
       "title": "Office",
@@ -476,6 +533,10 @@
         "phone": "Phone",
         "pobox": "P.O.Box",
         "website": "Website"
+      },
+      "map": {
+        "title": "Find us on the map",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },
@@ -1062,6 +1123,7 @@
     "actions": {
       "title": "HR Actions",
       "buttons": {
+        "manageTeam": "Manage Team",
         "workerManagement": "Worker Management",
         "disputeResolution": "Dispute Resolution",
         "performanceReviews": "Performance Reviews"
@@ -1256,6 +1318,40 @@
         "payWorker": "Pay Worker",
         "investigate": "Investigate"
       }
+    }
+  },
+  "HRManageTeam": {
+    "title": "Manage Team Members",
+    "subtitle": "Add or remove the leaders who appear on the About page.",
+    "buttons": {
+      "back": "Back to HR Dashboard",
+      "addMember": "Add Team Member",
+      "editMember": "Edit"
+    },
+    "list": {
+      "title": "Leadership & Culture Directory",
+      "subtitle": "Keep this roster in sync with the public About page."
+    },
+    "empty": {
+      "title": "No team members yet",
+      "description": "Use the button above to add the first member of your leadership roster."
+    },
+    "modal": {
+      "title": "Add a Team Member",
+      "editTitle": "Edit Team Member",
+      "submit": "Save team member",
+      "update": "Update team member",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "loadError": "We couldn't load team members. Please try again shortly.",
+      "createSuccess": "{name} has been added to the team.",
+      "updateSuccess": "{name} has been updated.",
+      "deleteSuccess": "{name} has been removed from the team.",
+      "deleteError": "Unable to remove this team member right now.",
+      "seedSuccess": "Loaded the default leadership roster into the directory.",
+      "seedError": "We couldn't sync the default leadership roster automatically.",
+      "seedFallback": "Showing the default leadership roster. Add or edit members to keep this list current."
     }
   }
 }

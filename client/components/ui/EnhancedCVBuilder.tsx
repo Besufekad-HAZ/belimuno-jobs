@@ -3,7 +3,21 @@
 import React, { useState, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { Plus, Trash2, User, Briefcase, GraduationCap, Award, Phone, Mail, MapPin, Save, Download, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  User,
+  Briefcase,
+  GraduationCap,
+  Award,
+  Phone,
+  Mail,
+  MapPin,
+  Save,
+  Download,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 
 interface PersonalInfo {
@@ -64,7 +78,7 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
   onSave,
   onDownload,
   initialData,
-  saving = false
+  saving = false,
 }) => {
   const [cvData, setCVData] = useState<CVData>({
     personalInfo: {
@@ -85,12 +99,14 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     detailedSkills: [],
   });
 
-  const [activeTab, setActiveTab] = useState<"personal" | "education" | "experience" | "skills" | "preview">("personal");
+  const [activeTab, setActiveTab] = useState<
+    "personal" | "education" | "experience" | "skills" | "preview"
+  >("personal");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (initialData) {
-      setCVData(prev => ({
+      setCVData((prev) => ({
         ...prev,
         ...initialData,
         personalInfo: { ...prev.personalInfo, ...initialData.personalInfo },
@@ -121,8 +137,8 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     // Education (at least 1 entry with required fields)
     totalFields += 1;
     if (cvData.education.length > 0) {
-      const validEducation = cvData.education.some(edu =>
-        edu.institution && edu.degree && edu.startDate
+      const validEducation = cvData.education.some(
+        (edu) => edu.institution && edu.degree && edu.startDate,
       );
       if (validEducation) completedFields += 1;
     }
@@ -130,8 +146,8 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     // Experience (at least 1 entry with required fields)
     totalFields += 1;
     if (cvData.experience.length > 0) {
-      const validExperience = cvData.experience.some(exp =>
-        exp.company && exp.position && exp.startDate
+      const validExperience = cvData.experience.some(
+        (exp) => exp.company && exp.position && exp.startDate,
       );
       if (validExperience) completedFields += 1;
     }
@@ -139,7 +155,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     // Skills (at least 3 detailed skill entries)
     totalFields += 1;
     if (cvData.detailedSkills.length >= 3) {
-      const validSkills = cvData.detailedSkills.filter(skill => skill.name && skill.name.trim() !== "").length;
+      const validSkills = cvData.detailedSkills.filter(
+        (skill) => skill.name && skill.name.trim() !== "",
+      ).length;
       if (validSkills >= 3) completedFields += 1;
     }
 
@@ -160,22 +178,30 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
     }
     if (!cvData.personalInfo.phone.trim()) {
       newErrors["personalInfo.phone"] = "Phone number is required";
-    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(cvData.personalInfo.phone.replace(/[\s\-\(\)]/g, ''))) {
+    } else if (
+      !/^[\+]?[1-9][\d]{0,15}$/.test(
+        cvData.personalInfo.phone.replace(/[\s\-\(\)]/g, ""),
+      )
+    ) {
       newErrors["personalInfo.phone"] = "Please enter a valid phone number";
     }
     if (!cvData.personalInfo.address.trim()) {
       newErrors["personalInfo.address"] = "Address is required";
     }
     if (!cvData.personalInfo.summary.trim()) {
-      newErrors["personalInfo.summary"] = "Professional summary (Bio) is required";
+      newErrors["personalInfo.summary"] =
+        "Professional summary (Bio) is required";
     } else if (cvData.personalInfo.summary.length > 500) {
-      newErrors["personalInfo.summary"] = "Professional summary must be 500 characters or less";
+      newErrors["personalInfo.summary"] =
+        "Professional summary must be 500 characters or less";
     }
     if (!cvData.personalInfo.workerExperience.trim()) {
-      newErrors["personalInfo.workerExperience"] = "Years of experience is required";
+      newErrors["personalInfo.workerExperience"] =
+        "Years of experience is required";
     }
     if (cvData.personalInfo.workerHourlyRate <= 0) {
-      newErrors["personalInfo.workerHourlyRate"] = "Hourly rate must be greater than 0";
+      newErrors["personalInfo.workerHourlyRate"] =
+        "Hourly rate must be greater than 0";
     }
     if (!cvData.personalInfo.dateOfBirth.trim()) {
       newErrors["personalInfo.dateOfBirth"] = "Date of birth is required";
@@ -184,37 +210,62 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+      ) {
         age--;
       }
-      
+
       if (age < 18) {
-        newErrors["personalInfo.dateOfBirth"] = "You must be at least 18 years old";
+        newErrors["personalInfo.dateOfBirth"] =
+          "You must be at least 18 years old";
       }
     }
     if (!cvData.personalInfo.gender.trim()) {
       newErrors["personalInfo.gender"] = "Gender is required";
     }
-    
+
     // Validate portfolio URL if provided
-    if (cvData.personalInfo.portfolio.trim() && !/^https?:\/\/.+/.test(cvData.personalInfo.portfolio)) {
-      newErrors["personalInfo.portfolio"] = "Please enter a valid URL (must start with http:// or https://)";
+    if (
+      cvData.personalInfo.portfolio.trim() &&
+      !/^https?:\/\/.+/.test(cvData.personalInfo.portfolio)
+    ) {
+      newErrors["personalInfo.portfolio"] =
+        "Please enter a valid URL (must start with http:// or https://)";
     }
 
     // Validate at least one education entry if any exist
-    if (cvData.education.length > 0 && !cvData.education.some(edu => edu.institution && edu.degree && edu.startDate)) {
-      newErrors["education"] = "At least one complete education entry is required if you have education entries.";
+    if (
+      cvData.education.length > 0 &&
+      !cvData.education.some(
+        (edu) => edu.institution && edu.degree && edu.startDate,
+      )
+    ) {
+      newErrors["education"] =
+        "At least one complete education entry is required if you have education entries.";
     }
 
     // Validate at least one experience entry if any exist
-    if (cvData.experience.length > 0 && !cvData.experience.some(exp => exp.company && exp.position && exp.startDate)) {
-      newErrors["experience"] = "At least one complete experience entry is required if you have experience entries.";
+    if (
+      cvData.experience.length > 0 &&
+      !cvData.experience.some(
+        (exp) => exp.company && exp.position && exp.startDate,
+      )
+    ) {
+      newErrors["experience"] =
+        "At least one complete experience entry is required if you have experience entries.";
     }
 
     // Validate at least 3 skills if any exist
-    if (cvData.detailedSkills.length > 0 && cvData.detailedSkills.filter(skill => skill.name.trim() !== "").length < 3) {
-      newErrors["skills"] = "Please add at least 3 detailed skills or leave this section empty if you don't want to use it.";
+    if (
+      cvData.detailedSkills.length > 0 &&
+      cvData.detailedSkills.filter((skill) => skill.name.trim() !== "").length <
+        3
+    ) {
+      newErrors["skills"] =
+        "Please add at least 3 detailed skills or leave this section empty if you don't want to use it.";
     }
 
     setErrors(newErrors);
@@ -228,19 +279,20 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
       const errorFields = Object.keys(errors);
       if (errorFields.length > 0) {
         const firstError = errorFields[0];
-        const fieldName = firstError.replace('personalInfo.', '');
-        const displayName = {
-          'fullName': 'Full Name',
-          'email': 'Email',
-          'phone': 'Phone Number',
-          'address': 'Address',
-          'summary': 'Professional Summary',
-          'workerExperience': 'Years of Experience',
-          'workerHourlyRate': 'Hourly Rate',
-          'dateOfBirth': 'Date of Birth',
-          'gender': 'Gender',
-          'portfolio': 'Portfolio Link'
-        }[fieldName] || fieldName;
+        const fieldName = firstError.replace("personalInfo.", "");
+        const displayName =
+          {
+            fullName: "Full Name",
+            email: "Email",
+            phone: "Phone Number",
+            address: "Address",
+            summary: "Professional Summary",
+            workerExperience: "Years of Experience",
+            workerHourlyRate: "Hourly Rate",
+            dateOfBirth: "Date of Birth",
+            gender: "Gender",
+            portfolio: "Portfolio Link",
+          }[fieldName] || fieldName;
         toast.error(`Please fix the ${displayName} field`);
       } else {
         toast.error("Please fill in all required fields");
@@ -275,25 +327,29 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
       endDate: "",
       current: false,
     };
-    setCVData(prev => ({
+    setCVData((prev) => ({
       ...prev,
       education: [...prev.education, newEducation],
     }));
   };
 
-  const updateEducation = (id: string, field: keyof Education, value: string | boolean) => {
-    setCVData(prev => ({
+  const updateEducation = (
+    id: string,
+    field: keyof Education,
+    value: string | boolean,
+  ) => {
+    setCVData((prev) => ({
       ...prev,
-      education: prev.education.map(edu =>
-        edu.id === id ? { ...edu, [field]: value } : edu
+      education: prev.education.map((edu) =>
+        edu.id === id ? { ...edu, [field]: value } : edu,
       ),
     }));
   };
 
   const removeEducation = (id: string) => {
-    setCVData(prev => ({
+    setCVData((prev) => ({
       ...prev,
-      education: prev.education.filter(edu => edu.id !== id),
+      education: prev.education.filter((edu) => edu.id !== id),
     }));
   };
 
@@ -307,25 +363,29 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
       current: false,
       description: "",
     };
-    setCVData(prev => ({
+    setCVData((prev) => ({
       ...prev,
       experience: [...prev.experience, newExperience],
     }));
   };
 
-  const updateExperience = (id: string, field: keyof Experience, value: string | boolean) => {
-    setCVData(prev => ({
+  const updateExperience = (
+    id: string,
+    field: keyof Experience,
+    value: string | boolean,
+  ) => {
+    setCVData((prev) => ({
       ...prev,
-      experience: prev.experience.map(exp =>
-        exp.id === id ? { ...exp, [field]: value } : exp
+      experience: prev.experience.map((exp) =>
+        exp.id === id ? { ...exp, [field]: value } : exp,
       ),
     }));
   };
 
   const removeExperience = (id: string) => {
-    setCVData(prev => ({
+    setCVData((prev) => ({
       ...prev,
-      experience: prev.experience.filter(exp => exp.id !== id),
+      experience: prev.experience.filter((exp) => exp.id !== id),
     }));
   };
 
@@ -335,33 +395,35 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
       name: "",
       level: "Beginner",
     };
-    setCVData(prev => ({
+    setCVData((prev) => ({
       ...prev,
       detailedSkills: [...prev.detailedSkills, newSkill],
     }));
   };
 
   const updateSkill = (id: string, field: keyof Skill, value: string) => {
-    setCVData(prev => ({
+    setCVData((prev) => ({
       ...prev,
-      detailedSkills: prev.detailedSkills.map(skill =>
-        skill.id === id ? { ...skill, [field]: value } : skill
+      detailedSkills: prev.detailedSkills.map((skill) =>
+        skill.id === id ? { ...skill, [field]: value } : skill,
       ),
     }));
   };
 
   const removeSkill = (id: string) => {
-    setCVData(prev => ({
+    setCVData((prev) => ({
       ...prev,
-      detailedSkills: prev.detailedSkills.filter(skill => skill.id !== id),
+      detailedSkills: prev.detailedSkills.filter((skill) => skill.id !== id),
     }));
   };
 
   const completionPercentage = calculateCompletionPercentage();
 
   const renderPersonalInfo = () => {
-    const personalInfoErrors = Object.keys(errors).filter(key => key.startsWith('personalInfo.'));
-    
+    const personalInfoErrors = Object.keys(errors).filter((key) =>
+      key.startsWith("personalInfo."),
+    );
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -372,30 +434,35 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
           {personalInfoErrors.length > 0 && (
             <div className="flex items-center text-red-600 text-sm">
               <AlertCircle className="h-4 w-4 mr-1" />
-              {personalInfoErrors.length} field{personalInfoErrors.length > 1 ? 's' : ''} need{personalInfoErrors.length === 1 ? 's' : ''} attention
+              {personalInfoErrors.length} field
+              {personalInfoErrors.length > 1 ? "s" : ""} need
+              {personalInfoErrors.length === 1 ? "s" : ""} attention
             </div>
           )}
         </div>
-        
+
         {personalInfoErrors.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-red-800 mb-2">Missing Required Fields:</h4>
+            <h4 className="text-sm font-medium text-red-800 mb-2">
+              Missing Required Fields:
+            </h4>
             <ul className="text-sm text-red-700 space-y-1">
-              {personalInfoErrors.map(errorKey => {
-                const fieldName = errorKey.replace('personalInfo.', '');
-                const displayName = {
-                  'fullName': 'Full Name',
-                  'email': 'Email',
-                  'phone': 'Phone Number',
-                  'address': 'Address',
-                  'summary': 'Professional Summary',
-                  'workerExperience': 'Years of Experience',
-                  'workerHourlyRate': 'Hourly Rate',
-                  'dateOfBirth': 'Date of Birth',
-                  'gender': 'Gender',
-                  'portfolio': 'Portfolio Link'
-                }[fieldName] || fieldName;
-                
+              {personalInfoErrors.map((errorKey) => {
+                const fieldName = errorKey.replace("personalInfo.", "");
+                const displayName =
+                  {
+                    fullName: "Full Name",
+                    email: "Email",
+                    phone: "Phone Number",
+                    address: "Address",
+                    summary: "Professional Summary",
+                    workerExperience: "Years of Experience",
+                    workerHourlyRate: "Hourly Rate",
+                    dateOfBirth: "Date of Birth",
+                    gender: "Gender",
+                    portfolio: "Portfolio Link",
+                  }[fieldName] || fieldName;
+
                 return (
                   <li key={errorKey} className="flex items-center">
                     <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
@@ -406,254 +473,298 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
             </ul>
           </div>
         )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Full Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={cvData.personalInfo.fullName}
-            onChange={(e) => {
-              setCVData(prev => ({
-                ...prev,
-                personalInfo: { ...prev.personalInfo, fullName: e.target.value }
-              }));
-              if (errors["personalInfo.fullName"]) {
-                setErrors(prev => ({ ...prev, "personalInfo.fullName": "" }));
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              errors["personalInfo.fullName"] ? "border-red-500 bg-red-50" : "border-gray-300"
-            }`}
-            placeholder="Enter your full name"
-          />
-          {errors["personalInfo.fullName"] && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors["personalInfo.fullName"]}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="email"
-            value={cvData.personalInfo.email}
-            onChange={(e) => {
-              setCVData(prev => ({
-                ...prev,
-                personalInfo: { ...prev.personalInfo, email: e.target.value }
-              }));
-              if (errors["personalInfo.email"]) {
-                setErrors(prev => ({ ...prev, "personalInfo.email": "" }));
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              errors["personalInfo.email"] ? "border-red-500 bg-red-50" : "border-gray-300"
-            }`}
-            placeholder="Enter your email"
-          />
-          {errors["personalInfo.email"] && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors["personalInfo.email"]}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Phone <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="tel"
-            value={cvData.personalInfo.phone}
-            onChange={(e) => {
-              setCVData(prev => ({
-                ...prev,
-                personalInfo: { ...prev.personalInfo, phone: e.target.value }
-              }));
-              if (errors["personalInfo.phone"]) {
-                setErrors(prev => ({ ...prev, "personalInfo.phone": "" }));
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              errors["personalInfo.phone"] ? "border-red-500 bg-red-50" : "border-gray-300"
-            }`}
-            placeholder="Enter your phone number"
-          />
-          {errors["personalInfo.phone"] && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors["personalInfo.phone"]}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Address <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={cvData.personalInfo.address}
-            onChange={(e) => {
-              setCVData(prev => ({
-                ...prev,
-                personalInfo: { ...prev.personalInfo, address: e.target.value }
-              }));
-              if (errors["personalInfo.address"]) {
-                setErrors(prev => ({ ...prev, "personalInfo.address": "" }));
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              errors["personalInfo.address"] ? "border-red-500 bg-red-50" : "border-gray-300"
-            }`}
-            placeholder="Enter your address"
-          />
-          {errors["personalInfo.address"] && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors["personalInfo.address"]}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Portfolio Link
-          </label>
-          <input
-            type="url"
-            value={cvData.personalInfo.portfolio}
-            onChange={(e) => {
-              setCVData(prev => ({
-                ...prev,
-                personalInfo: { ...prev.personalInfo, portfolio: e.target.value }
-              }));
-              if (errors["personalInfo.portfolio"]) {
-                setErrors(prev => ({ ...prev, "personalInfo.portfolio": "" }));
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              errors["personalInfo.portfolio"] ? "border-red-500 bg-red-50" : "border-gray-300"
-            }`}
-            placeholder="https://your-portfolio-website.com"
-          />
-          {errors["personalInfo.portfolio"] && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors["personalInfo.portfolio"]}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Date of Birth <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            value={cvData.personalInfo.dateOfBirth}
-            onChange={(e) => {
-              setCVData(prev => ({
-                ...prev,
-                personalInfo: { ...prev.personalInfo, dateOfBirth: e.target.value }
-              }));
-              if (errors["personalInfo.dateOfBirth"]) {
-                setErrors(prev => ({ ...prev, "personalInfo.dateOfBirth": "" }));
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              errors["personalInfo.dateOfBirth"] ? "border-red-500 bg-red-50" : "border-gray-300"
-            }`}
-          />
-          {errors["personalInfo.dateOfBirth"] && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors["personalInfo.dateOfBirth"]}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Gender <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={cvData.personalInfo.gender}
-            onChange={(e) => {
-              setCVData(prev => ({
-                ...prev,
-                personalInfo: { ...prev.personalInfo, gender: e.target.value }
-              }));
-              if (errors["personalInfo.gender"]) {
-                setErrors(prev => ({ ...prev, "personalInfo.gender": "" }));
-              }
-            }}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-              errors["personalInfo.gender"] ? "border-red-500 bg-red-50" : "border-gray-300"
-            }`}
-          >
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-            <option value="prefer-not-to-say">Prefer not to say</option>
-          </select>
-          {errors["personalInfo.gender"] && (
-            <p className="mt-1 text-sm text-red-600 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              {errors["personalInfo.gender"]}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Professional Summary <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          value={cvData.personalInfo.summary}
-          onChange={(e) => {
-            setCVData(prev => ({
-              ...prev,
-              personalInfo: { ...prev.personalInfo, summary: e.target.value }
-            }));
-            if (errors["personalInfo.summary"]) {
-              setErrors(prev => ({ ...prev, "personalInfo.summary": "" }));
-            }
-          }}
-          rows={4}
-          maxLength={500}
-          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-            errors["personalInfo.summary"] ? "border-red-500 bg-red-50" : "border-gray-300"
-          }`}
-          placeholder="Brief summary of your professional background and goals"
-        />
-        <div className="flex justify-between items-center mt-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            {errors["personalInfo.summary"] && (
-              <p className="text-sm text-red-600 flex items-center">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={cvData.personalInfo.fullName}
+              onChange={(e) => {
+                setCVData((prev) => ({
+                  ...prev,
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    fullName: e.target.value,
+                  },
+                }));
+                if (errors["personalInfo.fullName"]) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    "personalInfo.fullName": "",
+                  }));
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                errors["personalInfo.fullName"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
+              placeholder="Enter your full name"
+            />
+            {errors["personalInfo.fullName"] && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
                 <AlertCircle className="h-4 w-4 mr-1" />
-                {errors["personalInfo.summary"]}
+                {errors["personalInfo.fullName"]}
               </p>
             )}
           </div>
-          <p className={`text-xs ${cvData.personalInfo.summary.length > 450 ? 'text-orange-500' : 'text-gray-500'}`}>
-            {cvData.personalInfo.summary.length}/500 characters
-          </p>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              value={cvData.personalInfo.email}
+              onChange={(e) => {
+                setCVData((prev) => ({
+                  ...prev,
+                  personalInfo: { ...prev.personalInfo, email: e.target.value },
+                }));
+                if (errors["personalInfo.email"]) {
+                  setErrors((prev) => ({ ...prev, "personalInfo.email": "" }));
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                errors["personalInfo.email"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
+              placeholder="Enter your email"
+            />
+            {errors["personalInfo.email"] && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {errors["personalInfo.email"]}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Phone <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="tel"
+              value={cvData.personalInfo.phone}
+              onChange={(e) => {
+                setCVData((prev) => ({
+                  ...prev,
+                  personalInfo: { ...prev.personalInfo, phone: e.target.value },
+                }));
+                if (errors["personalInfo.phone"]) {
+                  setErrors((prev) => ({ ...prev, "personalInfo.phone": "" }));
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                errors["personalInfo.phone"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
+              placeholder="Enter your phone number"
+            />
+            {errors["personalInfo.phone"] && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {errors["personalInfo.phone"]}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Address <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={cvData.personalInfo.address}
+              onChange={(e) => {
+                setCVData((prev) => ({
+                  ...prev,
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    address: e.target.value,
+                  },
+                }));
+                if (errors["personalInfo.address"]) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    "personalInfo.address": "",
+                  }));
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                errors["personalInfo.address"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
+              placeholder="Enter your address"
+            />
+            {errors["personalInfo.address"] && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {errors["personalInfo.address"]}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Portfolio Link
+            </label>
+            <input
+              type="url"
+              value={cvData.personalInfo.portfolio}
+              onChange={(e) => {
+                setCVData((prev) => ({
+                  ...prev,
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    portfolio: e.target.value,
+                  },
+                }));
+                if (errors["personalInfo.portfolio"]) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    "personalInfo.portfolio": "",
+                  }));
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                errors["personalInfo.portfolio"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
+              placeholder="https://your-portfolio-website.com"
+            />
+            {errors["personalInfo.portfolio"] && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {errors["personalInfo.portfolio"]}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Date of Birth <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={cvData.personalInfo.dateOfBirth}
+              onChange={(e) => {
+                setCVData((prev) => ({
+                  ...prev,
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    dateOfBirth: e.target.value,
+                  },
+                }));
+                if (errors["personalInfo.dateOfBirth"]) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    "personalInfo.dateOfBirth": "",
+                  }));
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                errors["personalInfo.dateOfBirth"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
+            />
+            {errors["personalInfo.dateOfBirth"] && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {errors["personalInfo.dateOfBirth"]}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Gender <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={cvData.personalInfo.gender}
+              onChange={(e) => {
+                setCVData((prev) => ({
+                  ...prev,
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    gender: e.target.value,
+                  },
+                }));
+                if (errors["personalInfo.gender"]) {
+                  setErrors((prev) => ({ ...prev, "personalInfo.gender": "" }));
+                }
+              }}
+              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                errors["personalInfo.gender"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
+              }`}
+            >
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer-not-to-say">Prefer not to say</option>
+            </select>
+            {errors["personalInfo.gender"] && (
+              <p className="mt-1 text-sm text-red-600 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {errors["personalInfo.gender"]}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Professional Summary <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            value={cvData.personalInfo.summary}
+            onChange={(e) => {
+              setCVData((prev) => ({
+                ...prev,
+                personalInfo: { ...prev.personalInfo, summary: e.target.value },
+              }));
+              if (errors["personalInfo.summary"]) {
+                setErrors((prev) => ({ ...prev, "personalInfo.summary": "" }));
+              }
+            }}
+            rows={4}
+            maxLength={500}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              errors["personalInfo.summary"]
+                ? "border-red-500 bg-red-50"
+                : "border-gray-300"
+            }`}
+            placeholder="Brief summary of your professional background and goals"
+          />
+          <div className="flex justify-between items-center mt-1">
+            <div>
+              {errors["personalInfo.summary"] && (
+                <p className="text-sm text-red-600 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors["personalInfo.summary"]}
+                </p>
+              )}
+            </div>
+            <p
+              className={`text-xs ${cvData.personalInfo.summary.length > 450 ? "text-orange-500" : "text-gray-500"}`}
+            >
+              {cvData.personalInfo.summary.length}/500 characters
+            </p>
+          </div>
+        </div>
 
         {/* Worker Specific Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Years of Experience <span className="text-red-500">*</span>
@@ -663,16 +774,24 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               min="0"
               value={cvData.personalInfo.workerExperience}
               onChange={(e) => {
-                setCVData(prev => ({
+                setCVData((prev) => ({
                   ...prev,
-                  personalInfo: { ...prev.personalInfo, workerExperience: e.target.value }
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    workerExperience: e.target.value,
+                  },
                 }));
                 if (errors["personalInfo.workerExperience"]) {
-                  setErrors(prev => ({ ...prev, "personalInfo.workerExperience": "" }));
+                  setErrors((prev) => ({
+                    ...prev,
+                    "personalInfo.workerExperience": "",
+                  }));
                 }
               }}
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                errors["personalInfo.workerExperience"] ? "border-red-500 bg-red-50" : "border-gray-300"
+                errors["personalInfo.workerExperience"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
               }`}
               placeholder="e.g. 5"
             />
@@ -694,16 +813,24 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               step="0.01"
               value={cvData.personalInfo.workerHourlyRate}
               onChange={(e) => {
-                setCVData(prev => ({
+                setCVData((prev) => ({
                   ...prev,
-                  personalInfo: { ...prev.personalInfo, workerHourlyRate: parseFloat(e.target.value) || 0 }
+                  personalInfo: {
+                    ...prev.personalInfo,
+                    workerHourlyRate: parseFloat(e.target.value) || 0,
+                  },
                 }));
                 if (errors["personalInfo.workerHourlyRate"]) {
-                  setErrors(prev => ({ ...prev, "personalInfo.workerHourlyRate": "" }));
+                  setErrors((prev) => ({
+                    ...prev,
+                    "personalInfo.workerHourlyRate": "",
+                  }));
                 }
               }}
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                errors["personalInfo.workerHourlyRate"] ? "border-red-500 bg-red-50" : "border-gray-300"
+                errors["personalInfo.workerHourlyRate"]
+                  ? "border-red-500 bg-red-50"
+                  : "border-gray-300"
               }`}
               placeholder="e.g. 250"
             />
@@ -726,7 +853,11 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
           <GraduationCap className="h-5 w-5 mr-2" />
           Education
         </h3>
-        <Button onClick={addEducation} size="sm" className="bg-blue-600 hover:bg-blue-700">
+        <Button
+          onClick={addEducation}
+          size="sm"
+          className="bg-blue-600 hover:bg-blue-700"
+        >
           <Plus className="h-4 w-4 mr-1" />
           Add Education
         </Button>
@@ -763,7 +894,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               <input
                 type="text"
                 value={edu.institution}
-                onChange={(e) => updateEducation(edu.id, "institution", e.target.value)}
+                onChange={(e) =>
+                  updateEducation(edu.id, "institution", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="University/School name"
               />
@@ -775,7 +908,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               <input
                 type="text"
                 value={edu.degree}
-                onChange={(e) => updateEducation(edu.id, "degree", e.target.value)}
+                onChange={(e) =>
+                  updateEducation(edu.id, "degree", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Bachelor's, Master's, etc."
               />
@@ -787,7 +922,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               <input
                 type="text"
                 value={edu.fieldOfStudy}
-                onChange={(e) => updateEducation(edu.id, "fieldOfStudy", e.target.value)}
+                onChange={(e) =>
+                  updateEducation(edu.id, "fieldOfStudy", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Computer Science, Business, etc."
               />
@@ -797,10 +934,15 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
                 type="checkbox"
                 id={`current-${edu.id}`}
                 checked={edu.current}
-                onChange={(e) => updateEducation(edu.id, "current", e.target.checked)}
+                onChange={(e) =>
+                  updateEducation(edu.id, "current", e.target.checked)
+                }
                 className="rounded"
               />
-              <label htmlFor={`current-${edu.id}`} className="text-sm text-gray-700">
+              <label
+                htmlFor={`current-${edu.id}`}
+                className="text-sm text-gray-700"
+              >
                 Currently studying
               </label>
             </div>
@@ -811,7 +953,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               <input
                 type="month"
                 value={edu.startDate}
-                onChange={(e) => updateEducation(edu.id, "startDate", e.target.value)}
+                onChange={(e) =>
+                  updateEducation(edu.id, "startDate", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -823,7 +967,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
                 <input
                   type="month"
                   value={edu.endDate}
-                  onChange={(e) => updateEducation(edu.id, "endDate", e.target.value)}
+                  onChange={(e) =>
+                    updateEducation(edu.id, "endDate", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -841,7 +987,11 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
           <Briefcase className="h-5 w-5 mr-2" />
           Work Experience
         </h3>
-        <Button onClick={addExperience} size="sm" className="bg-green-600 hover:bg-green-700">
+        <Button
+          onClick={addExperience}
+          size="sm"
+          className="bg-green-600 hover:bg-green-700"
+        >
           <Plus className="h-4 w-4 mr-1" />
           Add Experience
         </Button>
@@ -878,7 +1028,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               <input
                 type="text"
                 value={exp.company}
-                onChange={(e) => updateExperience(exp.id, "company", e.target.value)}
+                onChange={(e) =>
+                  updateExperience(exp.id, "company", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Company name"
               />
@@ -890,7 +1042,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               <input
                 type="text"
                 value={exp.position}
-                onChange={(e) => updateExperience(exp.id, "position", e.target.value)}
+                onChange={(e) =>
+                  updateExperience(exp.id, "position", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Job title"
               />
@@ -902,7 +1056,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
               <input
                 type="month"
                 value={exp.startDate}
-                onChange={(e) => updateExperience(exp.id, "startDate", e.target.value)}
+                onChange={(e) =>
+                  updateExperience(exp.id, "startDate", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -911,10 +1067,15 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
                 type="checkbox"
                 id={`current-exp-${exp.id}`}
                 checked={exp.current}
-                onChange={(e) => updateExperience(exp.id, "current", e.target.checked)}
+                onChange={(e) =>
+                  updateExperience(exp.id, "current", e.target.checked)
+                }
                 className="rounded"
               />
-              <label htmlFor={`current-exp-${exp.id}`} className="text-sm text-gray-700">
+              <label
+                htmlFor={`current-exp-${exp.id}`}
+                className="text-sm text-gray-700"
+              >
                 Currently working here
               </label>
             </div>
@@ -926,7 +1087,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
                 <input
                   type="month"
                   value={exp.endDate}
-                  onChange={(e) => updateExperience(exp.id, "endDate", e.target.value)}
+                  onChange={(e) =>
+                    updateExperience(exp.id, "endDate", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -938,7 +1101,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
             </label>
             <textarea
               value={exp.description}
-              onChange={(e) => updateExperience(exp.id, "description", e.target.value)}
+              onChange={(e) =>
+                updateExperience(exp.id, "description", e.target.value)
+              }
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Describe your responsibilities and achievements"
@@ -956,14 +1121,19 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
           <Award className="h-5 w-5 mr-2" />
           Skills
         </h3>
-        <Button onClick={addSkill} size="sm" className="bg-purple-600 hover:bg-purple-700">
+        <Button
+          onClick={addSkill}
+          size="sm"
+          className="bg-purple-600 hover:bg-purple-700"
+        >
           <Plus className="h-4 w-4 mr-1" />
           Add Skill
         </Button>
       </div>
 
       <p className="text-sm text-gray-600">
-        Add at least 3 skills to complete this section. This helps potential clients understand your expertise.
+        Add at least 3 skills to complete this section. This helps potential
+        clients understand your expertise.
       </p>
 
       {cvData.detailedSkills.length === 0 && (
@@ -998,7 +1168,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
                 <input
                   type="text"
                   value={skill.name}
-                  onChange={(e) => updateSkill(skill.id, "name", e.target.value)}
+                  onChange={(e) =>
+                    updateSkill(skill.id, "name", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g. JavaScript, Project Management"
                 />
@@ -1009,7 +1181,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
                 </label>
                 <select
                   value={skill.level}
-                  onChange={(e) => updateSkill(skill.id, "level", e.target.value)}
+                  onChange={(e) =>
+                    updateSkill(skill.id, "level", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="Beginner">Beginner</option>
@@ -1027,111 +1201,196 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
 
   const renderPreview = () => (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">CV Preview</h3>
-      <Card className="p-6 bg-white border-2 border-gray-200">
-        {/* Header */}
-        <div className="text-center border-b pb-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {cvData.personalInfo.fullName || "Your Name"}
-          </h1>
-          <div className="flex justify-center items-center space-x-4 text-sm text-gray-600">
-            <div className="flex items-center">
-              <Mail className="h-4 w-4 mr-1" />
-              {cvData.personalInfo.email || "your.email@example.com"}
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-bold text-primary">CV Preview</h3>
+        <div className="flex items-center text-sm text-secondary">
+          <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+          Live Preview
+        </div>
+      </div>
+
+      <Card className="overflow-hidden bg-white shadow-xl">
+        {/* Header with Gradient Background */}
+        <div className="bg-gradient-primary text-white p-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold mb-3">
+              {cvData.personalInfo.fullName || "Your Name"}
+            </h1>
+            <div className="flex flex-wrap justify-center items-center gap-6 text-sm opacity-90">
+              <div className="flex items-center">
+                <Mail className="h-4 w-4 mr-2" />
+                {cvData.personalInfo.email || "your.email@example.com"}
+              </div>
+              <div className="flex items-center">
+                <Phone className="h-4 w-4 mr-2" />
+                {cvData.personalInfo.phone || "+251 XX XXX XXXX"}
+              </div>
+              <div className="flex items-center">
+                <MapPin className="h-4 w-4 mr-2" />
+                {cvData.personalInfo.address || "Your Address"}
+              </div>
             </div>
-            <div className="flex items-center">
-              <Phone className="h-4 w-4 mr-1" />
-              {cvData.personalInfo.phone || "+251 XX XXX XXXX"}
-            </div>
-            <div className="flex items-center">
-              <MapPin className="h-4 w-4 mr-1" />
-              {cvData.personalInfo.address || "Your Address"}
-            </div>
+            {cvData.personalInfo.portfolio && (
+              <div className="mt-3">
+                <a
+                  href={cvData.personalInfo.portfolio}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-sm opacity-90 hover:opacity-100 transition-opacity"
+                >
+                  <span className="mr-1">🌐</span>
+                  Portfolio
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Summary */}
-        {cvData.personalInfo.summary && (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2 border-b border-gray-200 pb-1">
-              Professional Summary
-            </h2>
-            <p className="text-gray-700 text-sm leading-relaxed">
-              {cvData.personalInfo.summary}
-            </p>
-          </div>
-        )}
+        <div className="p-8 space-y-8">
+          {/* Professional Summary */}
+          {cvData.personalInfo.summary && (
+            <div className="bg-section rounded-lg p-6">
+              <h2 className="text-xl font-bold text-primary mb-4 flex items-center">
+                <User className="h-5 w-5 mr-2 text-secondary" />
+                Professional Summary
+              </h2>
+              <p className="text-secondary leading-relaxed">
+                {cvData.personalInfo.summary}
+              </p>
+            </div>
+          )}
 
-        {/* Experience */}
-        {cvData.experience.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-1">
-              Work Experience
-            </h2>
-            <div className="space-y-4">
-              {cvData.experience.map((exp) => (
-                <div key={exp.id} className="border-l-2 border-blue-200 pl-4">
-                  <h3 className="font-semibold text-gray-900">
-                    {exp.position || "Position"} at {exp.company || "Company"}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {exp.startDate} - {exp.current ? "Present" : exp.endDate}
-                  </p>
-                  {exp.description && (
-                    <p className="text-sm text-gray-700 leading-relaxed">
-                      {exp.description}
-                    </p>
-                  )}
-                </div>
-              ))}
+          {/* Work Experience */}
+          {cvData.experience.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold text-primary mb-6 flex items-center">
+                <Briefcase className="h-5 w-5 mr-2 text-secondary" />
+                Work Experience
+              </h2>
+              <div className="space-y-6">
+                {cvData.experience.map((exp, index) => (
+                  <div key={exp.id} className="relative">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-3 h-3 bg-gradient-primary rounded-full mt-2"></div>
+                        {index < cvData.experience.length - 1 && (
+                          <div className="absolute left-1.5 top-5 w-0.5 h-full bg-gradient-to-b from-secondary to-transparent"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 bg-card rounded-lg p-6 border-l-4 border-l-secondary">
+                        <h3 className="text-lg font-semibold text-primary mb-2">
+                          {exp.position || "Position"} at{" "}
+                          {exp.company || "Company"}
+                        </h3>
+                        <p className="text-sm text-secondary mb-3 font-medium">
+                          {exp.startDate} -{" "}
+                          {exp.current ? "Present" : exp.endDate}
+                        </p>
+                        {exp.description && (
+                          <p className="text-secondary leading-relaxed">
+                            {exp.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Education */}
+          {cvData.education.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold text-primary mb-6 flex items-center">
+                <GraduationCap className="h-5 w-5 mr-2 text-secondary" />
+                Education
+              </h2>
+              <div className="space-y-4">
+                {cvData.education.map((edu, index) => (
+                  <div key={edu.id} className="relative">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0">
+                        <div className="w-3 h-3 bg-gradient-success rounded-full mt-2"></div>
+                        {index < cvData.education.length - 1 && (
+                          <div className="absolute left-1.5 top-5 w-0.5 h-full bg-gradient-to-b from-green-300 to-transparent"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 bg-card rounded-lg p-6 border-l-4 border-l-green-400">
+                        <h3 className="text-lg font-semibold text-primary mb-2">
+                          {edu.degree || "Degree"} in{" "}
+                          {edu.fieldOfStudy || "Field of Study"}
+                        </h3>
+                        <p className="text-sm text-secondary mb-1 font-medium">
+                          {edu.institution || "Institution"}
+                        </p>
+                        <p className="text-sm text-secondary">
+                          {edu.startDate} -{" "}
+                          {edu.current ? "Present" : edu.endDate}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Skills */}
+          {cvData.detailedSkills.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold text-primary mb-6 flex items-center">
+                <Award className="h-5 w-5 mr-2 text-secondary" />
+                Skills
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cvData.detailedSkills.map((skill) => (
+                  <div
+                    key={skill.id}
+                    className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-primary">
+                        {skill.name || "Skill"}
+                      </span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${
+                          skill.level === "Expert"
+                            ? "bg-green-100 text-green-700"
+                            : skill.level === "Advanced"
+                              ? "bg-blue-100 text-blue-700"
+                              : skill.level === "Intermediate"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {skill.level}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Additional Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+            <div className="bg-card rounded-lg p-4">
+              <h3 className="font-semibold text-primary mb-2">
+                Experience Level
+              </h3>
+              <p className="text-secondary">
+                {cvData.personalInfo.workerExperience} years
+              </p>
+            </div>
+            <div className="bg-card rounded-lg p-4">
+              <h3 className="font-semibold text-primary mb-2">Hourly Rate</h3>
+              <p className="text-secondary">
+                {cvData.personalInfo.workerHourlyRate} ETB
+              </p>
             </div>
           </div>
-        )}
-
-        {/* Education */}
-        {cvData.education.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-1">
-              Education
-            </h2>
-            <div className="space-y-3">
-              {cvData.education.map((edu) => (
-                <div key={edu.id} className="border-l-2 border-green-200 pl-4">
-                  <h3 className="font-semibold text-gray-900">
-                    {edu.degree || "Degree"} in {edu.fieldOfStudy || "Field of Study"}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {edu.institution || "Institution"}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {edu.startDate} - {edu.current ? "Present" : edu.endDate}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Skills */}
-        {cvData.detailedSkills.length > 0 && (
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-1">
-              Skills
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {cvData.detailedSkills.map((skill) => (
-                <div key={skill.id} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
-                  <span className="text-sm font-medium text-gray-900">
-                    {skill.name || "Skill"}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {skill.level}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
       </Card>
     </div>
   );
@@ -1149,7 +1408,9 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
       {/* Progress Header */}
       <div className="bg-white border-b border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Build Your Professional CV</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Build Your Professional CV
+          </h1>
           <div className="flex items-center space-x-4">
             <Button
               onClick={handleSave}
@@ -1180,9 +1441,13 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  completionPercentage === 100 ? 'bg-green-600' :
-                  completionPercentage >= 75 ? 'bg-blue-600' :
-                  completionPercentage >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                  completionPercentage === 100
+                    ? "bg-green-600"
+                    : completionPercentage >= 75
+                      ? "bg-blue-600"
+                      : completionPercentage >= 50
+                        ? "bg-yellow-500"
+                        : "bg-red-500"
                 }`}
                 style={{ width: `${completionPercentage}%` }}
               />
@@ -1197,12 +1462,14 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
             ) : (
               <div className="flex items-center text-gray-500">
                 <AlertCircle className="h-5 w-5 mr-1" />
-                {completionPercentage < 50 ? 'Getting Started' :
-                 completionPercentage < 75 ? 'Almost There' : 'Nearly Complete'}
+                {completionPercentage < 50
+                  ? "Getting Started"
+                  : completionPercentage < 75
+                    ? "Almost There"
+                    : "Nearly Complete"}
               </div>
             )}
           </div>
-
         </div>
       </div>
 
@@ -1212,7 +1479,11 @@ const EnhancedCVBuilder: React.FC<EnhancedCVBuilderProps> = ({
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as "personal" | "education" | "experience" | "skills")}
+              onClick={() =>
+                setActiveTab(
+                  tab.id as "personal" | "education" | "experience" | "skills",
+                )
+              }
               className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center transition-colors ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-600"

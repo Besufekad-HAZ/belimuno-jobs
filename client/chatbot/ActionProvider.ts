@@ -48,7 +48,7 @@ class ActionProvider {
   handleIntroduction() {
     const message = this.createChatBotMessage(
       "I am Belimuno Bot! 👋\n\n" +
-        "Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country since 2011. " +
+        "Belimuno Jobs is Ethiopia's premier HR outsourcing platform, connecting skilled workers with businesses across the country since 2012. " +
         "We help businesses scale with flexible, high-quality workforce solutions.\n\n" +
         "Our company has:\n" +
         "- An annual turnover of about 200 million birr\n" +
@@ -62,7 +62,7 @@ class ActionProvider {
   handleHelp() {
     const message = this.createChatBotMessage(
       `Hello! I'm here to help you with information about Belimuno Jobs. Here are some topics I can assist you with:
-    
+
           - 👥 Manpower Supply & Outsourcing
           - 🎯 Recruitment & Hiring
           - 🎓 Training & Development
@@ -74,7 +74,7 @@ class ActionProvider {
           - 👔 Our Team
           - 💼 Job Opportunities
           - 📍 Office Location
-    
+
         Just type a keyword (e.g., "services", "jobs", or "contact") for more information on a specific topic!`,
     );
 
@@ -162,7 +162,7 @@ class ActionProvider {
 
   handleAbout() {
     const message = this.createChatBotMessage(
-      "Belimuno HR outsourcing solution was established in 2011 as Belimuno recruiting service. We've grown to become one of the fast-growing firms in the sector with:\n\n" +
+      "Belimuno HR outsourcing solution was established in 2012 as Belimuno recruiting service. We've grown to become one of the fast-growing firms in the sector with:\n\n" +
         "- Annual turnover of about 200 million birr\n" +
         "- Serving international NGOs like WFP, NRS, and FHI\n" +
         "- Working with major construction firms like China Genzuba group\n" +

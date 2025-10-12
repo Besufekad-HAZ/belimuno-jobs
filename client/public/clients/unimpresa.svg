@@ -1,0 +1,15 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>Unimpresa</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(32 28)">
+    <path d="M24 16h120v88H24z" fill="#f58220" rx="12"/>
+    <rect x="52" y="40" width="64" height="40" fill="#ffffff" rx="6"/>
+    <circle cx="84" cy="60" r="14" fill="#1f3c88"/>
+    <circle cx="84" cy="60" r="8" fill="#f7c948"/>
+    <circle cx="84" cy="60" r="3" fill="#ffffff"/>
+  </g>
+  <g transform="translate(168 90)" fill="#1f3c88" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif" font-weight="700">
+    <text x="0" y="22" font-size="48">UNIMPRESA</text>
+    <text x="4" y="48" font-size="18" letter-spacing="1.8">UNIONE NAZIONALE DI IMPRESE</text>
+  </g>
+</svg>

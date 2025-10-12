@@ -1,6 +1,7 @@
 {
   "Navbar": {
     "brand": "Belimuno Jobs",
+    "description": "Magaalaa guddoo irraa hanga naannolee misoomaa jiranitti Belimuno hojjettoota gahaa biyya guutuu geessa.",
     "navigation": {
       "home": "Mana",
       "about": "Waa'ee",
@@ -22,7 +23,82 @@
       "admin_outsource": "Manguddoo - Ala Tajaajilaa",
       "worker": "Hojjettoota",
       "client": "Maamilaa"
-    }
+    },
+    "addisAbaba": {
+      "name": "Addis Ababa",
+      "description": "Bu'uuraalee maallaqaa, teknoolojii fi bulchiinsa hojii.",
+      "jobs": "120+ hojii hojiirra jiran",
+      "tagline": "Magaalaa guddoo mootummaa"
+    },
+    "oromia": {
+      "name": "Oromiyaa",
+      "description": "Beektoota logistiksii, qonnaa fi projektoota dirree.",
+      "jobs": "80+ hojii hojiirra jiran",
+      "tagline": "Qonnaa fi logistiksii"
+    },
+    "amhara": {
+      "name": "Amhaaraa",
+      "description": "Carraa turaizimii, barnootaa fi tajaajila fayyaa.",
+      "jobs": "60+ hojii hojiirra jiran",
+      "tagline": "Turaizimii fi misooma hawaasaa"
+    },
+    "tigray": {
+      "name": "Tigraay",
+      "description": "Ijaarsa haaromsaa, tajaajila fi hojii teeknikaa.",
+      "jobs": "40+ hojii hojiirra jiran",
+      "tagline": "Deebii ijaarsa"
+    },
+    "snnp": {
+      "name": "SNNP",
+      "description": "Projektoota oomisha, hospitaalityii fi aadaa.",
+      "jobs": "55+ hojii hojiirra jiran",
+      "tagline": "Korridori oomisha"
+    },
+    "sidama": {
+      "name": "Sidaamaa",
+      "description": "Hojiilee qonnaa, daldalaa fi tajaajila maamilaa.",
+      "jobs": "45+ hojii hojiirra jiran",
+      "tagline": "Buna fi tajaajila"
+    },
+    "gambela": {
+      "name": "Gambeellaa",
+      "description": "Deeggarsa balaa namoomaa, kuusaa fi logistiksii.",
+      "jobs": "30+ hojii hojiirra jiran",
+      "tagline": "Bu'uura balaa namoomaa"
+    },
+    "afar": {
+      "name": "Afar",
+      "description": "Projektoota humna ibsaa, tajaajila ittisa fi hojii dirree.",
+      "jobs": "25+ hojii hojiirra jiran",
+      "tagline": "Korridori humna ibsaa"
+    },
+    "benishangul": {
+      "name": "Beniishaangul-Gumuz",
+      "description": "Projektoota gurguddaa fi hojii damee hidha lagaatti.",
+      "jobs": "28+ hojii hojiirra jiran",
+      "tagline": "Hidhaa fi mega projektii"
+    },
+    "direDawa": {
+      "name": "Dirree Dhawaa",
+      "description": "Qacaruu paarkii industirii, saffisaa kenninsa fi tajaajila xiyyaaraa.",
+      "jobs": "38+ hojii hojiirra jiran",
+      "tagline": "Balbala industirii"
+    },
+    "harari": {
+      "name": "Hararii",
+      "description": "Turaizimii aadaa, hospitaalityii fi hojii bulchiinsa magaalotaa.",
+      "jobs": "22+ hojii hojiirra jiran",
+      "tagline": "Magaalaa dhaala aadaa"
+    },
+    "somali": {
+      "name": "Somaalee (Jiijigaa)",
+      "description": "Daldala daangaa, logistiksii fi deeggarsa karooraa NGO.",
+      "jobs": "35+ hojii hojiirra jiran",
+      "tagline": "Daandii daldalaa bahaa"
+    },
+    "register": "galmeessuu",
+    "goToDashboard": "Daashboorotti deemi",
+    "browseJobs": "Hojiiwwan ilaali"
   },
   "Home": {
     "hero": {
@@ -34,6 +110,11 @@
       "register": "galmeessuu",
       "goToDashboard": "Daashboorotti deemi",
       "browseJobs": "Hojiiwwan ilaali"
+    },
+    "trustedBy": {
+      "eyebrow": "Dhaabbatoota qajeelaa hundaatin amanamte",
+      "title": "Gareewwan addunyaa Belimuno irratti hirkatu",
+      "subtitle": "NGO'olee irraa kaampaanoota gugurtuu gurguddaa keessatti, furmaanni nuuma keenya miseensota hojii proojektota mudarraa hunda guyyaa guyyaan humna."
     },
     "stats": {
       "title": "Lakkoofsa Platformaa",
@@ -97,37 +178,80 @@
       }
     },
     "regions": {
-      "title": "Naannolee keessatti hojjenne",
-      "subtitle": "Itoophiyaa guutuu keessatti hojjettoota fi maamiltoota walitti nu fidna",
+      "title": "Naannolee keessatti hojjenna",
+      "subtitle": "Naannolee guddoo Itoophiyaa keessatti hojjettoota fi maamiltoota walitti fidna",
+      "description": "Magaalaa guddoo irraa hanga naannolee misoomaa jiranitti Belimuno hojiilee gahaa biyya guutuu geessa.",
       "addisAbaba": {
         "name": "Finfinnee",
-        "description": "Kutaa faayinaansii, tekinooloojii fi bulchiinsaaf bu'uura.",
-        "jobs": "Hojii 120+ hojjetamaa jiru"
+        "description": "Bu'uura faayinaansii, tekinooloojii fi bulchiinsa yakka keessatti.",
+        "jobs": "120+ hojii hojii irra jiran",
+        "tagline": "Magaalaa mootummaa"
       },
       "oromia": {
         "name": "Oromiyaa",
-        "description": "Ogeeyyii lojistiksii, qonnaa fi projektii lafa irrati hojjetan.",
-        "jobs": "Hojii 80+ hojjetamaa jiru"
+        "description": "Ogeeyyii logistiksii, qonnaa fi projektoota dirree.",
+        "jobs": "80+ hojii hojii irra jiran",
+        "tagline": "Qonnaa fi logistiksii"
       },
       "amhara": {
         "name": "Amaaraa",
-        "description": "Carraa tajaajila imalaa, barnootaa fi fayyaa.",
-        "jobs": "Hojii 60+ hojjetamaa jiru"
+        "description": "Carraa turaizimii, barnootaa fi tajaajila fayyaa.",
+        "jobs": "60+ hojii hojii irra jiran",
+        "tagline": "Turaizimii fi misooma hawaasaa"
       },
       "tigray": {
         "name": "Tigraay",
-        "description": "Hojii ijaarsa haaromsaa, tajaajilaa fi bulchiinsa.",
-        "jobs": "Hojii 40+ hojjetamaa jiru"
+        "description": "Ijaarsa haaromsaa, tajaajila fi hojii teeknikaa.",
+        "jobs": "40+ hojii hojii irra jiran",
+        "tagline": "Deebii ijaarsa"
       },
       "snnp": {
         "name": "SNNP",
-        "description": "Bakka oomisha, hoteelaa fi projektoota aadaa.",
-        "jobs": "Hojii 55+ hojjetamaa jiru"
+        "description": "Bakka oomisha, hospitaalityii fi projektoota aadaa.",
+        "jobs": "55+ hojii hojii irra jiran",
+        "tagline": "Korridori oomisha"
       },
       "sidama": {
         "name": "Siidaamaa",
-        "description": "Tokkummaa qonnaa, daldalaa fi tajaajila maamilaa.",
-        "jobs": "Hojii 45+ hojjetamaa jiru"
+        "description": "Qonna bunaa, daldala gabaa fi tajaajila maamilaa.",
+        "jobs": "45+ hojii hojii irra jiran",
+        "tagline": "Buna fi tajaajila"
+      },
+      "gambela": {
+        "name": "Gambeellaa",
+        "description": "Deeggarsa balaa namoomaa, kuusaa fi logistiksii.",
+        "jobs": "30+ hojii hojii irra jiran",
+        "tagline": "Bu'uura balaa namoomaa"
+      },
+      "afar": {
+        "name": "Afar",
+        "description": "Projektoota humna ibsaa, tajaajila ittisaa fi hojii dirree.",
+        "jobs": "25+ hojii hojii irra jiran",
+        "tagline": "Korridori humna ibsaa"
+      },
+      "benishangul": {
+        "name": "Beniishaangul-Gumuz",
+        "description": "Projektoota gurguddaa fi hojii hidha lagaatti.",
+        "jobs": "28+ hojii hojii irra jiran",
+        "tagline": "Hidhaa fi mega projektii"
+      },
+      "direDawa": {
+        "name": "Dirree Dhawaa",
+        "description": "Paarkii industirii, saffisa geejjibaa fi tajaajila xiyyaaraa.",
+        "jobs": "38+ hojii hojii irra jiran",
+        "tagline": "Balbala industirii"
+      },
+      "harari": {
+        "name": "Hararii",
+        "description": "Turaizimii aadaa, hospitaalityii fi hojjettoota bulchiinsa magaalotaa.",
+        "jobs": "22+ hojii hojii irra jiran",
+        "tagline": "Magaalaa dhaala aadaa"
+      },
+      "somali": {
+        "name": "Somaalee (Jiijigaa)",
+        "description": "Daldala daangaa, logistiksii fi deeggarsa karooraa NGO.",
+        "jobs": "35+ hojii hojii irra jiran",
+        "tagline": "Daandii daldalaa bahaa"
       }
     },
     "news": {
@@ -140,8 +264,18 @@
       "backButton": "Deebi'i",
       "shareButton": "Qoodsi",
       "backToHome": "Manaatti Deebi'i",
+      "trustedBy": {
+        "eyebrow": "Dhaabbilee duraa irraa amanamne",
+        "title": "Gareen addunyaa Belimuno irratti hirkatu",
+        "subtitle": "NGOwwan irraa kaasee hanga dhaabbilee ijaarsa guddaatti, tajaajilli qacarrii keenya projektoota murteessaa guyyaa guyyaatti deeggaru."
+      },
       "viewAllNews": "Oduu Hundaa Ilaali",
       "relatedNews": "Oduu Walqabataa"
+    },
+    "categories": {
+      "title": "Gosa Waa'ee Hojiiwwan",
+      "subtitle": "Carraawwan garaagaraa keessatti gosa hojiiwwan fi qophiiwwan adda addaa keessatti argadhu",
+      "viewAllCategories": "Gosa Hunda Ilaali"
     },
     "cta": {
       "title": "Imalaa Keessan Jalqabuu Ready Ta'anii?",
@@ -158,6 +292,7 @@
     "sections": {
       "company": "Kaampaanii",
       "contact": "Bilbila",
+      "addTeamMember": "Hojjetaa Dabaluu",
       "followUs": "Nu Hordofaa"
     },
     "links": {
@@ -252,7 +387,9 @@
     },
     "team": {
       "title": "Hirmaata Keenya",
-      "description": "BELIMUNO qoqaawaalee gurguddoo sadanitti qooddame: bulchinsa fi herrega, hiree namaa, fi bulchiinsa tajaajilaa ala. Qoqaawaan hundi dalagawwan bulchinsaa, bitaa, fi dalagawwan herregaa hojjetu, yeroo qoqaawaan bulchiinsa tajaajilaa alaas hojjettoota alaa fi pirojeektota bulchu."
+      "description": "BELIMUNO qoqaawaalee gurguddoo sadanitti qooddame: bulchinsa fi herrega, hiree namaa, fi bulchiinsa tajaajilaa ala. Qoqaawaan hundi dalagawwan bulchinsaa, bitaa, fi dalagawwan herregaa hojjetu, yeroo qoqaawaan bulchiinsa tajaajilaa alaas hojjettoota alaa fi pirojeektota bulchu.",
+      "heading": "Bulchitoota fi ogeeyyii Belimuno kakaasan",
+      "lede": "Yaada sirna qindaa'aa qaban, hoggantoota nama dura kaasan fi ogeeyyii raawwii hojii gaarii kennuuf tokko ta'anii tajaajila hojii qulqulluu dhiyeessu."
     },
     "clients": {
       "title": "Maamilota Keenya",
@@ -451,6 +588,7 @@
     },
     "form": {
       "title": "Ergaa Ergaa",
+      "subtitle": "Please share a few details and teamni keenya si quunnama baay'ee salphaatti.",
       "fields": {
         "name": "Maqaa Guutuu",
         "email": "Imeelii",
@@ -465,7 +603,8 @@
       "status": {
         "success": "Ergaa ergame. Galatoomaa!",
         "error": "Ergamuu hin dandeenye. Irra deebi'i."
-      }
+      },
+      "helper": "We typically respond within one business day."
     },
     "office": {
       "title": "Biroo",
@@ -475,6 +614,10 @@
         "phone": "Bilbila",
         "pobox": "P.O.Box",
         "website": "Website"
+      },
+      "map": {
+        "title": "Bakka keenya irratti argadhu",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },
@@ -991,6 +1134,7 @@
     "actions": {
       "title": "Dalagaa HR",
       "buttons": {
+        "manageTeam": "Garee Bulchiisi",
         "workerManagement": "Bulchiinsa Hojjettootaa",
         "disputeResolution": "Furmaata Wal Dhabdamuu",
         "performanceReviews": "Qorannoo Dalagaa"
@@ -1185,6 +1329,40 @@
         "payWorker": "Hojjetaa Kaffali",
         "investigate": "Qorannoo Godhaa"
       }
+    }
+  },
+  "HRManageTeam": {
+    "title": "Garee Bulchiisi",
+    "subtitle": "Muudamtoota Fuula About irratti mul'atan itti dabali yookaan balleessi.",
+    "buttons": {
+      "back": "Deebi'i Daashbooraa HR",
+      "addMember": "Hojjetaa Garee Dabaluu",
+      "editMember": "Gulaali"
+    },
+    "list": {
+      "title": "Tarree Leenjii fi Aadaa",
+      "subtitle": "Tarreen kun fuula About balbala uummataa wajjin akka wal simatu godhi."
+    },
+    "empty": {
+      "title": "Hojjettoonni garee hin jiran",
+      "description": "Hojjetaa jalqabaa dabaluuf qabduu gubbaa jiru fayyadami."
+    },
+    "modal": {
+      "title": "Hojjetaa Garee Dabaluu",
+      "editTitle": "Hojjetaa Garee Gulaali",
+      "submit": "Hojjetaa Ol kaa'i",
+      "update": "Hojjetaa Fooyyessi",
+      "cancel": "Haquu"
+    },
+    "messages": {
+      "loadError": "Hojjettoota garee fe'uu hin dandeenye. Itti yaali booddee.",
+      "createSuccess": "{name} gareetti dabalameera.",
+      "updateSuccess": "{name} ni fooyya'e.",
+      "deleteSuccess": "{name} gareerraa haqameera.",
+      "deleteError": "Hojjetaa kana ammatti balleessuu hin dandeenye.",
+      "seedSuccess": "Tarree hoggansaa duraan jiru gara sirnaatti dabalameera.",
+      "seedError": "Tarree hoggansaa duraan jiru ofumaan galchuu hin milkoofne.",
+      "seedFallback": "Ammas tarreen hoggansaa duraan jiru agarsiifamaa jira. Haaromsuuf miseensota dabaluu ykn gulaaluu dandeessu."
     }
   }
 }

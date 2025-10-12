@@ -1,0 +1,9 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>FHI360</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(32 40)" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif" font-weight="700">
+    <text x="0" y="48" font-size="72" fill="#1f1f1f">fhi</text>
+    <text x="152" y="48" font-size="72" fill="#f58220">360</text>
+    <text x="4" y="84" font-size="20" fill="#5f6368" letter-spacing="2">THE SCIENCE OF IMPROVING LIVES</text>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>Action Against Hunger</title>
+  <rect width="320" height="160" fill="none"/>
+  <g transform="translate(32 20)">
+    <path d="M42 48c0-12.7 9.3-23.5 22.2-26.2-1.5 2.9-2.4 6.2-2.4 9.7 0 13.2 10.8 24 24 24 3.5 0 6.8-0.8 9.7-2.4C92.5 66 81.7 75.3 69 75.3 54.2 75.3 42 63.1 42 48z" fill="#2bb673"/>
+    <circle cx="69" cy="21.5" r="21.5" fill="#1780bf"/>
+  </g>
+  <g transform="translate(120 36)" fill="#4a4f55" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif" font-weight="700">
+    <text x="0" y="40" font-size="38" letter-spacing="2">ACTION</text>
+    <text x="0" y="76" font-size="38" letter-spacing="2">AGAINST</text>
+    <text x="0" y="112" font-size="38" letter-spacing="2">HUNGER</text>
+  </g>
+</svg>

@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import Card from "@/components/ui/Card";
-import { Award } from "lucide-react";
 import type { ClientItem } from "@/data/clients";
 
 type ClientsGridProps = {
@@ -17,6 +17,15 @@ const ClientsGrid: React.FC<ClientsGridProps> = ({
   className,
 }) => {
   const list = typeof limit === "number" ? clients.slice(0, limit) : clients;
+
+  const getInitials = (name: string) =>
+    name
+      .replace(/\([^)]*\)/g, "")
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || name.slice(0, 2).toUpperCase();
   return (
     <div
       className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${className || ""}`}
@@ -27,8 +36,27 @@ const ClientsGrid: React.FC<ClientsGridProps> = ({
           className="p-6 hover:shadow-lg transition-shadow"
         >
           <div className="flex items-start space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-              <Award className="h-6 w-6 text-white" />
+            <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
+              {client.logo ? (
+                <Image
+                  src={client.logo}
+                  alt={client.name}
+                  fill
+                  sizes="56px"
+                  className="object-contain p-2"
+                />
+              ) : (
+                <div
+                  className="flex h-full w-full items-center justify-center text-base font-semibold tracking-wide text-slate-700"
+                  style={{
+                    background: client.brandColor
+                      ? `linear-gradient(135deg, ${client.brandColor}15, ${client.brandColor}05)`
+                      : "linear-gradient(135deg, rgba(37,99,235,0.18), rgba(14,165,233,0.12))",
+                  }}
+                >
+                  {getInitials(client.name)}
+                </div>
+              )}
             </div>
             <div>
               <h3 className="font-bold text-gray-900">{client.name}</h3>

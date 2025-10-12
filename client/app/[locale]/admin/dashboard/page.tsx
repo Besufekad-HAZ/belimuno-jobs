@@ -78,7 +78,11 @@ const AdminDashboard: React.FC = () => {
       return;
     }
 
-    fetchDashboardData();
+    const load = async () => {
+      await fetchDashboardData();
+    };
+
+    load();
   }, [router]);
 
   const fetchDashboardData = async () => {

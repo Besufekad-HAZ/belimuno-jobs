@@ -1,0 +1,12 @@
+<svg width="320" height="160" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title>Jhpiego</title>
+  <rect width="320" height="160" fill="none"/>
+  <g fill="#0d6f7c" font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif">
+    <text x="36" y="94" font-size="72" font-weight="700">jhpiego</text>
+    <text x="38" y="124" font-size="18" letter-spacing="2">Saving lives. Improving health. Transforming futures.</text>
+  </g>
+  <g fill="#0d6f7c">
+    <circle cx="250" cy="54" r="18"/>
+    <circle cx="278" cy="40" r="12"/>
+  </g>
+</svg>
