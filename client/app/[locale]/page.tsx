@@ -9,7 +9,7 @@ import {
   Briefcase,
   TrendingUp,
   CheckCircle,
-  Star,
+  // Star,
   MapPin,
   Newspaper,
   Calendar,
