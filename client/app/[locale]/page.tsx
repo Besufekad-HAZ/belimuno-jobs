@@ -24,6 +24,7 @@ import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import { newsData } from "@/data/news";
 import TrustedBySection from "@/components/sections/TrustedBySection";
+import TestimonialsSection from "@/components/sections/TestimonialsSection";
 
 type StoredUser = { role: string } | null;
 
@@ -608,7 +609,7 @@ export default function Home() {
       </div>
 
       {/* Testimonials Section */}
-      <div className="py-16 bg-gray-50">
+      {/* <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900">
@@ -617,7 +618,7 @@ export default function Home() {
             <p className="text-gray-600 mt-4">{t("testimonials.subtitle")}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
+            {/* Testimonial 1 }
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
               <div className="flex justify-center mb-4">
                 {[...Array(5)].map((_, i) => (
@@ -643,7 +644,7 @@ export default function Home() {
               </div>
             </Card>
 
-            {/* Testimonial 2 */}
+            {/* Testimonial 2 }
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
               <div className="flex justify-center mb-4">
                 {[...Array(5)].map((_, i) => (
@@ -669,7 +670,7 @@ export default function Home() {
               </div>
             </Card>
 
-            {/* Testimonial 3 */}
+            {/* Testimonial 3 }
             <Card className="text-center p-6 hover:shadow-lg transition-shadow">
               <div className="flex justify-center mb-4">
                 {[...Array(5)].map((_, i) => (
@@ -696,8 +697,9 @@ export default function Home() {
             </Card>
           </div>
         </div>
-      </div>
-      {/* <TestimonialsSection /> */}
+      </div> */}
+
+      <TestimonialsSection />
 
       {/* Regions Where We Operate */}
       <div className="py-16 bg-white">
