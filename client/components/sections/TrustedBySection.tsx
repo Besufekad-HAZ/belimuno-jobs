@@ -82,7 +82,7 @@ const TrustedBySection: React.FC = () => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/40 py-16">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/40 mt-6 py-10">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-16 top-12 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
         <div className="absolute -right-10 bottom-0 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
