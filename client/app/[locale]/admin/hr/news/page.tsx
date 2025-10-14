@@ -36,7 +36,7 @@ interface NewsArticle {
   content?: string;
   date: string;
   category: string;
-  imageUrl?: string;
+  image?: string;
   readTime?: string;
   author?: string;
   status?: "draft" | "published" | "archived";
@@ -48,24 +48,18 @@ type NewsFormState = {
   title: string;
   excerpt: string;
   content: string;
-  date: string;
   category: string;
-  imageUrl: string;
-  readTime: string;
   author: string;
-  status: "draft" | "published" | "archived";
+  image: string;
 };
 
 const emptyNewsForm: NewsFormState = {
   title: "",
   excerpt: "",
   content: "",
-  date: new Date().toISOString().split("T")[0],
   category: "",
-  imageUrl: "",
-  readTime: "",
   author: "",
-  status: "draft",
+  image: "",
 };
 
 const categorySuggestions = [
@@ -188,12 +182,9 @@ const ManageNewsPage: React.FC = () => {
         title: article.title,
         excerpt: article.excerpt,
         content: article.content || "",
-        date: article.date.split("T")[0],
         category: article.category,
-        imageUrl: article.imageUrl || "",
-        readTime: article.readTime || "",
         author: article.author || "",
-        status: article.status || "draft",
+        image: article.image || "",
       });
     } else {
       setEditingArticle(null);
@@ -224,26 +215,6 @@ const ManageNewsPage: React.FC = () => {
       const next = { ...prev };
       delete next[field];
       return next;
-    });
-  };
-
-  const handleImageUrlChange = (value: string) => {
-    const sanitized = value.trim();
-    setForm((prev) => ({ ...prev, imageUrl: sanitized }));
-    setFormErrors((prev) => {
-      if (!prev.imageUrl) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next.imageUrl;
-      return next;
-    });
-    setImageUploadError(null);
-    setImagePreview((prev) => {
-      if (prev && prev.startsWith("blob:")) {
-        URL.revokeObjectURL(prev);
-      }
-      return sanitized ? sanitized : null;
     });
   };
 
@@ -289,11 +260,12 @@ const ManageNewsPage: React.FC = () => {
         (response.data?.url as string | undefined);
 
       if (uploadedUrl) {
-        handleImageUrlChange(uploadedUrl);
+        // Store the uploaded URL in a temporary state for form submission
+        setForm((prev) => ({ ...prev, image: uploadedUrl }));
         toast.success("Article image uploaded.");
       } else {
         setImageUploadError(
-          "Upload finished but no URL was returned. Please paste it manually.",
+          "Upload finished but no URL was returned. Please try again.",
         );
       }
     } catch (error) {
@@ -315,8 +287,7 @@ const ManageNewsPage: React.FC = () => {
     }
   };
 
-  const previewSource =
-    imagePreview ?? (form.imageUrl?.trim() ? form.imageUrl.trim() : null);
+  const previewSource = imagePreview;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -332,9 +303,6 @@ const ManageNewsPage: React.FC = () => {
     if (!form.category.trim()) {
       errors.category = "Please select a category.";
     }
-    if (!form.date.trim()) {
-      errors.date = "Please select a publication date.";
-    }
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -349,12 +317,10 @@ const ManageNewsPage: React.FC = () => {
         title: form.title.trim(),
         excerpt: form.excerpt.trim(),
         content: form.content.trim() || undefined,
-        date: form.date,
         category: form.category.trim(),
-        imageUrl: form.imageUrl.trim() || undefined,
-        readTime: form.readTime.trim() || undefined,
         author: form.author.trim() || undefined,
-        status: form.status,
+        image: form.image.trim() || undefined,
+        status: "draft" as const, // Default to draft
       };
 
       if (editingArticle) {
@@ -494,10 +460,10 @@ const ManageNewsPage: React.FC = () => {
                     key={article._id || `${article.title}-${article.date}`}
                     className="group relative flex flex-col rounded-2xl border border-blue-100 bg-white/95 p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                   >
-                    {article.imageUrl && (
+                    {article.image && (
                       <div className="relative h-32 w-full overflow-hidden rounded-lg mb-3">
                         <Image
-                          src={article.imageUrl}
+                          src={article.image}
                           alt={article.title}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -619,25 +585,6 @@ const ManageNewsPage: React.FC = () => {
               required
             />
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1">
-                Status
-              </label>
-              <select
-                value={form.status}
-                onChange={(event) =>
-                  handleInputChange("status")(event.target.value)
-                }
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
               <Input
                 label="Category"
                 value={form.category}
@@ -655,19 +602,9 @@ const ManageNewsPage: React.FC = () => {
                 ))}
               </datalist>
             </div>
-            <Input
-              label="Publication Date"
-              type="date"
-              value={form.date}
-              onChange={(event) =>
-                handleInputChange("date")(event.target.value)
-              }
-              error={formErrors.date}
-              required
-            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
             <Input
               label="Author (optional)"
               value={form.author}
@@ -676,26 +613,41 @@ const ManageNewsPage: React.FC = () => {
               }
               placeholder="e.g. John Doe"
             />
-            <Input
-              label="Read Time (optional)"
-              value={form.readTime}
-              onChange={(event) =>
-                handleInputChange("readTime")(event.target.value)
-              }
-              placeholder="e.g. 5 min read"
-            />
           </div>
 
-          <Input
-            label="Excerpt"
-            value={form.excerpt}
-            onChange={(event) =>
-              handleInputChange("excerpt")(event.target.value)
-            }
-            placeholder="Brief summary of the article..."
-            error={formErrors.excerpt}
-            required
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              Excerpt
+            </label>
+            <textarea
+              value={form.excerpt}
+              onChange={(event) =>
+                handleInputChange("excerpt")(event.target.value)
+              }
+              rows={3}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Brief summary of the article..."
+              required
+            />
+            {formErrors.excerpt && (
+              <p className="mt-1 text-sm text-red-600">{formErrors.excerpt}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">
+              Content
+            </label>
+            <textarea
+              value={form.content}
+              onChange={(event) =>
+                handleInputChange("content")(event.target.value)
+              }
+              rows={8}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Full article content..."
+            />
+          </div>
 
           <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-900">
@@ -736,28 +688,6 @@ const ManageNewsPage: React.FC = () => {
                 )}
               </div>
             </div>
-            <Input
-              label="Image URL (optional)"
-              value={form.imageUrl}
-              onChange={(event) => handleImageUrlChange(event.target.value)}
-              placeholder="https://..."
-              helperText="Paste a public image URL or use the upload button above."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">
-              Content (optional)
-            </label>
-            <textarea
-              value={form.content}
-              onChange={(event) =>
-                handleInputChange("content")(event.target.value)
-              }
-              rows={8}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Full article content..."
-            />
           </div>
 
           <input

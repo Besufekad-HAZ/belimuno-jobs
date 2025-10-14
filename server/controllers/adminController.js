@@ -1663,16 +1663,8 @@ exports.getNewsArticle = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/news
 // @access  Private/Any Admin
 exports.createNews = asyncHandler(async (req, res) => {
-  const {
-    title,
-    excerpt,
-    content,
-    date,
-    category,
-    imageUrl,
-    readTime,
-    author,
-  } = req.body;
+  const { title, excerpt, content, date, category, image, readTime, author } =
+    req.body;
 
   if (!title || !excerpt || !category) {
     return res.status(400).json({
@@ -1691,7 +1683,7 @@ exports.createNews = asyncHandler(async (req, res) => {
 
   if (content) newsData.content = content.trim();
   if (date) newsData.date = new Date(date);
-  if (imageUrl) newsData.imageUrl = imageUrl.trim();
+  if (image) newsData.image = image.trim();
   if (readTime) newsData.readTime = readTime.trim();
   if (author) newsData.author = author.trim();
 
@@ -1714,7 +1706,7 @@ exports.updateNews = asyncHandler(async (req, res) => {
     "content",
     "date",
     "category",
-    "imageUrl",
+    "image",
     "readTime",
     "author",
     "status",

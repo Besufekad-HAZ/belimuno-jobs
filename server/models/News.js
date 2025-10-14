@@ -29,7 +29,7 @@ const NewsSchema = new mongoose.Schema(
       trim: true,
       maxlength: 100,
     },
-    imageUrl: {
+    image: {
       type: String,
       trim: true,
     },
@@ -46,7 +46,7 @@ const NewsSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["draft", "published", "archived"],
-      default: "draft",
+      default: "published",
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

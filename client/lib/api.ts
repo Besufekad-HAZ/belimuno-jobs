@@ -644,7 +644,7 @@ export const adminAPI = {
     content?: string;
     date?: string;
     category: string;
-    imageUrl?: string;
+    image?: string;
     readTime?: string;
     author?: string;
     status?: "draft" | "published" | "archived";
@@ -657,7 +657,7 @@ export const adminAPI = {
       content?: string;
       date?: string;
       category?: string;
-      imageUrl?: string;
+      image?: string;
       readTime?: string;
       author?: string;
       status?: "draft" | "published" | "archived";
