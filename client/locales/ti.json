@@ -512,6 +512,7 @@
     },
     "form": {
       "title": "መልእኽቲ ስደዱ",
+      "subtitle": "ብዝሒ ዝተፈለጠ ዝርዝር ሙሉእ ክትህቡ ንዓቢ እናለና ብቅልጡፍ ንእልሰልኩም።",
       "fields": {
         "name": "ምሉእ ስም",
         "email": "ኢ-መይል",
@@ -526,7 +527,8 @@
       "status": {
         "success": "መልእኽቲኹም ተደይቡ። የቅንየለይ!",
         "error": "ኣይተደይበን። ደጊምኩም ፈትኑ።"
-      }
+      },
+      "helper": "ብዋናው ንሳብ ሓደ መስከረም መዓልቲ ብዙሕ እናመልስ ኢና።"
     },
     "office": {
       "title": "ቤት ጽሕፈት",
@@ -536,6 +538,10 @@
         "phone": "ተሌፎን",
         "pobox": "ፖ.ሳ.ቁ",
         "website": "ወብሳይት"
+      },
+      "map": {
+        "title": "ቦታናን በኣብ ካርታ ርኢ",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },
@@ -1255,7 +1261,8 @@
     "subtitle": "ኣብ ሓበሬታ About ዝተሓተቱ መሪታት ያእትዱን ወይ ይለውጡን።",
     "buttons": {
       "back": "ናብ ዳሽቦርድ HR ተመለስ",
-      "addMember": "ኣባል ወስኽ"
+      "addMember": "ኣባል ወስኽ",
+      "editMember": "ጽሓፍ"
     },
     "list": {
       "title": "መሪነትን ባህሊን ዝያዳምሩ ኣባላት",
@@ -1267,12 +1274,15 @@
     },
     "modal": {
       "title": "ኣባል ወስኽ",
+      "editTitle": "ኣባል ጽሓፍ",
       "submit": "ኣባል ኣድልዎ",
+      "update": "ኣባል ኣሻሽል",
       "cancel": "ሰርዝ"
     },
     "messages": {
       "loadError": "ኣባላት ቡድን ምጽናዕ ኣልተቻለን። በድሕሪ ግዜ ይሞክሩ።",
       "createSuccess": "{name} ናብ ቡድን ተጨመረ።",
+      "updateSuccess": "{name} ተሻሽለ።",
       "deleteSuccess": "{name} ኣብ ቡድን ካብ እዚ ወጺኡ።",
       "deleteError": "እዚ ኣባል ኣብዚ ሰዓት ምስወጣን ኣይከኣልን።",
       "seedSuccess": "መደበኛ ዝርዝር መሪነትና ናብ ስርዓት ኣተኻኽለና።",

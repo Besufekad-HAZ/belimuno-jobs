@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Card from "@/components/ui/Card";
 import type { ClientItem } from "@/data/clients";
+import { resolveAssetUrl } from "@/lib/assets";
 
 type ClientsGridProps = {
   clients: ClientItem[];
@@ -30,46 +31,52 @@ const ClientsGrid: React.FC<ClientsGridProps> = ({
     <div
       className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${className || ""}`}
     >
-      {list.map((client) => (
-        <Card
-          key={client.name}
-          className="p-6 hover:shadow-lg transition-shadow"
-        >
-          <div className="flex items-start space-x-4">
-            <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
-              {client.logo ? (
-                <Image
-                  src={client.logo}
-                  alt={client.name}
-                  fill
-                  sizes="56px"
-                  className="object-contain p-2"
-                />
-              ) : (
-                <div
-                  className="flex h-full w-full items-center justify-center text-base font-semibold tracking-wide text-slate-700"
-                  style={{
-                    background: client.brandColor
-                      ? `linear-gradient(135deg, ${client.brandColor}15, ${client.brandColor}05)`
-                      : "linear-gradient(135deg, rgba(37,99,235,0.18), rgba(14,165,233,0.12))",
-                  }}
-                >
-                  {getInitials(client.name)}
-                </div>
-              )}
+      {list.map((client) => {
+        const logoSrc = client.logo
+          ? (resolveAssetUrl(client.logo) ?? client.logo)
+          : undefined;
+
+        return (
+          <Card
+            key={client.name}
+            className="p-6 hover:shadow-lg transition-shadow"
+          >
+            <div className="flex items-start space-x-4">
+              <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-sm">
+                {logoSrc ? (
+                  <Image
+                    src={logoSrc}
+                    alt={client.name}
+                    fill
+                    sizes="56px"
+                    className="object-contain p-2"
+                  />
+                ) : (
+                  <div
+                    className="flex h-full w-full items-center justify-center text-base font-semibold tracking-wide text-slate-700"
+                    style={{
+                      background: client.brandColor
+                        ? `linear-gradient(135deg, ${client.brandColor}15, ${client.brandColor}05)`
+                        : "linear-gradient(135deg, rgba(37,99,235,0.18), rgba(14,165,233,0.12))",
+                    }}
+                  >
+                    {getInitials(client.name)}
+                  </div>
+                )}
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900">{client.name}</h3>
+                {client.type && (
+                  <p className="text-xs text-gray-500 mb-1">{client.type}</p>
+                )}
+                {client.service && (
+                  <p className="text-sm text-gray-700">{client.service}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-gray-900">{client.name}</h3>
-              {client.type && (
-                <p className="text-xs text-gray-500 mb-1">{client.type}</p>
-              )}
-              {client.service && (
-                <p className="text-sm text-gray-700">{client.service}</p>
-              )}
-            </div>
-          </div>
-        </Card>
-      ))}
+          </Card>
+        );
+      })}
     </div>
   );
 };

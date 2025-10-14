@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { CLIENTS, type ClientItem } from "@/data/clients";
 import { Sparkles } from "lucide-react";
+import { resolveAssetUrl } from "@/lib/assets";
 
 const getInitials = (name: string) => {
   const letters = name
@@ -20,6 +21,7 @@ const getInitials = (name: string) => {
 
 type EnhancedClient = ClientItem & {
   initials: string;
+  logoSrc?: string;
 };
 
 const TrustedBySection: React.FC = () => {
@@ -29,6 +31,9 @@ const TrustedBySection: React.FC = () => {
     const enhanced = CLIENTS.map((client) => ({
       ...client,
       initials: getInitials(client.name),
+      logoSrc: client.logo
+        ? (resolveAssetUrl(client.logo) ?? client.logo)
+        : undefined,
     }));
 
     // Duplicate the collection so the marquee can loop seamlessly
@@ -46,10 +51,10 @@ const TrustedBySection: React.FC = () => {
         className="client-tile flex w-56 flex-shrink-0 flex-col items-center text-center"
       >
         <div className="client-logo-wrapper relative flex h-24 w-full items-center justify-center overflow-hidden rounded-2xl border border-slate-200/60 bg-white shadow-[0_8px_28px_rgba(15,23,42,0.08)] transition-transform duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-[0_16px_36px_rgba(15,23,42,0.12)]">
-          {client.logo ? (
+          {client.logoSrc ? (
             <div className="relative h-full w-full px-6 py-4">
               <Image
-                src={client.logo}
+                src={client.logoSrc}
                 alt={client.name}
                 fill
                 className="object-contain"
@@ -82,7 +87,7 @@ const TrustedBySection: React.FC = () => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/40 py-16">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/40 mt-6 py-10">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-16 top-12 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
         <div className="absolute -right-10 bottom-0 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />

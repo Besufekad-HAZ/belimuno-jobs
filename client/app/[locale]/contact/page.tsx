@@ -6,6 +6,8 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { contactAPI } from "@/lib/api";
 import { useTranslations } from "next-intl";
+import { toast } from "@/components/ui/sonner";
+import { MessageSquare, User, Mail, Phone, Globe, MapPin } from "lucide-react";
 
 const ContactPage: React.FC = () => {
   const [name, setName] = useState("");
@@ -13,9 +15,7 @@ const ContactPage: React.FC = () => {
   const [phone, setPhone] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<"idle" | "sending">("idle");
   const t = useTranslations("ContactPage");
 
   const submit = async (e: React.FormEvent) => {
@@ -23,14 +23,16 @@ const ContactPage: React.FC = () => {
     setStatus("sending");
     try {
       await contactAPI.submit({ name, email, phone, subject, message });
-      setStatus("sent");
+      toast.success(t("form.status.success"));
       setName("");
       setEmail("");
       setPhone("");
       setSubject("");
       setMessage("");
+      setStatus("idle");
     } catch {
-      setStatus("error");
+      toast.error(t("form.status.error"));
+      setStatus("idle");
     }
   };
 
@@ -43,100 +45,211 @@ const ContactPage: React.FC = () => {
         </div>
       </div>
 
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {t("form.title")}
-            </h2>
-            <form onSubmit={submit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label={t("form.fields.name")}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-                <Input
-                  label={t("form.fields.email")}
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Input
-                label={t("form.fields.phone")}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              <Input
-                label={t("form.fields.subject")}
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                required
-              />
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("form.fields.message")}
-                </label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  rows={6}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <Button type="submit" disabled={status === "sending"}>
-                  {status === "sending"
-                    ? t("form.button.sending")
-                    : t("form.button.send")}
-                </Button>
-                {status === "sent" && (
-                  <span className="text-green-600 text-sm">
-                    {t("form.status.success")}
+      <section className="relative py-16">
+        <div className="absolute inset-0">
+          <div className="mx-auto h-full max-w-6xl rounded-[3rem] bg-gradient-to-br from-cyan-100/40 via-transparent to-blue-100/40 blur-3xl" />
+        </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <Card className="relative overflow-hidden border-0 bg-white/90 shadow-2xl ring-1 ring-cyan-100/60 backdrop-blur supports-[backdrop-filter]:bg-white/75">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100" />
+            <div className="relative">
+              <div className="flex flex-col gap-4 mb-8">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-lg shadow-cyan-500/40">
+                    <MessageSquare className="h-6 w-6" />
                   </span>
-                )}
-                {status === "error" && (
-                  <span className="text-red-600 text-sm">
-                    {t("form.status.error")}
-                  </span>
-                )}
-              </div>
-            </form>
-          </Card>
-          <Card className="p-6 self-start">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {t("office.title")}
-            </h2>
-            <p className="text-gray-700">{t("office.address")}</p>
-            <div className="mt-4 text-gray-700 space-y-1">
-              <p>{t("office.contact.email")}: info@belimunojobs.com</p>
-              <p>{t("office.contact.pobox")}: 100144, Addis Ababa</p>
-              <p>{t("office.contact.website")}: www.belimunojobs.com</p>
-              <div className="flex gap-2">
-                <p className="font-medium">{t("office.contact.phone")}:</p>
-                <div className="flex flex-col gap-y-1">
-                  {[
-                    "+251 930 014 332",
-                    "+251 978 009 084",
-                    "+251 935 402 673",
-                    "+251 913 064 948",
-                  ].map((phone) => (
-                    <a
-                      key={phone}
-                      href={`tel:${phone.replace(/\s/g, "")}`}
-                      className="hover:text-blue-600 transition-colors"
-                    >
-                      {phone}
-                    </a>
-                  ))}
+                  <div>
+                    <h2 className="text-2xl font-semibold text-gray-900">
+                      {t("form.title")}
+                    </h2>
+                    <p className="text-sm text-slate-600">
+                      {t("form.subtitle")}
+                    </p>
+                  </div>
                 </div>
               </div>
+              <form onSubmit={submit} className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <Input
+                    label={t("form.fields.name")}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="rounded-xl border-transparent bg-white/80 shadow-inner focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/80"
+                  />
+                  <Input
+                    label={t("form.fields.email")}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="rounded-xl border-transparent bg-white/80 shadow-inner focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/80"
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <Input
+                    label={t("form.fields.phone")}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="rounded-xl border-transparent bg-white/80 shadow-inner focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/80"
+                  />
+                  <Input
+                    label={t("form.fields.subject")}
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    required
+                    className="rounded-xl border-transparent bg-white/80 shadow-inner focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/80"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    {t("form.fields.message")}
+                  </label>
+                  <div className="relative">
+                    <textarea
+                      className="w-full rounded-2xl border border-transparent bg-white/80 px-4 py-3 text-gray-900 shadow-inner transition duration-200 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/80"
+                      rows={6}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      required
+                    />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 rounded-b-2xl bg-gradient-to-t from-cyan-100/40 to-transparent"></div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    loading={status === "sending"}
+                    className="w-full sm:w-auto shadow-lg shadow-cyan-500/30"
+                  >
+                    {status === "sending"
+                      ? t("form.button.sending")
+                      : t("form.button.send")}
+                  </Button>
+                  <p className="text-sm text-slate-500">{t("form.helper")}</p>
+                </div>
+              </form>
             </div>
           </Card>
+          <div className="space-y-6">
+            <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-800 via-blue-700 to-cyan-600 text-white shadow-xl">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.25),transparent)] opacity-80" />
+              <div className="relative">
+                <h2 className="text-2xl font-semibold mb-4">
+                  {t("office.title")}
+                </h2>
+                <p className="text-blue-50 leading-relaxed">
+                  {t("office.address")}
+                </p>
+                <div className="mt-6 space-y-5">
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white">
+                      <Mail className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                        {t("office.contact.email")}
+                      </p>
+                      <a
+                        href="mailto:info@belimunojobs.com"
+                        className="text-base font-medium text-white/90 hover:text-white"
+                      >
+                        info@belimunojobs.com
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white">
+                      <Globe className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                        {t("office.contact.website")}
+                      </p>
+                      <a
+                        href="https://www.belimunojobs.com"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-base font-medium text-white/90 hover:text-white"
+                      >
+                        www.belimunojobs.com
+                      </a>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white">
+                      <User className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                        {t("office.contact.pobox")}
+                      </p>
+                      <p className="text-base font-medium text-white/90">
+                        100144, Addis Ababa
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white">
+                      <Phone className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
+                        {t("office.contact.phone")}
+                      </p>
+                      <div className="mt-2 grid grid-cols-1 gap-2 text-base font-medium text-white/90">
+                        {[
+                          "+251 930 014 332",
+                          "+251 978 009 084",
+                          "+251 935 402 673",
+                          "+251 913 064 948",
+                        ].map((phoneNumber) => (
+                          <a
+                            key={phoneNumber}
+                            href={`tel:${phoneNumber.replace(/\s/g, "")}`}
+                            className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm transition hover:bg-white/20"
+                          >
+                            <Phone className="h-4 w-4 opacity-80" />
+                            <span>{phoneNumber}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+            <Card className="relative overflow-hidden border-0 bg-white/90 shadow-xl ring-1 ring-cyan-100/60 backdrop-blur supports-[backdrop-filter]:bg-white/75">
+              <div className="relative">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30">
+                      <MapPin className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        {t("office.map.title")}
+                      </h3>
+                      <p className="text-sm text-slate-600">
+                        {t("office.map.subtitle")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 overflow-hidden rounded-2xl border border-cyan-100 shadow-inner">
+                  <iframe
+                    title="Belimuno Human Resource Outsourcing Solution"
+                    src="https://maps.google.com/maps?q=Belimuno%20Human%20Resource%20Outsourcing%20Solution%2C%20Djibuti%20St%2C%20Addis%20Ababa&z=16&output=embed"
+                    loading="lazy"
+                    className="h-72 w-full border-0"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                  ></iframe>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       </section>
     </div>

@@ -588,6 +588,7 @@
     },
     "form": {
       "title": "Ergaa Ergaa",
+      "subtitle": "Please share a few details and teamni keenya si quunnama baay'ee salphaatti.",
       "fields": {
         "name": "Maqaa Guutuu",
         "email": "Imeelii",
@@ -602,7 +603,8 @@
       "status": {
         "success": "Ergaa ergame. Galatoomaa!",
         "error": "Ergamuu hin dandeenye. Irra deebi'i."
-      }
+      },
+      "helper": "We typically respond within one business day."
     },
     "office": {
       "title": "Biroo",
@@ -612,6 +614,10 @@
         "phone": "Bilbila",
         "pobox": "P.O.Box",
         "website": "Website"
+      },
+      "map": {
+        "title": "Bakka keenya irratti argadhu",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },
@@ -1331,7 +1337,8 @@
     "subtitle": "Muudamtoota Fuula About irratti mul'atan itti dabali yookaan balleessi.",
     "buttons": {
       "back": "Deebi'i Daashbooraa HR",
-      "addMember": "Hojjetaa Garee Dabaluu"
+      "addMember": "Hojjetaa Garee Dabaluu",
+      "editMember": "Gulaali"
     },
     "list": {
       "title": "Tarree Leenjii fi Aadaa",
@@ -1343,12 +1350,15 @@
     },
     "modal": {
       "title": "Hojjetaa Garee Dabaluu",
+      "editTitle": "Hojjetaa Garee Gulaali",
       "submit": "Hojjetaa Ol kaa'i",
+      "update": "Hojjetaa Fooyyessi",
       "cancel": "Haquu"
     },
     "messages": {
       "loadError": "Hojjettoota garee fe'uu hin dandeenye. Itti yaali booddee.",
       "createSuccess": "{name} gareetti dabalameera.",
+      "updateSuccess": "{name} ni fooyya'e.",
       "deleteSuccess": "{name} gareerraa haqameera.",
       "deleteError": "Hojjetaa kana ammatti balleessuu hin dandeenye.",
       "seedSuccess": "Tarree hoggansaa duraan jiru gara sirnaatti dabalameera.",

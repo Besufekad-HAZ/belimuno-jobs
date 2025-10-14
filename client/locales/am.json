@@ -507,6 +507,7 @@
     },
     "form": {
       "title": "መልእክት ይላኩ",
+      "subtitle": "Please fill out the form and we will reply shortly.",
       "fields": {
         "name": "ሙሉ ስም",
         "email": "ኢሜይል",
@@ -521,7 +522,8 @@
       "status": {
         "success": "መልእክትዎ ተልኳል። አመሰግናለሁ!",
         "error": "ማስተላለፍ አልተቻለም። እባክዎ ደግሞ ይሞክሩ።"
-      }
+      },
+      "helper": "We typically respond within one business day."
     },
     "office": {
       "title": "ቢሮ",
@@ -531,6 +533,10 @@
         "phone": "ስልክ",
         "pobox": "ፖ.ሳ.ቁ",
         "website": "ዌብሳይት"
+      },
+      "map": {
+        "title": "Find us on the map",
+        "subtitle": "Belimuno Human Resource Outsourcing Solution, Djibuti St, Addis Ababa"
       }
     }
   },
@@ -1250,7 +1256,8 @@
     "subtitle": "በአባውት ገፅ ላይ የሚታዩትን መሪዎች ያክሉ ወይም ያስወግዱ።",
     "buttons": {
       "back": "ወደ HR ዳሽቦርድ ተመለስ",
-      "addMember": "አባል ያክሉ"
+      "addMember": "አባል ያክሉ",
+      "editMember": "ያስተካክሉ"
     },
     "list": {
       "title": "የመሪነት እና ባህል አባላት",
@@ -1262,12 +1269,15 @@
     },
     "modal": {
       "title": "አባል ያክሉ",
+      "editTitle": "አባል ያስተካክሉ",
       "submit": "አባልን ያቀርቡ",
+      "update": "አባልን ያድሱ",
       "cancel": "ይቅር"
     },
     "messages": {
       "loadError": "የቡድን አባላትን ማቅረብ አልተቻለም። እባክዎ በኋላ ይሞክሩ።",
       "createSuccess": "{name} ወደ ቡድኑ ተጨምሯል።",
+      "updateSuccess": "{name} ተዘምኗል።",
       "deleteSuccess": "{name} ከቡድኑ ተወግዷል።",
       "deleteError": "ይህን አባል ጊዜው ላይ ማስወገድ አልተቻለም።",
       "seedSuccess": "የተለመዱትን የመሪነት ዝርዝሮች ወደ ዳይሬክቶሪው ጨምረናል።",

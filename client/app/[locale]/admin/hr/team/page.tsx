@@ -9,7 +9,15 @@ import React, {
 } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Users, UserPlus, Trash2, ArrowLeft, UploadCloud } from "lucide-react";
+import {
+  Users,
+  UserPlus,
+  Trash2,
+  ArrowLeft,
+  UploadCloud,
+  Pencil,
+  Save,
+} from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -28,6 +36,7 @@ interface TeamMember {
   department: string;
   photoUrl?: string;
   image?: string;
+  photoKey?: string;
   email?: string;
   phone?: string;
   bio?: string;
@@ -44,6 +53,7 @@ type TeamFormState = {
   email: string;
   phone: string;
   photoUrl: string;
+  photoKey: string;
   bio: string;
   order: string;
 };
@@ -55,6 +65,7 @@ const emptyTeamForm: TeamFormState = {
   email: "",
   phone: "",
   photoUrl: "",
+  photoKey: "",
   bio: "",
   order: "",
 };
@@ -128,6 +139,7 @@ const ManageTeamPage: React.FC = () => {
     message: string;
   } | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [form, setForm] = useState<TeamFormState>(emptyTeamForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formMessage, setFormMessage] = useState<{
@@ -146,6 +158,17 @@ const ManageTeamPage: React.FC = () => {
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const t = useTranslations("HRManageTeam");
+
+  const safeTranslate = useCallback(
+    (key: string, fallback: string) => {
+      const value = t(key);
+      if (!value || value === key || value === `HRManageTeam.${key}`) {
+        return fallback;
+      }
+      return value;
+    },
+    [t],
+  );
 
   const resetPhotoState = useCallback(() => {
     setPhotoPreview((prev) => {
@@ -295,6 +318,7 @@ const ManageTeamPage: React.FC = () => {
     });
     setFormErrors({});
     setFormMessage(null);
+    setEditingMember(null);
     resetPhotoState();
     setShowModal(true);
     // Focus first field after next paint
@@ -306,7 +330,31 @@ const ManageTeamPage: React.FC = () => {
     setForm(emptyTeamForm);
     setFormErrors({});
     setFormMessage(null);
+    setEditingMember(null);
     resetPhotoState();
+  };
+
+  const handleEditMember = (member: TeamMember) => {
+    resetPhotoState();
+    setEditingMember(member);
+    setForm({
+      name: member.name || "",
+      role: member.role || "",
+      department: member.department || "",
+      email: member.email || "",
+      phone: member.phone || "",
+      photoUrl: member.photoUrl || member.image || "",
+      photoKey: member.photoKey || "",
+      bio: member.bio || "",
+      order:
+        typeof member.order === "number" && Number.isFinite(member.order)
+          ? String(member.order)
+          : "",
+    });
+    setFormErrors({});
+    setFormMessage(null);
+    setShowModal(true);
+    setTimeout(() => firstFieldRef.current?.focus(), 0);
   };
 
   const handleInputChange = (field: keyof TeamFormState) => (value: string) => {
@@ -321,9 +369,17 @@ const ManageTeamPage: React.FC = () => {
     });
   };
 
-  const handlePhotoUrlChange = (value: string) => {
+  const handlePhotoUrlChange = (value: string, key?: string | null) => {
     const sanitized = value.trim();
-    setForm((prev) => ({ ...prev, photoUrl: sanitized }));
+    setForm((prev) => {
+      const next = { ...prev, photoUrl: sanitized };
+      if (key !== undefined) {
+        next.photoKey = key ? key : "";
+      } else if (!sanitized) {
+        next.photoKey = "";
+      }
+      return next;
+    });
     setFormErrors((prev) => {
       if (!prev.photoUrl) {
         return prev;
@@ -381,9 +437,12 @@ const ManageTeamPage: React.FC = () => {
       const uploadedUrl =
         (response.data?.data?.url as string | undefined) ??
         (response.data?.url as string | undefined);
+      const uploadedKey =
+        (response.data?.data?.filename as string | undefined) ??
+        (response.data?.filename as string | undefined);
 
       if (uploadedUrl) {
-        handlePhotoUrlChange(uploadedUrl);
+        handlePhotoUrlChange(uploadedUrl, uploadedKey ?? null);
         toast.success("Profile photo uploaded.");
       } else {
         setPhotoUploadError(
@@ -440,11 +499,30 @@ const ManageTeamPage: React.FC = () => {
       return;
     }
 
+    const isEditing = Boolean(editingMember?._id);
+
     try {
       setSubmitting(true);
       setFormMessage(null);
 
-      const payload = {
+      const trimmedPhotoKey = form.photoKey.trim();
+      const photoKeyPayload = trimmedPhotoKey
+        ? trimmedPhotoKey
+        : isEditing && editingMember?.photoKey
+          ? null
+          : undefined;
+
+      const payload: {
+        name: string;
+        role: string;
+        department: string;
+        photoUrl?: string;
+        photoKey?: string | null;
+        email?: string;
+        phone?: string;
+        bio?: string;
+        order?: number;
+      } = {
         name: form.name.trim(),
         role: form.role.trim(),
         department: form.department.trim(),
@@ -455,17 +533,28 @@ const ManageTeamPage: React.FC = () => {
         order: form.order ? Number(form.order) : undefined,
       };
 
-      await adminAPI.createTeamMember(payload);
+      if (photoKeyPayload !== undefined) {
+        payload.photoKey = photoKeyPayload;
+      }
 
-      toast.success(
-        t("messages.createSuccess", { name: payload.name }) ||
-          `${payload.name} has been added to the team.`,
-      );
+      if (isEditing && editingMember?._id) {
+        await adminAPI.updateTeamMember(editingMember._id, payload);
+        toast.success(
+          t("messages.updateSuccess", { name: payload.name }) ||
+            `${payload.name} has been updated.`,
+        );
+      } else {
+        await adminAPI.createTeamMember(payload);
+        toast.success(
+          t("messages.createSuccess", { name: payload.name }) ||
+            `${payload.name} has been added to the team.`,
+        );
+      }
 
       await fetchTeamMembers();
       handleCloseModal();
     } catch (error) {
-      console.error("Failed to create team member:", error);
+      console.error("Failed to save team member:", error);
       const apiMessage = (
         error as { response?: { data?: { message?: string } } }
       )?.response?.data?.message;
@@ -475,7 +564,11 @@ const ManageTeamPage: React.FC = () => {
           apiMessage ||
           "We couldn't save this team member right now. Please retry in a moment.",
       });
-      toast.error("Unable to add team member");
+      toast.error(
+        isEditing
+          ? "Unable to update team member"
+          : "Unable to add team member",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -643,15 +736,26 @@ const ManageTeamPage: React.FC = () => {
                       </div>
                       <div className="flex flex-col gap-2">
                         {member._id && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-500 hover:text-red-600"
-                            onClick={() => requestDelete(member)}
-                            aria-label={`Remove ${member.name}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-cyan-600 hover:text-cyan-700"
+                              onClick={() => handleEditMember(member)}
+                              aria-label={t("buttons.editMember")}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-600"
+                              onClick={() => requestDelete(member)}
+                              aria-label={`Remove ${member.name}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -687,7 +791,11 @@ const ManageTeamPage: React.FC = () => {
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
-        title={t("modal.title")}
+        title={
+          editingMember
+            ? safeTranslate("modal.editTitle", "Edit team member")
+            : safeTranslate("modal.title", "Add a team member")
+        }
         size="lg"
       >
         {formMessage && (
@@ -858,15 +966,28 @@ const ManageTeamPage: React.FC = () => {
               onClick={handleCloseModal}
               className="min-w-[110px]"
             >
-              {t("modal.cancel")}
+              {safeTranslate("modal.cancel", "Cancel")}
             </Button>
             <Button
               type="submit"
               loading={submitting}
-              className="min-w-[150px]"
+              className="min-w-[150px] inline-flex items-center gap-2"
             >
-              <UserPlus className="h-4 w-4" />
-              {t("modal.submit")}
+              {editingMember ? (
+                <>
+                  <Save className="h-4 w-4" />
+                  <span>
+                    {safeTranslate("modal.update", "Update team member")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4" />
+                  <span>
+                    {safeTranslate("modal.submit", "Save team member")}
+                  </span>
+                </>
+              )}
             </Button>
           </div>
         </form>
