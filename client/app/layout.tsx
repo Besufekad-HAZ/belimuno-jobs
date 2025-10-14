@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Manrope, Noto_Sans_Ethiopic } from "next/font/google";
-// @ts-expect-error: side-effect CSS import from dynamic route folder ([locale])
 import "./[locale]/globals.css";
-// @ts-expect-error: side-effect CSS import from dynamic route folder ([locale])
 import "./[locale]/fonts.css";
-// @ts-expect-error: third-party package CSS without declarations
 import "react-chatbot-kit/build/main.css";
 import { resolveAssetUrl } from "@/lib/assets";
 
