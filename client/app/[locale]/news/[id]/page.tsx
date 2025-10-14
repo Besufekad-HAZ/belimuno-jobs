@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,7 +9,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
-import { newsData } from "@/data/news";
+import { publicAPI } from "@/lib/api";
 
 interface NewsDetailPageProps {
   params: Promise<{
@@ -18,17 +18,89 @@ interface NewsDetailPageProps {
   }>;
 }
 
+type NewsArticle = {
+  _id: string;
+  id?: string;
+  title: string;
+  excerpt: string;
+  content?: string;
+  date: string;
+  category: string;
+  image?: string;
+  imageUrl?: string;
+  readTime?: string;
+  author?: string;
+  status?: string;
+};
+
 export default function NewsDetailPage({ params }: NewsDetailPageProps) {
   const router = useRouter();
   const t = useTranslations("Home");
 
   const unwrappedParams = React.use(params);
-  const news = newsData.find((item) => item.id === unwrappedParams.id);
+  const [news, setNews] = useState<NewsArticle | null>(null);
+  const [relatedNews, setRelatedNews] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (unwrappedParams.id) {
+      fetchNewsArticle(unwrappedParams.id);
+      fetchRelatedNews();
+    }
+  }, [unwrappedParams.id]);
+
+  const fetchNewsArticle = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await publicAPI.getNewsArticle(id);
+      const article = response.data.data || response.data;
+      setNews({
+        ...article,
+        id: article._id,
+        imageUrl: article.image || article.imageUrl,
+      });
+    } catch (error) {
+      console.error("Failed to fetch news article:", error);
+      setNews(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRelatedNews = async () => {
+    try {
+      const response = await publicAPI.getNews({
+        status: "published",
+        limit: 3,
+        sort: "-date",
+      });
+      const articles = response.data.data || [];
+      setRelatedNews(
+        articles.map((article: NewsArticle) => ({
+          ...article,
+          id: article._id,
+          imageUrl: article.image || article.imageUrl,
+        })),
+      );
+    } catch (error) {
+      console.error("Failed to fetch related news:", error);
+      setRelatedNews([]);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   if (!news) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
+          <Newspaper className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             News Not Found
           </h1>
@@ -190,70 +262,69 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
         </article>
 
         {/* Related News */}
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {t("NewsDetail.relatedNews")}
-          </h2>
+        {relatedNews.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              {t("NewsDetail.relatedNews")}
+            </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {newsData
-              .filter((item) => item.id !== news.id)
-              .slice(0, 2)
-              .map((relatedNews) => (
-                <div
-                  key={relatedNews.id}
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => router.push(`/news/${relatedNews.id}`)}
-                >
-                  <Card className="h-full">
-                    <div className="h-48 relative overflow-hidden">
-                      {relatedNews.imageUrl ? (
-                        <Image
-                          src={relatedNews.imageUrl}
-                          alt={relatedNews.title}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-cyan-100">
-                          <Newspaper className="h-12 w-12 text-blue-400/60" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {relatedNews
+                .filter((item) => item.id !== news.id)
+                .slice(0, 2)
+                .map((article) => (
+                  <div
+                    key={article.id}
+                    className="hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => router.push(`/news/${article.id}`)}
+                  >
+                    <Card className="h-full">
+                      <div className="h-48 relative overflow-hidden">
+                        {article.imageUrl ? (
+                          <Image
+                            src={article.imageUrl}
+                            alt={article.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-cyan-100">
+                            <Newspaper className="h-12 w-12 text-blue-400/60" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
+                        <div className="absolute top-4 right-4">
+                          <Badge variant="secondary" size="sm">
+                            {article.category}
+                          </Badge>
                         </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
-                      <div className="absolute top-4 right-4">
-                        <Badge variant="secondary" size="sm">
-                          {relatedNews.category}
-                        </Badge>
                       </div>
-                    </div>
 
-                    <div className="p-6">
-                      <div className="flex items-center text-sm text-gray-500 mb-3">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        {new Date(relatedNews.date).toLocaleDateString(
-                          "en-US",
-                          {
+                      <div className="p-6">
+                        <div className="flex items-center text-sm text-gray-500 mb-3">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {new Date(article.date).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
-                          },
-                        )}
+                          })}
+                        </div>
+
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          {article.title}
+                        </h3>
+
+                        <p className="text-gray-600 text-sm line-clamp-3">
+                          {article.excerpt}
+                        </p>
                       </div>
-
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        {relatedNews.title}
-                      </h3>
-
-                      <p className="text-gray-600 text-sm line-clamp-3">
-                        {relatedNews.excerpt}
-                      </p>
-                    </div>
-                  </Card>
-                </div>
-              ))}
+                    </Card>
+                  </div>
+                ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

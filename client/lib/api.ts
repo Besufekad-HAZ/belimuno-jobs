@@ -765,4 +765,17 @@ export const contactAPI = {
   }) => api.post("/contact", messageData),
 };
 
+// Public API
+export const publicAPI = {
+  getNews: (params?: {
+    status?: "draft" | "published" | "archived";
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/news", { params }),
+  getNewsArticle: (id: string) => api.get(`/news/${id}`),
+};
+
 export default api;
