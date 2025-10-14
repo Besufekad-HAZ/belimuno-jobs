@@ -511,6 +511,14 @@ const HRAdminDashboard: React.FC = () => {
                 {t("actions.buttons.manageTeam")}
               </Button>
               <Button
+                onClick={() => router.push("/admin/hr/news")}
+                variant="primary"
+                className="w-full justify-start"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                {t("actions.buttons.manageNews")}
+              </Button>
+              <Button
                 onClick={() => router.push("/admin/hr/workers")}
                 variant="outline"
                 className="w-full justify-start"

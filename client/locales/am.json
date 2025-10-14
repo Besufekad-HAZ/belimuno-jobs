@@ -1054,6 +1054,7 @@
       "title": "የሰው ሃብት እርምጃዎች",
       "buttons": {
         "manageTeam": "የቡድን አስተዳደር",
+        "manageNews": "የዜና አስተዳደር",
         "workerManagement": "የሰራተኞች አስተዳደር",
         "disputeResolution": "የግጭት መፍትሄ",
         "performanceReviews": "የአፈጻጸም ግምገማዎች"

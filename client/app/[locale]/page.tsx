@@ -16,16 +16,14 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { getStoredUser } from "@/lib/auth";
-import { jobsAPI, workerAPI } from "@/lib/api";
+import { jobsAPI, workerAPI, publicAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Hero from "@/components/sections/Hero";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
-import { newsData } from "@/data/news";
 import TrustedBySection from "@/components/sections/TrustedBySection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
-import { resolveAssetUrl } from "@/lib/assets";
 
 type StoredUser = { role: string } | null;
 
@@ -64,6 +62,21 @@ type Category = {
   count: number;
 };
 
+type NewsArticle = {
+  _id: string;
+  id?: string;
+  title: string;
+  excerpt: string;
+  content?: string;
+  date: string;
+  category: string;
+  image?: string;
+  imageUrl?: string;
+  readTime?: string;
+  author?: string;
+  status?: string;
+};
+
 export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
   const [stats, setStats] = useState<Stats>(null);
@@ -71,6 +84,8 @@ export default function Home() {
   const [jobsForYou, setJobsForYou] = useState<JobsForYouJob[]>([]);
   const [jobsForYouLoading, setJobsForYouLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+  const [newsLoading, setNewsLoading] = useState(false);
 
   const router = useRouter();
   const t = useTranslations("Home");
@@ -81,6 +96,7 @@ export default function Home() {
     setUser(currentUser);
 
     fetchPublicData();
+    fetchNews();
 
     // Fetch jobs for you if user is a worker
     if (currentUser?.role === "worker") {
@@ -100,6 +116,31 @@ export default function Home() {
       setCategories(statsResponse.data.data?.jobsByCategory || []);
     } catch (error) {
       console.error("Failed to fetch public data:", error);
+    }
+  };
+
+  const fetchNews = async () => {
+    try {
+      setNewsLoading(true);
+      const response = await publicAPI.getNews({
+        status: "published",
+        limit: 3,
+        sort: "-date",
+      });
+      const articles = response.data.data || [];
+      console.log("articles", articles);
+      setNewsArticles(
+        articles.map((article: NewsArticle) => ({
+          ...article,
+          id: article._id,
+          imageUrl: article.image || article.imageUrl,
+        })),
+      );
+    } catch (error) {
+      console.error("Failed to fetch news:", error);
+      setNewsArticles([]);
+    } finally {
+      setNewsLoading(false);
     }
   };
 
@@ -837,21 +878,17 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {newsData.slice(0, 3).map((news) => {
-              const imageSrc = news.imageUrl
-                ? (resolveAssetUrl(news.imageUrl) ?? news.imageUrl)
-                : undefined;
-
+            {newsArticles.slice(0, 3).map((news) => {
               return (
                 <Card
                   key={news.id}
                   className="hover:shadow-lg transition-all duration-300 group overflow-hidden"
                 >
-                  {imageSrc ? (
+                  {news.imageUrl ? (
                     // news image
                     <div className="h-48 relative overflow-hidden flex items-center justify-center bg-gray-100">
                       <Image
-                        src={imageSrc}
+                        src={news.imageUrl ?? ""}
                         alt={news.title}
                         fill
                         className="object-cover"

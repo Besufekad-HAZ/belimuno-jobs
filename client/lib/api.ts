@@ -630,6 +630,43 @@ export const adminAPI = {
     });
   },
 
+  // News management
+  getNews: (params?: {
+    status?: "draft" | "published" | "archived";
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/admin/news", { params }),
+  getNewsArticle: (id: string) => api.get(`/admin/news/${id}`),
+  createNews: (payload: {
+    title: string;
+    excerpt: string;
+    content?: string;
+    date?: string;
+    category: string;
+    image?: string;
+    readTime?: string;
+    author?: string;
+    status?: "draft" | "published" | "archived";
+  }) => api.post("/admin/news", payload),
+  updateNews: (
+    id: string,
+    payload: {
+      title?: string;
+      excerpt?: string;
+      content?: string;
+      date?: string;
+      category?: string;
+      image?: string;
+      readTime?: string;
+      author?: string;
+      status?: "draft" | "published" | "archived";
+    },
+  ) => api.put(`/admin/news/${id}`, payload),
+  deleteNews: (id: string) => api.delete(`/admin/news/${id}`),
+
   // Additional endpoints from second adminAPI
   getStats: () => api.get("/admin/stats"),
   getAnalytics: (params?: {
@@ -728,6 +765,19 @@ export const contactAPI = {
     subject: string;
     message: string;
   }) => api.post("/contact", messageData),
+};
+
+// Public API
+export const publicAPI = {
+  getNews: (params?: {
+    status?: "draft" | "published" | "archived";
+    category?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/news", { params }),
+  getNewsArticle: (id: string) => api.get(`/news/${id}`),
 };
 
 export default api;
