@@ -15,7 +15,7 @@ import {
   Calendar,
   ExternalLink,
 } from "lucide-react";
-import { getStoredUser, getRoleDashboardPath } from "@/lib/auth";
+import { getStoredUser } from "@/lib/auth";
 import { jobsAPI, workerAPI, publicAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Hero from "@/components/sections/Hero";
@@ -24,7 +24,6 @@ import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import TrustedBySection from "@/components/sections/TrustedBySection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
-import { resolveAssetUrl } from "@/lib/assets";
 
 type StoredUser = { role: string } | null;
 
@@ -880,20 +879,16 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {newsArticles.slice(0, 3).map((news) => {
-              const imageSrc = news.imageUrl
-                ? (resolveAssetUrl(news.imageUrl) ?? news.imageUrl)
-                : undefined;
-
               return (
                 <Card
                   key={news.id}
                   className="hover:shadow-lg transition-all duration-300 group overflow-hidden"
                 >
-                  {imageSrc ? (
+                  {news.imageUrl ? (
                     // news image
                     <div className="h-48 relative overflow-hidden flex items-center justify-center bg-gray-100">
                       <Image
-                        src={imageSrc}
+                        src={news.imageUrl ?? ""}
                         alt={news.title}
                         fill
                         className="object-cover"

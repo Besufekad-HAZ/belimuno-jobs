@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Manrope, Noto_Sans_Ethiopic } from "next/font/google";
-// @ts-expect-error: Allow side-effect CSS imports without type declarations
 import "./globals.css";
-// @ts-expect-error: Allow side-effect CSS imports without type declarations
 import "./fonts.css";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
@@ -12,7 +10,6 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import ChatbotComponent from "@/chatbot/ChatbotComponent";
 import { Toaster } from "@/components/ui/sonner";
-// @ts-expect-error: Allow side-effect CSS imports without type declarations
 import "react-chatbot-kit/build/main.css";
 import { resolveAssetUrl } from "@/lib/assets";
 
