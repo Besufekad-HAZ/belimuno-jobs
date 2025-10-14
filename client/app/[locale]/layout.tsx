@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Manrope, Noto_Sans_Ethiopic } from "next/font/google";
+// @ts-expect-error: Allow side-effect CSS imports without type declarations
 import "./globals.css";
+// @ts-expect-error: Allow side-effect CSS imports without type declarations
 import "./fonts.css";
 import Navbar from "@/components/Layout/Navbar";
 import Footer from "@/components/Layout/Footer";
@@ -10,7 +12,9 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import ChatbotComponent from "@/chatbot/ChatbotComponent";
 import { Toaster } from "@/components/ui/sonner";
+// @ts-expect-error: Allow side-effect CSS imports without type declarations
 import "react-chatbot-kit/build/main.css";
+import { resolveAssetUrl } from "@/lib/assets";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -28,13 +32,15 @@ const notoEthiopic = Noto_Sans_Ethiopic({
   subsets: ["ethiopic"],
 });
 
+const brandIcon = resolveAssetUrl("/belimuno-logo.png") ?? "/belimuno-logo.png";
+
 export const metadata: Metadata = {
   title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
   icons: {
-    icon: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
-    shortcut: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
-    apple: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
+    icon: [{ url: brandIcon, type: "image/svg+xml" }],
+    shortcut: [{ url: brandIcon, type: "image/svg+xml" }],
+    apple: [{ url: brandIcon, type: "image/svg+xml" }],
   },
 };
 
@@ -55,7 +61,9 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <div className={`${manrope.variable} ${notoEthiopic.variable} ${geistMono.variable} antialiased`}>
+    <div
+      className={`${manrope.variable} ${notoEthiopic.variable} ${geistMono.variable} antialiased`}
+    >
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>

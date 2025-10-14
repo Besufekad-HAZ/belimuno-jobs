@@ -3,6 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import { Minimize2, X } from "lucide-react";
+import { resolveAssetUrl } from "@/lib/assets";
+
+const HEADER_LOGO_SRC =
+  resolveAssetUrl("/belimuno-logo.png") ?? "/belimuno-logo.png";
 
 interface ModernChatbotHeaderProps {
   title?: string;
@@ -22,7 +26,7 @@ const ModernChatbotHeader: React.FC<ModernChatbotHeaderProps> = ({
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center overflow-hidden">
           <Image
-            src="/belimuno-logo.png"
+            src={HEADER_LOGO_SRC}
             alt="Belimuno"
             width={32}
             height={32}

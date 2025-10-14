@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Manrope, Noto_Sans_Ethiopic } from "next/font/google";
+// @ts-expect-error: side-effect CSS import from dynamic route folder ([locale])
 import "./[locale]/globals.css";
+// @ts-expect-error: side-effect CSS import from dynamic route folder ([locale])
 import "./[locale]/fonts.css";
+// @ts-expect-error: third-party package CSS without declarations
 import "react-chatbot-kit/build/main.css";
+import { resolveAssetUrl } from "@/lib/assets";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -20,13 +24,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const brandIcon = resolveAssetUrl("/belimuno-logo.png") ?? "/belimuno-logo.png";
+
 export const metadata: Metadata = {
   title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
   icons: {
-    icon: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
-    shortcut: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
-    apple: [{ url: "/belimuno-logo.png", type: "image/svg+xml" }],
+    icon: [{ url: brandIcon, type: "image/svg+xml" }],
+    shortcut: [{ url: brandIcon, type: "image/svg+xml" }],
+    apple: [{ url: brandIcon, type: "image/svg+xml" }],
   },
 };
 

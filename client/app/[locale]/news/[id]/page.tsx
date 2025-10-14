@@ -10,6 +10,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import { newsData } from "@/data/news";
+import { resolveAssetUrl } from "@/lib/assets";
 
 interface NewsDetailPageProps {
   params: Promise<{
@@ -24,6 +25,9 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
 
   const unwrappedParams = React.use(params);
   const news = newsData.find((item) => item.id === unwrappedParams.id);
+  const heroImageSrc = news?.imageUrl
+    ? (resolveAssetUrl(news.imageUrl) ?? news.imageUrl)
+    : undefined;
 
   if (!news) {
     return (
@@ -90,9 +94,9 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
         <article className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Hero Image */}
           <div className="relative h-64 md:h-80 bg-gradient-to-br from-blue-100 to-cyan-100">
-            {news.imageUrl ? (
+            {heroImageSrc ? (
               <Image
-                src={news.imageUrl}
+                src={heroImageSrc}
                 alt={news.title}
                 fill
                 className="object-cover"
@@ -199,59 +203,66 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
             {newsData
               .filter((item) => item.id !== news.id)
               .slice(0, 2)
-              .map((relatedNews) => (
-                <div
-                  key={relatedNews.id}
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => router.push(`/news/${relatedNews.id}`)}
-                >
-                  <Card className="h-full">
-                    <div className="h-48 relative overflow-hidden">
-                      {relatedNews.imageUrl ? (
-                        <Image
-                          src={relatedNews.imageUrl}
-                          alt={relatedNews.title}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-cyan-100">
-                          <Newspaper className="h-12 w-12 text-blue-400/60" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
-                      <div className="absolute top-4 right-4">
-                        <Badge variant="secondary" size="sm">
-                          {relatedNews.category}
-                        </Badge>
-                      </div>
-                    </div>
+              .map((relatedNews) => {
+                const relatedImageSrc = relatedNews.imageUrl
+                  ? (resolveAssetUrl(relatedNews.imageUrl) ??
+                    relatedNews.imageUrl)
+                  : undefined;
 
-                    <div className="p-6">
-                      <div className="flex items-center text-sm text-gray-500 mb-3">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        {new Date(relatedNews.date).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          },
+                return (
+                  <div
+                    key={relatedNews.id}
+                    className="hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => router.push(`/news/${relatedNews.id}`)}
+                  >
+                    <Card className="h-full">
+                      <div className="h-48 relative overflow-hidden">
+                        {relatedImageSrc ? (
+                          <Image
+                            src={relatedImageSrc}
+                            alt={relatedNews.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-cyan-100">
+                            <Newspaper className="h-12 w-12 text-blue-400/60" />
+                          </div>
                         )}
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
+                        <div className="absolute top-4 right-4">
+                          <Badge variant="secondary" size="sm">
+                            {relatedNews.category}
+                          </Badge>
+                        </div>
                       </div>
 
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        {relatedNews.title}
-                      </h3>
+                      <div className="p-6">
+                        <div className="flex items-center text-sm text-gray-500 mb-3">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          {new Date(relatedNews.date).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            },
+                          )}
+                        </div>
 
-                      <p className="text-gray-600 text-sm line-clamp-3">
-                        {relatedNews.excerpt}
-                      </p>
-                    </div>
-                  </Card>
-                </div>
-              ))}
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          {relatedNews.title}
+                        </h3>
+
+                        <p className="text-gray-600 text-sm line-clamp-3">
+                          {relatedNews.excerpt}
+                        </p>
+                      </div>
+                    </Card>
+                  </div>
+                );
+              })}
           </div>
         </div>
       </div>

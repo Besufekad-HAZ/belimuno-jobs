@@ -22,6 +22,7 @@ import { DEFAULT_TEAM_MEMBERS } from "@/data/defaultTeamMembers";
 import type { DefaultTeamMember } from "@/data/defaultTeamMembers";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
+import { DEFAULT_UPLOADS_BASE, resolveAssetUrl } from "@/lib/assets";
 
 type TeamMember = {
   _id?: string;
@@ -45,8 +46,11 @@ const getInitials = (name: string) => {
   );
 };
 
-const mapDefaultMember = (member: DefaultTeamMember): TeamMember => {
-  const photo = member.image?.trim();
+const mapDefaultMember = (
+  member: DefaultTeamMember,
+  uploadsBase?: string,
+): TeamMember => {
+  const photo = resolveAssetUrl(member.image, uploadsBase);
   return {
     ...member,
     photoUrl: photo,
@@ -54,8 +58,48 @@ const mapDefaultMember = (member: DefaultTeamMember): TeamMember => {
   };
 };
 
-const DEFAULT_TEAM_FALLBACK: TeamMember[] =
-  DEFAULT_TEAM_MEMBERS.map(mapDefaultMember);
+const DEFAULT_TEAM_FALLBACK: TeamMember[] = DEFAULT_TEAM_MEMBERS.map((member) =>
+  mapDefaultMember(member, DEFAULT_UPLOADS_BASE),
+);
+
+type ResolvedTeamImageProps = {
+  member: TeamMember;
+  className?: string;
+  sizes?: string;
+  fallback: React.ReactNode;
+};
+
+const ResolvedTeamImage: React.FC<ResolvedTeamImageProps> = ({
+  member,
+  className,
+  sizes = "128px",
+  fallback,
+}) => {
+  const [src, setSrc] = useState<string | undefined>(() =>
+    resolveAssetUrl(member.photoUrl || member.image, DEFAULT_UPLOADS_BASE),
+  );
+
+  useEffect(() => {
+    setSrc(
+      resolveAssetUrl(member.photoUrl || member.image, DEFAULT_UPLOADS_BASE),
+    );
+  }, [member.photoUrl, member.image]);
+
+  if (!src) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={member.name}
+      fill
+      sizes={sizes}
+      className={className}
+      onError={() => setSrc(undefined)}
+    />
+  );
+};
 
 const AboutPage: React.FC = () => {
   const t = useTranslations("AboutPage");
@@ -74,11 +118,17 @@ const AboutPage: React.FC = () => {
     };
 
     const hydrateMember = (member: TeamMember): TeamMember => {
-      const fallbackImage = member.photoUrl?.trim() || member.image?.trim();
+      const fallbackImage =
+        resolveAssetUrl(
+          member.photoUrl?.trim() || member.image?.trim(),
+          DEFAULT_UPLOADS_BASE,
+        ) ||
+        member.photoUrl ||
+        member.image;
       return {
         ...member,
-        photoUrl: fallbackImage,
-        image: fallbackImage,
+        photoUrl: fallbackImage || undefined,
+        image: fallbackImage || undefined,
       };
     };
 
@@ -110,10 +160,14 @@ const AboutPage: React.FC = () => {
           }
 
           if ((!existing.image || !existing.image.trim()) && m.image) {
+            const resolvedImage = resolveAssetUrl(
+              m.image,
+              DEFAULT_UPLOADS_BASE,
+            );
             map.set(key, {
               ...existing,
-              image: m.image,
-              photoUrl: existing.photoUrl || m.image,
+              image: resolvedImage || m.image,
+              photoUrl: existing.photoUrl || resolvedImage || m.image,
             });
           }
         });
@@ -188,7 +242,6 @@ const AboutPage: React.FC = () => {
   ];
 
   const [executiveLead, ...coreTeam] = teamMembers;
-  const executiveLeadPhoto = executiveLead?.photoUrl || executiveLead?.image;
 
   return (
     <div className="min-h-screen bg-gradient-background">
@@ -378,23 +431,20 @@ const AboutPage: React.FC = () => {
               <div className="relative flex flex-col gap-8 md:flex-row md:items-center">
                 <div className="relative mx-auto mt-4 md:mt-0 md:mx-0">
                   <div className="absolute inset-0 h-40 w-40 rounded-full bg-cyan-300/40 blur-2xl" />
-                  {executiveLeadPhoto ? (
-                    <div className="relative h-36 w-36 overflow-hidden rounded-full ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
-                      <Image
-                        src={executiveLeadPhoto}
-                        alt={executiveLead.name}
-                        fill
-                        sizes="128px"
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="relative h-36 w-36 rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
-                      <span className="absolute inset-0 flex items-center justify-center text-4xl font-semibold tracking-wide text-slate-800">
-                        {getInitials(executiveLead.name)}
-                      </span>
-                    </div>
-                  )}
+                  <div className="relative h-36 w-36 overflow-hidden rounded-full ring-2 ring-cyan-200/70 ring-offset-4 ring-offset-white shadow-xl">
+                    <ResolvedTeamImage
+                      member={executiveLead}
+                      sizes="144px"
+                      className="object-cover"
+                      fallback={
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200">
+                          <span className="text-4xl font-semibold tracking-wide text-slate-800">
+                            {getInitials(executiveLead.name)}
+                          </span>
+                        </div>
+                      }
+                    />
+                  </div>
                 </div>
                 <div className="text-center md:text-left">
                   <Badge className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-800">
@@ -426,53 +476,46 @@ const AboutPage: React.FC = () => {
           )}
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {coreTeam.map((member, index) => {
-              const photo = member.photoUrl || member.image;
-              return (
-                <div
-                  key={`${member.role}-${index}`}
-                  className="group relative overflow-hidden rounded-3xl border border-cyan-100 bg-white/80 p-6 backdrop-blur transition-all duration-500 hover:-translate-y-2 hover:border-cyan-300 hover:bg-white shadow-[0_20px_60px_rgba(15,98,254,0.12)]"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                  <div className="relative flex flex-col items-center text-center">
-                    <div className="relative mb-6 mt-4">
-                      <div className="absolute -inset-3 rounded-full bg-cyan-200/40 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
-                      {photo ? (
-                        <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-cyan-200/70">
-                          <Image
-                            src={photo}
-                            alt={member.name}
-                            fill
-                            sizes="128px"
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200 ring-2 ring-cyan-200/70">
-                          <span className="text-3xl font-semibold tracking-normal text-slate-800">
-                            {getInitials(member.name)}
-                          </span>
-                        </div>
-                      )}
+            {coreTeam.map((member, index) => (
+              <div
+                key={`${member.role}-${index}`}
+                className="group relative overflow-hidden rounded-3xl border border-cyan-100 bg-white/80 p-6 backdrop-blur transition-all duration-500 hover:-translate-y-2 hover:border-cyan-300 hover:bg-white shadow-[0_20px_60px_rgba(15,98,254,0.12)]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-50 via-transparent to-blue-100 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="relative flex flex-col items-center text-center">
+                  <div className="relative mb-6 mt-4">
+                    <div className="absolute -inset-3 rounded-full bg-cyan-200/40 blur-lg opacity-0 transition-opacity duration-500 group-hover:opacity-70" />
+                    <div className="relative h-32 w-32 overflow-hidden rounded-full ring-2 ring-cyan-200/70">
+                      <ResolvedTeamImage
+                        member={member}
+                        className="object-cover"
+                        fallback={
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-cyan-100 via-blue-100 to-indigo-200">
+                            <span className="text-3xl font-semibold tracking-normal text-slate-800">
+                              {getInitials(member.name)}
+                            </span>
+                          </div>
+                        }
+                      />
                     </div>
-                    <Badge className="mt-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-cyan-700">
-                      {member.department}
-                    </Badge>
-                    <h4 className="mt-4 text-xl font-semibold text-slate-900">
-                      {member.name}
-                    </h4>
-                    <p className="mt-1 text-sm font-medium uppercase tracking-[0.15em] text-slate-500">
-                      {member.role}
-                    </p>
-                    <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
-                    <p className="mt-4 text-sm text-slate-600">
-                      Building resilient teams and unforgettable client
-                      experiences.
-                    </p>
                   </div>
+                  <Badge className="mt-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-cyan-700">
+                    {member.department}
+                  </Badge>
+                  <h4 className="mt-4 text-xl font-semibold text-slate-900">
+                    {member.name}
+                  </h4>
+                  <p className="mt-1 text-sm font-medium uppercase tracking-[0.15em] text-slate-500">
+                    {member.role}
+                  </p>
+                  <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
+                  <p className="mt-4 text-sm text-slate-600">
+                    Building resilient teams and unforgettable client
+                    experiences.
+                  </p>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>

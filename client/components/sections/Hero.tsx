@@ -6,9 +6,12 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
 import { getStoredUser, getRoleDashboardPath } from "@/lib/auth";
+import { resolveAssetUrl } from "@/lib/assets";
 import { ArrowRight, Briefcase } from "lucide-react";
 
 type StoredUser = { role: string } | null;
+
+const HERO_IMAGE_SRC = resolveAssetUrl("/hero.jpg") ?? "/hero.jpg";
 
 export default function Hero() {
   const [user, setUser] = useState<StoredUser>(null);
@@ -32,7 +35,7 @@ export default function Hero() {
       {/* Full-width background image - hidden on mobile */}
       <div className="absolute inset-0 hidden lg:block">
         <Image
-          src="/hero.jpg"
+          src={HERO_IMAGE_SRC}
           alt="African professionals working together in a modern office"
           fill
           priority
@@ -99,5 +102,3 @@ export default function Hero() {
     </section>
   );
 }
-
-

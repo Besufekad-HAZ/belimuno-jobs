@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { User as UserIcon, LogOut, Menu, X } from "lucide-react";
 import { getStoredUser, clearAuth, getRoleDashboardPath } from "@/lib/auth";
 import { notificationsAPI } from "@/lib/api";
+import { resolveAssetUrl } from "@/lib/assets";
 import NotificationDropdown from "@/components/ui/NotificationDropdown";
 import type { User } from "@/lib/auth";
 import LanguageSelector from "../clients/LanguageSelector";
@@ -127,6 +128,9 @@ const Navbar: React.FC = () => {
   const isAdminUser =
     user && ["super_admin", "admin_hr", "admin_outsource"].includes(user.role);
 
+  const brandLogoSrc =
+    resolveAssetUrl("/belimuno-logo.png") ?? "/belimuno-logo.png";
+
   return (
     <nav className="sticky top-0 z-50 bg-gradient-primary shadow-md border-b border-blue-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -135,7 +139,7 @@ const Navbar: React.FC = () => {
             <Link href="/" className="flex-shrink-0 flex items-center gap-2">
               <div className="relative h-10 w-10 sm:h-12 sm:w-12 mix-blend-luminosity border border-cyan-200 rounded-full bg-amber-50">
                 <Image
-                  src="/belimuno-logo.png"
+                  src={brandLogoSrc}
                   alt="Belimuno Logo"
                   fill
                   sizes="48px"
