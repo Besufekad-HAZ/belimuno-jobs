@@ -200,10 +200,10 @@ const ContactPage: React.FC = () => {
                       </p>
                       <div className="mt-2 grid grid-cols-1 gap-2 text-base font-medium text-white/90">
                         {[
-                          "+251 930 014 332",
-                          "+251 978 009 084",
-                          "+251 935 402 673",
-                          "+251 913 064 948",
+                          "+251-930-014332",
+                          "+251-935-402674",
+                          "+251-935-402673",
+                          "+251-978-009084",
                         ].map((phoneNumber) => (
                           <a
                             key={phoneNumber}
