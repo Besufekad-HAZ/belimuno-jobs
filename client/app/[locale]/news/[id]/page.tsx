@@ -10,6 +10,7 @@ import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import { publicAPI } from "@/lib/api";
+import { DEFAULT_UPLOADS_BASE, resolveAssetUrl } from "@/lib/assets";
 
 interface NewsDetailPageProps {
   params: Promise<{
@@ -31,6 +32,43 @@ type NewsArticle = {
   readTime?: string;
   author?: string;
   status?: string;
+};
+
+type ResolvedNewsImageProps = {
+  news: NewsArticle;
+  className?: string;
+  sizes?: string;
+  fallback: React.ReactNode;
+};
+
+const ResolvedNewsImage: React.FC<ResolvedNewsImageProps> = ({
+  news,
+  className,
+  sizes = "80vw",
+  fallback,
+}) => {
+  const [src, setSrc] = useState<string | undefined>(() =>
+    resolveAssetUrl(news.imageUrl || news.image, DEFAULT_UPLOADS_BASE),
+  );
+
+  useEffect(() => {
+    setSrc(resolveAssetUrl(news.imageUrl || news.image, DEFAULT_UPLOADS_BASE));
+  }, [news.imageUrl, news.image]);
+
+  if (!src) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={news.title}
+      fill
+      sizes={sizes}
+      className={className}
+      onError={() => setSrc(undefined)}
+    />
+  );
 };
 
 export default function NewsDetailPage({ params }: NewsDetailPageProps) {
@@ -162,20 +200,16 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
         <article className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Hero Image */}
           <div className="relative h-64 md:h-80 bg-gradient-to-br from-blue-100 to-cyan-100">
-            {news.imageUrl ? (
-              <Image
-                src={news.imageUrl}
-                alt={news.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 80vw"
-                priority
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <Newspaper className="h-24 w-24 text-blue-400/60" />
-              </div>
-            )}
+            <ResolvedNewsImage
+              news={news}
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 80vw"
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <Newspaper className="h-24 w-24 text-blue-400/60" />
+                </div>
+              }
+            />
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20" />
 
             {/* Category Badge */}
@@ -280,19 +314,16 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
                   >
                     <Card className="h-full">
                       <div className="h-48 relative overflow-hidden">
-                        {article.imageUrl ? (
-                          <Image
-                            src={article.imageUrl}
-                            alt={article.title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-cyan-100">
-                            <Newspaper className="h-12 w-12 text-blue-400/60" />
-                          </div>
-                        )}
+                        <ResolvedNewsImage
+                          news={article}
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          fallback={
+                            <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-cyan-100">
+                              <Newspaper className="h-12 w-12 text-blue-400/60" />
+                            </div>
+                          }
+                        />
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
                         <div className="absolute top-4 right-4">
                           <Badge variant="secondary" size="sm">

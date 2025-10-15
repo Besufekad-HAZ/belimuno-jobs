@@ -36,6 +36,7 @@ interface NewsArticle {
   content?: string;
   date: string;
   category: string;
+  imageUrl?: string;
   image?: string;
   readTime?: string;
   author?: string;
@@ -186,7 +187,7 @@ const ManageNewsPage: React.FC = () => {
         content: article.content || "",
         category: article.category,
         author: article.author || "",
-        image: article.image || "",
+        image: article.imageUrl || article.image || "",
       });
     } else {
       setEditingArticle(null);
@@ -457,80 +458,83 @@ const ManageNewsPage: React.FC = () => {
               </div>
             ) : sortedNews.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {sortedNews.map((article) => (
-                  <div
-                    key={article._id || `${article.title}-${article.date}`}
-                    className="group relative flex flex-col rounded-2xl border border-blue-100 bg-white/95 p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    {article.image && (
-                      <div className="relative h-32 w-full overflow-hidden rounded-lg mb-3">
-                        <Image
-                          src={article.image}
-                          alt={article.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <Badge
-                          variant={getStatusColor(article.status || "draft")}
-                          size="sm"
-                        >
-                          {article.status || "draft"}
-                        </Badge>
-                        <Badge variant="blue" size="sm">
-                          {article.category}
-                        </Badge>
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 line-clamp-3 mb-3">
-                        {article.excerpt}
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(article.date)}
+                {sortedNews.map((article) => {
+                  const image = article.imageUrl || article.image;
+                  return (
+                    <div
+                      key={article._id || `${article.title}-${article.date}`}
+                      className="group relative flex flex-col rounded-2xl border border-blue-100 bg-white/95 p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                    >
+                      {image && (
+                        <div className="relative h-32 w-full overflow-hidden rounded-lg mb-3">
+                          <Image
+                            src={image}
+                            alt={article.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="object-cover"
+                          />
                         </div>
-                        {article.readTime && (
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <Badge
+                            variant={getStatusColor(article.status || "draft")}
+                            size="sm"
+                          >
+                            {article.status || "draft"}
+                          </Badge>
+                          <Badge variant="blue" size="sm">
+                            {article.category}
+                          </Badge>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
+                          {article.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+                          {article.excerpt}
+                        </p>
+                        <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
                           <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {article.readTime}
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(article.date)}
                           </div>
-                        )}
-                        {article.author && (
-                          <div className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
-                            {article.author}
-                          </div>
-                        )}
+                          {article.readTime && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {article.readTime}
+                            </div>
+                          )}
+                          {article.author && (
+                            <div className="flex items-center gap-1">
+                              <User className="h-3 w-3" />
+                              {article.author}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 pt-3 border-t border-gray-100">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => handleOpenModal(article)}
+                        >
+                          <Edit3 className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => requestDelete(article)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2 pt-3 border-t border-gray-100">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => handleOpenModal(article)}
-                      >
-                        <Edit3 className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-600"
-                        onClick={() => requestDelete(article)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-10">
