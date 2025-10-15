@@ -85,7 +85,6 @@ export default function Home() {
   const [jobsForYouLoading, setJobsForYouLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
-  const [newsLoading, setNewsLoading] = useState(false);
 
   const router = useRouter();
   const t = useTranslations("Home");
@@ -95,13 +94,42 @@ export default function Home() {
     console.log("currentUser", currentUser);
     setUser(currentUser);
 
-    fetchPublicData();
-    fetchNews();
+    let isMounted = true;
 
-    // Fetch jobs for you if user is a worker
+    const loadNews = async () => {
+      try {
+        const response = await publicAPI.getNews({
+          status: "published",
+          limit: 3,
+          sort: "-date",
+        });
+        if (!isMounted) return;
+        const articles = response.data.data || [];
+        console.log("articles", articles);
+        setNewsArticles(
+          articles.map((article: NewsArticle) => ({
+            ...article,
+            id: article._id,
+            imageUrl: article.image || article.imageUrl,
+          })),
+        );
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Failed to fetch news:", error);
+        setNewsArticles([]);
+      }
+    };
+
+    fetchPublicData();
+    loadNews();
+
     if (currentUser?.role === "worker") {
       fetchJobsForYou();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const fetchPublicData = async () => {
@@ -116,31 +144,6 @@ export default function Home() {
       setCategories(statsResponse.data.data?.jobsByCategory || []);
     } catch (error) {
       console.error("Failed to fetch public data:", error);
-    }
-  };
-
-  const fetchNews = async () => {
-    try {
-      setNewsLoading(true);
-      const response = await publicAPI.getNews({
-        status: "published",
-        limit: 3,
-        sort: "-date",
-      });
-      const articles = response.data.data || [];
-      console.log("articles", articles);
-      setNewsArticles(
-        articles.map((article: NewsArticle) => ({
-          ...article,
-          id: article._id,
-          imageUrl: article.image || article.imageUrl,
-        })),
-      );
-    } catch (error) {
-      console.error("Failed to fetch news:", error);
-      setNewsArticles([]);
-    } finally {
-      setNewsLoading(false);
     }
   };
 
