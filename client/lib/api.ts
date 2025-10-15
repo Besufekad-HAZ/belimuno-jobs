@@ -667,6 +667,33 @@ export const adminAPI = {
   ) => api.put(`/admin/news/${id}`, payload),
   deleteNews: (id: string) => api.delete(`/admin/news/${id}`),
 
+  // Client management
+  getClients: (params?: {
+    status?: "active" | "inactive" | "archived";
+    type?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/admin/clients", { params }),
+  getClient: (id: string) => api.get(`/admin/clients/${id}`),
+  createClient: (payload: {
+    name: string;
+    type: string;
+    logo?: string;
+    status?: "active" | "inactive" | "archived";
+  }) => api.post("/admin/clients", payload),
+  updateClient: (
+    id: string,
+    payload: {
+      name?: string;
+      type?: string;
+      logo?: string;
+      status?: "active" | "inactive" | "archived";
+    },
+  ) => api.put(`/admin/clients/${id}`, payload),
+  deleteClient: (id: string) => api.delete(`/admin/clients/${id}`),
+
   // Additional endpoints from second adminAPI
   getStats: () => api.get("/admin/stats"),
   getAnalytics: (params?: {

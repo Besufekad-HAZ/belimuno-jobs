@@ -1060,6 +1060,7 @@
       "buttons": {
         "manageTeam": "ቡድን ኣስተዳደር",
         "manageNews": "የዜና አስተዳደር",
+        "manageClients": "የቀጣሪዎች አስተዳደር",
         "workerManagement": "ኣስተዳደር ሰራሕተኛ",
         "disputeResolution": "ፍታሕ ግጭት",
         "performanceReviews": "ግምገማ ኣፈጻጸም"

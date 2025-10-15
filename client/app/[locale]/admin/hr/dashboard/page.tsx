@@ -13,6 +13,8 @@ import {
   Eye,
   Bell,
   MessageSquarePlus,
+  Newspaper,
+  Building,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI, notificationsAPI } from "@/lib/api";
@@ -515,8 +517,16 @@ const HRAdminDashboard: React.FC = () => {
                 variant="primary"
                 className="w-full justify-start"
               >
-                <Users className="h-4 w-4 mr-2" />
+                <Newspaper className="h-4 w-4 mr-2" />
                 {t("actions.buttons.manageNews")}
+              </Button>
+              <Button
+                onClick={() => router.push("/admin/hr/clients")}
+                variant="primary"
+                className="w-full justify-start"
+              >
+                <Building className="h-4 w-4 mr-2" />
+                {t("actions.buttons.manageClients")}
               </Button>
               <Button
                 onClick={() => router.push("/admin/hr/workers")}
