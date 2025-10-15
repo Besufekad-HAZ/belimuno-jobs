@@ -8,6 +8,7 @@ const Report = require("../models/Report");
 const Dispute = require("../models/Dispute");
 const TeamMember = require("../models/TeamMember");
 const News = require("../models/News");
+const Client = require("../models/Client");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
@@ -45,9 +46,7 @@ const sanitizeFilename = (rawName) => {
     .replace(/-+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-  const sanitizedExt = ext && /\.[a-zA-Z0-9]+$/.test(ext)
-    ? ext
-    : ".jpg";
+  const sanitizedExt = ext && /\.[a-zA-Z0-9]+$/.test(ext) ? ext : ".jpg";
 
   const finalBase = sanitizedBase || fallbackBase;
   return `${finalBase}${sanitizedExt}`;
@@ -1551,7 +1550,9 @@ exports.uploadTeamMemberPhoto = (req, res) => {
     }
 
     try {
-      const objectKey = generateTeamObjectKey(req.file.originalname || "photo.jpg");
+      const objectKey = generateTeamObjectKey(
+        req.file.originalname || "photo.jpg"
+      );
       const { url } = await uploadObject({
         key: objectKey,
         body: req.file.buffer,
@@ -1635,8 +1636,8 @@ exports.createTeamMember = asyncHandler(async (req, res) => {
   }
 
   const sanitizedPhotoUrl = photoUrl?.trim() || undefined;
-  const sanitizedPhotoKey = normalizePhotoKey(photoKey) ||
-    inferManagedPhotoKey(sanitizedPhotoUrl);
+  const sanitizedPhotoKey =
+    normalizePhotoKey(photoKey) || inferManagedPhotoKey(sanitizedPhotoUrl);
   const resolvedPhotoUrl =
     sanitizedPhotoUrl ||
     (sanitizedPhotoKey ? buildTeamPhotoUrl(sanitizedPhotoKey) : undefined);
@@ -1782,7 +1783,10 @@ exports.updateTeamMember = asyncHandler(async (req, res) => {
 
   if (Object.prototype.hasOwnProperty.call(req.body, "status")) {
     const normalizedStatus = String(req.body.status || "").trim();
-    if (normalizedStatus && !["active", "archived"].includes(normalizedStatus)) {
+    if (
+      normalizedStatus &&
+      !["active", "archived"].includes(normalizedStatus)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Status must be either active or archived",
@@ -1821,7 +1825,8 @@ exports.deleteTeamMember = asyncHandler(async (req, res) => {
     });
   }
 
-  const managedPhotoKey = member.photoKey || inferManagedPhotoKey(member.photoUrl);
+  const managedPhotoKey =
+    member.photoKey || inferManagedPhotoKey(member.photoUrl);
   if (managedPhotoKey) {
     await deleteTeamPhoto(managedPhotoKey);
   }
@@ -2003,5 +2008,159 @@ exports.deleteNews = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "News article deleted successfully",
+  });
+});
+
+// @desc    Get all clients with filtering
+// @route   GET /api/admin/clients
+// @access  Private/Any Admin
+exports.getClients = asyncHandler(async (req, res) => {
+  const {
+    status,
+    type,
+    page = 1,
+    limit = 20,
+    search,
+    sort = "-createdAt",
+  } = req.query;
+
+  const query = {};
+  if (status) query.status = status;
+  if (type) query.type = type;
+
+  if (search) {
+    query.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { type: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const sortBy = sort ? String(sort).split(",").join(" ") : "-createdAt";
+  const clientsQuery = Client.find(query)
+    .sort(sortBy)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
+
+  const clients = await clientsQuery;
+  const total = await Client.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: clients.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit),
+    },
+    data: clients,
+  });
+});
+
+// @desc    Get single client details
+// @route   GET /api/admin/clients/:id
+// @access  Private/Any Admin
+exports.getClient = asyncHandler(async (req, res) => {
+  const client = await Client.findById(req.params.id);
+
+  if (!client) {
+    return res.status(404).json({
+      success: false,
+      message: "Client not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: client,
+  });
+});
+
+// @desc    Create a new client
+// @route   POST /api/admin/clients
+// @access  Private/Any Admin
+exports.createClient = asyncHandler(async (req, res) => {
+  const { name, type, logo } = req.body;
+
+  if (!name || !type) {
+    return res.status(400).json({
+      success: false,
+      message: "Name and type are required",
+    });
+  }
+
+  const clientData = {
+    name: name.trim(),
+    type: type.trim(),
+    createdBy: req.user._id,
+    updatedBy: req.user._id,
+  };
+
+  if (logo) clientData.logo = logo.trim();
+
+  const client = await Client.create(clientData);
+
+  res.status(201).json({
+    success: true,
+    message: "Client created successfully",
+    data: client,
+  });
+});
+
+// @desc    Update a client
+// @route   PUT /api/admin/clients/:id
+// @access  Private/Any Admin
+exports.updateClient = asyncHandler(async (req, res) => {
+  const allowedFields = ["name", "type", "logo", "status"];
+
+  const updateData = {};
+  Object.keys(req.body).forEach((key) => {
+    if (allowedFields.includes(key)) {
+      if (typeof req.body[key] === "string") {
+        updateData[key] = req.body[key].trim();
+      } else {
+        updateData[key] = req.body[key];
+      }
+    }
+  });
+
+  updateData.updatedBy = req.user._id;
+
+  const client = await Client.findByIdAndUpdate(req.params.id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!client) {
+    return res.status(404).json({
+      success: false,
+      message: "Client not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Client updated successfully",
+    data: client,
+  });
+});
+
+// @desc    Delete a client
+// @route   DELETE /api/admin/clients/:id
+// @access  Private/Any Admin
+exports.deleteClient = asyncHandler(async (req, res) => {
+  const client = await Client.findByIdAndDelete(req.params.id);
+
+  if (!client) {
+    return res.status(404).json({
+      success: false,
+      message: "Client not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Client deleted successfully",
   });
 });

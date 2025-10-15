@@ -32,6 +32,11 @@ const {
   createNews,
   updateNews,
   deleteNews,
+  getClients,
+  getClient,
+  createClient,
+  updateClient,
+  deleteClient,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
 const {
@@ -108,5 +113,12 @@ router.get("/news/:id", getNewsArticle);
 router.post("/news", createNews);
 router.put("/news/:id", updateNews);
 router.delete("/news/:id", deleteNews);
+
+// Client management (any admin)
+router.get("/clients", getClients);
+router.get("/clients/:id", getClient);
+router.post("/clients", createClient);
+router.put("/clients/:id", updateClient);
+router.delete("/clients/:id", deleteClient);
 
 module.exports = router;
