@@ -24,6 +24,7 @@ import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import TrustedBySection from "@/components/sections/TrustedBySection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import { DEFAULT_UPLOADS_BASE, resolveAssetUrl } from "@/lib/assets";
 
 type StoredUser = { role: string } | null;
 
@@ -75,6 +76,43 @@ type NewsArticle = {
   readTime?: string;
   author?: string;
   status?: string;
+};
+
+type ResolvedNewsImageProps = {
+  news: NewsArticle;
+  className?: string;
+  sizes?: string;
+  fallback: React.ReactNode;
+};
+
+const ResolvedNewsImage: React.FC<ResolvedNewsImageProps> = ({
+  news,
+  className,
+  sizes = "33vw",
+  fallback,
+}) => {
+  const [src, setSrc] = useState<string | undefined>(() =>
+    resolveAssetUrl(news.imageUrl || news.image, DEFAULT_UPLOADS_BASE),
+  );
+
+  useEffect(() => {
+    setSrc(resolveAssetUrl(news.imageUrl || news.image, DEFAULT_UPLOADS_BASE));
+  }, [news.imageUrl, news.image]);
+
+  if (!src) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={news.title}
+      fill
+      sizes={sizes}
+      className={className}
+      onError={() => setSrc(undefined)}
+    />
+  );
 };
 
 export default function Home() {
@@ -746,127 +784,6 @@ export default function Home() {
 
       <TestimonialsSection />
 
-      {/* Regions Where We Operate */}
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">
-              {t("regions.title")}
-            </h2>
-            <p className="text-gray-600 mt-4">{t("regions.subtitle")}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Addis Ababa */}
-            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-6 w-6 text-blue-600 mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {t("regions.addisAbaba.name")}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {t("regions.addisAbaba.description")}
-                  </p>
-                  <Badge variant="primary" size="sm">
-                    {t("regions.addisAbaba.jobs")}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-
-            {/* Oromia */}
-            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-6 w-6 text-green-600 mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {t("regions.oromia.name")}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {t("regions.oromia.description")}
-                  </p>
-                  <Badge variant="secondary" size="sm">
-                    {t("regions.oromia.jobs")}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-
-            {/* Amhara */}
-            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-yellow-500">
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-6 w-6 text-yellow-600 mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {t("regions.amhara.name")}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {t("regions.amhara.description")}
-                  </p>
-                  <Badge variant="secondary" size="sm">
-                    {t("regions.amhara.jobs")}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-
-            {/* Tigray */}
-            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-6 w-6 text-purple-600 mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {t("regions.tigray.name")}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {t("regions.tigray.description")}
-                  </p>
-                  <Badge variant="secondary" size="sm">
-                    {t("regions.tigray.jobs")}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-
-            {/* SNNP */}
-            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-indigo-500">
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-6 w-6 text-indigo-600 mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {t("regions.snnp.name")}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {t("regions.snnp.description")}
-                  </p>
-                  <Badge variant="secondary" size="sm">
-                    {t("regions.snnp.jobs")}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-
-            {/* Sidama */}
-            <Card className="p-6 hover:shadow-lg transition-shadow border-l-4 border-l-red-500">
-              <div className="flex items-start space-x-3">
-                <MapPin className="h-6 w-6 text-red-600 mt-1" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {t("regions.sidama.name")}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {t("regions.sidama.description")}
-                  </p>
-                  <Badge variant="secondary" size="sm">
-                    {t("regions.sidama.jobs")}
-                  </Badge>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </div>
-
       {/* News Section */}
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -887,36 +804,25 @@ export default function Home() {
                   key={news.id}
                   className="hover:shadow-lg transition-all duration-300 group overflow-hidden"
                 >
-                  {news.imageUrl ? (
-                    // news image
-                    <div className="h-48 relative overflow-hidden flex items-center justify-center bg-gray-100">
-                      <Image
-                        src={news.imageUrl ?? ""}
-                        alt={news.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        priority={false}
-                      />
-                      <div className="absolute top-4 right-4 z-10">
-                        <Badge variant="secondary" size="sm">
-                          {news.category}
-                        </Badge>
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 pointer-events-none" />
+                  <div className="h-48 relative overflow-hidden flex items-center justify-center bg-gray-100">
+                    <ResolvedNewsImage
+                      news={news}
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      fallback={
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20"></div>
+                          <Newspaper className="h-16 w-16 text-blue-400/60" />
+                        </div>
+                      }
+                    />
+                    <div className="absolute top-4 right-4 z-10">
+                      <Badge variant="secondary" size="sm">
+                        {news.category}
+                      </Badge>
                     </div>
-                  ) : (
-                    // news image placeholder
-                    <div className="h-48 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20"></div>
-                      <Newspaper className="h-16 w-16 text-blue-400/60" />
-                      <div className="absolute top-4 right-4">
-                        <Badge variant="secondary" size="sm">
-                          {news.category}
-                        </Badge>
-                      </div>
-                    </div>
-                  )}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 pointer-events-none" />
+                  </div>
 
                   <div className="p-6">
                     <div className="flex items-center text-sm text-gray-500 mb-3">
