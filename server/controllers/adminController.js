@@ -12,78 +12,169 @@ const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
 const multer = require("multer");
-const fs = require("fs");
 const path = require("path");
-
-const fsPromises = fs.promises;
+const crypto = require("crypto");
+const {
+  uploadObject,
+  deleteObject,
+  buildPublicUrl,
+  resolveKeyFromUrl,
+} = require("../utils/s3Storage");
 
 // Lightweight in-memory cache for dashboard
 const __dashboardCache = { data: null, ts: 0 };
+const TEAM_UPLOAD_PREFIX = (process.env.AWS_S3_TEAM_PREFIX || "public/team")
+  .replace(/^\/+/, "")
+  .replace(/\/+$/, "");
 
-const ensureDirectory = (dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+const ensureTeamKeyPrefix = (filename) =>
+  TEAM_UPLOAD_PREFIX ? `${TEAM_UPLOAD_PREFIX}/${filename}` : filename;
+
+const sanitizeFilename = (rawName) => {
+  const fallbackBase = "team-member";
+  if (!rawName) {
+    return `${fallbackBase}.jpg`;
   }
+
+  const withoutQuery = rawName.split("?")[0]?.split("#")[0] || rawName;
+  const ext = path.extname(withoutQuery);
+  const baseName = path.basename(withoutQuery, ext);
+
+  const sanitizedBase = baseName
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  const sanitizedExt = ext && /\.[a-zA-Z0-9]+$/.test(ext)
+    ? ext
+    : ".jpg";
+
+  const finalBase = sanitizedBase || fallbackBase;
+  return `${finalBase}${sanitizedExt}`;
 };
 
-const teamUploadsDir = path.join(__dirname, "..", "uploads", "team");
-ensureDirectory(teamUploadsDir);
+const stripKnownTeamPrefixes = (value) => {
+  if (!value) {
+    return value;
+  }
+
+  const normalized = value.replace(/^\/+/, "");
+  const prefixes = ["uploads/team/", "public/team/"];
+
+  if (TEAM_UPLOAD_PREFIX && !prefixes.includes(`${TEAM_UPLOAD_PREFIX}/`)) {
+    prefixes.push(`${TEAM_UPLOAD_PREFIX}/`);
+  }
+
+  for (const prefix of prefixes) {
+    if (normalized.toLowerCase().startsWith(prefix.toLowerCase())) {
+      return normalized.slice(prefix.length);
+    }
+  }
+
+  return normalized;
+};
+
+const extractFilenamePart = (value) => {
+  if (!value) {
+    return undefined;
+  }
+
+  let candidate = String(value).trim();
+  if (!candidate) {
+    return undefined;
+  }
+
+  if (/^https?:\/\//i.test(candidate)) {
+    try {
+      const url = new URL(candidate);
+      candidate = url.pathname || "";
+    } catch (_error) {
+      // leave candidate as-is if URL parsing fails
+    }
+  }
+
+  candidate = candidate.replace(/\\/g, "/");
+  candidate = candidate.split("?")[0]?.split("#")[0] || candidate;
+  candidate = candidate.replace(/^\/+/, "");
+  const stripped = stripKnownTeamPrefixes(candidate);
+
+  const parts = stripped.split("/");
+  const filename = parts.pop();
+  if (!filename) {
+    return undefined;
+  }
+  return filename;
+};
 
 const normalizePhotoKey = (rawKey) => {
-  if (!rawKey) {
+  const filename = extractFilenamePart(rawKey);
+  if (!filename) {
     return undefined;
   }
-  const trimmed = String(rawKey).trim();
-  if (!trimmed) {
-    return undefined;
-  }
-  return path.basename(trimmed).replace(/[^a-zA-Z0-9._-]/g, "-");
+
+  const sanitized = sanitizeFilename(filename);
+  return ensureTeamKeyPrefix(sanitized);
 };
 
 const inferManagedPhotoKey = (url) => {
   if (!url || typeof url !== "string") {
     return undefined;
   }
-  const cleaned = url.split("?")[0]?.split("#")[0] || "";
-  if (!cleaned.includes("/uploads/team/")) {
+
+  const trimmed = url.trim();
+  if (!trimmed) {
     return undefined;
   }
-  return path.basename(cleaned);
+
+  const lower = trimmed.toLowerCase();
+  const patterns = ["/uploads/team/", "/public/team/"];
+  if (TEAM_UPLOAD_PREFIX) {
+    patterns.push(`/${TEAM_UPLOAD_PREFIX.toLowerCase()}/`);
+  }
+
+  const matchesManagedPattern = patterns.some((pattern) =>
+    lower.includes(pattern)
+  );
+
+  if (!matchesManagedPattern) {
+    const resolvedKey = resolveKeyFromUrl(trimmed);
+    if (!resolvedKey) {
+      return undefined;
+    }
+    const normalizedKey = resolvedKey.replace(/^\/+/, "");
+    if (
+      TEAM_UPLOAD_PREFIX &&
+      !normalizedKey
+        .toLowerCase()
+        .startsWith(`${TEAM_UPLOAD_PREFIX.toLowerCase()}/`)
+    ) {
+      return undefined;
+    }
+    return normalizePhotoKey(normalizedKey);
+  }
+
+  return normalizePhotoKey(trimmed);
 };
+
+const resolveTeamObjectKey = (rawKey) => normalizePhotoKey(rawKey);
 
 const deleteTeamPhoto = async (photoKey) => {
-  if (!photoKey) {
+  const managedKey =
+    resolveTeamObjectKey(photoKey) || inferManagedPhotoKey(photoKey);
+
+  if (!managedKey) {
     return;
   }
+
   try {
-    await fsPromises.unlink(path.join(teamUploadsDir, photoKey));
+    await deleteObject(managedKey);
   } catch (error) {
-    if (error && error.code !== "ENOENT") {
-      console.warn("Failed to delete team member photo", photoKey, error);
-    }
+    console.warn("Failed to delete team member photo", managedKey, error);
   }
 };
 
-const teamPhotoStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, teamUploadsDir);
-  },
-  filename: (_req, file, cb) => {
-    const timestamp = Date.now();
-    const cleanedOriginal = file.originalname
-      .toLowerCase()
-      .replace(/[^a-z0-9.]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    const ext = path.extname(cleanedOriginal) || ".jpg";
-    const baseName = cleanedOriginal
-      ? cleanedOriginal.replace(ext, "")
-      : "team-member";
-    cb(null, `${timestamp}-${baseName}${ext}`);
-  },
-});
-
 const teamPhotoUpload = multer({
-  storage: teamPhotoStorage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB
   },
@@ -96,12 +187,21 @@ const teamPhotoUpload = multer({
   },
 });
 
-const buildTeamPhotoUrl = (req, filename) => {
-  const base =
-    process.env.FILE_BASE_URL || `${req.protocol}://${req.get("host")}`;
-  const normalizedBase = base.endsWith("/") ? base.slice(0, -1) : base;
-  return `${normalizedBase}/uploads/team/${filename}`;
+const generateTeamObjectKey = (originalName) => {
+  const sanitizedName = sanitizeFilename(originalName);
+  const ext = path.extname(sanitizedName) || ".jpg";
+  const base = path.basename(sanitizedName, ext);
+  const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
+  const combined = `${uniqueSuffix}-${base}`
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const finalBase = combined || `${uniqueSuffix}-team-member`;
+  const normalizedExt = ext || ".jpg";
+  return ensureTeamKeyPrefix(`${finalBase}${normalizedExt}`);
 };
+
+const buildTeamPhotoUrl = (key) => buildPublicUrl(key);
 
 // @desc    Get admin dashboard (optimized)
 // @route   GET /api/admin/dashboard
@@ -1431,7 +1531,7 @@ exports.getTeamMembers = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/team/upload-photo
 // @access  Private/Admin HR or Super Admin
 exports.uploadTeamMemberPhoto = (req, res) => {
-  teamPhotoUpload.single("photo")(req, res, (err) => {
+  teamPhotoUpload.single("photo")(req, res, async (err) => {
     if (err) {
       let message = err.message || "Unable to upload profile photo.";
       if (err.code === "LIMIT_FILE_SIZE" || err.message === "File too large") {
@@ -1450,18 +1550,37 @@ exports.uploadTeamMemberPhoto = (req, res) => {
       });
     }
 
-    const fileUrl = buildTeamPhotoUrl(req, req.file.filename);
+    try {
+      const objectKey = generateTeamObjectKey(req.file.originalname || "photo.jpg");
+      const { url } = await uploadObject({
+        key: objectKey,
+        body: req.file.buffer,
+        contentType: req.file.mimetype,
+      });
 
-    return res.status(201).json({
-      success: true,
-      message: "Profile photo uploaded successfully.",
-      data: {
-        url: fileUrl,
-        filename: req.file.filename,
-        size: req.file.size,
-        mimeType: req.file.mimetype,
-      },
-    });
+      const fileUrl = url || buildTeamPhotoUrl(objectKey);
+      const filename = path.basename(objectKey);
+
+      return res.status(201).json({
+        success: true,
+        message: "Profile photo uploaded successfully.",
+        data: {
+          url: fileUrl,
+          key: objectKey,
+          photoKey: objectKey,
+          filename,
+          size: req.file.size,
+          mimeType: req.file.mimetype,
+        },
+      });
+    } catch (uploadError) {
+      console.error("Failed to upload profile photo to S3", uploadError);
+      return res.status(500).json({
+        success: false,
+        message:
+          "We couldn't store that image right now. Please try again in a moment.",
+      });
+    }
   });
 };
 
@@ -1518,12 +1637,15 @@ exports.createTeamMember = asyncHandler(async (req, res) => {
   const sanitizedPhotoUrl = photoUrl?.trim() || undefined;
   const sanitizedPhotoKey = normalizePhotoKey(photoKey) ||
     inferManagedPhotoKey(sanitizedPhotoUrl);
+  const resolvedPhotoUrl =
+    sanitizedPhotoUrl ||
+    (sanitizedPhotoKey ? buildTeamPhotoUrl(sanitizedPhotoKey) : undefined);
 
   const member = await TeamMember.create({
     name: trimmedName,
     role: trimmedRole,
     department: trimmedDepartment,
-    photoUrl: sanitizedPhotoUrl,
+    photoUrl: resolvedPhotoUrl,
     photoKey: sanitizedPhotoKey,
     email: email?.trim() || undefined,
     phone: phone?.trim() || undefined,
@@ -1615,6 +1737,15 @@ exports.updateTeamMember = asyncHandler(async (req, res) => {
       if (inferredKey) {
         member.photoKey = inferredKey;
       }
+    }
+  }
+
+  if (member.photoKey) {
+    const inferredFromUrl = member.photoUrl
+      ? inferManagedPhotoKey(member.photoUrl)
+      : undefined;
+    if (!member.photoUrl || inferredFromUrl === member.photoKey) {
+      member.photoUrl = buildTeamPhotoUrl(member.photoKey);
     }
   }
 

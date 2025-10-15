@@ -12,6 +12,20 @@ JWT_SECRET=belimuno_jobs_jwt_secret_key_2025_development
 JWT_EXPIRE=30d
 CLIENT_URL=http://localhost:3000
 
+# AWS S3 (required for media uploads)
+AWS_S3_BUCKET=belimuno-uploads
+AWS_S3_REGION=eu-north-1
+AWS_S3_PUBLIC_BASE_URL=https://belimuno-uploads.s3.eu-north-1.amazonaws.com/public
+AWS_S3_TEAM_PREFIX=public/team
+
+# AWS credentials (use IAM user or role with PutObject/DeleteObject permissions)
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+
+# Optional overrides
+# AWS_S3_ENDPOINT=https://s3.eu-north-1.amazonaws.com
+# AWS_S3_FORCE_PATH_STYLE=false
+
 # Google OAuth (optional - for Google Sign-In)
 GOOGLE_CLIENT_ID=your_google_client_id_here
 GOOGLE_CLIENT_SECRET=your_google_client_secret_here

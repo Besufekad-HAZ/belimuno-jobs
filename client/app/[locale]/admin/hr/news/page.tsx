@@ -62,6 +62,8 @@ const emptyNewsForm: NewsFormState = {
   image: "",
 };
 
+const MAX_NEWS_IMAGE_SIZE = 1 * 1024 * 1024; // 1MB cap to keep news assets lightweight
+
 const categorySuggestions = [
   "Company News",
   "Industry Updates",
@@ -237,8 +239,8 @@ const ManageNewsPage: React.FC = () => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setImageUploadError("Images must be 5MB or smaller.");
+    if (file.size > MAX_NEWS_IMAGE_SIZE) {
+      setImageUploadError("Images must be 1MB or smaller.");
       event.target.value = "";
       return;
     }
@@ -681,7 +683,7 @@ const ManageNewsPage: React.FC = () => {
                   {uploadingImage ? "Uploading..." : "Upload image"}
                 </Button>
                 <p className="text-xs text-gray-500">
-                  PNG or JPG up to 5MB. We&apos;ll host it for you.
+                  PNG or JPG up to 1MB. We&apos;ll host it for you.
                 </p>
                 {imageUploadError && (
                   <p className="text-xs text-red-600">{imageUploadError}</p>
