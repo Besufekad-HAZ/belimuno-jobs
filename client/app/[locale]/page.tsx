@@ -24,6 +24,7 @@ import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import TrustedBySection from "@/components/sections/TrustedBySection";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import { DEFAULT_UPLOADS_BASE, resolveAssetUrl } from "@/lib/assets";
 
 type StoredUser = { role: string } | null;
 
@@ -75,6 +76,43 @@ type NewsArticle = {
   readTime?: string;
   author?: string;
   status?: string;
+};
+
+type ResolvedNewsImageProps = {
+  news: NewsArticle;
+  className?: string;
+  sizes?: string;
+  fallback: React.ReactNode;
+};
+
+const ResolvedNewsImage: React.FC<ResolvedNewsImageProps> = ({
+  news,
+  className,
+  sizes = "33vw",
+  fallback,
+}) => {
+  const [src, setSrc] = useState<string | undefined>(() =>
+    resolveAssetUrl(news.imageUrl || news.image, DEFAULT_UPLOADS_BASE),
+  );
+
+  useEffect(() => {
+    setSrc(resolveAssetUrl(news.imageUrl || news.image, DEFAULT_UPLOADS_BASE));
+  }, [news.imageUrl, news.image]);
+
+  if (!src) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={news.title}
+      fill
+      sizes={sizes}
+      className={className}
+      onError={() => setSrc(undefined)}
+    />
+  );
 };
 
 export default function Home() {
@@ -887,36 +925,25 @@ export default function Home() {
                   key={news.id}
                   className="hover:shadow-lg transition-all duration-300 group overflow-hidden"
                 >
-                  {news.imageUrl ? (
-                    // news image
-                    <div className="h-48 relative overflow-hidden flex items-center justify-center bg-gray-100">
-                      <Image
-                        src={news.imageUrl ?? ""}
-                        alt={news.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        priority={false}
-                      />
-                      <div className="absolute top-4 right-4 z-10">
-                        <Badge variant="secondary" size="sm">
-                          {news.category}
-                        </Badge>
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 pointer-events-none" />
+                  <div className="h-48 relative overflow-hidden flex items-center justify-center bg-gray-100">
+                    <ResolvedNewsImage
+                      news={news}
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      fallback={
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20"></div>
+                          <Newspaper className="h-16 w-16 text-blue-400/60" />
+                        </div>
+                      }
+                    />
+                    <div className="absolute top-4 right-4 z-10">
+                      <Badge variant="secondary" size="sm">
+                        {news.category}
+                      </Badge>
                     </div>
-                  ) : (
-                    // news image placeholder
-                    <div className="h-48 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20"></div>
-                      <Newspaper className="h-16 w-16 text-blue-400/60" />
-                      <div className="absolute top-4 right-4">
-                        <Badge variant="secondary" size="sm">
-                          {news.category}
-                        </Badge>
-                      </div>
-                    </div>
-                  )}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 pointer-events-none" />
+                  </div>
 
                   <div className="p-6">
                     <div className="flex items-center text-sm text-gray-500 mb-3">
