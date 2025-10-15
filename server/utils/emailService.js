@@ -1,12 +1,29 @@
 const nodemailer = require('nodemailer');
 
+// Trim surrounding quotes that sometimes get copied into hosting dashboards
+const stripSurroundingQuotes = (value) => {
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+  if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+};
+
+const getSmtpUser = () => stripSurroundingQuotes(process.env.SMTP_USER);
+const getSmtpPass = () => stripSurroundingQuotes(process.env.SMTP_PASS);
+const getFromAddress = () => `"Belimuno Jobs" <${getSmtpUser() || 'noreply@belimuno.com'}>`;
+
 // Create reusable transporter object using SMTP transport
 const createTransporter = () => {
   // Check if SMTP credentials are properly configured
-  const isEmailConfigured = process.env.SMTP_USER &&
-                           process.env.SMTP_USER !== 'your-email@gmail.com' &&
-                           process.env.SMTP_PASS &&
-                           process.env.SMTP_PASS !== 'your-app-password';
+  const smtpUser = getSmtpUser();
+  const smtpPass = getSmtpPass();
+  const isEmailConfigured = smtpUser &&
+                           smtpUser !== 'your-email@gmail.com' &&
+                           smtpPass &&
+                           smtpPass !== 'your-app-password';
 
 
   // For development or when SMTP credentials are not configured, use console logging
@@ -27,13 +44,16 @@ const createTransporter = () => {
   }
 
   // Production email configuration
+  const port = Number(process.env.SMTP_PORT) || 587;
+  const secure = (process.env.SMTP_SECURE || '').toString().toLowerCase() === 'true' || port === 465;
+
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: false, // true for 465, false for other ports
+    port,
+    secure,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+      user: smtpUser,
+      pass: smtpPass
     }
   });
 
@@ -55,8 +75,7 @@ const sendPasswordResetEmail = async (email, resetToken, userName) => {
   const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
 
   const mailOptions = {
-    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
-    to: email,
+    from: getFromAddress(),
     subject: 'Password Reset Request - Belimuno Jobs',
     text: `
 Hello ${userName},
@@ -136,8 +155,7 @@ The Belimuno Jobs Team
 // Send password reset success email
 const sendPasswordResetSuccessEmail = async (email, userName) => {
   const mailOptions = {
-    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
-    to: email,
+    from: getFromAddress(),
     subject: 'Password Reset Successful - Belimuno Jobs',
     text: `
 Hello ${userName},
@@ -202,8 +220,7 @@ The Belimuno Jobs Team
 // Test email functionality
 const testEmail = async (testEmail) => {
   const mailOptions = {
-    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
-    to: testEmail,
+    from: getFromAddress(),
     subject: 'Test Email - Belimuno Jobs',
     text: 'This is a test email from Belimuno Jobs to verify email configuration.',
     html: `
@@ -233,8 +250,7 @@ module.exports = {
   sendContactMessageEmail: async (toEmail, payload) => {
     const { name, email, phone, subject, message } = payload || {};
     const mailOptions = {
-      from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
-      to: toEmail,
+      from: getFromAddress(),
       subject: `📬 New Contact Message: ${subject || 'No subject'}`,
       text: `You have received a new contact message.\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || '-'}\nSubject: ${subject}\n\nMessage:\n${message}\n` ,
       html: `
@@ -269,8 +285,7 @@ module.exports = {
   },
   sendContactAutoReply: async (toEmail, name) => {
     const mailOptions = {
-      from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
-      to: toEmail,
+      from: getFromAddress(),
       subject: 'We received your message – Belimuno Jobs',
       text: `Hello ${name || ''},\n\nThanks for reaching out to Belimuno Jobs. We have received your message and our team will get back to you shortly.\n\nBest regards,\nBelimuno Jobs Team`,
       html: `
