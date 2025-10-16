@@ -12,195 +12,16 @@ const Client = require("../models/Client");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
-const multer = require("multer");
 const path = require("path");
-const crypto = require("crypto");
 const {
-  uploadObject,
-  deleteObject,
-  buildPublicUrl,
-  resolveKeyFromUrl,
-} = require("../utils/s3Storage");
+  handlePhotoUpload,
+  deletePhoto,
+  normalizePhotoKey,
+  inferManagedPhotoKey,
+} = require("../utils/photoUpload");
 
 // Lightweight in-memory cache for dashboard
 const __dashboardCache = { data: null, ts: 0 };
-const TEAM_UPLOAD_PREFIX = (process.env.AWS_S3_TEAM_PREFIX || "public/team")
-  .replace(/^\/+/, "")
-  .replace(/\/+$/, "");
-
-const ensureTeamKeyPrefix = (filename) =>
-  TEAM_UPLOAD_PREFIX ? `${TEAM_UPLOAD_PREFIX}/${filename}` : filename;
-
-const sanitizeFilename = (rawName) => {
-  const fallbackBase = "team-member";
-  if (!rawName) {
-    return `${fallbackBase}.jpg`;
-  }
-
-  const withoutQuery = rawName.split("?")[0]?.split("#")[0] || rawName;
-  const ext = path.extname(withoutQuery);
-  const baseName = path.basename(withoutQuery, ext);
-
-  const sanitizedBase = baseName
-    .replace(/[^a-zA-Z0-9._-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  const sanitizedExt = ext && /\.[a-zA-Z0-9]+$/.test(ext) ? ext : ".jpg";
-
-  const finalBase = sanitizedBase || fallbackBase;
-  return `${finalBase}${sanitizedExt}`;
-};
-
-const stripKnownTeamPrefixes = (value) => {
-  if (!value) {
-    return value;
-  }
-
-  const normalized = value.replace(/^\/+/, "");
-  const prefixes = ["uploads/team/", "public/team/"];
-
-  if (TEAM_UPLOAD_PREFIX && !prefixes.includes(`${TEAM_UPLOAD_PREFIX}/`)) {
-    prefixes.push(`${TEAM_UPLOAD_PREFIX}/`);
-  }
-
-  for (const prefix of prefixes) {
-    if (normalized.toLowerCase().startsWith(prefix.toLowerCase())) {
-      return normalized.slice(prefix.length);
-    }
-  }
-
-  return normalized;
-};
-
-const extractFilenamePart = (value) => {
-  if (!value) {
-    return undefined;
-  }
-
-  let candidate = String(value).trim();
-  if (!candidate) {
-    return undefined;
-  }
-
-  if (/^https?:\/\//i.test(candidate)) {
-    try {
-      const url = new URL(candidate);
-      candidate = url.pathname || "";
-    } catch (_error) {
-      // leave candidate as-is if URL parsing fails
-    }
-  }
-
-  candidate = candidate.replace(/\\/g, "/");
-  candidate = candidate.split("?")[0]?.split("#")[0] || candidate;
-  candidate = candidate.replace(/^\/+/, "");
-  const stripped = stripKnownTeamPrefixes(candidate);
-
-  const parts = stripped.split("/");
-  const filename = parts.pop();
-  if (!filename) {
-    return undefined;
-  }
-  return filename;
-};
-
-const normalizePhotoKey = (rawKey) => {
-  const filename = extractFilenamePart(rawKey);
-  if (!filename) {
-    return undefined;
-  }
-
-  const sanitized = sanitizeFilename(filename);
-  return ensureTeamKeyPrefix(sanitized);
-};
-
-const inferManagedPhotoKey = (url) => {
-  if (!url || typeof url !== "string") {
-    return undefined;
-  }
-
-  const trimmed = url.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-
-  const lower = trimmed.toLowerCase();
-  const patterns = ["/uploads/team/", "/public/team/"];
-  if (TEAM_UPLOAD_PREFIX) {
-    patterns.push(`/${TEAM_UPLOAD_PREFIX.toLowerCase()}/`);
-  }
-
-  const matchesManagedPattern = patterns.some((pattern) =>
-    lower.includes(pattern)
-  );
-
-  if (!matchesManagedPattern) {
-    const resolvedKey = resolveKeyFromUrl(trimmed);
-    if (!resolvedKey) {
-      return undefined;
-    }
-    const normalizedKey = resolvedKey.replace(/^\/+/, "");
-    if (
-      TEAM_UPLOAD_PREFIX &&
-      !normalizedKey
-        .toLowerCase()
-        .startsWith(`${TEAM_UPLOAD_PREFIX.toLowerCase()}/`)
-    ) {
-      return undefined;
-    }
-    return normalizePhotoKey(normalizedKey);
-  }
-
-  return normalizePhotoKey(trimmed);
-};
-
-const resolveTeamObjectKey = (rawKey) => normalizePhotoKey(rawKey);
-
-const deleteTeamPhoto = async (photoKey) => {
-  const managedKey =
-    resolveTeamObjectKey(photoKey) || inferManagedPhotoKey(photoKey);
-
-  if (!managedKey) {
-    return;
-  }
-
-  try {
-    await deleteObject(managedKey);
-  } catch (error) {
-    console.warn("Failed to delete team member photo", managedKey, error);
-  }
-};
-
-const teamPhotoUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
-  fileFilter: (_req, file, cb) => {
-    if (!file.mimetype || !file.mimetype.startsWith("image/")) {
-      cb(new Error("Only image files are allowed."));
-      return;
-    }
-    cb(null, true);
-  },
-});
-
-const generateTeamObjectKey = (originalName) => {
-  const sanitizedName = sanitizeFilename(originalName);
-  const ext = path.extname(sanitizedName) || ".jpg";
-  const base = path.basename(sanitizedName, ext);
-  const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
-  const combined = `${uniqueSuffix}-${base}`
-    .replace(/[^a-zA-Z0-9._-]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  const finalBase = combined || `${uniqueSuffix}-team-member`;
-  const normalizedExt = ext || ".jpg";
-  return ensureTeamKeyPrefix(`${finalBase}${normalizedExt}`);
-};
-
-const buildTeamPhotoUrl = (key) => buildPublicUrl(key);
 
 // @desc    Get admin dashboard (optimized)
 // @route   GET /api/admin/dashboard
@@ -1529,61 +1350,22 @@ exports.getTeamMembers = asyncHandler(async (req, res) => {
 // @desc    Upload a team member profile photo
 // @route   POST /api/admin/team/upload-photo
 // @access  Private/Admin HR or Super Admin
-exports.uploadTeamMemberPhoto = (req, res) => {
-  teamPhotoUpload.single("photo")(req, res, async (err) => {
-    if (err) {
-      let message = err.message || "Unable to upload profile photo.";
-      if (err.code === "LIMIT_FILE_SIZE" || err.message === "File too large") {
-        message = "Image exceeds the 5MB limit.";
-      }
-      return res.status(400).json({
-        success: false,
-        message,
-      });
-    }
+exports.uploadTeamMemberPhoto = asyncHandler(async (req, res) => {
+  try {
+    const result = await handlePhotoUpload(req, res, "team", "team-member");
 
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Please attach an image file in the 'photo' field.",
-      });
-    }
-
-    try {
-      const objectKey = generateTeamObjectKey(
-        req.file.originalname || "photo.jpg"
-      );
-      const { url } = await uploadObject({
-        key: objectKey,
-        body: req.file.buffer,
-        contentType: req.file.mimetype,
-      });
-
-      const fileUrl = url || buildTeamPhotoUrl(objectKey);
-      const filename = path.basename(objectKey);
-
-      return res.status(201).json({
-        success: true,
-        message: "Profile photo uploaded successfully.",
-        data: {
-          url: fileUrl,
-          key: objectKey,
-          photoKey: objectKey,
-          filename,
-          size: req.file.size,
-          mimeType: req.file.mimetype,
-        },
-      });
-    } catch (uploadError) {
-      console.error("Failed to upload profile photo to S3", uploadError);
-      return res.status(500).json({
-        success: false,
-        message:
-          "We couldn't store that image right now. Please try again in a moment.",
-      });
-    }
-  });
-};
+    return res.status(201).json({
+      success: true,
+      message: "Profile photo uploaded successfully.",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to upload photo",
+    });
+  }
+});
 
 // @desc    Create a new team member
 // @route   POST /api/admin/team
@@ -1802,7 +1584,7 @@ exports.updateTeamMember = asyncHandler(async (req, res) => {
   await member.save();
 
   if (previousPhotoKey && previousPhotoKey !== member.photoKey) {
-    await deleteTeamPhoto(previousPhotoKey);
+    await deletePhoto(previousPhotoKey, "team");
   }
 
   res.status(200).json({
@@ -1828,7 +1610,7 @@ exports.deleteTeamMember = asyncHandler(async (req, res) => {
   const managedPhotoKey =
     member.photoKey || inferManagedPhotoKey(member.photoUrl);
   if (managedPhotoKey) {
-    await deleteTeamPhoto(managedPhotoKey);
+    await deletePhoto(managedPhotoKey, "team");
   }
 
   res.status(200).json({
@@ -1905,6 +1687,26 @@ exports.getNewsArticle = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Upload a news article image
+// @route   POST /api/admin/news/upload-image
+// @access  Private/Any Admin
+exports.uploadNewsImage = asyncHandler(async (req, res) => {
+  try {
+    const result = await handlePhotoUpload(req, res, "news", "news-article");
+
+    return res.status(201).json({
+      success: true,
+      message: "News image uploaded successfully.",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to upload image",
+    });
+  }
+});
+
 // @desc    Create a new news article
 // @route   POST /api/admin/news
 // @access  Private/Any Admin
@@ -1929,7 +1731,11 @@ exports.createNews = asyncHandler(async (req, res) => {
 
   if (content) newsData.content = content.trim();
   if (date) newsData.date = new Date(date);
-  if (image) newsData.image = image.trim();
+  if (image) {
+    const photoKey =
+      normalizePhotoKey(image, "news") || inferManagedPhotoKey(image, "news");
+    newsData.image = photoKey;
+  }
   if (readTime) newsData.readTime = readTime.trim();
   if (author) newsData.author = author.trim();
 
@@ -1946,6 +1752,15 @@ exports.createNews = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/news/:id
 // @access  Private/Any Admin
 exports.updateNews = asyncHandler(async (req, res) => {
+  const news = await News.findById(req.params.id);
+
+  if (!news) {
+    return res.status(404).json({
+      success: false,
+      message: "News article not found",
+    });
+  }
+
   const allowedFields = [
     "title",
     "excerpt",
@@ -1963,6 +1778,11 @@ exports.updateNews = asyncHandler(async (req, res) => {
     if (allowedFields.includes(key)) {
       if (key === "date" && req.body[key]) {
         updateData[key] = new Date(req.body[key]);
+      } else if (key === "image") {
+        const photoKey =
+          normalizePhotoKey(req.body[key], "news") ||
+          inferManagedPhotoKey(req.body[key], "news");
+        updateData[key] = photoKey;
       } else if (typeof req.body[key] === "string") {
         updateData[key] = req.body[key].trim();
       } else {
@@ -1973,22 +1793,20 @@ exports.updateNews = asyncHandler(async (req, res) => {
 
   updateData.updatedBy = req.user._id;
 
-  const news = await News.findByIdAndUpdate(req.params.id, updateData, {
+  // If image is being updated, delete the old one
+  if (updateData.image && news.image && updateData.image !== news.image) {
+    await deletePhoto(news.image, "news");
+  }
+
+  const updatedNews = await News.findByIdAndUpdate(req.params.id, updateData, {
     new: true,
     runValidators: true,
   });
 
-  if (!news) {
-    return res.status(404).json({
-      success: false,
-      message: "News article not found",
-    });
-  }
-
   res.status(200).json({
     success: true,
     message: "News article updated successfully",
-    data: news,
+    data: updatedNews,
   });
 });
 
@@ -1996,7 +1814,7 @@ exports.updateNews = asyncHandler(async (req, res) => {
 // @route   DELETE /api/admin/news/:id
 // @access  Private/Any Admin
 exports.deleteNews = asyncHandler(async (req, res) => {
-  const news = await News.findByIdAndDelete(req.params.id);
+  const news = await News.findById(req.params.id);
 
   if (!news) {
     return res.status(404).json({
@@ -2004,6 +1822,13 @@ exports.deleteNews = asyncHandler(async (req, res) => {
       message: "News article not found",
     });
   }
+
+  // Delete associated image if exists
+  if (news.image) {
+    await deletePhoto(news.image, "news");
+  }
+
+  await news.deleteOne();
 
   res.status(200).json({
     success: true,
@@ -2018,6 +1843,7 @@ exports.getClients = asyncHandler(async (req, res) => {
   const {
     status,
     type,
+    service,
     page = 1,
     limit = 20,
     search,
@@ -2027,11 +1853,13 @@ exports.getClients = asyncHandler(async (req, res) => {
   const query = {};
   if (status) query.status = status;
   if (type) query.type = type;
+  if (service) query.service = service;
 
   if (search) {
     query.$or = [
       { name: { $regex: search, $options: "i" } },
       { type: { $regex: search, $options: "i" } },
+      { service: { $regex: search, $options: "i" } },
     ];
   }
 
@@ -2077,11 +1905,31 @@ exports.getClient = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Upload a client logo
+// @route   POST /api/admin/clients/upload-logo
+// @access  Private/Any Admin
+exports.uploadClientLogo = asyncHandler(async (req, res) => {
+  try {
+    const result = await handlePhotoUpload(req, res, "client", "client-logo");
+
+    return res.status(201).json({
+      success: true,
+      message: "Client logo uploaded successfully.",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to upload logo",
+    });
+  }
+});
+
 // @desc    Create a new client
 // @route   POST /api/admin/clients
 // @access  Private/Any Admin
 exports.createClient = asyncHandler(async (req, res) => {
-  const { name, type, logo } = req.body;
+  const { name, type, service, logo } = req.body;
 
   if (!name || !type) {
     return res.status(400).json({
@@ -2097,7 +1945,12 @@ exports.createClient = asyncHandler(async (req, res) => {
     updatedBy: req.user._id,
   };
 
-  if (logo) clientData.logo = logo.trim();
+  if (service) clientData.service = service.trim();
+  if (logo) {
+    const photoKey =
+      normalizePhotoKey(logo, "client") || inferManagedPhotoKey(logo, "client");
+    clientData.logo = photoKey;
+  }
 
   const client = await Client.create(clientData);
 
@@ -2112,12 +1965,26 @@ exports.createClient = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/clients/:id
 // @access  Private/Any Admin
 exports.updateClient = asyncHandler(async (req, res) => {
-  const allowedFields = ["name", "type", "logo", "status"];
+  const client = await Client.findById(req.params.id);
+
+  if (!client) {
+    return res.status(404).json({
+      success: false,
+      message: "Client not found",
+    });
+  }
+
+  const allowedFields = ["name", "type", "service", "logo", "status"];
 
   const updateData = {};
   Object.keys(req.body).forEach((key) => {
     if (allowedFields.includes(key)) {
-      if (typeof req.body[key] === "string") {
+      if (key === "logo") {
+        const photoKey =
+          normalizePhotoKey(req.body[key], "client") ||
+          inferManagedPhotoKey(req.body[key], "client");
+        updateData[key] = photoKey;
+      } else if (typeof req.body[key] === "string") {
         updateData[key] = req.body[key].trim();
       } else {
         updateData[key] = req.body[key];
@@ -2127,22 +1994,24 @@ exports.updateClient = asyncHandler(async (req, res) => {
 
   updateData.updatedBy = req.user._id;
 
-  const client = await Client.findByIdAndUpdate(req.params.id, updateData, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!client) {
-    return res.status(404).json({
-      success: false,
-      message: "Client not found",
-    });
+  // If logo is being updated, delete the old one
+  if (updateData.logo && client.logo && updateData.logo !== client.logo) {
+    await deletePhoto(client.logo, "client");
   }
+
+  const updatedClient = await Client.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   res.status(200).json({
     success: true,
     message: "Client updated successfully",
-    data: client,
+    data: updatedClient,
   });
 });
 
@@ -2150,7 +2019,7 @@ exports.updateClient = asyncHandler(async (req, res) => {
 // @route   DELETE /api/admin/clients/:id
 // @access  Private/Any Admin
 exports.deleteClient = asyncHandler(async (req, res) => {
-  const client = await Client.findByIdAndDelete(req.params.id);
+  const client = await Client.findById(req.params.id);
 
   if (!client) {
     return res.status(404).json({
@@ -2158,6 +2027,13 @@ exports.deleteClient = asyncHandler(async (req, res) => {
       message: "Client not found",
     });
   }
+
+  // Delete associated logo if exists
+  if (client.logo) {
+    await deletePhoto(client.logo, "client");
+  }
+
+  await client.deleteOne();
 
   res.status(200).json({
     success: true,

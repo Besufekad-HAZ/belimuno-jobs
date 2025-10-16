@@ -671,6 +671,7 @@ export const adminAPI = {
   getClients: (params?: {
     status?: "active" | "inactive" | "archived";
     type?: string;
+    service?: string;
     search?: string;
     page?: number;
     limit?: number;
@@ -680,6 +681,7 @@ export const adminAPI = {
   createClient: (payload: {
     name: string;
     type: string;
+    service?: string;
     logo?: string;
     status?: "active" | "inactive" | "archived";
   }) => api.post("/admin/clients", payload),
@@ -688,6 +690,7 @@ export const adminAPI = {
     payload: {
       name?: string;
       type?: string;
+      service?: string;
       logo?: string;
       status?: "active" | "inactive" | "archived";
     },

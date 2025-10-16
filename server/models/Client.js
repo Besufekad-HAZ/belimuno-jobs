@@ -14,6 +14,11 @@ const ClientSchema = new mongoose.Schema(
       trim: true,
       maxlength: 100,
     },
+    service: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+    },
     logo: {
       type: String,
       trim: true,

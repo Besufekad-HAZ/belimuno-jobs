@@ -30,10 +30,11 @@ import { getStoredUser, hasRole } from "@/lib/auth";
 import { toast } from "@/components/ui/sonner";
 
 interface Client {
-  _id?: string;
+  _id: string;
   name: string;
   type: string;
-  logo?: string;
+  service: string;
+  logo: string;
   status?: "active" | "inactive" | "archived";
   createdAt?: string;
   updatedAt?: string;
@@ -42,28 +43,29 @@ interface Client {
 type ClientFormState = {
   name: string;
   type: string;
+  service: string;
   logo: string;
 };
 
 const emptyClientForm: ClientFormState = {
   name: "",
   type: "",
+  service: "",
   logo: "",
 };
 
 const MAX_CLIENT_LOGO_SIZE = 1 * 1024 * 1024; // 1MB cap to keep client logos lightweight
 
 const typeSuggestions = [
-  "Technology",
-  "Healthcare",
-  "Finance",
-  "Education",
-  "Manufacturing",
-  "Retail",
-  "Consulting",
-  "Non-profit",
-  "Government",
-  "Media",
+  "International NGO",
+  "Local NGO",
+  "Construction",
+  "Intergovernmental Organisation",
+  "Faith-based NGO",
+  "Security Company",
+  "Engineering & Design",
+  "Business Association",
+  "International Company",
 ];
 
 const formatDate = (dateString: string) => {
@@ -175,6 +177,7 @@ const ManageClientsPage: React.FC = () => {
       setForm({
         name: client.name,
         type: client.type,
+        service: client.service || "",
         logo: client.logo || "",
       });
     } else {
@@ -305,6 +308,7 @@ const ManageClientsPage: React.FC = () => {
       const payload = {
         name: form.name.trim(),
         type: form.type.trim(),
+        service: form.service.trim() || undefined,
         logo: form.logo.trim() || undefined,
         status: "active" as const, // Default to active
       };
@@ -471,6 +475,11 @@ const ManageClientsPage: React.FC = () => {
                         <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
                           {client.name}
                         </h3>
+                        {client.service && (
+                          <p className="text-sm text-gray-600 mb-2">
+                            Service: {client.service}
+                          </p>
+                        )}
                         <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
@@ -562,7 +571,7 @@ const ManageClientsPage: React.FC = () => {
                 onChange={(event) =>
                   handleInputChange("type")(event.target.value)
                 }
-                placeholder="e.g. Technology"
+                placeholder="e.g. International NGO"
                 error={formErrors.type}
                 list="client-types"
                 required
@@ -573,6 +582,16 @@ const ManageClientsPage: React.FC = () => {
                 ))}
               </datalist>
             </div>
+          </div>
+
+          <div>
+            <Input
+              label="Service"
+              value={form.service}
+              onChange={(event) =>
+                handleInputChange("service")(event.target.value)
+              }
+            />
           </div>
 
           <div className="space-y-3">
