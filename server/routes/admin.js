@@ -37,6 +37,8 @@ const {
   createClient,
   updateClient,
   deleteClient,
+  uploadNewsImage,
+  uploadClientLogo,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
 const {
@@ -86,10 +88,23 @@ router.get("/disputes/:id", getDispute);
 router.post("/disputes", createDispute);
 router.put("/disputes/:id", updateDispute);
 
+// Photo upload routes
 router.post(
   "/team/upload-photo",
   authorize("super_admin", "admin_hr"),
   uploadTeamMemberPhoto
+);
+
+router.post(
+  "/news/upload-photo",
+  authorize("super_admin", "admin_hr"),
+  uploadNewsImage
+);
+
+router.post(
+  "/clients/upload-photo",
+  authorize("super_admin", "admin_hr"),
+  uploadClientLogo
 );
 
 // Public team route (no auth) for the About page and public site

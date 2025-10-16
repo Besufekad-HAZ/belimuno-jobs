@@ -249,7 +249,7 @@ const ManageClientsPage: React.FC = () => {
     });
 
     try {
-      const response = await adminAPI.uploadTeamPhoto(file);
+      const response = await adminAPI.uploadClientLogo(file);
       const uploadedUrl =
         (response.data?.data?.url as string | undefined) ??
         (response.data?.url as string | undefined);

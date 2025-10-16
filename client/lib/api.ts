@@ -620,10 +620,30 @@ export const adminAPI = {
     },
   ) => api.put(`/admin/team/${id}`, payload),
   deleteTeamMember: (id: string) => api.delete(`/admin/team/${id}`),
+
+  // photo upload routes
   uploadTeamPhoto: (file: File) => {
     const formData = new FormData();
     formData.append("photo", file);
     return api.post("/admin/team/upload-photo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+  uploadNewsImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    return api.post("/admin/news/upload-photo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+  uploadClientLogo: (file: File) => {
+    const formData = new FormData();
+    formData.append("logo", file);
+    return api.post("/admin/clients/upload-photo", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
