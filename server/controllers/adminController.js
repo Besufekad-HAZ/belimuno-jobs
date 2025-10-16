@@ -1418,18 +1418,12 @@ exports.createTeamMember = asyncHandler(async (req, res) => {
   }
 
   const sanitizedPhotoUrl = photoUrl?.trim() || undefined;
-  const sanitizedPhotoKey =
-    normalizePhotoKey(photoKey) || inferManagedPhotoKey(sanitizedPhotoUrl);
-  const resolvedPhotoUrl =
-    sanitizedPhotoUrl ||
-    (sanitizedPhotoKey ? buildTeamPhotoUrl(sanitizedPhotoKey) : undefined);
 
   const member = await TeamMember.create({
     name: trimmedName,
     role: trimmedRole,
     department: trimmedDepartment,
-    photoUrl: resolvedPhotoUrl,
-    photoKey: sanitizedPhotoKey,
+    photoUrl: sanitizedPhotoUrl,
     email: email?.trim() || undefined,
     phone: phone?.trim() || undefined,
     bio: bio?.trim() || undefined,
@@ -1497,39 +1491,8 @@ exports.updateTeamMember = asyncHandler(async (req, res) => {
   let photoKeyProvided = false;
 
   if (Object.prototype.hasOwnProperty.call(req.body, "photoUrl")) {
-    photoUrlProvided = true;
     const trimmedUrl = String(req.body.photoUrl || "").trim();
     member.photoUrl = trimmedUrl || undefined;
-  }
-
-  if (Object.prototype.hasOwnProperty.call(req.body, "photoKey")) {
-    photoKeyProvided = true;
-    const rawKey = req.body.photoKey;
-    if (rawKey === null || rawKey === "") {
-      member.photoKey = undefined;
-    } else {
-      member.photoKey = normalizePhotoKey(rawKey);
-    }
-  }
-
-  if (photoUrlProvided && !photoKeyProvided) {
-    if (!member.photoUrl) {
-      member.photoKey = undefined;
-    } else {
-      const inferredKey = inferManagedPhotoKey(member.photoUrl);
-      if (inferredKey) {
-        member.photoKey = inferredKey;
-      }
-    }
-  }
-
-  if (member.photoKey) {
-    const inferredFromUrl = member.photoUrl
-      ? inferManagedPhotoKey(member.photoUrl)
-      : undefined;
-    if (!member.photoUrl || inferredFromUrl === member.photoKey) {
-      member.photoUrl = buildTeamPhotoUrl(member.photoKey);
-    }
   }
 
   if (Object.prototype.hasOwnProperty.call(req.body, "email")) {
@@ -1732,9 +1695,8 @@ exports.createNews = asyncHandler(async (req, res) => {
   if (content) newsData.content = content.trim();
   if (date) newsData.date = new Date(date);
   if (image) {
-    const photoKey =
-      normalizePhotoKey(image, "news") || inferManagedPhotoKey(image, "news");
-    newsData.image = photoKey;
+    // Store the full URL instead of the key
+    newsData.image = image;
   }
   if (readTime) newsData.readTime = readTime.trim();
   if (author) newsData.author = author.trim();
@@ -1779,10 +1741,8 @@ exports.updateNews = asyncHandler(async (req, res) => {
       if (key === "date" && req.body[key]) {
         updateData[key] = new Date(req.body[key]);
       } else if (key === "image") {
-        const photoKey =
-          normalizePhotoKey(req.body[key], "news") ||
-          inferManagedPhotoKey(req.body[key], "news");
-        updateData[key] = photoKey;
+        // Store the full URL
+        updateData[key] = req.body[key];
       } else if (typeof req.body[key] === "string") {
         updateData[key] = req.body[key].trim();
       } else {
@@ -1947,9 +1907,8 @@ exports.createClient = asyncHandler(async (req, res) => {
 
   if (service) clientData.service = service.trim();
   if (logo) {
-    const photoKey =
-      normalizePhotoKey(logo, "client") || inferManagedPhotoKey(logo, "client");
-    clientData.logo = photoKey;
+    // Store the full URL instead of the key
+    clientData.logo = logo;
   }
 
   const client = await Client.create(clientData);
@@ -1980,10 +1939,8 @@ exports.updateClient = asyncHandler(async (req, res) => {
   Object.keys(req.body).forEach((key) => {
     if (allowedFields.includes(key)) {
       if (key === "logo") {
-        const photoKey =
-          normalizePhotoKey(req.body[key], "client") ||
-          inferManagedPhotoKey(req.body[key], "client");
-        updateData[key] = photoKey;
+        // Store the full URL
+        updateData[key] = req.body[key];
       } else if (typeof req.body[key] === "string") {
         updateData[key] = req.body[key].trim();
       } else {

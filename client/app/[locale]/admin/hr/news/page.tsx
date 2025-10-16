@@ -323,7 +323,7 @@ const ManageNewsPage: React.FC = () => {
         category: form.category.trim(),
         author: form.author.trim() || undefined,
         image: form.image.trim() || undefined,
-        status: "draft" as const, // Default to draft
+        status: "published" as const, // Default to published
       };
 
       if (editingArticle) {
@@ -479,10 +479,12 @@ const ManageNewsPage: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center justify-between gap-2 mb-2">
                           <Badge
-                            variant={getStatusColor(article.status || "draft")}
+                            variant={getStatusColor(
+                              article.status || "published",
+                            )}
                             size="sm"
                           >
-                            {article.status || "draft"}
+                            {article.status || "published"}
                           </Badge>
                           <Badge variant="blue" size="sm">
                             {article.category}

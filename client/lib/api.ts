@@ -633,7 +633,7 @@ export const adminAPI = {
   },
   uploadNewsImage: (file: File) => {
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("photo", file);
     return api.post("/admin/news/upload-photo", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -642,7 +642,7 @@ export const adminAPI = {
   },
   uploadClientLogo: (file: File) => {
     const formData = new FormData();
-    formData.append("logo", file);
+    formData.append("photo", file);
     return api.post("/admin/clients/upload-photo", formData, {
       headers: {
         "Content-Type": "multipart/form-data",

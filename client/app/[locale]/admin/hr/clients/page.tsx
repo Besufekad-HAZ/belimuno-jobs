@@ -250,11 +250,11 @@ const ManageClientsPage: React.FC = () => {
 
     try {
       const response = await adminAPI.uploadClientLogo(file);
-      const uploadedUrl =
-        (response.data?.data?.url as string | undefined) ??
-        (response.data?.url as string | undefined);
+      const uploadedUrl = response.data?.data?.url;
+      console.log("Upload response:", response.data?.data);
 
       if (uploadedUrl) {
+        console.log("Using URL:", uploadedUrl);
         // Store the uploaded URL in a temporary state for form submission
         setForm((prev) => ({ ...prev, logo: uploadedUrl }));
         toast.success("Client logo uploaded.");

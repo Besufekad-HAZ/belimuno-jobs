@@ -174,19 +174,18 @@ const handlePhotoUpload = (req, res, entityType, fallbackPrefix) => {
           fallbackPrefix
         );
 
-        const { url } = await uploadObject({
+        await uploadObject({
           key: objectKey,
           body: req.file.buffer,
           contentType: req.file.mimetype,
         });
 
-        const fileUrl = url || buildPublicUrl(objectKey);
+        const fileUrl = buildPublicUrl(objectKey);
         const filename = path.basename(objectKey);
 
+        // Only return the full URL, not the key
         resolve({
           url: fileUrl,
-          key: objectKey,
-          photoKey: objectKey,
           filename,
           size: req.file.size,
           mimeType: req.file.mimetype,
