@@ -828,6 +828,15 @@ export const publicAPI = {
     sort?: string;
   }) => api.get("/news", { params }),
   getNewsArticle: (id: string) => api.get(`/news/${id}`),
+  getClients: (params?: {
+    status?: "active" | "inactive" | "archived";
+    type?: string;
+    service?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/clients", { params }),
 };
 
 export default api;

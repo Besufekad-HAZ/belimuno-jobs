@@ -1,6 +1,7 @@
 const TeamMember = require("../models/TeamMember");
 const asyncHandler = require("../utils/asyncHandler");
 const News = require("../models/News");
+const Client = require("../models/Client");
 
 // Public controller to return deduped team members for About page
 exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
@@ -136,5 +137,55 @@ exports.getNewsArticle = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: news,
+  });
+});
+
+// @desc    Get all clients with filtering
+// @route   GET /api/public/clients
+// @access  Public
+exports.getClients = asyncHandler(async (req, res) => {
+  const {
+    status,
+    type,
+    service,
+    page = 1,
+    limit = 20,
+    search,
+    sort = "-createdAt",
+  } = req.query;
+
+  const query = {};
+  if (status) query.status = status;
+  if (type) query.type = type;
+  if (service) query.service = service;
+
+  if (search) {
+    query.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { type: { $regex: search, $options: "i" } },
+      { service: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const sortBy = sort ? String(sort).split(",").join(" ") : "-createdAt";
+  const clientsQuery = Client.find(query)
+    .sort(sortBy)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
+
+  const clients = await clientsQuery;
+  const total = await Client.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: clients.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit),
+    },
+    data: clients,
   });
 });
