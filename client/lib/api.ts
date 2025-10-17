@@ -820,7 +820,7 @@ export const contactAPI = {
 // Public API
 export const publicAPI = {
   getTeam: (params?: { limit?: number; sort?: string }) =>
-    api.get("/team", { params }),
+    api.get("/public/team", { params }),
   getNews: (params?: {
     status?: "draft" | "published" | "archived";
     category?: string;
@@ -828,8 +828,8 @@ export const publicAPI = {
     page?: number;
     limit?: number;
     sort?: string;
-  }) => api.get("/news", { params }),
-  getNewsArticle: (id: string) => api.get(`/news/${id}`),
+  }) => api.get("/public/news", { params }),
+  getNewsArticle: (id: string) => api.get(`/public/news/${id}`),
   getClients: (params?: {
     status?: "active" | "inactive" | "archived";
     type?: string;
@@ -838,7 +838,7 @@ export const publicAPI = {
     page?: number;
     limit?: number;
     sort?: string;
-  }) => api.get("/clients", { params }),
+  }) => api.get("/public/clients", { params }),
 };
 
 export default api;

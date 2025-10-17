@@ -14,12 +14,19 @@ const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
 const path = require("path");
+const multer = require("multer");
+const crypto = require("crypto");
 const {
   handlePhotoUpload,
   deletePhoto,
   normalizePhotoKey,
   inferManagedPhotoKey,
 } = require("../utils/photoUpload");
+const {
+  deleteObject,
+  buildPublicUrl,
+  resolveKeyFromUrl,
+} = require("../utils/s3Storage");
 
 // Lightweight in-memory cache for dashboard
 const __dashboardCache = { data: null, ts: 0 };
@@ -104,7 +111,7 @@ const extractFilenamePart = (value) => {
   return filename;
 };
 
-const normalizePhotoKey = (rawKey) => {
+const normalizeTeamPhotoKey = (rawKey) => {
   const filename = extractFilenamePart(rawKey);
   if (!filename) {
     return undefined;
@@ -114,7 +121,7 @@ const normalizePhotoKey = (rawKey) => {
   return ensureTeamKeyPrefix(sanitized);
 };
 
-const inferManagedPhotoKey = (url) => {
+const inferManagedTeamPhotoKey = (url) => {
   if (!url || typeof url !== "string") {
     return undefined;
   }
@@ -148,17 +155,17 @@ const inferManagedPhotoKey = (url) => {
     ) {
       return undefined;
     }
-    return normalizePhotoKey(normalizedKey);
+    return normalizeTeamPhotoKey(normalizedKey);
   }
 
-  return normalizePhotoKey(trimmed);
+  return normalizeTeamPhotoKey(trimmed);
 };
 
-const resolveTeamObjectKey = (rawKey) => normalizePhotoKey(rawKey);
+const resolveTeamObjectKey = (rawKey) => normalizeTeamPhotoKey(rawKey);
 
 const deleteTeamPhoto = async (photoKey) => {
   const managedKey =
-    resolveTeamObjectKey(photoKey) || inferManagedPhotoKey(photoKey);
+    resolveTeamObjectKey(photoKey) || inferManagedTeamPhotoKey(photoKey);
 
   if (!managedKey) {
     return;
@@ -1791,7 +1798,7 @@ exports.deleteTeamMember = asyncHandler(async (req, res) => {
   }
 
   const managedPhotoKey =
-    member.photoKey || inferManagedPhotoKey(member.photoUrl);
+    member.photoKey || inferManagedTeamPhotoKey(member.photoUrl);
   if (managedPhotoKey) {
     await deletePhoto(managedPhotoKey, "team");
   }
