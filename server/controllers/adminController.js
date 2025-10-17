@@ -7,6 +7,7 @@ const Notification = require("../models/Notification");
 const Report = require("../models/Report");
 const Dispute = require("../models/Dispute");
 const TeamMember = require("../models/TeamMember");
+const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 const News = require("../models/News");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
@@ -202,6 +203,48 @@ const generateTeamObjectKey = (originalName) => {
 };
 
 const buildTeamPhotoUrl = (key) => buildPublicUrl(key);
+// @desc    Seed default team members if collection is empty
+// @route   POST /api/admin/team/seed-defaults
+// @access  Private/Admin HR
+exports.seedDefaultTeamMembers = asyncHandler(async (req, res) => {
+  const existingCount = await TeamMember.countDocuments();
+  if (existingCount > 0) {
+    return res.status(200).json({
+      success: true,
+      message: "Team collection already initialized",
+      data: { seeded: false, count: existingCount },
+    });
+  }
+
+  try {
+    const docs = (DEFAULT_TEAM_MEMBERS || []).map((m) => ({
+      name: m.name,
+      role: m.role,
+      department: m.department,
+      photoUrl: m.image || undefined,
+      status: "active",
+      order:
+        typeof m.order === "number" && Number.isFinite(m.order)
+          ? m.order
+          : undefined,
+    }));
+    if (docs.length > 0) {
+      await TeamMember.insertMany(docs, { ordered: false });
+    }
+    const count = await TeamMember.countDocuments();
+    return res.status(201).json({
+      success: true,
+      message: "Default team members seeded",
+      data: { seeded: true, count },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to seed default team members",
+      error: error?.message || String(error),
+    });
+  }
+});
 
 // @desc    Get admin dashboard (optimized)
 // @route   GET /api/admin/dashboard

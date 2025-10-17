@@ -32,6 +32,7 @@ const {
   createNews,
   updateNews,
   deleteNews,
+  seedDefaultTeamMembers,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
 const {
@@ -74,7 +75,8 @@ router.put("/payments/:id/mark-paid", markPaymentPaid);
 // Reviews moderation
 router.get("/reviews", getReviews);
 router.put("/reviews/:id", moderateReview);
-
+// Seed defaults (manual trigger)
+router.post("/team/seed-defaults", seedDefaultTeamMembers);
 // Disputes management
 router.get("/disputes", getDisputes);
 router.get("/disputes/:id", getDispute);
