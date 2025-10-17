@@ -81,10 +81,6 @@ const TrustedBySection: React.FC = () => {
       "CGGC (China Gezuba Group)",
       "Children Believe",
       "DanChurchAid (DCA)",
-      "FHI360",
-      "International IDEA",
-      "Jhpiego",
-      "The Lutheran World Federation",
       "Oxfam",
       "Stantec",
       "The HALO Trust",
@@ -95,47 +91,16 @@ const TrustedBySection: React.FC = () => {
       ? CLIENTS.filter((c) => testNames.has(c.name))
       : CLIENTS;
 
-    // Local overrides pointing to /public/clients assets to avoid S3 during tests
-    const testLogoOverrides: Record<string, string> = {
-      Unimpresa: "/clients/unimpresa.svg",
-      Voith: "/clients/voith.svg",
-      "Action Against Hunger": "/clients/action-against-hunger.svg",
-      "Addis Guzo": "/clients/addis-guzo.svg",
-      "Alive & Thrive": "/clients/alive-and-thrive.svg",
-      "CGGC (China Gezuba Group)": "/clients/cggc.svg",
-      "Children Believe": "/clients/children-believe.svg",
-      "DanChurchAid (DCA)": "/clients/dca.svg",
-      FHI360: "/clients/fhi360.svg",
-      "International IDEA": "/clients/international-idea.svg",
-      Jhpiego: "/clients/jhpiego.svg",
-      "The Lutheran World Federation": "/clients/lutheran-world-federation.svg",
-      Oxfam: "/clients/oxfam.svg",
-      Stantec: "/clients/stantec.svg",
-      "The HALO Trust": "/clients/halo-trust.svg",
-      Trablisa: "/clients/trablisa.svg",
-    };
-
-    return source.map((client) => {
-      const override = isTestMode ? testLogoOverrides[client.name] : undefined;
-      const logoSrc = override
-        ? override
-        : client.logo
-          ? (resolveAssetUrl(client.logo) ?? client.logo)
-          : undefined;
-      return {
-        ...client,
-        initials: getInitials(client.name),
-        logoSrc,
-      };
-    });
+    return source.map((client) => ({
+      ...client,
+      initials: getInitials(client.name),
+      logoSrc: client.logo
+        ? (resolveAssetUrl(client.logo) ?? client.logo)
+        : undefined,
+    }));
   }, [isTestMode]);
 
-  // Rotating list updated every 3 seconds to auto-change logos without remounting tracks
-  const [rotating, setRotating] = useState<EnhancedClient[]>(enhancedClients);
-
-  useEffect(() => {
-    setRotating(enhancedClients);
-  }, [enhancedClients]);
+  // Static list for marquee; no timed rotation to avoid visual jumps
 
   const rotateArray = useCallback((arr: EnhancedClient[], offset: number) => {
     if (!arr.length) return arr;
@@ -143,23 +108,11 @@ const TrustedBySection: React.FC = () => {
     return arr.slice(k).concat(arr.slice(0, k));
   }, []);
 
-  useEffect(() => {
-    if (reduceMotion || !isVisible) return;
-    const id = setInterval(() => {
-      setRotating((prev) => rotateArray(prev, 1));
-    }, 3000);
-    return () => clearInterval(id);
-  }, [reduceMotion, isVisible, rotateArray]);
-
-  const marqueeA = useMemo(() => {
-    const list = rotating;
-    return [...list, ...list];
-  }, [rotating]);
-
-  const marqueeB = useMemo(() => {
-    const list = rotateArray(rotating, Math.floor(rotating.length / 3) || 1);
-    return [...list, ...list];
-  }, [rotating, rotateArray]);
+  // No interval-based rotation; continuous CSS marquee ensures smooth motion
+  const marqueeOffsetB = useMemo(
+    () => Math.floor(enhancedClients.length / 3) || 1,
+    [enhancedClients.length],
+  );
 
   const renderTile = (
     client: EnhancedClient,
@@ -211,10 +164,6 @@ const TrustedBySection: React.FC = () => {
       aria-label={t("eyebrow")}
       ref={sectionRef}
     >
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-16 top-12 h-56 w-56 rounded-full bg-cyan-400/10 blur-3xl" />
-        <div className="absolute -right-10 bottom-0 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
-      </div>
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <span className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1 text-sm font-semibold text-blue-700">
@@ -227,61 +176,56 @@ const TrustedBySection: React.FC = () => {
           <p className="mt-3 text-base text-slate-600 sm:text-lg">
             {t("subtitle")}
           </p>
+
+          {reduceMotion ? (
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center">
+              {enhancedClients.map((client, index) =>
+                renderTile(client, index, { keyOverride: `grid-${index}` }),
+              )}
+            </div>
+          ) : (
+            <div className="mt-12 space-y-10">
+              {/* Row 1 - forward */}
+              <div className="group relative overflow-hidden marquee-mask">
+                <div
+                  className="marquee-track"
+                  data-variant="primary"
+                  data-animate={isVisible}
+                  aria-hidden="true"
+                >
+                  {[0, 1].map((clone) =>
+                    enhancedClients.map((client, index) =>
+                      renderTile(client, index, {
+                        withTooltip: true,
+                        keyOverride: `${client.name}-a-${clone}-${index}`,
+                      }),
+                    ),
+                  )}
+                </div>
+              </div>
+
+              {/* Row 2 - reverse */}
+              <div className="group relative overflow-hidden marquee-mask">
+                <div
+                  className="marquee-track"
+                  data-variant="secondary"
+                  data-animate={isVisible}
+                  aria-hidden="true"
+                >
+                  {[0, 1].map((clone) =>
+                    rotateArray(enhancedClients, marqueeOffsetB).map(
+                      (client, index) =>
+                        renderTile(client, index, {
+                          withTooltip: true,
+                          keyOverride: `${client.name}-b-${clone}-${index}`,
+                        }),
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-
-        {reduceMotion ? (
-          <div className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center justify-items-center">
-            {CLIENTS.map((client, index) =>
-              renderTile(
-                {
-                  ...client,
-                  initials: getInitials(client.name),
-                  logoSrc: client.logo
-                    ? (resolveAssetUrl(client.logo) ?? client.logo)
-                    : undefined,
-                },
-                index,
-                { keyOverride: `grid-${index}` },
-              ),
-            )}
-          </div>
-        ) : (
-          <div className="mt-12 space-y-10">
-            {/* Row 1 - forward */}
-            <div className="group relative overflow-hidden marquee-mask">
-              <div
-                className="marquee-track"
-                data-variant="primary"
-                data-animate={isVisible}
-                aria-hidden="true"
-              >
-                {marqueeA.map((client, index) =>
-                  renderTile(client, index, {
-                    withTooltip: true,
-                    keyOverride: `a-${index}`,
-                  }),
-                )}
-              </div>
-            </div>
-
-            {/* Row 2 - reverse */}
-            <div className="group relative overflow-hidden marquee-mask">
-              <div
-                className="marquee-track"
-                data-variant="secondary"
-                data-animate={isVisible}
-                aria-hidden="true"
-              >
-                {marqueeB.map((client, index) =>
-                  renderTile(client, index, {
-                    withTooltip: true,
-                    keyOverride: `b-${index}`,
-                  }),
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <style jsx>{`
@@ -294,6 +238,9 @@ const TrustedBySection: React.FC = () => {
           width: max-content;
           animation: marquee var(--speed) linear infinite;
           will-change: transform;
+          backface-visibility: hidden;
+          transform: translateZ(0);
+          contain: layout paint style;
         }
 
         .marquee-track[data-variant="secondary"] {
@@ -302,11 +249,8 @@ const TrustedBySection: React.FC = () => {
           opacity: 0.95;
         }
 
-        /* Slow down on hover instead of pausing */
-        .group:hover .marquee-track {
-          --speed: 90s;
-        }
-        /* Pause if focused for accessibility */
+        /* Pause on hover/focus for smooth reading */
+        .group:hover .marquee-track,
         .group:focus-within .marquee-track {
           animation-play-state: paused;
         }
@@ -318,19 +262,19 @@ const TrustedBySection: React.FC = () => {
 
         @keyframes marquee {
           0% {
-            transform: translateX(0);
+            transform: translate3d(0, 0, 0);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translate3d(-50%, 0, 0);
           }
         }
 
         @keyframes marquee-reverse {
           0% {
-            transform: translateX(-50%);
+            transform: translate3d(-50%, 0, 0);
           }
           100% {
-            transform: translateX(0);
+            transform: translate3d(0, 0, 0);
           }
         }
 
@@ -429,9 +373,6 @@ const TrustedBySection: React.FC = () => {
         @media (max-width: 640px) {
           .marquee-track {
             --gap: 2rem;
-          }
-          .group:hover .marquee-track {
-            --speed: 70s;
           }
         }
       `}</style>
