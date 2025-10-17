@@ -1,6 +1,7 @@
 const TeamMember = require("../models/TeamMember");
 const asyncHandler = require("../utils/asyncHandler");
 const News = require("../models/News");
+const Client = require("../models/Client");
 const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 
 // Public controller to return deduped team members for About page
@@ -67,9 +68,15 @@ exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
   // Ensure any missing defaults are present even when collection isn't empty
   try {
     const allExisting = await TeamMember.find({}, "name role").lean();
-    const toKey = (m) => `${(m.name || "").toString().trim().toLowerCase()}::${(m.role || "").toString().trim().toLowerCase()}`;
+    const toKey = (m) =>
+      `${(m.name || "").toString().trim().toLowerCase()}::${(m.role || "")
+        .toString()
+        .trim()
+        .toLowerCase()}`;
     const existingKeys = new Set(allExisting.map(toKey));
-    const missing = (DEFAULT_TEAM_MEMBERS || []).filter((m) => !existingKeys.has(toKey(m)));
+    const missing = (DEFAULT_TEAM_MEMBERS || []).filter(
+      (m) => !existingKeys.has(toKey(m))
+    );
     if (missing.length > 0) {
       const docs = missing.map((m) => ({
         name: m.name,
@@ -90,7 +97,10 @@ exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
         .lean();
     }
   } catch (backfillErr) {
-    console.warn("Backfill of missing default team members failed:", backfillErr);
+    console.warn(
+      "Backfill of missing default team members failed:",
+      backfillErr
+    );
   }
 
   const normalizeKey = (m) => {
@@ -198,5 +208,55 @@ exports.getNewsArticle = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     data: news,
+  });
+});
+
+// @desc    Get all clients with filtering
+// @route   GET /api/public/clients
+// @access  Public
+exports.getClients = asyncHandler(async (req, res) => {
+  const {
+    status,
+    type,
+    service,
+    page = 1,
+    limit = 20,
+    search,
+    sort = "-createdAt",
+  } = req.query;
+
+  const query = {};
+  if (status) query.status = status;
+  if (type) query.type = type;
+  if (service) query.service = service;
+
+  if (search) {
+    query.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { type: { $regex: search, $options: "i" } },
+      { service: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const sortBy = sort ? String(sort).split(",").join(" ") : "-createdAt";
+  const clientsQuery = Client.find(query)
+    .sort(sortBy)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
+
+  const clients = await clientsQuery;
+  const total = await Client.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: clients.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit),
+    },
+    data: clients,
   });
 });

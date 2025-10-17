@@ -620,10 +620,30 @@ export const adminAPI = {
     },
   ) => api.put(`/admin/team/${id}`, payload),
   deleteTeamMember: (id: string) => api.delete(`/admin/team/${id}`),
+
+  // photo upload routes
   uploadTeamPhoto: (file: File) => {
     const formData = new FormData();
     formData.append("photo", file);
     return api.post("/admin/team/upload-photo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+  uploadNewsImage: (file: File) => {
+    const formData = new FormData();
+    formData.append("photo", file);
+    return api.post("/admin/news/upload-photo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+  uploadClientLogo: (file: File) => {
+    const formData = new FormData();
+    formData.append("photo", file);
+    return api.post("/admin/clients/upload-photo", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -666,6 +686,36 @@ export const adminAPI = {
     },
   ) => api.put(`/admin/news/${id}`, payload),
   deleteNews: (id: string) => api.delete(`/admin/news/${id}`),
+
+  // Client management
+  getClients: (params?: {
+    status?: "active" | "inactive" | "archived";
+    type?: string;
+    service?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/admin/clients", { params }),
+  getClient: (id: string) => api.get(`/admin/clients/${id}`),
+  createClient: (payload: {
+    name: string;
+    type: string;
+    service?: string;
+    logo?: string;
+    status?: "active" | "inactive" | "archived";
+  }) => api.post("/admin/clients", payload),
+  updateClient: (
+    id: string,
+    payload: {
+      name?: string;
+      type?: string;
+      service?: string;
+      logo?: string;
+      status?: "active" | "inactive" | "archived";
+    },
+  ) => api.put(`/admin/clients/${id}`, payload),
+  deleteClient: (id: string) => api.delete(`/admin/clients/${id}`),
 
   // Additional endpoints from second adminAPI
   getStats: () => api.get("/admin/stats"),
@@ -780,6 +830,15 @@ export const publicAPI = {
     sort?: string;
   }) => api.get("/news", { params }),
   getNewsArticle: (id: string) => api.get(`/news/${id}`),
+  getClients: (params?: {
+    status?: "active" | "inactive" | "archived";
+    type?: string;
+    service?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/clients", { params }),
 };
 
 export default api;

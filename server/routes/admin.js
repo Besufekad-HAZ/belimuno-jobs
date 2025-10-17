@@ -32,6 +32,13 @@ const {
   createNews,
   updateNews,
   deleteNews,
+  getClients,
+  getClient,
+  createClient,
+  updateClient,
+  deleteClient,
+  uploadNewsImage,
+  uploadClientLogo,
   seedDefaultTeamMembers,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
@@ -83,10 +90,23 @@ router.get("/disputes/:id", getDispute);
 router.post("/disputes", createDispute);
 router.put("/disputes/:id", updateDispute);
 
+// Photo upload routes
 router.post(
   "/team/upload-photo",
   authorize("super_admin", "admin_hr"),
   uploadTeamMemberPhoto
+);
+
+router.post(
+  "/news/upload-photo",
+  authorize("super_admin", "admin_hr"),
+  uploadNewsImage
+);
+
+router.post(
+  "/clients/upload-photo",
+  authorize("super_admin", "admin_hr"),
+  uploadClientLogo
 );
 
 // Public team route (no auth) for the About page and public site
@@ -110,5 +130,12 @@ router.get("/news/:id", getNewsArticle);
 router.post("/news", createNews);
 router.put("/news/:id", updateNews);
 router.delete("/news/:id", deleteNews);
+
+// Client management (any admin)
+router.get("/clients", getClients);
+router.get("/clients/:id", getClient);
+router.post("/clients", createClient);
+router.put("/clients/:id", updateClient);
+router.delete("/clients/:id", deleteClient);
 
 module.exports = router;

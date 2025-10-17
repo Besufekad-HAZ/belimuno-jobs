@@ -29,51 +29,43 @@ import { adminAPI } from "@/lib/api";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { toast } from "@/components/ui/sonner";
 
-interface NewsArticle {
-  _id?: string;
-  title: string;
-  excerpt: string;
-  content?: string;
-  date: string;
-  category: string;
-  imageUrl?: string;
-  image?: string;
-  readTime?: string;
-  author?: string;
-  status?: "draft" | "published" | "archived";
+interface Client {
+  _id: string;
+  name: string;
+  type: string;
+  service: string;
+  logo: string;
+  status?: "active" | "inactive" | "archived";
   createdAt?: string;
   updatedAt?: string;
 }
 
-type NewsFormState = {
-  title: string;
-  excerpt: string;
-  content: string;
-  category: string;
-  author: string;
-  image: string;
+type ClientFormState = {
+  name: string;
+  type: string;
+  service: string;
+  logo: string;
 };
 
-const emptyNewsForm: NewsFormState = {
-  title: "",
-  excerpt: "",
-  content: "",
-  category: "",
-  author: "",
-  image: "",
+const emptyClientForm: ClientFormState = {
+  name: "",
+  type: "",
+  service: "",
+  logo: "",
 };
 
-const MAX_NEWS_IMAGE_SIZE = 1 * 1024 * 1024; // 1MB cap to keep news assets lightweight
+const MAX_CLIENT_LOGO_SIZE = 1 * 1024 * 1024; // 1MB cap to keep client logos lightweight
 
-const categorySuggestions = [
-  "Company News",
-  "Industry Updates",
-  "Job Market Trends",
-  "Success Stories",
-  "Platform Updates",
-  "Community",
-  "Announcements",
-  "Tips & Advice",
+const typeSuggestions = [
+  "International NGO",
+  "Local NGO",
+  "Construction",
+  "Intergovernmental Organisation",
+  "Faith-based NGO",
+  "Security Company",
+  "Engineering & Design",
+  "Business Association",
+  "International Company",
 ];
 
 const formatDate = (dateString: string) => {
@@ -86,9 +78,9 @@ const formatDate = (dateString: string) => {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case "published":
+    case "active":
       return "success";
-    case "draft":
+    case "inactive":
       return "warning";
     case "archived":
       return "gray";
@@ -97,136 +89,136 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const ManageNewsPage: React.FC = () => {
-  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+const ManageClientsPage: React.FC = () => {
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [banner, setBanner] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(
-    null,
-  );
-  const [form, setForm] = useState<NewsFormState>(emptyNewsForm);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [form, setForm] = useState<ClientFormState>(emptyClientForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formMessage, setFormMessage] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageUploadError, setImageUploadError] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<NewsArticle | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Client | null>(null);
   const [deleting, setDeleting] = useState(false);
   const hasFetchedRef = useRef(false);
-  const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
 
-  const resetImageState = useCallback(() => {
-    setImagePreview((prev) => {
+  const resetLogoState = useCallback(() => {
+    setLogoPreview((prev) => {
       if (prev && prev.startsWith("blob:")) {
         URL.revokeObjectURL(prev);
       }
       return null;
     });
-    setImageUploadError(null);
-    setUploadingImage(false);
-    if (imageInputRef.current) {
-      imageInputRef.current.value = "";
+    setLogoUploadError(null);
+    setUploadingLogo(false);
+    if (logoInputRef.current) {
+      logoInputRef.current.value = "";
     }
-  }, [imageInputRef]);
+  }, [logoInputRef]);
 
   useEffect(() => {
     return () => {
-      if (imagePreview && imagePreview.startsWith("blob:")) {
-        URL.revokeObjectURL(imagePreview);
+      if (logoPreview && logoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(logoPreview);
       }
     };
-  }, [imagePreview]);
+  }, [logoPreview]);
 
-  const sortedNews = useMemo(
+  const sortedClients = useMemo(
     () =>
-      [...newsArticles].sort((a, b) => {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      [...clients].sort((a, b) => {
+        return (
+          new Date(b.createdAt || "").getTime() -
+          new Date(a.createdAt || "").getTime()
+        );
       }),
-    [newsArticles],
+    [clients],
   );
 
-  const fetchNewsArticles = useCallback(async () => {
+  const fetchClients = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await adminAPI.getNews({
+      const response = await adminAPI.getClients({
         limit: 50,
-        sort: "-date",
+        sort: "-createdAt",
       });
 
-      const articles = response.data?.data || [];
-      setNewsArticles(articles);
+      const clientsData = response.data?.data || [];
+      setClients(clientsData);
       setBanner((prev) => (prev?.type === "error" ? null : prev));
     } catch (error) {
-      console.error("Failed to load news articles:", error);
-      setNewsArticles([]);
+      console.error("Failed to load clients:", error);
+      setClients([]);
       setBanner({
         type: "error",
-        message: "We couldn't load news articles. Please try again shortly.",
+        message: "We couldn't load clients. Please try again shortly.",
       });
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const handleOpenModal = (article?: NewsArticle) => {
-    if (article) {
-      setEditingArticle(article);
+  const handleOpenModal = (client?: Client) => {
+    if (client) {
+      setEditingClient(client);
       setForm({
-        title: article.title,
-        excerpt: article.excerpt,
-        content: article.content || "",
-        category: article.category,
-        author: article.author || "",
-        image: article.imageUrl || article.image || "",
+        name: client.name,
+        type: client.type,
+        service: client.service || "",
+        logo: client.logo || "",
       });
     } else {
-      setEditingArticle(null);
-      setForm(emptyNewsForm);
+      setEditingClient(null);
+      setForm(emptyClientForm);
     }
     setFormErrors({});
     setFormMessage(null);
-    resetImageState();
+    resetLogoState();
     setShowModal(true);
     setTimeout(() => firstFieldRef.current?.focus(), 0);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setEditingArticle(null);
-    setForm(emptyNewsForm);
+    setEditingClient(null);
+    setForm(emptyClientForm);
     setFormErrors({});
     setFormMessage(null);
-    resetImageState();
+    resetLogoState();
   };
 
-  const handleInputChange = (field: keyof NewsFormState) => (value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setFormErrors((prev) => {
-      if (!prev[field]) {
-        return prev;
-      }
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
+  const handleInputChange =
+    (field: keyof ClientFormState) => (value: string) => {
+      setForm((prev) => ({ ...prev, [field]: value }));
+      setFormErrors((prev) => {
+        if (!prev[field]) {
+          return prev;
+        }
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    };
+
+  const handleSelectLogo = () => {
+    setLogoUploadError(null);
+    logoInputRef.current?.click();
   };
 
-  const handleSelectImage = () => {
-    setImageUploadError(null);
-    imageInputRef.current?.click();
-  };
-
-  const handleImageFileChange = async (
+  const handleLogoFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
@@ -235,21 +227,21 @@ const ManageNewsPage: React.FC = () => {
     }
 
     if (!file.type.startsWith("image/")) {
-      setImageUploadError("Please choose an image file (PNG or JPG).");
+      setLogoUploadError("Please choose an image file (PNG or JPG).");
       event.target.value = "";
       return;
     }
 
-    if (file.size > MAX_NEWS_IMAGE_SIZE) {
-      setImageUploadError("Images must be 1MB or smaller.");
+    if (file.size > MAX_CLIENT_LOGO_SIZE) {
+      setLogoUploadError("Images must be 1MB or smaller.");
       event.target.value = "";
       return;
     }
 
     const objectUrl = URL.createObjectURL(file);
-    setImageUploadError(null);
-    setUploadingImage(true);
-    setImagePreview((prev) => {
+    setLogoUploadError(null);
+    setUploadingLogo(true);
+    setLogoPreview((prev) => {
       if (prev && prev.startsWith("blob:")) {
         URL.revokeObjectURL(prev);
       }
@@ -257,54 +249,51 @@ const ManageNewsPage: React.FC = () => {
     });
 
     try {
-      const response = await adminAPI.uploadNewsImage(file);
-      const uploadedUrl =
-        (response.data?.data?.url as string | undefined) ??
-        (response.data?.url as string | undefined);
+      const response = await adminAPI.uploadClientLogo(file);
+      const uploadedUrl = response.data?.data?.url;
+      console.log("Upload response:", response.data?.data);
 
       if (uploadedUrl) {
+        console.log("Using URL:", uploadedUrl);
         // Store the uploaded URL in a temporary state for form submission
-        setForm((prev) => ({ ...prev, image: uploadedUrl }));
-        toast.success("Article image uploaded.");
+        setForm((prev) => ({ ...prev, logo: uploadedUrl }));
+        toast.success("Client logo uploaded.");
       } else {
-        setImageUploadError(
+        setLogoUploadError(
           "Upload finished but no URL was returned. Please try again.",
         );
       }
     } catch (error) {
-      console.error("Failed to upload image:", error);
-      setImageUploadError(
-        "We couldn't upload that image. Please try a different file.",
+      console.error("Failed to upload logo:", error);
+      setLogoUploadError(
+        "We couldn't upload that logo. Please try a different file.",
       );
-      setImagePreview((prev) => {
+      setLogoPreview((prev) => {
         if (prev && prev.startsWith("blob:")) {
           URL.revokeObjectURL(prev);
         }
         return null;
       });
     } finally {
-      setUploadingImage(false);
-      if (imageInputRef.current) {
-        imageInputRef.current.value = "";
+      setUploadingLogo(false);
+      if (logoInputRef.current) {
+        logoInputRef.current.value = "";
       }
     }
   };
 
-  const previewSource = imagePreview;
+  const previewSource = logoPreview;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const errors: Record<string, string> = {};
 
-    if (!form.title.trim()) {
-      errors.title = "Please add a title for the news article.";
+    if (!form.name.trim()) {
+      errors.name = "Please add a client name.";
     }
-    if (!form.excerpt.trim()) {
-      errors.excerpt = "Please add an excerpt or summary.";
-    }
-    if (!form.category.trim()) {
-      errors.category = "Please select a category.";
+    if (!form.type.trim()) {
+      errors.type = "Please select a client type.";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -317,27 +306,25 @@ const ManageNewsPage: React.FC = () => {
       setFormMessage(null);
 
       const payload = {
-        title: form.title.trim(),
-        excerpt: form.excerpt.trim(),
-        content: form.content.trim() || undefined,
-        category: form.category.trim(),
-        author: form.author.trim() || undefined,
-        image: form.image.trim() || undefined,
-        status: "published" as const, // Default to published
+        name: form.name.trim(),
+        type: form.type.trim(),
+        service: form.service.trim() || undefined,
+        logo: form.logo.trim() || undefined,
+        status: "active" as const, // Default to active
       };
 
-      if (editingArticle) {
-        await adminAPI.updateNews(editingArticle._id!, payload);
-        toast.success("News article updated successfully");
+      if (editingClient) {
+        await adminAPI.updateClient(editingClient._id!, payload);
+        toast.success("Client updated successfully");
       } else {
-        await adminAPI.createNews(payload);
-        toast.success("News article created successfully");
+        await adminAPI.createClient(payload);
+        toast.success("Client created successfully");
       }
 
-      await fetchNewsArticles();
+      await fetchClients();
       handleCloseModal();
     } catch (error) {
-      console.error("Failed to save news article:", error);
+      console.error("Failed to save client:", error);
       const apiMessage = (
         error as { response?: { data?: { message?: string } } }
       )?.response?.data?.message;
@@ -345,30 +332,30 @@ const ManageNewsPage: React.FC = () => {
         type: "error",
         message:
           apiMessage ||
-          "We couldn't save this news article right now. Please retry in a moment.",
+          "We couldn't save this client right now. Please retry in a moment.",
       });
-      toast.error("Unable to save news article");
+      toast.error("Unable to save client");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const requestDelete = (article: NewsArticle) => {
-    if (!article._id) return;
-    setDeleteTarget(article);
+  const requestDelete = (client: Client) => {
+    if (!client._id) return;
+    setDeleteTarget(client);
   };
 
   const confirmDelete = async () => {
     if (!deleteTarget || !deleteTarget._id) return;
     setDeleting(true);
     try {
-      await adminAPI.deleteNews(deleteTarget._id);
-      setNewsArticles((prev) => prev.filter((a) => a._id !== deleteTarget._id));
-      toast.success("News article deleted successfully");
+      await adminAPI.deleteClient(deleteTarget._id);
+      setClients((prev) => prev.filter((c) => c._id !== deleteTarget._id));
+      toast.success("Client deleted successfully");
       setDeleteTarget(null);
     } catch (error) {
-      console.error("Failed to delete news article:", error);
-      toast.error("Unable to delete this news article right now.");
+      console.error("Failed to delete client:", error);
+      toast.error("Unable to delete this client right now.");
     } finally {
       setDeleting(false);
     }
@@ -388,17 +375,17 @@ const ManageNewsPage: React.FC = () => {
     }
 
     hasFetchedRef.current = true;
-    fetchNewsArticles();
-  }, [fetchNewsArticles, router]);
+    fetchClients();
+  }, [fetchClients, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Manage News</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Manage Clients</h1>
             <p className="text-gray-600 max-w-3xl mt-2">
-              Create and manage news articles for the platform
+              Create and manage client profiles for the platform
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -416,7 +403,7 @@ const ManageNewsPage: React.FC = () => {
               onClick={() => handleOpenModal()}
             >
               <Plus className="h-4 w-4" />
-              Add News Article
+              Add Client
             </Button>
           </div>
         </div>
@@ -424,11 +411,9 @@ const ManageNewsPage: React.FC = () => {
         <Card className="p-6 mb-8">
           <div className="flex flex-col gap-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                News Articles
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900">Clients</h2>
               <p className="text-sm text-gray-600 mt-1">
-                Manage all news articles published on the platform
+                Manage all client profiles on the platform
               </p>
             </div>
 
@@ -444,7 +429,7 @@ const ManageNewsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {Array.from({ length: 6 }).map((_, index) => (
                   <div
-                    key={`news-skeleton-${index}`}
+                    key={`client-skeleton-${index}`}
                     className="flex flex-col rounded-2xl border border-blue-100 bg-white/70 p-4 animate-pulse"
                   >
                     <div className="h-32 w-full rounded-lg bg-blue-100 mb-3" />
@@ -456,20 +441,19 @@ const ManageNewsPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-            ) : sortedNews.length > 0 ? (
+            ) : sortedClients.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {sortedNews.map((article) => {
-                  const image = article.imageUrl || article.image;
+                {sortedClients.map((client) => {
                   return (
                     <div
-                      key={article._id || `${article.title}-${article.date}`}
+                      key={client._id || `${client.name}-${client.type}`}
                       className="group relative flex flex-col rounded-2xl border border-blue-100 bg-white/95 p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                     >
-                      {image && (
+                      {client.logo && (
                         <div className="relative h-32 w-full overflow-hidden rounded-lg mb-3">
                           <Image
-                            src={image}
-                            alt={article.title}
+                            src={client.logo}
+                            alt={client.name}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className="object-cover"
@@ -479,40 +463,28 @@ const ManageNewsPage: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center justify-between gap-2 mb-2">
                           <Badge
-                            variant={getStatusColor(
-                              article.status || "published",
-                            )}
+                            variant={getStatusColor(client.status || "active")}
                             size="sm"
                           >
-                            {article.status || "published"}
+                            {client.status || "active"}
                           </Badge>
                           <Badge variant="blue" size="sm">
-                            {article.category}
+                            {client.type}
                           </Badge>
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">
-                          {article.title}
+                          {client.name}
                         </h3>
-                        <p className="text-sm text-gray-600 line-clamp-3 mb-3">
-                          {article.excerpt}
-                        </p>
+                        {client.service && (
+                          <p className="text-sm text-gray-600 mb-2">
+                            Service: {client.service}
+                          </p>
+                        )}
                         <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {formatDate(article.date)}
+                            {formatDate(client.createdAt || "")}
                           </div>
-                          {article.readTime && (
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {article.readTime}
-                            </div>
-                          )}
-                          {article.author && (
-                            <div className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {article.author}
-                            </div>
-                          )}
                         </div>
                       </div>
                       <div className="flex gap-2 pt-3 border-t border-gray-100">
@@ -520,7 +492,7 @@ const ManageNewsPage: React.FC = () => {
                           variant="outline"
                           size="sm"
                           className="flex-1"
-                          onClick={() => handleOpenModal(article)}
+                          onClick={() => handleOpenModal(client)}
                         >
                           <Edit3 className="h-4 w-4 mr-1" />
                           Edit
@@ -529,7 +501,7 @@ const ManageNewsPage: React.FC = () => {
                           variant="ghost"
                           size="sm"
                           className="text-red-500 hover:text-red-600"
-                          onClick={() => requestDelete(article)}
+                          onClick={() => requestDelete(client)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -544,11 +516,11 @@ const ManageNewsPage: React.FC = () => {
                   <FileText className="h-7 w-7" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  No news articles yet
+                  No clients yet
                 </h3>
                 <p className="mt-2 text-sm text-gray-600 max-w-xl mx-auto">
-                  Start by creating your first news article to keep your users
-                  informed about platform updates and industry news.
+                  Start by creating your first client profile to showcase your
+                  partnerships and collaborations.
                 </p>
                 <Button
                   variant="primary"
@@ -557,7 +529,7 @@ const ManageNewsPage: React.FC = () => {
                   onClick={() => handleOpenModal()}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add News Article
+                  Add Client
                 </Button>
               </div>
             )}
@@ -568,7 +540,7 @@ const ManageNewsPage: React.FC = () => {
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
-        title={editingArticle ? "Edit News Article" : "Create News Article"}
+        title={editingClient ? "Edit Client" : "Create Client"}
         size="lg"
       >
         {formMessage && (
@@ -583,30 +555,30 @@ const ManageNewsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               ref={firstFieldRef}
-              label="Title"
-              value={form.title}
+              label="Client Name"
+              value={form.name}
               onChange={(event) =>
-                handleInputChange("title")(event.target.value)
+                handleInputChange("name")(event.target.value)
               }
-              placeholder="e.g. New Platform Features Launch"
-              error={formErrors.title}
+              placeholder="e.g. Acme Corporation"
+              error={formErrors.name}
               required
             />
             <div>
               <Input
-                label="Category"
-                value={form.category}
+                label="Client Type"
+                value={form.type}
                 onChange={(event) =>
-                  handleInputChange("category")(event.target.value)
+                  handleInputChange("type")(event.target.value)
                 }
-                placeholder="e.g. Company News"
-                error={formErrors.category}
-                list="news-categories"
+                placeholder="e.g. International NGO"
+                error={formErrors.type}
+                list="client-types"
                 required
               />
-              <datalist id="news-categories">
-                {categorySuggestions.map((category) => (
-                  <option key={category} value={category} />
+              <datalist id="client-types">
+                {typeSuggestions.map((type) => (
+                  <option key={type} value={type} />
                 ))}
               </datalist>
             </div>
@@ -614,52 +586,17 @@ const ManageNewsPage: React.FC = () => {
 
           <div>
             <Input
-              label="Author (optional)"
-              value={form.author}
+              label="Service"
+              value={form.service}
               onChange={(event) =>
-                handleInputChange("author")(event.target.value)
+                handleInputChange("service")(event.target.value)
               }
-              placeholder="e.g. John Doe"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">
-              Excerpt
-            </label>
-            <textarea
-              value={form.excerpt}
-              onChange={(event) =>
-                handleInputChange("excerpt")(event.target.value)
-              }
-              rows={3}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Brief summary of the article..."
-              required
-            />
-            {formErrors.excerpt && (
-              <p className="mt-1 text-sm text-red-600">{formErrors.excerpt}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">
-              Content
-            </label>
-            <textarea
-              value={form.content}
-              onChange={(event) =>
-                handleInputChange("content")(event.target.value)
-              }
-              rows={8}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Full article content..."
             />
           </div>
 
           <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-900">
-              Article Image
+              Client Logo
             </label>
             <div className="flex items-center gap-4">
               <div className="relative h-20 w-20 overflow-hidden rounded-lg border border-blue-100 bg-blue-50 flex items-center justify-center">
@@ -667,12 +604,12 @@ const ManageNewsPage: React.FC = () => {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={previewSource}
-                    alt="Article preview"
+                    alt="Client logo preview"
                     className="h-full w-full object-cover"
                   />
                 ) : (
                   <span className="text-lg font-semibold uppercase tracking-wide text-blue-700">
-                    IMG
+                    LOGO
                   </span>
                 )}
               </div>
@@ -681,29 +618,29 @@ const ManageNewsPage: React.FC = () => {
                   type="button"
                   variant="outline"
                   className="inline-flex items-center gap-2"
-                  onClick={handleSelectImage}
-                  loading={uploadingImage}
-                  disabled={uploadingImage}
+                  onClick={handleSelectLogo}
+                  loading={uploadingLogo}
+                  disabled={uploadingLogo}
                 >
                   <UploadCloud className="h-4 w-4" />
-                  {uploadingImage ? "Uploading..." : "Upload image"}
+                  {uploadingLogo ? "Uploading..." : "Upload logo"}
                 </Button>
                 <p className="text-xs text-gray-500">
                   PNG or JPG up to 1MB. We&apos;ll host it for you.
                 </p>
-                {imageUploadError && (
-                  <p className="text-xs text-red-600">{imageUploadError}</p>
+                {logoUploadError && (
+                  <p className="text-xs text-red-600">{logoUploadError}</p>
                 )}
               </div>
             </div>
           </div>
 
           <input
-            ref={imageInputRef}
+            ref={logoInputRef}
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={handleImageFileChange}
+            onChange={handleLogoFileChange}
           />
 
           <div className="flex justify-end gap-3">
@@ -721,7 +658,7 @@ const ManageNewsPage: React.FC = () => {
               className="min-w-[150px]"
             >
               <Plus className="h-4 w-4" />
-              {editingArticle ? "Update Article" : "Create Article"}
+              {editingClient ? "Update Client" : "Create Client"}
             </Button>
           </div>
         </form>
@@ -730,14 +667,14 @@ const ManageNewsPage: React.FC = () => {
       <Modal
         isOpen={!!deleteTarget}
         onClose={deleting ? () => {} : cancelDelete}
-        title={deleteTarget ? `Delete "${deleteTarget.title}"?` : "Confirm"}
+        title={deleteTarget ? `Delete "${deleteTarget.name}"?` : "Confirm"}
         size="sm"
         preventCloseOnOutsideClick={deleting}
       >
         <div className="space-y-4">
           <p className="text-sm text-slate-600">
-            This will permanently delete the news article. This action cannot be
-            undone.
+            This will permanently delete the client profile. This action cannot
+            be undone.
           </p>
           <div className="flex justify-end gap-3">
             <Button
@@ -764,4 +701,4 @@ const ManageNewsPage: React.FC = () => {
   );
 };
 
-export default ManageNewsPage;
+export default ManageClientsPage;

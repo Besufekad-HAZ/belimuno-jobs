@@ -1125,6 +1125,7 @@
       "buttons": {
         "manageTeam": "Manage Team",
         "manageNews": "Manage News",
+        "manageClients": "Manage Clients",
         "workerManagement": "Worker Management",
         "disputeResolution": "Dispute Resolution",
         "performanceReviews": "Performance Reviews"

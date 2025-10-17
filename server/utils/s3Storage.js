@@ -1,4 +1,8 @@
-const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} = require("@aws-sdk/client-s3");
 
 const requiredEnv = (value, name) => {
   if (!value) {
@@ -7,12 +11,13 @@ const requiredEnv = (value, name) => {
   return value;
 };
 
-const REGION = process.env.AWS_S3_REGION || process.env.AWS_REGION || "us-east-1";
+const REGION =
+  process.env.AWS_S3_REGION || process.env.AWS_REGION || "us-east-1";
 const BUCKET = process.env.AWS_S3_BUCKET;
 const ENDPOINT = process.env.AWS_S3_ENDPOINT;
-const FORCE_PATH_STYLE = `${process.env.AWS_S3_FORCE_PATH_STYLE || ""}`
-  .toLowerCase()
-  .trim() === "true";
+const FORCE_PATH_STYLE =
+  `${process.env.AWS_S3_FORCE_PATH_STYLE || ""}`.toLowerCase().trim() ===
+  "true";
 const PUBLIC_BASE_URL = process.env.AWS_S3_PUBLIC_BASE_URL;
 
 let cachedClient;
@@ -40,24 +45,31 @@ const buildPublicUrl = (key) => {
     return undefined;
   }
 
-  const normalizedKey = key.replace(/^\/+/, "");
+  // Remove leading slashes and normalize the key
+  let normalizedKey = key.replace(/^\/+/, "");
 
+  // First try to use PUBLIC_BASE_URL if available
   if (PUBLIC_BASE_URL) {
     const trimmed = PUBLIC_BASE_URL.replace(/\/+$/, "");
-    const lowerBase = trimmed.toLowerCase();
-    const lowerKey = normalizedKey.toLowerCase();
 
-    if (lowerBase.endsWith("/public") && lowerKey.startsWith("public/")) {
-      const strippedKey = normalizedKey.slice("public/".length);
-      return `${trimmed}/${encodeURI(strippedKey)}`;
+    // If the base URL ends with /public and the key starts with public/,
+    // remove the duplicate public/ from the key
+    if (
+      trimmed.toLowerCase().endsWith("/public") &&
+      normalizedKey.toLowerCase().startsWith("public/")
+    ) {
+      normalizedKey = normalizedKey.substring("public/".length);
     }
 
     return `${trimmed}/${encodeURI(normalizedKey)}`;
   }
 
+  // Fallback to constructing S3 URL
   const bucket = requiredEnv(BUCKET, "AWS_S3_BUCKET");
   const regionSegment = REGION ? `.${REGION}` : "";
-  return `https://${bucket}.s3${regionSegment}.amazonaws.com/${encodeURI(normalizedKey)}`;
+  return `https://${bucket}.s3${regionSegment}.amazonaws.com/${encodeURI(
+    normalizedKey
+  )}`;
 };
 
 const uploadObject = async ({ key, body, contentType, cacheControl }) => {
@@ -71,7 +83,7 @@ const uploadObject = async ({ key, body, contentType, cacheControl }) => {
       Body: body,
       ContentType: contentType || "application/octet-stream",
       CacheControl: cacheControl || "public, max-age=31536000, immutable",
-    }),
+    })
   );
 
   return {
@@ -93,7 +105,7 @@ const deleteObject = async (key) => {
       new DeleteObjectCommand({
         Bucket: bucket,
         Key: key,
-      }),
+      })
     );
   } catch (error) {
     const statusCode = error?.$metadata?.httpStatusCode;

@@ -3,6 +3,7 @@ const {
   getPublicTeamMembers,
   getNews,
   getNewsArticle,
+  getClients,
 } = require("../controllers/publicController");
 
 const router = express.Router();
@@ -13,5 +14,8 @@ router.get("/team", getPublicTeamMembers);
 // News management
 router.get("/news", getNews);
 router.get("/news/:id", getNewsArticle);
+
+// Client management
+router.get("/clients", getClients);
 
 module.exports = router;
