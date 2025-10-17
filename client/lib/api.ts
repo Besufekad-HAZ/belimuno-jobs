@@ -819,6 +819,8 @@ export const contactAPI = {
 
 // Public API
 export const publicAPI = {
+  getTeam: (params?: { limit?: number; sort?: string }) =>
+    api.get("/team", { params }),
   getNews: (params?: {
     status?: "draft" | "published" | "archived";
     category?: string;

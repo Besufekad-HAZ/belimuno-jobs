@@ -7,6 +7,7 @@ const Notification = require("../models/Notification");
 const Report = require("../models/Report");
 const Dispute = require("../models/Dispute");
 const TeamMember = require("../models/TeamMember");
+const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 const News = require("../models/News");
 const Client = require("../models/Client");
 const asyncHandler = require("../utils/asyncHandler");
@@ -22,6 +23,225 @@ const {
 
 // Lightweight in-memory cache for dashboard
 const __dashboardCache = { data: null, ts: 0 };
+const TEAM_UPLOAD_PREFIX = (process.env.AWS_S3_TEAM_PREFIX || "public/team")
+  .replace(/^\/+/, "")
+  .replace(/\/+$/, "");
+
+const ensureTeamKeyPrefix = (filename) =>
+  TEAM_UPLOAD_PREFIX ? `${TEAM_UPLOAD_PREFIX}/${filename}` : filename;
+
+const sanitizeFilename = (rawName) => {
+  const fallbackBase = "team-member";
+  if (!rawName) {
+    return `${fallbackBase}.jpg`;
+  }
+
+  const withoutQuery = rawName.split("?")[0]?.split("#")[0] || rawName;
+  const ext = path.extname(withoutQuery);
+  const baseName = path.basename(withoutQuery, ext);
+
+  const sanitizedBase = baseName
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  const sanitizedExt = ext && /\.[a-zA-Z0-9]+$/.test(ext) ? ext : ".jpg";
+
+  const finalBase = sanitizedBase || fallbackBase;
+  return `${finalBase}${sanitizedExt}`;
+};
+
+const stripKnownTeamPrefixes = (value) => {
+  if (!value) {
+    return value;
+  }
+
+  const normalized = value.replace(/^\/+/, "");
+  const prefixes = ["uploads/team/", "public/team/"];
+
+  if (TEAM_UPLOAD_PREFIX && !prefixes.includes(`${TEAM_UPLOAD_PREFIX}/`)) {
+    prefixes.push(`${TEAM_UPLOAD_PREFIX}/`);
+  }
+
+  for (const prefix of prefixes) {
+    if (normalized.toLowerCase().startsWith(prefix.toLowerCase())) {
+      return normalized.slice(prefix.length);
+    }
+  }
+
+  return normalized;
+};
+
+const extractFilenamePart = (value) => {
+  if (!value) {
+    return undefined;
+  }
+
+  let candidate = String(value).trim();
+  if (!candidate) {
+    return undefined;
+  }
+
+  if (/^https?:\/\//i.test(candidate)) {
+    try {
+      const url = new URL(candidate);
+      candidate = url.pathname || "";
+    } catch (_error) {
+      // leave candidate as-is if URL parsing fails
+    }
+  }
+
+  candidate = candidate.replace(/\\/g, "/");
+  candidate = candidate.split("?")[0]?.split("#")[0] || candidate;
+  candidate = candidate.replace(/^\/+/, "");
+  const stripped = stripKnownTeamPrefixes(candidate);
+
+  const parts = stripped.split("/");
+  const filename = parts.pop();
+  if (!filename) {
+    return undefined;
+  }
+  return filename;
+};
+
+const normalizePhotoKey = (rawKey) => {
+  const filename = extractFilenamePart(rawKey);
+  if (!filename) {
+    return undefined;
+  }
+
+  const sanitized = sanitizeFilename(filename);
+  return ensureTeamKeyPrefix(sanitized);
+};
+
+const inferManagedPhotoKey = (url) => {
+  if (!url || typeof url !== "string") {
+    return undefined;
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const lower = trimmed.toLowerCase();
+  const patterns = ["/uploads/team/", "/public/team/"];
+  if (TEAM_UPLOAD_PREFIX) {
+    patterns.push(`/${TEAM_UPLOAD_PREFIX.toLowerCase()}/`);
+  }
+
+  const matchesManagedPattern = patterns.some((pattern) =>
+    lower.includes(pattern)
+  );
+
+  if (!matchesManagedPattern) {
+    const resolvedKey = resolveKeyFromUrl(trimmed);
+    if (!resolvedKey) {
+      return undefined;
+    }
+    const normalizedKey = resolvedKey.replace(/^\/+/, "");
+    if (
+      TEAM_UPLOAD_PREFIX &&
+      !normalizedKey
+        .toLowerCase()
+        .startsWith(`${TEAM_UPLOAD_PREFIX.toLowerCase()}/`)
+    ) {
+      return undefined;
+    }
+    return normalizePhotoKey(normalizedKey);
+  }
+
+  return normalizePhotoKey(trimmed);
+};
+
+const resolveTeamObjectKey = (rawKey) => normalizePhotoKey(rawKey);
+
+const deleteTeamPhoto = async (photoKey) => {
+  const managedKey =
+    resolveTeamObjectKey(photoKey) || inferManagedPhotoKey(photoKey);
+
+  if (!managedKey) {
+    return;
+  }
+
+  try {
+    await deleteObject(managedKey);
+  } catch (error) {
+    console.warn("Failed to delete team member photo", managedKey, error);
+  }
+};
+
+const teamPhotoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB
+  },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype || !file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed."));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+const generateTeamObjectKey = (originalName) => {
+  const sanitizedName = sanitizeFilename(originalName);
+  const ext = path.extname(sanitizedName) || ".jpg";
+  const base = path.basename(sanitizedName, ext);
+  const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
+  const combined = `${uniqueSuffix}-${base}`
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const finalBase = combined || `${uniqueSuffix}-team-member`;
+  const normalizedExt = ext || ".jpg";
+  return ensureTeamKeyPrefix(`${finalBase}${normalizedExt}`);
+};
+
+const buildTeamPhotoUrl = (key) => buildPublicUrl(key);
+// @desc    Seed default team members if collection is empty
+// @route   POST /api/admin/team/seed-defaults
+// @access  Private/Admin HR
+exports.seedDefaultTeamMembers = asyncHandler(async (req, res) => {
+  const existingCount = await TeamMember.countDocuments();
+  if (existingCount > 0) {
+    return res.status(200).json({
+      success: true,
+      message: "Team collection already initialized",
+      data: { seeded: false, count: existingCount },
+    });
+  }
+
+  try {
+    const docs = (DEFAULT_TEAM_MEMBERS || []).map((m) => ({
+      name: m.name,
+      role: m.role,
+      department: m.department,
+      photoUrl: m.image || undefined,
+      status: "active",
+      order:
+        typeof m.order === "number" && Number.isFinite(m.order)
+          ? m.order
+          : undefined,
+    }));
+    if (docs.length > 0) {
+      await TeamMember.insertMany(docs, { ordered: false });
+    }
+    const count = await TeamMember.countDocuments();
+    return res.status(201).json({
+      success: true,
+      message: "Default team members seeded",
+      data: { seeded: true, count },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to seed default team members",
+      error: error?.message || String(error),
+    });
+  }
+});
 
 // @desc    Get admin dashboard (optimized)
 // @route   GET /api/admin/dashboard

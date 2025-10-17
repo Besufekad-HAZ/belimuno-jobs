@@ -2,6 +2,7 @@ const TeamMember = require("../models/TeamMember");
 const asyncHandler = require("../utils/asyncHandler");
 const News = require("../models/News");
 const Client = require("../models/Client");
+const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 
 // Public controller to return deduped team members for About page
 exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
@@ -27,10 +28,80 @@ exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
     200
   );
 
-  const rawMembers = await TeamMember.find({ status: "active" })
+  let rawMembers = await TeamMember.find({ status: "active" })
     .sort(sortCriteria)
     .limit(numericLimit)
     .lean();
+
+  // Auto-seed default team members if none exist to keep frontend and backend in sync
+  if (!rawMembers || rawMembers.length === 0) {
+    try {
+      // Only seed if the collection is completely empty to avoid duplicates
+      const existingCount = await TeamMember.countDocuments();
+      if (existingCount === 0 && Array.isArray(DEFAULT_TEAM_MEMBERS)) {
+        const seedDocs = DEFAULT_TEAM_MEMBERS.map((m) => ({
+          name: m.name,
+          role: m.role,
+          department: m.department,
+          // Preserve client/public images as-is; client resolves relative paths correctly
+          photoUrl: m.image || undefined,
+          status: "active",
+          order:
+            typeof m.order === "number" && Number.isFinite(m.order)
+              ? m.order
+              : undefined,
+        }));
+        if (seedDocs.length > 0) {
+          await TeamMember.insertMany(seedDocs, { ordered: false });
+        }
+        rawMembers = await TeamMember.find({ status: "active" })
+          .sort(sortCriteria)
+          .limit(numericLimit)
+          .lean();
+      }
+    } catch (seedErr) {
+      // Non-fatal: log and continue with empty result
+      console.warn("Auto-seed of default team members failed:", seedErr);
+    }
+  }
+
+  // Ensure any missing defaults are present even when collection isn't empty
+  try {
+    const allExisting = await TeamMember.find({}, "name role").lean();
+    const toKey = (m) =>
+      `${(m.name || "").toString().trim().toLowerCase()}::${(m.role || "")
+        .toString()
+        .trim()
+        .toLowerCase()}`;
+    const existingKeys = new Set(allExisting.map(toKey));
+    const missing = (DEFAULT_TEAM_MEMBERS || []).filter(
+      (m) => !existingKeys.has(toKey(m))
+    );
+    if (missing.length > 0) {
+      const docs = missing.map((m) => ({
+        name: m.name,
+        role: m.role,
+        department: m.department,
+        photoUrl: m.image || undefined,
+        status: "active",
+        order:
+          typeof m.order === "number" && Number.isFinite(m.order)
+            ? m.order
+            : undefined,
+      }));
+      await TeamMember.insertMany(docs, { ordered: false });
+      // Refresh active list after backfill
+      rawMembers = await TeamMember.find({ status: "active" })
+        .sort(sortCriteria)
+        .limit(numericLimit)
+        .lean();
+    }
+  } catch (backfillErr) {
+    console.warn(
+      "Backfill of missing default team members failed:",
+      backfillErr
+    );
+  }
 
   const normalizeKey = (m) => {
     const name = (m.name || "").toString().trim().toLowerCase();

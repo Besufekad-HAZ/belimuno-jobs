@@ -21,7 +21,7 @@ import Image from "next/image";
 import { DEFAULT_TEAM_MEMBERS } from "@/data/defaultTeamMembers";
 import type { DefaultTeamMember } from "@/data/defaultTeamMembers";
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
+import { publicAPI } from "@/lib/api";
 import { DEFAULT_UPLOADS_BASE, resolveAssetUrl } from "@/lib/assets";
 
 type TeamMember = {
@@ -46,20 +46,14 @@ const getInitials = (name: string) => {
   );
 };
 
-const mapDefaultMember = (
-  member: DefaultTeamMember,
-  uploadsBase?: string,
-): TeamMember => {
-  const photo = resolveAssetUrl(member.image, uploadsBase);
-  return {
-    ...member,
-    photoUrl: photo,
-    image: photo,
-  };
+const mapDefaultMember = (member: DefaultTeamMember): TeamMember => {
+  // Preserve original relative paths like "/team/*.jpg" so Next.js can serve from public/
+  const photo = member.image;
+  return { ...member, photoUrl: photo, image: photo };
 };
 
 const DEFAULT_TEAM_FALLBACK: TeamMember[] = DEFAULT_TEAM_MEMBERS.map((member) =>
-  mapDefaultMember(member, DEFAULT_UPLOADS_BASE),
+  mapDefaultMember(member),
 );
 
 type ResolvedTeamImageProps = {
@@ -75,15 +69,28 @@ const ResolvedTeamImage: React.FC<ResolvedTeamImageProps> = ({
   sizes = "128px",
   fallback,
 }) => {
-  const [src, setSrc] = useState<string | undefined>(() =>
-    resolveAssetUrl(member.photoUrl || member.image, DEFAULT_UPLOADS_BASE),
-  );
+  const pickSrc = (m: TeamMember | undefined) => {
+    const raw = (m?.photoUrl || m?.image || "").trim();
+    if (!raw) return undefined;
+    // If absolute URL, use as-is
+    if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) return raw;
+    // If points to app public assets (e.g., /team/...), keep relative path
+    if (
+      raw.startsWith("/team/") ||
+      raw.startsWith("/images/") ||
+      raw.startsWith("/_next/")
+    ) {
+      return raw;
+    }
+    // Otherwise, resolve against uploads base (S3 or configured CDN)
+    return resolveAssetUrl(raw, DEFAULT_UPLOADS_BASE);
+  };
+
+  const [src, setSrc] = useState<string | undefined>(() => pickSrc(member));
 
   useEffect(() => {
-    setSrc(
-      resolveAssetUrl(member.photoUrl || member.image, DEFAULT_UPLOADS_BASE),
-    );
-  }, [member.photoUrl, member.image]);
+    setSrc(pickSrc(member));
+  }, [member]);
 
   if (!src) {
     return <>{fallback}</>;
@@ -111,12 +118,6 @@ const AboutPage: React.FC = () => {
   useEffect(() => {
     let mounted = true;
 
-    const normalizeKey = (m: TeamMember) => {
-      const name = (m.name || "").toString().trim().toLowerCase();
-      const role = (m.role || "").toString().trim().toLowerCase();
-      return `${name}::${role}`;
-    };
-
     const hydrateMember = (member: TeamMember): TeamMember => {
       const fallbackImage =
         resolveAssetUrl(
@@ -134,53 +135,21 @@ const AboutPage: React.FC = () => {
 
     const fetchTeam = async () => {
       try {
-        const res = await api.get("/team");
+        const res = await publicAPI.getTeam({ limit: 48, sort: "order" });
         const data = res.data?.data || [];
         if (!Array.isArray(data) || data.length === 0) {
           return;
         }
-
-        // Merge persisted members with defaults (persisted first)
-        const map = new Map<string, TeamMember>();
-        (data as TeamMember[])
+        // Use admin-managed list exclusively when available
+        const hydratedSorted = (data as TeamMember[])
           .map(hydrateMember)
-          .forEach((m) => map.set(normalizeKey(m), m));
-
-        DEFAULT_TEAM_FALLBACK.forEach((m) => {
-          const key = normalizeKey(m);
-          if (!map.has(key)) {
-            map.set(key, m);
-            return;
-          }
-
-          const existing = map.get(key);
-          if (!existing) {
-            map.set(key, m);
-            return;
-          }
-
-          if ((!existing.image || !existing.image.trim()) && m.image) {
-            const resolvedImage = resolveAssetUrl(
-              m.image,
-              DEFAULT_UPLOADS_BASE,
-            );
-            map.set(key, {
-              ...existing,
-              image: resolvedImage || m.image,
-              photoUrl: existing.photoUrl || resolvedImage || m.image,
-            });
-          }
-        });
-
-        const merged = Array.from(map.values()).sort(
-          (a: TeamMember, b: TeamMember) => {
+          .sort((a, b) => {
             const ao = typeof a.order === "number" ? a.order : 999;
             const bo = typeof b.order === "number" ? b.order : 999;
             return ao - bo;
-          },
-        );
+          });
 
-        if (mounted) setTeamMembers(merged);
+        if (mounted) setTeamMembers(hydratedSorted);
       } catch (err) {
         // keep defaults on error
         console.warn("Could not load persisted team members:", err);
@@ -609,10 +578,10 @@ const AboutPage: React.FC = () => {
                   {t("cta.contact.phone.title")}
                 </p>
                 {[
-                  "+251 930 014 332",
-                  "+251 978 009 084",
-                  "+251 935 402 673",
-                  "+251 913 064 948",
+                  "+251-930-014332",
+                  "+251-935-402674",
+                  "+251-935-402673",
+                  "+251-978-009084",
                 ].map((phone) => (
                   <a
                     key={phone}
