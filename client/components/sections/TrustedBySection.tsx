@@ -131,7 +131,7 @@ const TrustedBySection: React.FC = () => {
         aria-label={client.name}
         data-tip={opts?.withTooltip ? client.service || client.type : undefined}
       >
-        <div className="relative flex h-12 sm:h-14 w-full items-center justify-center overflow-visible transition-transform duration-500 ease-out group-hover:-translate-y-1 focus-within:-translate-y-1">
+        <div className="relative flex h-12 sm:h-14 w-full items-center justify-center overflow-visible transition-transform duration-500 ease-out group-hover:-translate-y-0.5 focus-within:-translate-y-0.5">
           {client.logoSrc ? (
             <div className="relative h-full w-full px-3 py-2 logo-bob">
               <Image
@@ -184,9 +184,9 @@ const TrustedBySection: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="mt-12 space-y-10">
+            <div className="mt-12 space-y-8">
               {/* Row 1 - forward */}
-              <div className="group relative overflow-hidden marquee-mask">
+              <div className="group relative overflow-x-hidden overflow-y-visible marquee-mask py-2">
                 <div
                   className="marquee-track"
                   data-variant="primary"
@@ -205,7 +205,7 @@ const TrustedBySection: React.FC = () => {
               </div>
 
               {/* Row 2 - reverse */}
-              <div className="group relative overflow-hidden marquee-mask">
+              <div className="group relative overflow-x-hidden overflow-y-visible marquee-mask">
                 <div
                   className="marquee-track"
                   data-variant="secondary"
