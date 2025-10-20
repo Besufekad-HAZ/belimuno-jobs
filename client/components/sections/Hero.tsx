@@ -110,14 +110,14 @@ export default function Hero() {
               <Button
                 size="lg"
                 onClick={handlePrimary}
-                className="btn-primary-hero btn-shine group relative w-full sm:w-auto bg-gradient-to-r from-orange-500 via-orange-500 to-amber-400 text-white shadow-2xl hover:shadow-[0_20px_45px_rgba(249,115,22,0.45)] px-6 py-3 sm:px-8 lg:px-10 text-base sm:text-lg font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-400"
+                className="btn-primary-hero btn-shine group relative w-full sm:w-auto bg-gradient-to-r from-orange-500 via-orange-500 to-amber-400 text-white shadow-2xl hover:shadow-[0_20px_45px_rgba(249,115,22,0.45)] px-6 sm:px-8 lg:px-10 text-base sm:text-lg font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-400"
               >
                 <span className="inline-flex items-center">
                   <span className="mr-3">
                     {user ? t("hero.goToDashboard") : t("hero.register")}
                   </span>
-                  <span className="ml-1 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/20 text-white transition-all duration-300 group-hover:bg-white/30">
-                    <ArrowRight className="h-5 w-5 sm:h-[22px] sm:w-[22px]" />
+                  <span className="ml-1 flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-white/20 text-white transition-all duration-300 group-hover:bg-white/30">
+                    <ArrowRight className="h-4 w-4 sm:h-[20px] sm:w-[20px]" />
                   </span>
                 </span>
               </Button>
