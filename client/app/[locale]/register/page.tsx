@@ -37,9 +37,6 @@ const RegisterPage: React.FC = () => {
     password: "",
     confirmPassword: "",
     role: "worker",
-    company: "",
-    industry: "",
-    website: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -111,16 +108,6 @@ const RegisterPage: React.FC = () => {
       case "confirmPassword":
         if (value !== formData.password) {
           errors.push("Passwords do not match");
-        }
-        break;
-      case "company":
-        if (formData.role === "client" && (!value || value.trim().length < 2)) {
-          errors.push("Company name must be at least 2 characters long");
-        }
-        break;
-      case "industry":
-        if (formData.role === "client" && (!value || value.trim().length < 2)) {
-          errors.push("Industry must be at least 2 characters long");
         }
         break;
     }
@@ -195,26 +182,6 @@ const RegisterPage: React.FC = () => {
       errors.push("Passwords do not match");
     }
 
-    const validRoles = [
-      "super_admin",
-      "admin_hr",
-      "admin_outsource",
-      "client",
-      "worker",
-    ];
-    if (!formData.role || !validRoles.includes(formData.role)) {
-      errors.push("Please select a valid role");
-    }
-
-    if (formData.role === "client") {
-      if (!formData.company || formData.company.trim().length < 2) {
-        errors.push("Company name must be at least 2 characters long");
-      }
-      if (!formData.industry || formData.industry.trim().length < 2) {
-        errors.push("Industry must be at least 2 characters long");
-      }
-    }
-
     return errors;
   };
 
@@ -242,28 +209,15 @@ const RegisterPage: React.FC = () => {
         password: string;
         role: string;
         profile?: RegistrationProfile;
-        clientProfile?: {
-          companyName: string;
-          industry: string;
-          website: string;
-        };
       }
 
       const registrationData: RegistrationData = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role,
+        role: "worker",
         profile: {},
       };
-
-      if (formData.role === "client") {
-        registrationData.clientProfile = {
-          companyName: formData.company,
-          industry: formData.industry,
-          website: formData.website,
-        };
-      }
 
       const response = await authAPI.register(
         registrationData as unknown as Record<string, unknown>,
@@ -320,10 +274,7 @@ const RegisterPage: React.FC = () => {
       client_id: clientId,
       callback: async (resp: { credential: string }) => {
         try {
-          const res = await authAPI.loginWithGoogle(
-            resp.credential,
-            formData.role as "worker" | "client",
-          );
+          const res = await authAPI.loginWithGoogle(resp.credential, "worker");
           const { token, user } = res.data;
           setAuth(token, user);
           if (typeof window !== "undefined")
@@ -346,7 +297,7 @@ const RegisterPage: React.FC = () => {
         logo_alignment: "left",
       });
     }
-  }, [googleReady, formData.role, router, t]);
+  }, [googleReady, router, t]);
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#0E4AA1] via-[#0D63C6] to-[#0E4AA1] flex flex-col justify-center py-6 sm:py-10 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -406,7 +357,7 @@ const RegisterPage: React.FC = () => {
             <div className="h-1 w-full bg-gradient-to-r from-white/60 via-white/30 to-white/60" />
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <form
-                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6"
                 onSubmit={handleSubmit}
               >
                 {error && (
@@ -450,83 +401,6 @@ const RegisterPage: React.FC = () => {
                     </p>
                   )}
                 </div>
-
-                <div className="md:col-span-1">
-                  <label
-                    htmlFor="role"
-                    className="block text-sm font-medium text-white/90 mb-1"
-                  >
-                    {t("form.fields.role.label")}
-                  </label>
-                  <select
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 rounded-xl bg-white/80 text-gray-900 border border-white/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60 focus:border-white/60"
-                  >
-                    <option value="worker">
-                      {t("form.fields.role.options.worker")}
-                    </option>
-                    <option value="client">
-                      {t("form.fields.role.options.client")}
-                    </option>
-                  </select>
-                </div>
-
-                {formData.role === "client" && (
-                  <>
-                    <div className="md:col-span-1">
-                      <Input
-                        label={t("form.fields.company")}
-                        name="company"
-                        type="text"
-                        required
-                        value={formData.company}
-                        onChange={handleChange}
-                        className={fieldErrors.company ? "border-red-500" : ""}
-                      />
-                      {fieldErrors.company && (
-                        <p className="mt-1 text-sm text-red-200">
-                          {fieldErrors.company}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="md:col-span-1">
-                      <Input
-                        label={t("form.fields.industry")}
-                        name="industry"
-                        type="text"
-                        required
-                        value={formData.industry}
-                        onChange={handleChange}
-                        className={fieldErrors.industry ? "border-red-500" : ""}
-                      />
-                      {fieldErrors.industry && (
-                        <p className="mt-1 text-sm text-red-200">
-                          {fieldErrors.industry}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="md:col-span-1">
-                      <Input
-                        label={t("form.fields.website")}
-                        name="website"
-                        type="url"
-                        value={formData.website}
-                        onChange={handleChange}
-                        className={fieldErrors.website ? "border-red-500" : ""}
-                      />
-                      {fieldErrors.website && (
-                        <p className="mt-1 text-sm text-red-200">
-                          {fieldErrors.website}
-                        </p>
-                      )}
-                    </div>
-                  </>
-                )}
 
                 {/* Google Sign Up Button */}
                 <div className="flex justify-center md:col-span-2 xl:col-span-3">
