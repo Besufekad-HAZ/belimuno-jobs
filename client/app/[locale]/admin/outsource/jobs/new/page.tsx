@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getStoredUser, hasRole } from "@/lib/auth";
-import { clientAPI } from "@/lib/api";
+import { adminAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
@@ -129,7 +129,7 @@ const NewJobPage: React.FC = () => {
         tags: formData.requirements.filter((req) => req.trim()),
       };
 
-      await clientAPI.createJob(jobData);
+      await adminAPI.createJob(jobData);
       router.push("/admin/outsource/dashboard");
     } catch (error: unknown) {
       if (typeof error === "object" && error && "response" in error) {

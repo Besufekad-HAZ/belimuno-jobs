@@ -70,9 +70,9 @@ router.put("/verify-worker/:id", verifyWorker);
 // Job management (any admin)
 router.get("/jobs", getJobs);
 router.get("/jobs/:id", getJob);
-router.post("/jobs", createJob);
-router.put("/jobs/:id", updateJob);
-router.delete("/jobs/:id", deleteJob);
+router.post("/jobs/create", createJob);
+router.put("/jobs/update/:id", updateJob);
+router.delete("/jobs/delete/:id", deleteJob);
 
 // Payment management (any admin can view/mark paid; disputes handled by super admin)
 router.get("/payments", getPayments);
