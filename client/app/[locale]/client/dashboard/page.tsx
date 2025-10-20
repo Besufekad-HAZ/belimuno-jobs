@@ -25,22 +25,14 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import BackToDashboard from "@/components/ui/BackToDashboard";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { toast } from "@/components/ui/sonner";
 import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
-
-interface ClientStats {
-  totalJobs: number;
-  activeJobs: object[];
-  completedJobs: number;
-  totalSpent: number;
-  averageRating: number;
-  pendingApplications: number;
-  totalApplications: number;
-}
+import { useClientDashboardData } from "@/hooks/useDashboardData";
+import { queryClient } from "@/lib/queryClient";
 
 const ClientDashboard: React.FC = () => {
-  const [stats, setStats] = useState<ClientStats | null>(null);
   interface ApplicationPreview {
     _id: string;
     proposal: string;
@@ -66,8 +58,14 @@ const ClientDashboard: React.FC = () => {
     payment?: { paymentStatus?: string };
     worker?: { name: string };
   }
-  const [jobs, setJobs] = useState<EnrichedJob[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Use React Query hook for data fetching with caching
+  const { data, isLoading } = useClientDashboardData();
+
+  const stats = data?.stats || null;
+  const jobs = data?.jobs || [];
+  const disputes = data?.disputes || [];
+  const loading = isLoading;
   const [selectedJob, setSelectedJob] = useState<EnrichedJob | null>(null);
   const [selectedJobForDetails, setSelectedJobForDetails] =
     useState<EnrichedJob | null>(null);
@@ -107,23 +105,6 @@ const ClientDashboard: React.FC = () => {
       description?: string;
     }>,
   });
-  const [disputes, setDisputes] = useState<
-    Array<{
-      _id: string;
-      title: string;
-      description: string;
-      status: string;
-      priority: string;
-      type: string;
-      job?: {
-        title: string;
-        budget: number;
-      };
-      createdAt: string;
-      updatedAt: string;
-      resolution?: string;
-    }>
-  >([]);
 
   const t = useTranslations("ClientDashboard");
   const [pendingProof, setPendingProof] = useState<{
@@ -140,29 +121,7 @@ const ClientDashboard: React.FC = () => {
       router.push("/login");
       return;
     }
-
-    fetchDashboardData();
   }, [router]);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [dashboardResponse, jobsResponse, disputesResponse] =
-        await Promise.all([
-          clientAPI.getDashboard(),
-          clientAPI.getJobs(),
-          clientAPI.getDisputes(),
-        ]);
-
-      setStats(dashboardResponse.data.data);
-      setJobs(jobsResponse.data.data || []);
-      setDisputes(disputesResponse.data.data || []);
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAcceptApplication = async (
     jobId: string,
@@ -170,7 +129,7 @@ const ClientDashboard: React.FC = () => {
   ) => {
     try {
       await clientAPI.acceptApplication(jobId, applicationId);
-      fetchDashboardData(); // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] }); // Refresh data
     } catch (error) {
       console.error("Failed to accept application:", error);
     }
@@ -182,7 +141,7 @@ const ClientDashboard: React.FC = () => {
   ) => {
     try {
       await clientAPI.rejectApplication(jobId, applicationId);
-      fetchDashboardData(); // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] }); // Refresh data
     } catch (error) {
       console.error("Failed to reject application:", error);
     }
@@ -203,7 +162,7 @@ const ClientDashboard: React.FC = () => {
         await clientAPI.requestRevision(jobId, message);
       }
 
-      fetchDashboardData(); // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] }); // Refresh data
       toast.success(`Job status updated to ${status.replace("_", " ")}`);
     } catch (error) {
       console.error("Failed to update job status:", error);
@@ -240,7 +199,7 @@ const ClientDashboard: React.FC = () => {
       await clientAPI.deleteJob(selectedJobForDelete._id);
       setShowDeleteJobModal(false);
       setSelectedJobForDelete(null);
-      fetchDashboardData();
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] });
       toast.success("Job deleted successfully");
     } catch (error) {
       console.error("Failed to delete job:", error);
@@ -260,7 +219,7 @@ const ClientDashboard: React.FC = () => {
       await clientAPI.updateJobStatus(selectedJobForCancel._id, "posted");
       setShowCancelAssignmentModal(false);
       setSelectedJobForCancel(null);
-      fetchDashboardData();
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] });
       toast.success("Assignment cancelled successfully");
     } catch (error) {
       console.error("Failed to cancel assignment:", error);
@@ -287,7 +246,7 @@ const ClientDashboard: React.FC = () => {
 
       setShowPaymentModal(false);
       setShowRatingModal(true);
-      fetchDashboardData();
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] });
     } catch (error) {
       console.error("Failed to process payment:", error);
     }
@@ -317,7 +276,7 @@ const ClientDashboard: React.FC = () => {
       setSelectedJob(null);
       setSelectedWorker(null);
 
-      fetchDashboardData();
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] });
     } catch (error) {
       console.error("Failed to submit rating:", error);
     }
@@ -353,7 +312,7 @@ const ClientDashboard: React.FC = () => {
       setShowProofModal(false);
       setSelectedJob(null);
       setSelectedWorker(null);
-      fetchDashboardData();
+      queryClient.invalidateQueries({ queryKey: ["clientDashboard"] });
       toast.success("Payment proof uploaded. Admin will verify and mark paid.");
     } catch (e) {
       console.error(e);
@@ -363,8 +322,42 @@ const ClientDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+          {/* Header Skeleton */}
+          <div className="mb-6 sm:mb-8">
+            <Skeleton height={32} width={250} className="mb-4" />
+            <Skeleton height={20} width={350} />
+          </div>
+
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="p-4 sm:p-6">
+                <Skeleton height={20} width={130} className="mb-2" />
+                <Skeleton height={32} width={85} className="mb-2" />
+                <Skeleton height={16} width={105} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Jobs List Skeleton */}
+          <Card className="p-4 sm:p-6 mb-6">
+            <Skeleton height={24} width={180} className="mb-4" />
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="border-b pb-4">
+                  <Skeleton height={20} width="80%" className="mb-2" />
+                  <Skeleton height={16} width="60%" className="mb-3" />
+                  <div className="flex gap-2">
+                    <Skeleton height={32} width={100} />
+                    <Skeleton height={32} width={100} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -1446,7 +1439,9 @@ const ClientDashboard: React.FC = () => {
                         priority: "medium",
                         evidence: [],
                       });
-                      fetchDashboardData(); // Refresh the dashboard data
+                      queryClient.invalidateQueries({
+                        queryKey: ["clientDashboard"],
+                      }); // Refresh the dashboard data
                       toast.success("Dispute created successfully");
                     } catch (error) {
                       console.error("Failed to create dispute:", error);

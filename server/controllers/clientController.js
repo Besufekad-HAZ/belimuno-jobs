@@ -14,8 +14,43 @@ const Review = require("../models/Review");
 exports.getDashboard = asyncHandler(async (req, res) => {
   const clientId = req.user._id;
 
-  // Get client's jobs statistics
-  const jobs = await Job.find({ client: clientId });
+  // First get jobs to have IDs for subsequent queries
+  const jobs = await Job.find({ client: clientId }).lean();
+  const jobIds = jobs.map((job) => job._id);
+
+  // Parallel queries for better performance
+  const [
+    recentApplications,
+    notifications,
+    pendingApplications,
+    totalApplications,
+  ] = await Promise.all([
+    Application.find({
+      job: { $in: jobIds },
+      status: { $in: ["shortlisted", "accepted"] },
+    })
+      .populate("worker", "name profile.avatar workerProfile.rating")
+      .populate("job", "title")
+      .populate("shortlistedBy", "name")
+      .sort({ appliedAt: -1 })
+      .limit(5)
+      .lean(),
+    Notification.find({
+      recipient: clientId,
+      isRead: false,
+    })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean(),
+    Application.countDocuments({
+      job: { $in: jobIds },
+      status: "pending",
+    }),
+    Application.countDocuments({
+      job: { $in: jobIds },
+    }),
+  ]);
+
   const activeJobs = jobs.filter((job) =>
     ["posted", "assigned", "in_progress"].includes(job.status)
   );
@@ -24,35 +59,6 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     (sum, job) => sum + (job.payment?.totalAmount || 0),
     0
   );
-
-  // Get recent shortlisted applications for client's jobs
-  const recentApplications = await Application.find({
-    job: { $in: jobs.map((job) => job._id) },
-    status: { $in: ["shortlisted", "accepted"] }, // Show shortlisted and accepted applications
-  })
-    .populate("worker", "name profile.avatar workerProfile.rating")
-    .populate("job", "title")
-    .populate("shortlistedBy", "name")
-    .sort({ appliedAt: -1 })
-    .limit(5);
-
-  // Get notifications
-  const notifications = await Notification.find({
-    recipient: clientId,
-    isRead: false,
-  })
-    .sort({ createdAt: -1 })
-    .limit(10);
-
-  // Pending applications across open/posted jobs
-  const pendingApplications = await Application.countDocuments({
-    job: { $in: jobs.map((j) => j._id) },
-    status: "pending",
-  });
-
-  const totalApplications = await Application.countDocuments({
-    job: { $in: jobs.map((j) => j._id) },
-  });
 
   // Average rating client has given (clientReview ratings)
   const ratings = completedJobs

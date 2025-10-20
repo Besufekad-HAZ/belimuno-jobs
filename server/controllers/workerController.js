@@ -31,21 +31,22 @@ exports.getJobsForYou = asyncHandler(async (req, res) => {
     });
   }
 
-  // Find jobs where requiredSkills intersect with worker's skills
-  const matchingJobs = await Job.find({
+  const query = {
     status: "posted",
     requiredSkills: { $in: workerSkills },
-  })
-    .populate("client", "name profile.avatar")
-    .populate("region", "name")
-    .sort({ createdAt: -1 })
-    .limit(limit * 1)
-    .skip((page - 1) * limit);
+  };
 
-  const total = await Job.countDocuments({
-    status: "posted",
-    requiredSkills: { $in: workerSkills },
-  });
+  // Parallel queries for better performance
+  const [matchingJobs, total] = await Promise.all([
+    Job.find(query)
+      .populate("client", "name profile.avatar")
+      .populate("region", "name")
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .lean(),
+    Job.countDocuments(query),
+  ]);
 
   res.status(200).json({
     success: true,
@@ -64,10 +65,41 @@ exports.getJobsForYou = asyncHandler(async (req, res) => {
 exports.getDashboard = asyncHandler(async (req, res) => {
   const worker = req.user;
 
-  // Get worker's jobs
-  const jobs = await Job.find({ worker: worker._id })
-    .populate("client", "name profile.avatar")
-    .sort({ createdAt: -1 });
+  // Parallel queries for better performance
+  const [
+    jobs,
+    pendingApplications,
+    notifications,
+    totalApplications,
+    pendingApplicationCount,
+  ] = await Promise.all([
+    Job.find({ worker: worker._id })
+      .populate("client", "name profile.avatar")
+      .sort({ createdAt: -1 })
+      .lean(),
+    Application.find({
+      worker: worker._id,
+      status: "pending",
+    })
+      .populate("job", "title budget deadline")
+      .sort({ appliedAt: -1 })
+      .limit(5)
+      .lean(),
+    Notification.find({
+      recipient: worker._id,
+      isRead: false,
+    })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean(),
+    Application.countDocuments({
+      worker: worker._id,
+    }),
+    Application.countDocuments({
+      worker: worker._id,
+      status: "pending",
+    }),
+  ]);
 
   const activeJobs = jobs.filter((job) =>
     ["assigned", "in_progress"].includes(job.status)
@@ -77,32 +109,6 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     (sum, job) => sum + (job.payment?.workerEarnings || 0),
     0
   );
-
-  // Get pending applications
-  const pendingApplications = await Application.find({
-    worker: worker._id,
-    status: "pending",
-  })
-    .populate("job", "title budget deadline")
-    .sort({ appliedAt: -1 })
-    .limit(5);
-
-  // Get notifications
-  const notifications = await Notification.find({
-    recipient: worker._id,
-    isRead: false,
-  })
-    .sort({ createdAt: -1 })
-    .limit(10);
-
-  // Application stats
-  const totalApplications = await Application.countDocuments({
-    worker: worker._id,
-  });
-  const pendingApplicationCount = await Application.countDocuments({
-    worker: worker._id,
-    status: "pending",
-  });
 
   const averageRating = worker.workerProfile?.rating || 0; // placeholder if rating aggregated differently later
 

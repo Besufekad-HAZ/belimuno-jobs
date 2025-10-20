@@ -22,54 +22,26 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import BackToDashboard from "@/components/ui/BackToDashboard";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useTranslations } from "next-intl";
-
-interface DashboardStats {
-  totalUsers: number;
-  totalJobs: number;
-  totalRevenue: number;
-  activeJobs: number;
-  completedJobs: number;
-  pendingVerifications: number;
-  disputedPayments: number;
-  monthlyGrowth: number;
-}
-
-interface RecentUser {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  isVerified?: boolean;
-  isActive?: boolean;
-  profile?: { verified?: boolean };
-  createdAt: string;
-}
-interface RecentJob {
-  _id: string;
-  title: string;
-  status: string;
-  budget?: number;
-  createdAt: string;
-}
-interface PaymentDispute {
-  _id: string;
-  amount?: number;
-  status: string;
-  createdAt: string;
-}
+import { useAdminDashboardData } from "@/hooks/useDashboardData";
+import { queryClient } from "@/lib/queryClient";
 
 const AdminDashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([]);
-  const [recentJobs, setRecentJobs] = useState<RecentJob[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [reportType, setReportType] = useState("revenue");
-  const [disputes, setDisputes] = useState<PaymentDispute[]>([]);
   const router = useRouter();
   const t = useTranslations("AdminDashboard");
+
+  // Use React Query hook for data fetching with caching
+  const { data, isLoading } = useAdminDashboardData();
+
+  const stats = data?.stats || null;
+  const recentUsers = data?.recentUsers || [];
+  const recentJobs = data?.recentJobs || [];
+  const disputes = data?.disputes || [];
+  const loading = isLoading;
 
   useEffect(() => {
     const user = getStoredUser();
@@ -77,113 +49,12 @@ const AdminDashboard: React.FC = () => {
       router.push("/login");
       return;
     }
-
-    const load = async () => {
-      await fetchDashboardData();
-    };
-
-    load();
   }, [router]);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [dashboardResponse, usersResponse, jobsResponse, paymentsResponse] =
-        await Promise.all([
-          adminAPI.getDashboard({ minimal: true }),
-          // Only fetch what we need for the cards
-          adminAPI.getUsers({
-            limit: 5,
-            sort: "-createdAt",
-            select: "name email role isVerified isActive createdAt",
-          }),
-          // Fetch recent jobs for the list
-          adminAPI.getAllJobs({
-            limit: 6,
-            sort: "-createdAt",
-            select: "title status budget createdAt",
-          }),
-          // Fetch only disputed payments for the disputes badge/modal
-          adminAPI.getPayments({
-            status: "disputed",
-            limit: 20,
-            sort: "-createdAt",
-            select: "status amount createdAt",
-          }),
-        ]);
-
-      setRecentUsers(usersResponse.data.data || []);
-      setRecentJobs(jobsResponse.data.data?.slice(0, 5) || []);
-
-      const overview =
-        dashboardResponse.data?.data?.overview ||
-        dashboardResponse.data?.overview ||
-        null;
-      console.log("overview", overview);
-
-      // Calculate monthly growth based on users and jobs
-      const now = new Date();
-      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const users = usersResponse.data.data || [];
-      const jobs = jobsResponse.data.data || [];
-
-      const thisMonthUsers = users.filter(
-        (u: RecentUser) => new Date(u.createdAt) >= thisMonth,
-      ).length;
-      const lastMonthUsers = users.filter((u: RecentUser) => {
-        const date = new Date(u.createdAt);
-        return date >= lastMonth && date < thisMonth;
-      }).length;
-
-      const thisMonthJobs = jobs.filter(
-        (j: RecentJob) => new Date(j.createdAt) >= thisMonth,
-      ).length;
-      const lastMonthJobs = jobs.filter((j: RecentJob) => {
-        const date = new Date(j.createdAt);
-        return date >= lastMonth && date < thisMonth;
-      }).length;
-
-      // Calculate growth percentage for both users and jobs
-      const userGrowth = lastMonthUsers
-        ? ((thisMonthUsers - lastMonthUsers) / lastMonthUsers) * 100
-        : 0;
-      const jobGrowth = lastMonthJobs
-        ? ((thisMonthJobs - lastMonthJobs) / lastMonthJobs) * 100
-        : 0;
-
-      setStats(
-        overview
-          ? {
-              totalUsers: overview.totalUsers,
-              totalJobs: overview.totalJobs,
-              totalRevenue: overview.totalRevenue,
-              activeJobs: overview.activeJobs,
-              completedJobs: overview.completedJobs,
-              pendingVerifications: overview.pendingVerifications,
-              disputedPayments: 0,
-              monthlyGrowth: Math.round((userGrowth + jobGrowth) / 2),
-            }
-          : null,
-      );
-
-      const payments: PaymentDispute[] = (paymentsResponse.data.data ||
-        paymentsResponse.data.payments ||
-        []) as PaymentDispute[];
-      console.log("payments", payments);
-
-      setDisputes(payments.filter((p) => p.status === "disputed"));
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleVerifyWorker = async (workerId: string) => {
     try {
       await adminAPI.verifyWorker(workerId);
-      fetchDashboardData(); // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["adminDashboard"] }); // Refresh data
     } catch (error) {
       console.error("Failed to verify worker:", error);
     }
@@ -208,7 +79,7 @@ const AdminDashboard: React.FC = () => {
       await adminAPI.handlePaymentDispute(disputeId, action, resolution);
       setShowDisputeModal(false);
 
-      fetchDashboardData(); // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["adminDashboard"] }); // Refresh data
     } catch (error) {
       console.error("Failed to resolve dispute:", error);
     }
@@ -244,8 +115,47 @@ const AdminDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+          {/* Header Skeleton */}
+          <div className="mb-6 sm:mb-8">
+            <Skeleton height={32} width={200} className="mb-4" />
+            <Skeleton height={20} width={300} />
+          </div>
+
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <Card key={i} className="p-4 sm:p-6">
+                <Skeleton height={20} width={120} className="mb-2" />
+                <Skeleton height={32} width={80} className="mb-2" />
+                <Skeleton height={16} width={100} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Lists Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <Card className="p-4 sm:p-6">
+              <Skeleton height={24} width={150} className="mb-4" />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="mb-4">
+                  <Skeleton height={20} width="100%" className="mb-2" />
+                  <Skeleton height={16} width="70%" />
+                </div>
+              ))}
+            </Card>
+            <Card className="p-4 sm:p-6">
+              <Skeleton height={24} width={150} className="mb-4" />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="mb-4">
+                  <Skeleton height={20} width="100%" className="mb-2" />
+                  <Skeleton height={16} width="70%" />
+                </div>
+              ))}
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }

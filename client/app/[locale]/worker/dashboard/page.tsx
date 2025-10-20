@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Briefcase,
@@ -28,59 +28,15 @@ import Badge from "@/components/ui/Badge";
 import BackToDashboard from "@/components/ui/BackToDashboard";
 import Modal from "@/components/ui/Modal";
 import ProgressBar from "@/components/ui/ProgressBar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslations } from "next-intl";
 import { toast } from "@/components/ui/sonner";
 import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
-
-interface WorkerStats {
-  totalApplications: number;
-  activeJobs: number;
-  completedJobs: number;
-  totalEarnings: number;
-  averageRating: number;
-  pendingApplications: number;
-  name?: string;
-  pendingApplicationsList?: {
-    _id: string;
-    job?: { title?: string };
-    appliedAt: string;
-  }[];
-}
-
-interface RealNotification {
-  _id: string;
-  title: string;
-  message: string;
-  type: string;
-  isRead: boolean;
-  readAt?: string;
-  createdAt: string;
-  priority: "low" | "medium" | "high" | "urgent";
-  actionButton?: {
-    text: string;
-    url: string;
-    action: string;
-  };
-  sender?: {
-    _id: string;
-    name: string;
-    profile?: {
-      avatar?: string;
-    };
-  };
-  relatedJob?: {
-    _id: string;
-    title: string;
-  };
-  relatedUser?: {
-    _id: string;
-    name: string;
-  };
-}
+import { useWorkerDashboardData } from "@/hooks/useDashboardData";
+import { queryClient } from "@/lib/queryClient";
 
 const WorkerDashboard: React.FC = () => {
-  const [stats, setStats] = useState<WorkerStats | null>(null);
   interface SimpleJob {
     _id: string;
     title: string;
@@ -95,13 +51,34 @@ const WorkerDashboard: React.FC = () => {
     applicationCount?: number;
     review?: { workerReview?: { rating?: number } };
   }
-  interface EarningsData {
-    recentPayments?: { jobTitle?: string; amount?: number; date?: string }[];
-  }
-  const [availableJobs, setAvailableJobs] = useState<SimpleJob[]>([]);
-  const [myJobs, setMyJobs] = useState<SimpleJob[]>([]);
-  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+
+  // Use React Query hook for data fetching with caching
+  const { data, isLoading } = useWorkerDashboardData();
+
+  const stats = data?.stats || null;
+  const availableJobs = data?.availableJobs || [];
+  const myJobsMemo = useMemo(() => data?.myJobs || [], [data?.myJobs]);
+  const appliedJobIds = data?.appliedJobIds || new Set();
+  const earnings = data?.earnings || null;
+  const [notifications, setNotifications] = useState<
+    {
+      _id: string;
+      title: string;
+      message: string;
+      type: string;
+      isRead: boolean;
+      readAt?: string;
+      createdAt: string;
+      priority: "low" | "medium" | "high" | "urgent";
+      actionButton?: { text: string; url: string; action: string };
+      sender?: { _id: string; name: string; profile?: { avatar?: string } };
+      relatedJob?: { _id: string; title: string };
+      relatedUser?: { _id: string; name: string };
+    }[]
+  >([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const loading = isLoading;
+
   const [selectedJob, setSelectedJob] = useState<SimpleJob | null>(null);
   const [applicationData, setApplicationData] = useState<{
     proposal: string;
@@ -110,9 +87,6 @@ const WorkerDashboard: React.FC = () => {
   }>({ proposal: "", proposedBudget: "" });
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const [notifications, setNotifications] = useState<RealNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [earnings, setEarnings] = useState<EarningsData | null>(null);
   const [chatJobId, setChatJobId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<
     {
@@ -163,7 +137,7 @@ const WorkerDashboard: React.FC = () => {
       description?: string;
     }>,
   });
-  const [disputes, setDisputes] = useState<
+  const [disputes] = useState<
     Array<{
       _id: string;
       title: string;
@@ -195,56 +169,17 @@ const WorkerDashboard: React.FC = () => {
       return;
     }
 
-    fetchDashboardData();
     fetchJobsForYou();
-    fetchNotifications();
   }, [router]);
 
   // Poll for new notifications every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchNotifications();
+      queryClient.invalidateQueries({ queryKey: ["workerDashboard"] });
     }, 30000);
 
     return () => clearInterval(interval);
   }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [
-        dashboardResponse,
-        jobsResponse,
-        myJobsResponse,
-        applicationsResponse,
-        earningsResponse,
-        disputesResponse,
-      ] = await Promise.all([
-        workerAPI.getDashboard(),
-        jobsAPI.getAll({ status: "open", limit: 10 }),
-        workerAPI.getJobs(),
-        workerAPI.getApplications(),
-        workerAPI.getEarnings(),
-        workerAPI.getDisputes(),
-      ]);
-
-      setStats(dashboardResponse.data.data || dashboardResponse.data); // support either wrapped or direct
-      setAvailableJobs(jobsResponse.data.data || []);
-      setMyJobs(myJobsResponse.data.data || []);
-      const apps: { job?: { _id: string } }[] =
-        applicationsResponse.data.data || [];
-      setAppliedJobIds(
-        new Set(apps.map((a) => a.job?._id).filter(Boolean) as string[]),
-      );
-      setEarnings(earningsResponse.data);
-      console.log("disputes", disputesResponse.data.data);
-      setDisputes(disputesResponse.data.data || []);
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchJobsForYou = async () => {
     try {
@@ -281,19 +216,6 @@ const WorkerDashboard: React.FC = () => {
       setJobsForYou([]);
     } finally {
       setJobsForYouLoading(false);
-    }
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await notificationsAPI.getAll();
-      const fetchedNotifications = response.data?.data || [];
-      setNotifications(fetchedNotifications);
-      setUnreadCount(
-        fetchedNotifications.filter((n: RealNotification) => !n.isRead).length,
-      );
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
     }
   };
 
@@ -383,7 +305,7 @@ const WorkerDashboard: React.FC = () => {
       );
       setSelectedJob(null);
       setApplicationData({ proposal: "", proposedBudget: "" });
-      fetchDashboardData(); // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["workerDashboard"] }); // Refresh data
     } catch (error) {
       console.error("Failed to apply to job:", error);
     }
@@ -396,7 +318,7 @@ const WorkerDashboard: React.FC = () => {
   ) => {
     try {
       await workerAPI.updateJobStatus(jobId, status, progress);
-      fetchDashboardData(); // Refresh data
+      queryClient.invalidateQueries({ queryKey: ["workerDashboard"] }); // Refresh data
     } catch (error) {
       console.error("Failed to update job status:", error);
     }
@@ -478,7 +400,7 @@ const WorkerDashboard: React.FC = () => {
       try {
         setChatJobId(jobId);
 
-        const job = myJobs.find((j: SimpleJob) => j._id === jobId);
+        const job = myJobsMemo.find((j: SimpleJob) => j._id === jobId);
         setCurrentJob(job ?? null);
 
         const res = await workerAPI.getJobMessages(jobId);
@@ -504,7 +426,7 @@ const WorkerDashboard: React.FC = () => {
         console.error(e);
       }
     },
-    [myJobs, normalizeChatMessage],
+    [myJobsMemo, normalizeChatMessage],
   );
 
   const sendModernMessage = useCallback(
@@ -672,17 +594,71 @@ const WorkerDashboard: React.FC = () => {
 
   const acceptAssignment = async (jobId: string) => {
     await workerAPI.acceptAssignedJob(jobId);
-    fetchDashboardData();
+    queryClient.invalidateQueries({ queryKey: ["workerDashboard"] });
   };
   const declineAssignment = async (jobId: string) => {
     await workerAPI.declineAssignedJob(jobId);
-    fetchDashboardData();
+    queryClient.invalidateQueries({ queryKey: ["workerDashboard"] });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+          {/* Header Skeleton */}
+          <div className="mb-6 sm:mb-8">
+            <Skeleton height={32} width={220} className="mb-4" />
+            <Skeleton height={20} width={320} />
+          </div>
+
+          {/* Profile Completion CTA Skeleton */}
+          <Card className="p-4 sm:p-6 mb-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <Skeleton height={24} width={180} className="mb-2" />
+            <Skeleton height={16} width={280} className="mb-3" />
+            <Skeleton height={36} width={140} />
+          </Card>
+
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="p-4 sm:p-6">
+                <Skeleton height={20} width={110} className="mb-2" />
+                <Skeleton height={32} width={75} className="mb-2" />
+                <Skeleton height={16} width={95} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Jobs Sections Skeleton */}
+          <div className="space-y-6">
+            {/* Jobs for You */}
+            <Card className="p-4 sm:p-6">
+              <Skeleton height={24} width={150} className="mb-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="border rounded-lg p-4">
+                    <Skeleton height={20} width="90%" className="mb-2" />
+                    <Skeleton height={16} width="75%" className="mb-3" />
+                    <Skeleton height={32} width={120} />
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* My Active Jobs */}
+            <Card className="p-4 sm:p-6">
+              <Skeleton height={24} width={180} className="mb-4" />
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border-b pb-3">
+                    <Skeleton height={20} width="85%" className="mb-2" />
+                    <Skeleton height={16} width="60%" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1043,9 +1019,9 @@ const WorkerDashboard: React.FC = () => {
                 </h3>
               </div>
               <div className="space-y-3 sm:space-y-4">
-                {myJobs
+                {myJobsMemo
                   .filter(
-                    (job) =>
+                    (job: SimpleJob) =>
                       job.status &&
                       [
                         "assigned",
@@ -1055,7 +1031,7 @@ const WorkerDashboard: React.FC = () => {
                         "disputed",
                       ].includes(job.status),
                   )
-                  .map((job) => (
+                  .map((job: SimpleJob) => (
                     <div
                       key={job._id}
                       className="p-3 sm:p-4 bg-gray-50 rounded-lg"
@@ -1768,7 +1744,9 @@ const WorkerDashboard: React.FC = () => {
                     setClientRating(5);
                     setClientReview("");
                     setRateJobId(null);
-                    fetchDashboardData();
+                    queryClient.invalidateQueries({
+                      queryKey: ["workerDashboard"],
+                    });
                   } catch (e) {
                     console.error(e);
                   }
@@ -2076,7 +2054,9 @@ const WorkerDashboard: React.FC = () => {
                         priority: disputeData.priority,
                         evidence: disputeData.evidence,
                       });
-                      fetchDashboardData(); // Refresh the dashboard data
+                      queryClient.invalidateQueries({
+                        queryKey: ["workerDashboard"],
+                      }); // Refresh the dashboard data
                       toast.success("Dispute created successfully");
                     } catch (error) {
                       console.error("Failed to create dispute:", error);

@@ -22,73 +22,42 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useTranslations } from "next-intl";
 import { toast } from "@/components/ui/sonner";
-
-interface HRStats {
-  totalWorkers: number;
-  verifiedWorkers: number;
-  pendingVerifications: number;
-  activeWorkers: number;
-  workersThisMonth: number;
-  disputesOpen: number;
-  disputesResolved: number;
-  totalDisputes: number;
-  performanceReviews: number;
-  trainingCompleted: number;
-}
-
-interface Worker {
-  _id: string;
-  name: string;
-  email: string;
-  isVerified: boolean;
-  isActive: boolean;
-  createdAt: string;
-  workerProfile?: {
-    skills: string[];
-    experience: string;
-    rating: number;
-    totalJobs: number;
-    completedJobs: number;
-    education?: object[];
-  };
-  profile?: {
-    verified: boolean;
-    avatar?: string;
-  };
-}
-
-interface Dispute {
-  _id: string;
-  worker: {
-    _id: string;
-    name: string;
-  };
-  client: {
-    _id: string;
-    name: string;
-  };
-  job?: {
-    _id: string;
-    title: string;
-  };
-  description: string;
-  status: string;
-  priority: string;
-  createdAt: string;
-}
+import { useHRDashboardData } from "@/hooks/useDashboardData";
+import { queryClient } from "@/lib/queryClient";
 
 const HRAdminDashboard: React.FC = () => {
-  const [stats, setStats] = useState<HRStats | null>(null);
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [disputes, setDisputes] = useState<Dispute[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showWorkerModal, setShowWorkerModal] = useState(false);
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
-  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
-  const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
+  const [selectedWorker, setSelectedWorker] = useState<{
+    _id: string;
+    name: string;
+    email: string;
+    isActive: boolean;
+    isVerified: boolean;
+    profile?: { verified: boolean };
+    workerProfile?: {
+      skills: string[];
+      experience: string;
+      rating: number;
+      totalJobs: number;
+      completedJobs: number;
+      education?: object[];
+    };
+  } | null>(null);
+  const [selectedDispute, setSelectedDispute] = useState<{
+    _id: string;
+    worker: { _id: string; name: string };
+    client: { _id: string; name: string };
+    job?: { _id: string; title: string };
+    description: string;
+    status: string;
+    priority: string;
+    createdAt: string;
+  } | null>(null);
   const [announcement, setAnnouncement] = useState({
     title: "",
     message: "",
@@ -98,86 +67,21 @@ const HRAdminDashboard: React.FC = () => {
   const router = useRouter();
   const t = useTranslations("HRAdminDashboard");
 
+  // Use React Query hook for data fetching with caching
+  const { data, isLoading } = useHRDashboardData();
+
+  const stats = data?.stats || null;
+  const workers = data?.workers || [];
+  const disputes = data?.disputes || [];
+  const loading = isLoading;
+
   useEffect(() => {
     const user = getStoredUser();
     if (!user || !hasRole(user, ["admin_hr"])) {
       router.push("/login");
       return;
     }
-
-    const load = async () => {
-      await fetchDashboardData();
-    };
-
-    load();
   }, [router]);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [usersResponse, disputesResponse] = await Promise.all([
-        adminAPI.getUsers({ role: "worker", limit: 100 }),
-        adminAPI.getDisputes(),
-      ]);
-
-      // Handle different API response structures
-      const workersData =
-        usersResponse.data?.data ||
-        usersResponse.data?.users ||
-        usersResponse.data ||
-        [];
-      console.log("workersData", workersData);
-      setWorkers(workersData);
-
-      // Set real disputes data
-      const disputesData = disputesResponse.data?.data || [];
-      setDisputes(disputesData);
-
-      // Calculate HR-specific stats
-      const hrStats: HRStats = {
-        totalWorkers: workersData.length,
-        verifiedWorkers: workersData.filter((w: Worker) => w.isVerified).length,
-        pendingVerifications: workersData.filter((w: Worker) => !w.isVerified)
-          .length,
-        activeWorkers: workersData.filter((w: Worker) => w.isActive).length,
-        workersThisMonth: workersData.filter((w: Worker) => {
-          const createdDate = new Date(w.createdAt);
-          const thisMonth = new Date();
-          thisMonth.setDate(1);
-          return createdDate >= thisMonth;
-        }).length,
-        disputesOpen: disputesData.filter((d: Dispute) => d.status === "open")
-          .length,
-        disputesResolved: disputesData.filter(
-          (d: Dispute) => d.status === "resolved",
-        ).length,
-        totalDisputes: disputesData.length,
-        performanceReviews: 0, // Placeholder
-        trainingCompleted: workersData.reduce(
-          (total: number, worker: Worker) =>
-            total + (worker.workerProfile?.education?.length || 0),
-          0,
-        ),
-      };
-
-      setStats(hrStats);
-
-      setStats((prev) =>
-        prev
-          ? {
-              ...prev,
-              disputesOpen: disputesData.filter(
-                (d: Dispute) => d.status === "open",
-              ).length,
-            }
-          : null,
-      );
-    } catch (error) {
-      console.error("Failed to fetch HR dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleWorkerVerification = async (
     workerId: string,
@@ -203,7 +107,7 @@ const HRAdminDashboard: React.FC = () => {
         });
       }
 
-      fetchDashboardData();
+      queryClient.invalidateQueries({ queryKey: ["hrDashboard"] });
       setShowWorkerModal(false);
       setSelectedWorker(null);
     } catch (error) {
@@ -235,7 +139,11 @@ const HRAdminDashboard: React.FC = () => {
     }
   };
 
-  const getWorkerStatusBadge = (worker: Worker) => {
+  const getWorkerStatusBadge = (worker: {
+    isActive: boolean;
+    isVerified: boolean;
+    profile?: { verified: boolean };
+  }) => {
     if (!worker.isActive)
       return <Badge variant="danger">{t("worker.status.inactive")}</Badge>;
     if (!worker.isVerified && !worker.profile?.verified)
@@ -255,8 +163,47 @@ const HRAdminDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Skeleton */}
+          <div className="mb-8">
+            <Skeleton height={36} width={250} className="mb-2" />
+            <Skeleton height={20} width={350} />
+          </div>
+
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <Card key={i} className="p-6">
+                <Skeleton height={20} width={120} className="mb-2" />
+                <Skeleton height={32} width={80} className="mb-2" />
+                <Skeleton height={16} width={100} />
+              </Card>
+            ))}
+          </div>
+
+          {/* Lists Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <Skeleton height={24} width={200} className="mb-4" />
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="mb-4">
+                  <Skeleton height={20} width="100%" className="mb-2" />
+                  <Skeleton height={16} width="80%" />
+                </div>
+              ))}
+            </Card>
+            <Card className="p-6">
+              <Skeleton height={24} width={200} className="mb-4" />
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="mb-4">
+                  <Skeleton height={20} width="100%" className="mb-2" />
+                  <Skeleton height={16} width="80%" />
+                </div>
+              ))}
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
