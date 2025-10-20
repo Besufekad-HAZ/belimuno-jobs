@@ -7,8 +7,8 @@ import { setAuth, getRoleDashboardPath } from "@/lib/auth";
 import { authAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Card from "@/components/ui/Card";
 import { useTranslations } from "next-intl";
+import AuthBackdrop from "@/components/ui/AuthBackdrop";
 
 type GoogleIdentity = {
   accounts?: {
@@ -37,22 +37,21 @@ const RegisterPage: React.FC = () => {
     password: "",
     confirmPassword: "",
     role: "worker",
-    // Client-specific fields
     company: "",
     industry: "",
     website: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const router = useRouter();
   const [googleReady, setGoogleReady] = useState(false);
   const googleBtnRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const t = useTranslations("RegisterPage");
 
   const getPasswordStrength = (password: string) => {
-    if (!password) return { score: 0, text: "" };
-
+    if (!password) return { score: 0, text: "" } as const;
     let score = 0;
     const checks = {
       length: password.length >= 8,
@@ -65,16 +64,18 @@ const RegisterPage: React.FC = () => {
     score = Object.values(checks).filter(Boolean).length;
 
     const strengthText =
-      {
-        0: "Very Weak",
-        1: "Weak",
-        2: "Fair",
-        3: "Good",
-        4: "Strong",
-        5: "Very Strong",
-      }[score] || "";
+      (
+        {
+          0: "Very Weak",
+          1: "Very Weak",
+          2: "Weak",
+          3: "Good",
+          4: "Strong",
+          5: "Very Strong",
+        } as const
+      )[score] || "";
 
-    return { score, text: strengthText, checks };
+    return { score, text: strengthText, checks } as const;
   };
 
   const validateField = (name: string, value: string) => {
@@ -89,14 +90,12 @@ const RegisterPage: React.FC = () => {
           errors.push("Name must be no more than 50 characters long");
         }
         break;
-
       case "email":
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!value || !emailRegex.test(value)) {
           errors.push("Please provide a valid email address");
         }
         break;
-
       case "password":
         if (!value || value.length < 8) {
           errors.push("Password must be at least 8 characters long");
@@ -109,19 +108,16 @@ const RegisterPage: React.FC = () => {
           );
         }
         break;
-
       case "confirmPassword":
         if (value !== formData.password) {
           errors.push("Passwords do not match");
         }
         break;
-
       case "company":
         if (formData.role === "client" && (!value || value.trim().length < 2)) {
           errors.push("Company name must be at least 2 characters long");
         }
         break;
-
       case "industry":
         if (formData.role === "client" && (!value || value.trim().length < 2)) {
           errors.push("Industry must be at least 2 characters long");
@@ -139,12 +135,11 @@ const RegisterPage: React.FC = () => {
   ) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
 
-    // Clear field error when user starts typing
     if (fieldErrors[name]) {
       setFieldErrors((prev) => {
         const newErrors = { ...prev };
@@ -153,14 +148,12 @@ const RegisterPage: React.FC = () => {
       });
     }
 
-    // Validate field in real-time (with debounce for better UX)
     if (name === "password" || name === "confirmPassword" || name === "email") {
       setTimeout(() => {
         const errors = validateField(name, value);
         if (errors.length > 0) {
           setFieldErrors((prev) => ({ ...prev, [name]: errors[0] }));
         } else {
-          // Clear error when field becomes valid
           setFieldErrors((prev) => {
             const newErrors = { ...prev };
             delete newErrors[name];
@@ -174,7 +167,6 @@ const RegisterPage: React.FC = () => {
   const validateForm = () => {
     const errors: string[] = [];
 
-    // Name validation
     if (!formData.name || formData.name.trim().length < 2) {
       errors.push("Name must be at least 2 characters long");
     }
@@ -182,13 +174,11 @@ const RegisterPage: React.FC = () => {
       errors.push("Name must be no more than 50 characters long");
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email || !emailRegex.test(formData.email)) {
       errors.push("Please provide a valid email address");
     }
 
-    // Password validation
     if (!formData.password || formData.password.length < 8) {
       errors.push("Password must be at least 8 characters long");
     }
@@ -201,12 +191,10 @@ const RegisterPage: React.FC = () => {
       );
     }
 
-    // Password confirmation
     if (formData.password !== formData.confirmPassword) {
       errors.push("Passwords do not match");
     }
 
-    // Role validation
     const validRoles = [
       "super_admin",
       "admin_hr",
@@ -218,7 +206,6 @@ const RegisterPage: React.FC = () => {
       errors.push("Please select a valid role");
     }
 
-    // Client-specific validation
     if (formData.role === "client") {
       if (!formData.company || formData.company.trim().length < 2) {
         errors.push("Company name must be at least 2 characters long");
@@ -236,7 +223,6 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
     setError("");
 
-    // Client-side validation
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
       setError(validationErrors.join(". "));
@@ -245,13 +231,9 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
-      // Prepare registration data based on role
       interface RegistrationProfile {
         bio?: string;
-        address?: {
-          city?: string;
-          country?: string;
-        };
+        address?: { city?: string; country?: string };
       }
 
       interface RegistrationData {
@@ -275,7 +257,6 @@ const RegisterPage: React.FC = () => {
         profile: {},
       };
 
-      // Add role-specific fields
       if (formData.role === "client") {
         registrationData.clientProfile = {
           companyName: formData.company,
@@ -290,33 +271,21 @@ const RegisterPage: React.FC = () => {
       const { token, user } = response.data;
 
       setAuth(token, user);
-      // Notify all tabs and components
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("authChanged"));
       }
-      
-      // Redirect workers to CV builder, others to dashboard
+
       if (user.role === "worker") {
         router.push("/profile/cv-builder");
       } else {
         router.push(getRoleDashboardPath(user.role));
       }
     } catch (error: unknown) {
-      if (
-        error &&
-        typeof error === "object" &&
-        "response" in error &&
-        error.response &&
-        typeof error.response === "object" &&
-        "data" in error.response &&
-        error.response.data &&
-        typeof error.response.data === "object" &&
-        "message" in error.response.data
-      ) {
-        setError(
-          (error as { response: { data: { message: string } } }).response.data
-            .message,
-        );
+      const maybeAxios = error as {
+        response?: { data?: { message?: string } };
+      };
+      if (maybeAxios?.response?.data?.message) {
+        setError(maybeAxios.response.data.message as string);
       } else {
         setError(t("errors.default"));
       }
@@ -325,7 +294,7 @@ const RegisterPage: React.FC = () => {
     }
   };
 
-  // Google Sign Up (with role)
+  // Load Google Identity script once
   useEffect(() => {
     const existing = document.getElementById("google-identity");
     if (existing) {
@@ -341,6 +310,7 @@ const RegisterPage: React.FC = () => {
     document.body.appendChild(s);
   }, []);
 
+  // Initialize and render Google Sign-Up button
   useEffect(() => {
     if (!googleReady) return;
     if (!window.google || !window.google.accounts?.id) return;
@@ -379,287 +349,331 @@ const RegisterPage: React.FC = () => {
   }, [googleReady, formData.role, router, t]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      {/* Top tabs + title section remains narrow for focus */}
-      <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
-        <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex mt-2">
-          <Link href="/login" className="flex-1">
-            <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">
-              {t("tabs.login")}
-            </div>
-          </Link>
-          <Link href="/register" className="flex-1">
-            <div className="text-center py-2 rounded-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">
-              {t("tabs.signup")}
-            </div>
-          </Link>
+    <div className="relative min-h-screen bg-gradient-to-b from-[#0E4AA1] via-[#0D63C6] to-[#0E4AA1] flex flex-col justify-center py-6 sm:py-10 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <AuthBackdrop />
+
+      <div className="relative z-10 w-full">
+        {/* Header Section */}
+        <div className="mx-auto w-full max-w-md text-center">
+          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
+            <svg
+              className="w-6 h-6 sm:w-8 sm:h-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 11c.9 0 1.7-.3 2.4-.8l2.1 2.1a1 1 0 001.4-1.4l-2.1-2.1c.5-.7.8-1.5.8-2.4A5 5 0 1012 11z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 drop-shadow">
+            {t("header.title")}
+          </h2>
+          <p className="text-base sm:text-lg text-blue-50/90 mb-2">
+            {t("header.subtitle.text")}{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-white underline decoration-white/60 hover:decoration-white"
+            >
+              {t("header.subtitle.link")}
+            </Link>
+          </p>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          {t("header.title")}
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          {t("header.subtitle.text")}{" "}
-          <Link
-            href="/login"
-            className="font-medium text-blue-600 hover:text-blue-500"
-          >
-            {t("header.subtitle.link")}
-          </Link>
-        </p>
-      </div>
 
-      {/* Main form card: widen and use responsive grid on md+/xl */}
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-6xl">
-        <Card>
-          <form
-            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-            onSubmit={handleSubmit}
-          >
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded md:col-span-2 xl:col-span-3">
-                {error}
+        {/* Auth Tabs */}
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl lg:max-w-3xl">
+          <div className="relative bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 p-1 flex shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
+            <Link href="/login" className="flex-1">
+              <div className="text-center py-2 rounded-lg font-semibold text-blue-50/80 hover:text-white">
+                {t("tabs.login")}
               </div>
-            )}
+            </Link>
+            <Link href="/register" className="flex-1">
+              <div className="text-center py-2 rounded-lg font-semibold transition-all bg-white/20 text-white shadow-inner">
+                {t("tabs.signup")}
+              </div>
+            </Link>
+          </div>
+        </div>
 
-            <div className="md:col-span-1">
-              <Input
-                label={t("form.fields.name")}
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className={fieldErrors.name ? "border-red-500" : ""}
-              />
-              {fieldErrors.name && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
-              )}
-            </div>
-
-            <div className="md:col-span-1">
-              <Input
-                label={t("form.fields.email")}
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className={fieldErrors.email ? "border-red-500" : ""}
-              />
-              {fieldErrors.email && (
-                <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
-              )}
-            </div>
-
-            <div className="md:col-span-1">
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700 mb-1"
+        {/* Main Form Card */}
+        <div className="mt-6 sm:mt-10 mx-auto w-full sm:max-w-2xl lg:max-w-5xl">
+          <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl shadow-[0_20px_80px_rgba(0,0,0,0.35)] border border-white/20 overflow-hidden ring-1 ring-white/10">
+            <div className="h-1 w-full bg-gradient-to-r from-white/60 via-white/30 to-white/60" />
+            <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              <form
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                onSubmit={handleSubmit}
               >
-                {t("form.fields.role.label")}
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="worker">
-                  {t("form.fields.role.options.worker")}
-                </option>
-                <option value="client">
-                  {t("form.fields.role.options.client")}
-                </option>
-              </select>
-            </div>
+                {error && (
+                  <div className="bg-red-50/70 border border-red-300/70 text-red-800 px-4 py-3 rounded-lg md:col-span-2 xl:col-span-3">
+                    {error}
+                  </div>
+                )}
 
-            {/* Client-specific fields */}
-            {formData.role === "client" && (
-              <>
                 <div className="md:col-span-1">
                   <Input
-                    label={t("form.fields.company")}
-                    name="company"
+                    label={t("form.fields.name")}
+                    labelClassName="text-white"
+                    name="name"
                     type="text"
                     required
-                    value={formData.company}
+                    value={formData.name}
                     onChange={handleChange}
-                    className={fieldErrors.company ? "border-red-500" : ""}
+                    className={fieldErrors.name ? "border-red-500" : ""}
                   />
-                  {fieldErrors.company && (
-                    <p className="mt-1 text-sm text-red-600">{fieldErrors.company}</p>
+                  {fieldErrors.name && (
+                    <p className="mt-1 text-sm text-red-200">
+                      {fieldErrors.name}
+                    </p>
                   )}
                 </div>
 
                 <div className="md:col-span-1">
                   <Input
-                    label={t("form.fields.industry")}
-                    name="industry"
-                    type="text"
+                    label={t("form.fields.email")}
+                    labelClassName="text-white"
+                    name="email"
+                    type="email"
                     required
-                    value={formData.industry}
+                    value={formData.email}
                     onChange={handleChange}
-                    className={fieldErrors.industry ? "border-red-500" : ""}
+                    className={fieldErrors.email ? "border-red-500" : ""}
                   />
-                  {fieldErrors.industry && (
-                    <p className="mt-1 text-sm text-red-600">{fieldErrors.industry}</p>
+                  {fieldErrors.email && (
+                    <p className="mt-1 text-sm text-red-200">
+                      {fieldErrors.email}
+                    </p>
                   )}
                 </div>
 
                 <div className="md:col-span-1">
-                  <Input
-                    label={t("form.fields.website")}
-                    name="website"
-                    type="url"
-                    value={formData.website}
+                  <label
+                    htmlFor="role"
+                    className="block text-sm font-medium text-white/90 mb-1"
+                  >
+                    {t("form.fields.role.label")}
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
                     onChange={handleChange}
-                    className={fieldErrors.website ? "border-red-500" : ""}
-                  />
-                  {fieldErrors.website && (
-                    <p className="mt-1 text-sm text-red-600">{fieldErrors.website}</p>
-                  )}
+                    className="w-full px-3 py-2 rounded-xl bg-white/80 text-gray-900 border border-white/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-white/60 focus:border-white/60"
+                  >
+                    <option value="worker">
+                      {t("form.fields.role.options.worker")}
+                    </option>
+                    <option value="client">
+                      {t("form.fields.role.options.client")}
+                    </option>
+                  </select>
                 </div>
-              </>
-            )}
 
-            {/* Google Sign Up Button */}
-            <div className="flex justify-center md:col-span-2 xl:col-span-3">
-              <div ref={googleBtnRef} />
-            </div>
-
-            <div className="md:col-span-1">
-              <Input
-                label={t("form.fields.password")}
-                name="password"
-                type="password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className={fieldErrors.password ? "border-red-500" : ""}
-                showPasswordToggle
-              />
-              {fieldErrors.password && (
-                <p className="mt-1 text-sm text-red-600">
-                  {fieldErrors.password}
-                </p>
-              )}
-
-              {/* Password Strength Indicator */}
-              {formData.password && (
-                <div className="mt-2">
-                  <div className="flex items-center space-x-2">
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map((level) => {
-                        const passwordStrength = getPasswordStrength(
-                          formData.password,
-                        );
-                        return (
-                          <div
-                            key={level}
-                            className={`h-2 w-8 rounded ${
-                              level <= passwordStrength.score
-                                ? passwordStrength.score <= 2
-                                  ? "bg-red-500"
-                                  : passwordStrength.score <= 3
-                                    ? "bg-yellow-500"
-                                    : "bg-green-500"
-                                : "bg-gray-200"
-                            }`}
-                          />
-                        );
-                      })}
+                {formData.role === "client" && (
+                  <>
+                    <div className="md:col-span-1">
+                      <Input
+                        label={t("form.fields.company")}
+                        name="company"
+                        type="text"
+                        required
+                        value={formData.company}
+                        onChange={handleChange}
+                        className={fieldErrors.company ? "border-red-500" : ""}
+                      />
+                      {fieldErrors.company && (
+                        <p className="mt-1 text-sm text-red-200">
+                          {fieldErrors.company}
+                        </p>
+                      )}
                     </div>
-                    <span
-                      className={`text-sm font-medium ${
-                        getPasswordStrength(formData.password).score <= 2
-                          ? "text-red-600"
-                          : getPasswordStrength(formData.password).score <= 3
-                            ? "text-yellow-600"
-                            : "text-green-600"
-                      }`}
-                    >
-                      {getPasswordStrength(formData.password).text}
-                    </span>
-                  </div>
 
-                  {/* Password Requirements */}
-                  <div className="mt-2 text-xs text-gray-600">
-                    <p className="font-medium">Password must contain:</p>
-                    <ul className="mt-1 space-y-1">
-                      <li
-                        className={`flex items-center ${formData.password.length >= 8 ? "text-green-600" : "text-gray-500"}`}
-                      >
-                        <span className="mr-2">
-                          {formData.password.length >= 8 ? "✓" : "○"}
-                        </span>
-                        At least 8 characters
-                      </li>
-                      <li
-                        className={`flex items-center ${/[a-z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
-                      >
-                        <span className="mr-2">
-                          {/[a-z]/.test(formData.password) ? "✓" : "○"}
-                        </span>
-                        One lowercase letter
-                      </li>
-                      <li
-                        className={`flex items-center ${/[A-Z]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
-                      >
-                        <span className="mr-2">
-                          {/[A-Z]/.test(formData.password) ? "✓" : "○"}
-                        </span>
-                        One uppercase letter
-                      </li>
-                      <li
-                        className={`flex items-center ${/\d/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
-                      >
-                        <span className="mr-2">
-                          {/\d/.test(formData.password) ? "✓" : "○"}
-                        </span>
-                        One number
-                      </li>
-                      <li
-                        className={`flex items-center ${/[@$!%*?&]/.test(formData.password) ? "text-green-600" : "text-gray-500"}`}
-                      >
-                        <span className="mr-2">
-                          {/[@$!%*?&]/.test(formData.password) ? "✓" : "○"}
-                        </span>
-                        One special character (@$!%*?&)
-                      </li>
-                    </ul>
-                  </div>
+                    <div className="md:col-span-1">
+                      <Input
+                        label={t("form.fields.industry")}
+                        name="industry"
+                        type="text"
+                        required
+                        value={formData.industry}
+                        onChange={handleChange}
+                        className={fieldErrors.industry ? "border-red-500" : ""}
+                      />
+                      {fieldErrors.industry && (
+                        <p className="mt-1 text-sm text-red-200">
+                          {fieldErrors.industry}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="md:col-span-1">
+                      <Input
+                        label={t("form.fields.website")}
+                        name="website"
+                        type="url"
+                        value={formData.website}
+                        onChange={handleChange}
+                        className={fieldErrors.website ? "border-red-500" : ""}
+                      />
+                      {fieldErrors.website && (
+                        <p className="mt-1 text-sm text-red-200">
+                          {fieldErrors.website}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Google Sign Up Button */}
+                <div className="flex justify-center md:col-span-2 xl:col-span-3">
+                  <div ref={googleBtnRef} />
                 </div>
-              )}
-            </div>
 
-            <div className="md:col-span-1">
-              <Input
-                label={t("form.fields.confirmPassword")}
-                name="confirmPassword"
-                type="password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={fieldErrors.confirmPassword ? "border-red-500" : ""}
-                showPasswordToggle
-              />
-              {fieldErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {fieldErrors.confirmPassword}
-                </p>
-              )}
-            </div>
+                <div className="md:col-span-1">
+                  <Input
+                    label={t("form.fields.password")}
+                    labelClassName="text-white"
+                    name="password"
+                    type="password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={fieldErrors.password ? "border-red-500" : ""}
+                    showPasswordToggle
+                  />
+                  {fieldErrors.password && (
+                    <p className="mt-1 text-sm text-red-200">
+                      {fieldErrors.password}
+                    </p>
+                  )}
 
-            <div className="md:col-span-2 xl:col-span-3">
-              <Button type="submit" className="w-full" loading={loading}>
-                {loading
-                  ? t("form.buttons.submit.loading")
-                  : t("form.buttons.submit.default")}
-              </Button>
+                  {formData.password && (
+                    <div className="mt-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex space-x-1">
+                          {[1, 2, 3, 4, 5].map((level) => {
+                            const passwordStrength = getPasswordStrength(
+                              formData.password,
+                            );
+                            return (
+                              <div
+                                key={level}
+                                className={`h-2 w-8 rounded ${
+                                  level <= passwordStrength.score
+                                    ? passwordStrength.score <= 2
+                                      ? "bg-red-500"
+                                      : passwordStrength.score <= 3
+                                        ? "bg-yellow-500"
+                                        : "bg-green-500"
+                                    : "bg-white/30"
+                                }`}
+                              />
+                            );
+                          })}
+                        </div>
+                        <span
+                          className={`text-sm font-medium ${
+                            getPasswordStrength(formData.password).score <= 2
+                              ? "text-red-200"
+                              : getPasswordStrength(formData.password).score <=
+                                  3
+                                ? "text-yellow-200"
+                                : "text-green-200"
+                          }`}
+                        >
+                          {getPasswordStrength(formData.password).text}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 text-xs text-white/80">
+                        <p className="font-medium">Password must contain:</p>
+                        <ul className="mt-1 space-y-1">
+                          <li
+                            className={`flex items-center ${formData.password.length >= 8 ? "text-green-200" : "text-white/70"}`}
+                          >
+                            <span className="mr-2">
+                              {formData.password.length >= 8 ? "✓" : "○"}
+                            </span>
+                            At least 8 characters
+                          </li>
+                          <li
+                            className={`flex items-center ${/[a-z]/.test(formData.password) ? "text-green-200" : "text-white/70"}`}
+                          >
+                            <span className="mr-2">
+                              {/[a-z]/.test(formData.password) ? "✓" : "○"}
+                            </span>
+                            One lowercase letter
+                          </li>
+                          <li
+                            className={`flex items-center ${/[A-Z]/.test(formData.password) ? "text-green-200" : "text-white/70"}`}
+                          >
+                            <span className="mr-2">
+                              {/[A-Z]/.test(formData.password) ? "✓" : "○"}
+                            </span>
+                            One uppercase letter
+                          </li>
+                          <li
+                            className={`flex items-center ${/\d/.test(formData.password) ? "text-green-200" : "text-white/70"}`}
+                          >
+                            <span className="mr-2">
+                              {/\d/.test(formData.password) ? "✓" : "○"}
+                            </span>
+                            One number
+                          </li>
+                          <li
+                            className={`flex items-center ${/[@$!%*?&]/.test(formData.password) ? "text-green-200" : "text-white/70"}`}
+                          >
+                            <span className="mr-2">
+                              {/[@$!%*?&]/.test(formData.password) ? "✓" : "○"}
+                            </span>
+                            One special character (@$!%*?&)
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="md:col-span-1">
+                  <Input
+                    label={t("form.fields.confirmPassword")}
+                    labelClassName="text-white"
+                    name="confirmPassword"
+                    type="password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={
+                      fieldErrors.confirmPassword ? "border-red-500" : ""
+                    }
+                    showPasswordToggle
+                  />
+                  {fieldErrors.confirmPassword && (
+                    <p className="mt-1 text-sm text-red-200">
+                      {fieldErrors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+
+                <div className="md:col-span-2 xl:col-span-3 flex justify-center">
+                  <Button
+                    type="submit"
+                    className="w-full max-w-xs"
+                    loading={loading}
+                  >
+                    {loading
+                      ? t("form.buttons.submit.loading")
+                      : t("form.buttons.submit.default")}
+                  </Button>
+                </div>
+              </form>
             </div>
-          </form>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

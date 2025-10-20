@@ -17,6 +17,7 @@ import {
   FieldProps,
 } from "formik";
 import * as Yup from "yup";
+import AuthBackdrop from "@/components/ui/AuthBackdrop";
 
 type GoogleIdentity = {
   accounts?: {
@@ -76,7 +77,7 @@ const LoginPage: React.FC = () => {
 
       console.log("User data:", user);
       setAuth(token, user);
-      
+
       // Verify the user was stored correctly
       setTimeout(() => {
         const storedUser = getStoredUser();
@@ -295,12 +296,8 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex flex-col justify-center py-4 sm:py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-20 sm:-top-40 -right-20 sm:-right-40 w-40 sm:w-80 h-40 sm:h-80 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 opacity-20"></div>
-        <div className="absolute -bottom-20 sm:-bottom-40 -left-20 sm:-left-40 w-40 sm:w-80 h-40 sm:h-80 rounded-full bg-gradient-to-tr from-blue-100 to-blue-200 opacity-20"></div>
-      </div>
+    <div className="relative min-h-screen bg-gradient-to-b from-[#0E4AA1] via-[#0D63C6] to-[#0E4AA1] flex flex-col justify-center py-6 sm:py-10 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <AuthBackdrop />
 
       <div className="relative z-10 w-full">
         {/* Header Section */}
@@ -320,20 +317,20 @@ const LoginPage: React.FC = () => {
               />
             </svg>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 drop-shadow">
             {t("header.title")}
           </h2>
-          <p className="text-base sm:text-lg text-gray-600 mb-2">
+          <p className="text-base sm:text-lg text-blue-50/90 mb-2">
             {t("header.subtitle")}{" "}
-            <span className="font-semibold text-blue-700">
+            <span className="font-semibold text-white">
               {t("header.brandName")}
             </span>
           </p>
-          <p className="text-xs sm:text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-blue-50/80">
             {t("header.noAccount.text")}{" "}
             <Link
               href="/register"
-              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+              className="font-semibold text-white underline decoration-white/60 hover:decoration-white"
             >
               {t("header.noAccount.link")}
             </Link>
@@ -342,14 +339,14 @@ const LoginPage: React.FC = () => {
 
         {/* Auth Tabs */}
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl lg:max-w-3xl">
-          <div className="relative bg-white/70 backdrop-blur rounded-xl border border-gray-200 p-1 flex">
+          <div className="relative bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 p-1 flex shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
             <Link href="/login" className="flex-1">
-              <div className="text-center py-2 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow">
+              <div className="text-center py-2 rounded-lg font-semibold transition-all bg-white/20 text-white shadow-inner">
                 {t("tabs.login")}
               </div>
             </Link>
             <Link href="/register" className="flex-1">
-              <div className="text-center py-2 rounded-lg font-semibold text-gray-600 hover:text-blue-700">
+              <div className="text-center py-2 rounded-lg font-semibold text-blue-50/80 hover:text-white">
                 {t("tabs.signup")}
               </div>
             </Link>
@@ -357,261 +354,274 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Main Form Card */}
-        <div className="mt-6 sm:mt-10 mx-auto w-full sm:max-w-2xl lg:max-w-3xl">
-          <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100 ring-1 ring-blue-50 overflow-hidden">
-            <div className="h-1 w-full bg-gradient-to-r from-blue-600 via-sky-500 to-indigo-600" />
+        <div className="mt-6 sm:mt-10 mx-auto w-full sm:max-w-3xl lg:max-w-4xl">
+          <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl shadow-[0_20px_80px_rgba(0,0,0,0.35)] border border-white/20 overflow-hidden ring-1 ring-white/10">
+            <div className="h-1 w-full bg-gradient-to-r from-white/60 via-white/30 to-white/60" />
+            {/* Form + Test Accounts layout */}
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              {/* Email/Password Sign-In */}
+              <div className="flex flex-col lg:flex-row lg:items-stretch lg:gap-6">
+                {/* Form Section*/}
+                <div className="flex-1 min-w-0">
+                  {/* Email/Password Sign-In */}
 
-              <Formik
-                innerRef={formikRef}
-                enableReinitialize
-                initialValues={{
-                  email: initialEmail,
-                  password: "",
-                  remember: initialRemember,
-                }}
-                validationSchema={LoginSchema}
-                onSubmit={handleSubmit}
-              >
-                {({ isSubmitting, values }) => (
-                  <Form className="space-y-6">
-                    {error && (
-                      <div
-                        role="alert"
-                        aria-live="polite"
-                        className="error-banner animate-shake"
-                      >
-                        <span aria-hidden="true" className="error-accent" />
-                        <button
-                          type="button"
-                          className="error-dismiss"
-                          aria-label="Dismiss"
-                          onClick={() => setError("")}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-4 h-4"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="sr-only">Dismiss</span>
-                        </button>
-                        <div className="flex items-center">
-                          <svg
-                            className="w-5 h-5 mr-2 icon"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="font-medium">{error}</span>
-                        </div>
-                        <span aria-hidden="true" className="error-progress" />
-                      </div>
-                    )}
-
-                    <div className="space-y-5">
-                      <div>
-                        <Field name="email">
-                          {({ field, meta }: FieldProps) => (
-                            <Input
-                              {...field}
-                              label={t("form.fields.email")}
-                              type="email"
-                              autoComplete="email"
-                              required
-                              error={meta.error}
-                              className={`rounded-xl border-gray-200 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${meta.error ? "animate-shake error-ring" : ""}`}
-                            />
-                          )}
-                        </Field>
-                      </div>
-                      <div>
-                        <Field name="password">
-                          {({ field, meta }: FieldProps) => (
-                            <Input
-                              {...field}
-                              label={t("form.fields.password")}
-                              type="password"
-                              showPasswordToggle
-                              autoComplete="current-password"
-                              required
-                              error={meta.error}
-                              className={`rounded-xl border-gray-200 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${meta.error ? "animate-shake error-ring" : ""}`}
-                            />
-                          )}
-                        </Field>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-                          <Field name="remember">
-                            {({ field }: FieldProps) => (
-                              <>
-                                <input
-                                  type="checkbox"
-                                  className="sr-only"
-                                  {...field}
-                                />
-                                <span
-                                  className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${values.remember ? "bg-blue-600" : "bg-gray-300"}`}
-                                  aria-hidden="true"
-                                >
-                                  <span
-                                    className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transform transition-transform ${values.remember ? "translate-x-4" : ""}`}
-                                  />
-                                </span>
-                                <span className="text-sm text-gray-600">
-                                  Remember me
-                                </span>
-                              </>
-                            )}
-                          </Field>
-                        </label>
-                        <Link
-                          href="/forgot-password"
-                          className="text-sm text-blue-600 hover:text-blue-500 font-medium transition-colors"
-                        >
-                          Forgot your password?
-                        </Link>
-                      </div>
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
-                      loading={loading || isSubmitting}
-                    >
-                      {loading || isSubmitting
-                        ? t("form.buttons.submit.loading")
-                        : t("form.buttons.submit.default")}
-                    </Button>
-                  </Form>
-                )}
-              </Formik>
-
-              {/* OR Divider */}
-              <div className="relative my-6">
-                <div
-                  className="absolute inset-0 flex items-center"
-                  aria-hidden="true"
-                >
-                  <div className="w-full border-t border-gray-200" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    {t("form.divider")}
-                  </span>
-                </div>
-              </div>
-
-              {/* Google Sign-In */}
-              <div className="flex justify-center">
-                <div
-                  ref={googleBtnRef}
-                  className="shadow-sm hover:shadow-md transition-shadow rounded-md"
-                />
-              </div>
-              <div className="mt-4 flex items-center justify-center text-xs text-gray-500">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4 text-green-600 mr-2"
-                >
-                  <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-                  <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M4 21v-2a4 4 0 0 1 3-3.87" />
-                  <path d="M7 7a5 5 0 0 1 10 0v4a5 5 0 0 1-10 0V7z" />
-                </svg>
-                <span>Secure login — your credentials are encrypted</span>
-              </div>
-            </div>
-
-            {/* Test Accounts Section */}
-            <div className="bg-gray-50 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-t border-gray-100">
-              <div className="flex items-center mb-3 sm:mb-4">
-                <div className="flex-1 border-t border-gray-200"></div>
-                <span className="px-2 sm:px-3 text-xs sm:text-sm font-medium text-gray-500 bg-gray-50">
-                  {t("testAccounts.title")}
-                </span>
-                <div className="flex-1 border-t border-gray-200"></div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {testAccounts.map((account, index) => (
-                  <button
-                    key={index}
-                    onClick={() =>
-                      fillTestAccount(account.email, account.password)
-                    }
-                    className="group w-full text-left px-3 sm:px-4 py-2 sm:py-3 bg-white hover:bg-blue-50 rounded-xl border border-gray-200 hover:border-blue-200 transition-all duration-200 hover:shadow-md transform hover:scale-[1.01]"
+                  <Formik
+                    innerRef={formikRef}
+                    enableReinitialize
+                    initialValues={{
+                      email: initialEmail,
+                      password: "",
+                      remember: initialRemember,
+                    }}
+                    validationSchema={LoginSchema}
+                    onSubmit={handleSubmit}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-gray-800 text-xs sm:text-sm group-hover:text-blue-700 transition-colors truncate">
-                          {account.role}
+                    {({ isSubmitting, values }) => (
+                      <Form className="space-y-6">
+                        {error && (
+                          <div
+                            role="alert"
+                            aria-live="polite"
+                            className="error-banner animate-shake"
+                          >
+                            <span aria-hidden="true" className="error-accent" />
+                            <button
+                              type="button"
+                              className="error-dismiss"
+                              aria-label="Dismiss"
+                              onClick={() => setError("")}
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="w-4 h-4"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              <span className="sr-only">Dismiss</span>
+                            </button>
+                            <div className="flex items-center">
+                              <svg
+                                className="w-5 h-5 mr-2 icon"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              <span className="font-medium">{error}</span>
+                            </div>
+                            <span
+                              aria-hidden="true"
+                              className="error-progress"
+                            />
+                          </div>
+                        )}
+
+                        <div className="space-y-5">
+                          <div>
+                            <Field name="email">
+                              {({ field, meta }: FieldProps) => (
+                                <Input
+                                  {...field}
+                                  label={t("form.fields.email")}
+                                  labelClassName="text-white"
+                                  type="email"
+                                  autoComplete="email"
+                                  required
+                                  error={meta.error}
+                                  className={`rounded-xl border-gray-200 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${meta.error ? "animate-shake error-ring" : ""}`}
+                                />
+                              )}
+                            </Field>
+                          </div>
+                          <div>
+                            <Field name="password">
+                              {({ field, meta }: FieldProps) => (
+                                <Input
+                                  {...field}
+                                  label={t("form.fields.password")}
+                                  labelClassName="text-white"
+                                  type="password"
+                                  showPasswordToggle
+                                  autoComplete="current-password"
+                                  required
+                                  error={meta.error}
+                                  className={`rounded-xl border-gray-200 transition-all duration-200 focus:scale-[1.02] focus:shadow-md ${meta.error ? "animate-shake error-ring" : ""}`}
+                                />
+                              )}
+                            </Field>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                              <Field name="remember">
+                                {({ field }: FieldProps) => (
+                                  <>
+                                    <input
+                                      type="checkbox"
+                                      className="sr-only"
+                                      {...field}
+                                    />
+                                    <span
+                                      className={`relative inline-flex h-5 w-9 rounded-full transition-colors ${values.remember ? "bg-blue-600" : "bg-gray-300"}`}
+                                      aria-hidden="true"
+                                    >
+                                      <span
+                                        className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transform transition-transform ${values.remember ? "translate-x-4" : ""}`}
+                                      />
+                                    </span>
+                                    <span className="text-sm text-white">
+                                      Remember me
+                                    </span>
+                                  </>
+                                )}
+                              </Field>
+                            </label>
+                            <Link
+                              href="/forgot-password"
+                              className="text-sm text-white hover:text-blue-800 font-medium transition-colors"
+                            >
+                              Forgot your password?
+                            </Link>
+                          </div>
                         </div>
-                        <div className="text-gray-500 text-xs mt-0.5 truncate">
-                          {account.email}
+
+                        <div className="flex justify-center">
+                          <Button
+                            type="submit"
+                            className="w-full max-w-xs bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl py-3 text-base font-semibold"
+                            loading={loading || isSubmitting}
+                          >
+                            {loading || isSubmitting
+                              ? t("form.buttons.submit.loading")
+                              : t("form.buttons.submit.default")}
+                          </Button>
                         </div>
-                      </div>
+                      </Form>
+                    )}
+                  </Formik>
+
+                  {/* OR Divider */}
+                  <div className="relative my-6">
+                    <div
+                      className="absolute inset-0 flex items-center"
+                      aria-hidden="true"
+                    >
+                      <div className="w-full border-t border-white/20" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-transparent text-blue-50/90">
+                        {t("form.divider")}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Google Sign-In */}
+                  <div className="flex justify-center">
+                    <div
+                      ref={googleBtnRef}
+                      className="shadow-sm hover:shadow-md transition-shadow rounded-md"
+                    />
+                  </div>
+                  <div className="mt-4 flex items-center justify-center text-xs text-blue-50/80">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-4 h-4 text-green-600 mr-2"
+                    >
+                      <path d="M12 17a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+                      <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M4 21v-2a4 4 0 0 1 3-3.87" />
+                      <path d="M7 7a5 5 0 0 1 10 0v4a5 5 0 0 1-10 0V7z" />
+                    </svg>
+                    <span>Secure login — your credentials are encrypted</span>
+                  </div>
+                </div>
+
+                {/* Test Accounts Section */}
+                <aside className="mt-6 lg:mt-0 lg:w-80 xl:w-96 bg-white/5 backdrop-blur px-4 sm:px-6 lg:px-5 py-4 sm:py-6 border-t border-white/10 lg:border-t-0 lg:border-l lg:border-white/10 rounded-3xl lg:rounded-2xl lg:self-stretch">
+                  <div className="flex items-center mb-3 sm:mb-4">
+                    <div className="flex-1 border-t border-white/10"></div>
+                    <span className="px-2 sm:px-3 text-xs sm:text-sm font-medium text-blue-50/80">
+                      {t("testAccounts.title")}
+                    </span>
+                    <div className="flex-1 border-t border-white/10"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-2">
+                    {testAccounts.map((account, index) => (
+                      <button
+                        key={index}
+                        onClick={() =>
+                          fillTestAccount(account.email, account.password)
+                        }
+                        className="group w-full text-left px-3 sm:px-4 py-2 sm:py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl border border-white/20 hover:border-white/30 transition-all duration-200 hover:shadow-md transform hover:scale-[1.01]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium text-white text-xs sm:text-sm group-hover:text-white transition-colors truncate">
+                              {account.role}
+                            </div>
+                            <div className="text-blue-100 text-xs mt-0.5 truncate">
+                              {account.email}
+                            </div>
+                          </div>
+                          <svg
+                            className="w-3 h-3 sm:w-4 sm:h-4 text-blue-100 group-hover:text-white transition-colors flex-shrink-0 ml-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-start">
                       <svg
-                        className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0 ml-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                        className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
                       >
                         <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clipRule="evenodd"
                         />
                       </svg>
+                      <p className="text-xs text-blue-700 leading-relaxed">
+                        <span className="font-medium">
+                          {t("testAccounts.info.title")}
+                        </span>{" "}
+                        {t("testAccounts.info.description")}{" "}
+                        <code className="bg-blue-100 px-1 rounded text-xs">
+                          {t("testAccounts.info.command")}
+                        </code>{" "}
+                        {t("testAccounts.info.location")}
+                      </p>
                     </div>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="flex items-start">
-                  <svg
-                    className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <p className="text-xs text-blue-700 leading-relaxed">
-                    <span className="font-medium">
-                      {t("testAccounts.info.title")}
-                    </span>{" "}
-                    {t("testAccounts.info.description")}{" "}
-                    <code className="bg-blue-100 px-1 rounded text-xs">
-                      {t("testAccounts.info.command")}
-                    </code>{" "}
-                    {t("testAccounts.info.location")}
-                  </p>
-                </div>
+                  </div>
+                </aside>
               </div>
             </div>
           </div>
