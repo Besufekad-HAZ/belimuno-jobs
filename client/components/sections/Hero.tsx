@@ -86,10 +86,10 @@ export default function Hero() {
               <span>{t("hero.tagline")}</span>
             </div>
             <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2.9rem] lg:text-[3.35rem] animate-fade-up animate-delay-100">
-              <span className="block text-balance leading-tight text-slate-900/90 text-3xl sm:text-[2.9rem] lg:text-[3.35rem]">
+              <span className="block text-balance break-words whitespace-normal leading-[1.12] text-slate-900/90 text-[clamp(1.5rem,7.8vw,2.9rem)] lg:text-[3.35rem]">
                 {t("hero.title.part1")}
               </span>
-              <span className="hero-typing block text-balance leading-tight gradient-animated-text text-[2.5rem] sm:text-[3.5rem] lg:text-[3.8rem] h-20">
+              <span className="hero-typing block text-balance break-words whitespace-normal hyphens-auto leading-[1.08] gradient-animated-text text-[clamp(1.7rem,9vw,3.5rem)] lg:text-[3.8rem] min-h-[1.25em] sm:min-h-[1.2em]">
                 <TypeAnimation
                   sequence={typingSequence}
                   wrapper="span"
@@ -126,7 +126,7 @@ export default function Hero() {
                 size="lg"
                 variant="outline"
                 onClick={() => router.push("/jobs")}
-                className="btn-shine group relative w-full sm:w-auto border-0 text-blue-700 shadow-lg hover:shadow-xl px-6 py-3 sm:px-8 lg:px-10 text-base sm:text-lg font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-500"
+                className="btn-secondary-hero btn-shine group relative w-full sm:w-auto border-0 text-blue-700 shadow-lg hover:shadow-xl px-6 py-3 sm:px-8 lg:px-10 text-base sm:text-lg font-semibold tracking-wide transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 hover:text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-500"
               >
                 <span className="inline-flex items-center">
                   <Briefcase className="mr-2 h-5 w-5 text-blue-600 transition-colors duration-300 group-hover:text-white" />
@@ -232,6 +232,9 @@ export default function Hero() {
 
         .hero-typewriter {
           display: inline-block;
+          word-break: break-word;
+          overflow-wrap: anywhere;
+          white-space: normal; /* allow wrapping on small screens */
         }
 
         /* Button polish */
