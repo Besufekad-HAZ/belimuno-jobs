@@ -990,6 +990,7 @@
       "title": "Daashbooraa Bulchinsa Ala Tajaajilaa",
       "subtitle": "Hojiiwwan, maamiloota, fi dalagaa daldalaa bulchiisi",
       "buttons": {
+        "postJob": "Hojii Maxxansii Dhaabbattoo",
         "manageJobs": "Hojiiwwan Bulchiisi",
         "clientManagement": "Bulchiinsa Maamilaa"
       }

@@ -352,7 +352,7 @@ const RegisterPage: React.FC = () => {
         </div>
 
         {/* Main Form Card */}
-        <div className="mt-6 sm:mt-10 mx-auto w-full sm:max-w-2xl lg:max-w-5xl">
+        <div className="mt-6 sm:mt-10 mx-auto w-full sm:max-w-2xl lg:max-w-3xl">
           <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl shadow-[0_20px_80px_rgba(0,0,0,0.35)] border border-white/20 overflow-hidden ring-1 ring-white/10">
             <div className="h-1 w-full bg-gradient-to-r from-white/60 via-white/30 to-white/60" />
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

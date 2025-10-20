@@ -979,6 +979,7 @@
       "title": "Outsourcing Admin Dashboard",
       "subtitle": "Manage jobs, clients, and business operations",
       "buttons": {
+        "postJob": "Post New Job",
         "manageJobs": "Manage Jobs",
         "clientManagement": "Client Management"
       }

@@ -12,6 +12,7 @@ import {
   FileText,
   Eye,
   Users,
+  Plus,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import Card from "@/components/ui/Card";
@@ -149,6 +150,13 @@ const OutsourceAdminDashboard: React.FC = () => {
             <p className="text-gray-600">{t("header.subtitle")}</p>
           </div>
           <div className="flex space-x-3 mt-4 sm:mt-0">
+            <Button
+              onClick={() => router.push("/admin/outsource/jobs/new")}
+              className="w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t("header.buttons.postJob")}
+            </Button>
             <Button
               onClick={() => router.push("/admin/outsource/projects")}
               variant="primary"
