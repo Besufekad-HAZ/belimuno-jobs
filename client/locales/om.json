@@ -104,8 +104,10 @@
     "hero": {
       "title": {
         "part1": "Qophiiwwan",
-        "part2": "Carraawwan waliin hidhu"
+        "part2": "Carraawwan waliin hidhu",
+        "dynamic": ["Carraawwan", "Abbootii hojii amanamoo", "Hojii hiika qabu"]
       },
+      "tagline": "Belimuno Jobs • Since 2012",
       "description": "Belimuno Jobs platformaa hiree HRaa Itoophiyaa keessatti kan caaltuudha, hojjettoota qophaa'aan qaban waliin daldaltoota magaalaa hunda keessatti hidha. Kumoota hojjettoota mijataa hojii isaanii ijaaruu keessatti walitti qabanii.",
       "register": "galmeessuu",
       "goToDashboard": "Daashboorotti deemi",
