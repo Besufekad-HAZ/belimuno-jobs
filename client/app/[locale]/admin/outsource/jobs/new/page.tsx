@@ -20,6 +20,8 @@ const NewJobPage: React.FC = () => {
     priority: "medium",
     location: "",
     workType: "remote",
+    company: "",
+    industry: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -91,24 +93,6 @@ const NewJobPage: React.FC = () => {
     setError("");
 
     try {
-      const user = getStoredUser();
-      // Support region being either a populated object or an id string
-      const regionId = (() => {
-        if (!user) return undefined;
-        if (typeof user.region === "string") return user.region;
-        if (user.region && typeof user.region === "object") {
-          const maybeObj = user.region as unknown as { _id?: string };
-          return maybeObj._id;
-        }
-        return undefined;
-      })();
-      if (!regionId) {
-        setError(
-          "Your account has no region assigned. Please contact support or update your profile.",
-        );
-        setLoading(false);
-        return;
-      }
       const jobData = {
         // Map frontend form fields to backend schema expectations
         title: formData.title,
@@ -119,10 +103,10 @@ const NewJobPage: React.FC = () => {
         priority: formData.priority,
         location: formData.location,
         workType: formData.workType,
+        company: formData.company,
+        industry: formData.industry,
         // Backend expects 'requiredSkills'
         requiredSkills: formData.skills.filter((skill) => skill.trim()),
-        // Provide region from user context
-        region: regionId,
         // Immediately post the job (instead of leaving as draft)
         status: "posted",
         // Keep requirements as tags if we want (map to tags) or drop if not used
@@ -236,6 +220,28 @@ const NewJobPage: React.FC = () => {
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  label="Company Name"
+                  name="company"
+                  type="text"
+                  required
+                  value={formData.company}
+                  onChange={handleChange}
+                  placeholder="e.g. Tech Solutions Inc."
+                />
+
+                <Input
+                  label="Industry"
+                  name="industry"
+                  type="text"
+                  required
+                  value={formData.industry}
+                  onChange={handleChange}
+                  placeholder="e.g. Technology, Healthcare, Finance"
+                />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Input
                   label="Deadline"
@@ -297,26 +303,6 @@ const NewJobPage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="e.g. Addis Ababa, Ethiopia"
               />
-              {/* Region (derived from user) */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Region
-                </label>
-                <input
-                  type="text"
-                  disabled
-                  value={(() => {
-                    const u = getStoredUser();
-                    if (!u) return "Not set";
-                    if (typeof u.region === "string") return "Assigned";
-                    return u.region?.name || "Assigned";
-                  })()}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 placeholder-gray-400 focus:outline-none"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Region is taken from your account and required to post a job.
-                </p>
-              </div>
             </div>
 
             {/* Requirements */}

@@ -688,7 +688,8 @@ exports.createJob = asyncHandler(async (req, res) => {
     "category",
     "budget",
     "deadline",
-    "region",
+    "company",
+    "industry",
   ];
   for (const field of requiredFields) {
     if (!jobData[field]) {
@@ -700,42 +701,38 @@ exports.createJob = asyncHandler(async (req, res) => {
   }
 
   const job = await Job.create(jobData);
-  await job.populate("region", "name");
 
-  // Find workers in the same region to notify them about the new job
-  const workersInRegion = await User.find({
+  // Find all verified workers to notify them about the new job
+  const verifiedWorkers = await User.find({
     role: "worker",
     isVerified: true,
     isActive: true,
-    region: job.region._id,
   }).select("_id");
 
-  // Notify workers in the region about the new job
-  if (workersInRegion.length > 0) {
+  // Notify all verified workers about the new job
+  if (verifiedWorkers.length > 0) {
     try {
       await NotificationService.notifyJobPosted(
         job._id,
         req.user._id,
-        workersInRegion.map((w) => w._id)
+        verifiedWorkers.map((w) => w._id)
       );
       console.log(
-        `Notified ${workersInRegion.length} workers in region ${job.region.name} about new job`
+        `Notified ${verifiedWorkers.length} verified workers about new job`
       );
     } catch (error) {
       console.error("Failed to send job notifications:", error);
       // Don't fail the job creation if notifications fail
     }
   } else {
-    console.log(
-      `No verified workers found in region ${job.region.name} for job notification`
-    );
+    console.log("No verified workers found for job notification");
   }
 
-  // Create notification for super admin
-  const superAdmin = await User.findOne({ role: "super_admin" });
-  if (superAdmin) {
+  // Create notification for admin outsource
+  const adminOutsource = await User.findOne({ role: "admin_outsource" });
+  if (adminOutsource) {
     await Notification.create({
-      recipient: superAdmin._id,
+      recipient: adminOutsource._id,
       sender: req.user._id,
       title: "New Job Posted",
       message: `A new job "${job.title}" has been posted`,
