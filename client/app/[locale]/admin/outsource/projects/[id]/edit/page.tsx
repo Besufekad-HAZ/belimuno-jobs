@@ -22,6 +22,8 @@ interface Job {
   status: string;
   tags: string[];
   requiredSkills: string[];
+  company: string;
+  industry: string;
   region: string | { _id: string; name: string };
 }
 
@@ -37,6 +39,8 @@ const UpdateJobPage: React.FC = () => {
     priority: "medium",
     location: "",
     workType: "remote",
+    company: "",
+    industry: "",
   });
   const [loading, setLoading] = useState(true); // Start with loading true
   const [error, setError] = useState("");
@@ -47,7 +51,7 @@ const UpdateJobPage: React.FC = () => {
 
   // Check if a field is restricted from updates based on job status
   const isFieldRestricted = (fieldName: string): boolean => {
-    const restrictedFields = ["budget", "deadline", "skills"];
+    const restrictedFields = ["budget", "skills"];
     return (
       (jobStatus === "assigned" || jobStatus === "in_progress") &&
       restrictedFields.includes(fieldName)
@@ -60,8 +64,8 @@ const UpdateJobPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await adminAPI.getJob(jobId);
-        const job = response.data.data.job as Job;
-        console.log(job);
+        const job = response.data.data as Job;
+        console.log("job", job);
 
         // Store the job status
         setJobStatus(job.status || "");
@@ -82,6 +86,8 @@ const UpdateJobPage: React.FC = () => {
           priority: job.priority || "medium",
           location: job.location || "",
           workType: job.workType || "remote",
+          company: job.company || "",
+          industry: job.industry || "",
         });
       } catch (error) {
         if (typeof error === "object" && error && "response" in error) {
@@ -92,7 +98,6 @@ const UpdateJobPage: React.FC = () => {
         } else {
           setError("Failed to fetch job");
         }
-        router.push("/admin/outsource/dashboard");
       } finally {
         setLoading(false);
       }
@@ -169,11 +174,11 @@ const UpdateJobPage: React.FC = () => {
     try {
       // Check for restricted field updates
       if (jobStatus === "assigned" || jobStatus === "in_progress") {
-        const restrictedFields = ["budget", "deadline", "skills"];
+        const restrictedFields = ["budget", "skills"];
 
         // Get current job data for comparison
         const response = await adminAPI.getJob(jobId);
-        const currentJob = response.data.data.job as Job;
+        const currentJob = response.data.data as Job;
 
         const hasRestrictedUpdates = restrictedFields.some((field) => {
           if (field === "skills") {
@@ -182,42 +187,17 @@ const UpdateJobPage: React.FC = () => {
             return JSON.stringify(currentSkills) !== JSON.stringify(newSkills);
           } else if (field === "budget") {
             return currentJob.budget?.toString() !== formData.budget;
-          } else if (field === "deadline") {
-            const currentDate = new Date(currentJob.deadline)
-              .toISOString()
-              .split("T")[0];
-            return currentDate !== formData.deadline;
           }
           return false;
         });
 
         if (hasRestrictedUpdates) {
-          setError(
-            "Cannot update budget, deadline, or required skills for assigned jobs",
-          );
+          setError("Cannot update budget or required skills for assigned jobs");
           setLoading(false);
           return;
         }
       }
 
-      const user = getStoredUser();
-      // Support region being either a populated object or an id string
-      const regionId = (() => {
-        if (!user) return undefined;
-        if (typeof user.region === "string") return user.region;
-        if (user.region && typeof user.region === "object") {
-          const maybeObj = user.region as unknown as { _id?: string };
-          return maybeObj._id;
-        }
-        return undefined;
-      })();
-      if (!regionId) {
-        setError(
-          "Your account has no region assigned. Please contact support or update your profile.",
-        );
-        setLoading(false);
-        return;
-      }
       const jobData = {
         // Map frontend form fields to backend schema expectations
         title: formData.title,
@@ -228,20 +208,19 @@ const UpdateJobPage: React.FC = () => {
         priority: formData.priority,
         location: formData.location,
         workType: formData.workType,
+        company: formData.company,
+        industry: formData.industry,
         // Backend expects 'requiredSkills'
         requiredSkills: formData.skills.filter((skill) => skill.trim()),
-        // Provide region from user context
-        region: regionId,
-        // Immediately post the job (instead of leaving as draft)
-        status: "posted",
         // Keep requirements as tags if we want (map to tags) or drop if not used
         tags: formData.requirements.filter((req) => req.trim()),
       };
 
       await adminAPI.updateJob(jobId, jobData);
       toast.success("Job updated successfully");
-      router.push("/admin/outsource/dashboard");
+      router.push("/admin/outsource/projects");
     } catch (error: unknown) {
+      console.log(error);
       if (typeof error === "object" && error && "response" in error) {
         const axiosErr = error as {
           response?: { data?: { message?: string } };
@@ -351,6 +330,27 @@ const UpdateJobPage: React.FC = () => {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Company Name"
+                    name="company"
+                    type="text"
+                    required
+                    value={formData.company}
+                    onChange={handleChange}
+                    placeholder="e.g. Tech Solutions Inc."
+                  />
+
+                  <Input
+                    label="Industry"
+                    name="industry"
+                    type="text"
+                    value={formData.industry}
+                    onChange={handleChange}
+                    placeholder="e.g. Technology, Healthcare, Finance"
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Input
                     label="Deadline"
@@ -360,7 +360,6 @@ const UpdateJobPage: React.FC = () => {
                     value={formData.deadline}
                     onChange={handleChange}
                     min={new Date().toISOString().split("T")[0]}
-                    disabled={isFieldRestricted("deadline")}
                   />
 
                   <div>
@@ -413,27 +412,6 @@ const UpdateJobPage: React.FC = () => {
                   onChange={handleChange}
                   placeholder="e.g. Addis Ababa, Ethiopia"
                 />
-                {/* Region (derived from user) */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Region
-                  </label>
-                  <input
-                    type="text"
-                    disabled
-                    value={(() => {
-                      const u = getStoredUser();
-                      if (!u) return "Not set";
-                      if (typeof u.region === "string") return "Assigned";
-                      return u.region?.name || "Assigned";
-                    })()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 placeholder-gray-400 focus:outline-none"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Region is taken from your account and required to post a
-                    job.
-                  </p>
-                </div>
               </div>
 
               {/* Requirements */}
@@ -536,7 +514,7 @@ const UpdateJobPage: React.FC = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push("/admin/outsource/dashboard")}
+                  onClick={() => router.push("/admin/outsource/projects")}
                 >
                   Cancel
                 </Button>
