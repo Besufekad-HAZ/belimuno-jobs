@@ -35,6 +35,8 @@ const OutsourceAdminDashboard: React.FC = () => {
     deadline: string;
     client: { _id: string; name: string; company?: string };
     worker?: { _id: string; name: string };
+    company?: string;
+    industry?: string;
     createdAt: string;
   } | null>(null);
   const router = useRouter();
@@ -46,6 +48,7 @@ const OutsourceAdminDashboard: React.FC = () => {
   const stats = data?.stats || null;
   const clients = data?.clients || [];
   const projects = data?.projects || [];
+  console.log(projects);
   const revenueData = data?.revenueData || [];
   const loading = isLoading;
 
@@ -364,7 +367,8 @@ const OutsourceAdminDashboard: React.FC = () => {
 
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                     <span>
-                      {t("jobs.details.client")}: {project.client.name}
+                      {t("jobs.details.client")}:{" "}
+                      {project.company || project.client?.name}
                     </span>
                     <span>{formatCurrency(project.budget)}</span>
                   </div>
@@ -652,7 +656,9 @@ const OutsourceAdminDashboard: React.FC = () => {
                   <p className="text-sm font-medium text-gray-600">
                     {t("jobs.details.client")}
                   </p>
-                  <p className="font-medium">{selectedProject.client.name}</p>
+                  <p className="font-medium">
+                    {selectedProject.company || selectedProject.client.name}
+                  </p>
                   {selectedProject.client.company && (
                     <p className="text-sm text-gray-600">
                       {selectedProject.client.company}

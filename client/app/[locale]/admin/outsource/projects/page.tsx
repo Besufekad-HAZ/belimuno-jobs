@@ -12,6 +12,7 @@ import {
   CheckCircle,
   AlertCircle,
   Users,
+  Trash2,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI } from "@/lib/api";
@@ -20,6 +21,8 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+import { queryClient } from "@/lib/queryClient";
 
 export interface Project {
   _id: string;
@@ -42,6 +45,8 @@ export interface Project {
     email: string;
     rating?: number;
   };
+  company?: string;
+  industry?: string;
   createdAt: string;
   updatedAt: string;
   startDate?: string;
@@ -88,6 +93,8 @@ type JobApi = {
     email: string;
     workerProfile?: { rating?: number };
   };
+  company?: string;
+  industry?: string;
   createdAt: string;
   updatedAt?: string;
   startDate?: string;
@@ -123,6 +130,9 @@ const ProjectOversight: React.FC = () => {
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
+  const [showDeleteJobModal, setShowDeleteJobModal] = useState(false);
+  const [selectedJobForDelete, setSelectedJobForDelete] =
+    useState<Project | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -209,6 +219,8 @@ const ProjectOversight: React.FC = () => {
                 rating: job.worker.workerProfile?.rating || 0,
               }
             : undefined,
+          company: job.company,
+          industry: job.industry,
           createdAt: job.createdAt,
           updatedAt: job.updatedAt || job.createdAt,
           startDate: job.startDate,
@@ -383,6 +395,26 @@ const ProjectOversight: React.FC = () => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const handleDeleteJob = (job: Project) => {
+    setSelectedJobForDelete(job);
+    setShowDeleteJobModal(true);
+  };
+
+  const confirmDeleteJob = async () => {
+    if (!selectedJobForDelete) return;
+
+    try {
+      await adminAPI.deleteJob(selectedJobForDelete._id);
+      setShowDeleteJobModal(false);
+      setSelectedJobForDelete(null);
+      queryClient.invalidateQueries({ queryKey: ["outsourceDashboard"] });
+      toast.success("Job deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete job:", error);
+      toast.error("Failed to delete job");
+    }
   };
 
   if (loading) {
@@ -615,10 +647,10 @@ const ProjectOversight: React.FC = () => {
                           Client
                         </p>
                         <p className="text-sm text-gray-600">
-                          {project.client.name}
+                          {project.company || project.client.name}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {project.client.company}
+                          {project.company || project.client.company}
                         </p>
                       </div>
                       <div>
@@ -716,14 +748,16 @@ const ProjectOversight: React.FC = () => {
 
                     <Button
                       onClick={() =>
-                        router.push(`/admin/outsource/projects/${project._id}`)
+                        router.push(
+                          `/admin/outsource/projects/edit/${project._id}`,
+                        )
                       }
                       variant="primary"
                       size="sm"
                       className="flex items-center space-x-2"
                     >
                       <Edit className="h-4 w-4" />
-                      <span>Manage</span>
+                      <span>Edit Job</span>
                     </Button>
 
                     <Button
@@ -738,6 +772,16 @@ const ProjectOversight: React.FC = () => {
                     >
                       <Users className="h-4 w-4" />
                       <span>Applicants</span>
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleDeleteJob(project)}
+                      className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
+                    >
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="text-xs sm:text-sm">Delete Job</span>
                     </Button>
                   </div>
                 </div>
@@ -807,13 +851,15 @@ const ProjectOversight: React.FC = () => {
                   <div className="space-y-2 text-sm">
                     <div>
                       <p>
-                        <strong>Client:</strong> {selectedProject.client.name}
+                        <strong>Client:</strong>{" "}
+                        {selectedProject.company || selectedProject.client.name}
                       </p>
                       <p className="text-gray-600">
                         {selectedProject.client.email}
                       </p>
                       <p className="text-gray-600">
-                        {selectedProject.client.company}
+                        {selectedProject.company ||
+                          selectedProject.client.company}
                       </p>
                     </div>
                     {selectedProject.worker && (
@@ -882,6 +928,67 @@ const ProjectOversight: React.FC = () => {
                     {new Date(selectedProject.updatedAt).toLocaleDateString()}
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        {/* Delete Job Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteJobModal}
+          onClose={() => {
+            setShowDeleteJobModal(false);
+            setSelectedJobForDelete(null);
+          }}
+          title="Delete Job"
+          size="md"
+        >
+          {selectedJobForDelete && (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <Trash2 className="h-5 w-5 text-red-600" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Are you sure you want to delete this job?
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
+                <p className="text-gray-700">{selectedJobForDelete.title}</p>
+                <p className="text-sm text-gray-500">
+                  Budget: ETB {selectedJobForDelete.budget?.toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Status: {selectedJobForDelete.status.replace("_", " ")}
+                </p>
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowDeleteJobModal(false);
+                    setSelectedJobForDelete(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmDeleteJob}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Job
+                </Button>
               </div>
             </div>
           )}

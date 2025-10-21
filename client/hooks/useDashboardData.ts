@@ -189,6 +189,8 @@ export const useOutsourceDashboardData = () => {
           ).toISOString(),
         client: job.client || { _id: "unknown", name: "Unknown Client" },
         worker: job.worker,
+        company: job.company,
+        industry: job.industry,
         createdAt: job.createdAt,
       }));
 
