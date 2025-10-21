@@ -749,7 +749,7 @@ const ProjectOversight: React.FC = () => {
                     <Button
                       onClick={() =>
                         router.push(
-                          `/admin/outsource/projects/edit/${project._id}`,
+                          `/admin/outsource/projects/${project._id}/edit`,
                         )
                       }
                       variant="primary"

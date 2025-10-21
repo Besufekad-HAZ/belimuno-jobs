@@ -428,7 +428,8 @@ export const adminAPI = {
     api.put(`/admin/users/${id}/deactivate`, { reason }),
   activateUser: (id: string) => api.put(`/admin/users/${id}/activate`),
   deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
-  getJobs: (params?: {
+  getJob: (id: string) => api.get(`/admin/jobs/${id}`),
+  getAllJobs: (params?: {
     status?: "draft" | "open" | "in_progress" | "completed" | "cancelled";
     category?: string;
     search?: string;
@@ -439,38 +440,9 @@ export const adminAPI = {
   }) => api.get("/admin/jobs", { params }),
   createJob: (jobData: Record<string, unknown>) =>
     api.post("/admin/jobs/create", jobData),
-  getAllJobs: (params?: {
-    status?: "draft" | "open" | "in_progress" | "completed" | "cancelled";
-    category?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-    sort?: string;
-    select?: string;
-  }) => api.get("/admin/jobs", { params }),
-  getJob: (id: string) => api.get(`/admin/jobs/${id}`),
-  updateJob: (
-    id: string,
-    jobData: {
-      title?: string;
-      description?: string;
-      category?: string;
-      budget?: { min: number; max: number } | number;
-      status?:
-        | "draft"
-        | "open"
-        | "posted"
-        | "in_progress"
-        | "completed"
-        | "cancelled"
-        | string;
-      featured?: boolean;
-      deadline?: string;
-      location?: string;
-      tags?: string[];
-    },
-  ) => api.put(`/admin/jobs/${id}`, jobData),
-  deleteJob: (id: string) => api.delete(`/admin/jobs/${id}`),
+  updateJob: (id: string, jobData: Record<string, unknown>) =>
+    api.put(`/admin/jobs/update/${id}`, jobData),
+  deleteJob: (id: string) => api.delete(`/admin/jobs/delete/${id}`),
   getPerformance: () => api.get("/admin/performance"),
   getPayments: (params?: {
     status?: "pending" | "processing" | "completed" | "failed" | "disputed";
