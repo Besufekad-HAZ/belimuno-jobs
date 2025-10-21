@@ -755,10 +755,7 @@ exports.createJob = asyncHandler(async (req, res) => {
 // @route   PUT /api/admin/jobs/update/:id
 // @access  Private/Admins
 exports.updateJob = asyncHandler(async (req, res) => {
-  let job = await Job.findOne({
-    _id: req.params.id,
-    admin: req.user._id,
-  });
+  let job = await Job.findById(req.params.id);
 
   if (!job) {
     return res.status(404).json({
@@ -769,16 +766,22 @@ exports.updateJob = asyncHandler(async (req, res) => {
 
   // Prevent updating certain fields if job is already assigned
   if (job.status === "assigned" || job.status === "in_progress") {
-    const restrictedFields = ["budget", "deadline", "requiredSkills"];
-    const hasRestrictedUpdates = restrictedFields.some(
-      (field) => req.body[field]
-    );
+    const restrictedFields = ["budget", "requiredSkills"];
+    const hasRestrictedUpdates = restrictedFields.some((field) => {
+      if (field === "budget") {
+        return req.body.budget !== undefined && req.body.budget !== job.budget;
+      } else if (field === "requiredSkills") {
+        const currentSkills = job.requiredSkills || [];
+        const newSkills = req.body.requiredSkills || [];
+        return JSON.stringify(currentSkills) !== JSON.stringify(newSkills);
+      }
+      return false;
+    });
 
     if (hasRestrictedUpdates) {
       return res.status(400).json({
         success: false,
-        message:
-          "Cannot update budget, deadline, or required skills for assigned jobs",
+        message: "Cannot update budget or required skills for assigned jobs",
       });
     }
   }
