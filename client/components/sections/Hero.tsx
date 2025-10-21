@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -9,7 +7,6 @@ import { getStoredUser, getRoleDashboardPath } from "@/lib/auth";
 import { resolveAssetUrl } from "@/lib/assets";
 import { ArrowRight, Briefcase } from "lucide-react";
 import { TypeAnimation } from "react-type-animation";
-import CountUp from "react-countup";
 
 type StoredUser = { role: string } | null;
 
@@ -17,11 +14,36 @@ const HERO_IMAGE_SRC = resolveAssetUrl("/hero.jpg") ?? "/hero.jpg";
 
 export default function Hero() {
   const [user, setUser] = useState<StoredUser>(null);
+  const [counts, setCounts] = useState({ users: 0, rate: 0, jobs: 0 });
   const router = useRouter();
   const t = useTranslations("Home");
 
   useEffect(() => {
     setUser(getStoredUser());
+
+    // Animate counts
+    const duration = 2000;
+    const steps = 60;
+    const interval = duration / steps;
+
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+
+      setCounts({
+        users: Math.round(12000 * progress) / 1000,
+        rate: Math.round(4.8 * progress * 10) / 10,
+        jobs: Math.round(1.8 * progress * 10) / 10,
+      });
+
+      if (currentStep >= steps) {
+        clearInterval(timer);
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
   }, []);
 
   const handlePrimary = () => {
@@ -33,9 +55,9 @@ export default function Hero() {
   };
 
   const stats = [
-    { value: 12, decimals: 0, suffix: "K+", label: t("stats.activeUsers") },
-    { value: 4.8, decimals: 1, suffix: "/5", label: t("stats.successRate") },
-    { value: 1.8, decimals: 1, suffix: "K", label: t("stats.jobsPosted") },
+    { id: 1, value: counts.users, suffix: "K+", label: t("stats.activeUsers") },
+    { id: 2, value: counts.rate, suffix: "/5", label: t("stats.successRate") },
+    { id: 3, value: counts.jobs, suffix: "K", label: t("stats.jobsPosted") },
   ];
 
   const dynamicPhrases = useMemo(() => {
@@ -45,6 +67,7 @@ export default function Hero() {
     }
     return [] as string[];
   }, [t]);
+
   const typingSequence = useMemo(() => {
     if (dynamicPhrases.length === 0) {
       return [t("hero.title.part2"), 2600];
@@ -54,7 +77,6 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-white">
-      {/* Full-width background image - hidden on mobile */}
       <div className="absolute inset-0 hidden lg:block">
         <Image
           src={HERO_IMAGE_SRC}
@@ -64,11 +86,9 @@ export default function Hero() {
           sizes="100vw"
           className="object-cover"
         />
-        {/* Left-to-right gradient overlay for readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/92 via-white/65 to-transparent" />
       </div>
 
-      {/* Mobile background accent blobs */}
       <div className="pointer-events-none absolute inset-0 lg:hidden">
         <div className="absolute -top-32 -right-24 h-72 w-72 rounded-full bg-blue-200/30 blur-3xl" />
         <div className="absolute -bottom-32 -left-24 h-72 w-72 rounded-full bg-cyan-200/30 blur-3xl" />
@@ -79,12 +99,12 @@ export default function Hero() {
         <div className="absolute -bottom-28 left-16 hidden lg:block h-56 w-56 rounded-full bg-cyan-400/15 blur-3xl" />
 
         <div className="relative grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)]">
-          {/* Copy */}
           <div className="relative z-10 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-blue-700 shadow-lg backdrop-blur animate-fade-up">
               <span className="inline-flex h-2 w-2 rounded-full bg-blue-600" />
               <span>{t("hero.tagline")}</span>
             </div>
+
             <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-[2.9rem] lg:text-[3.35rem] animate-fade-up animate-delay-100">
               <span className="block text-balance break-words whitespace-normal leading-[1.12] text-slate-900/90 text-[clamp(1.5rem,7.8vw,2.9rem)] lg:text-[3.35rem]">
                 {t("hero.title.part1")}
@@ -102,6 +122,7 @@ export default function Hero() {
                 />
               </span>
             </h1>
+
             <p className="mt-2 max-w-[36rem] text-base text-slate-600 sm:text-lg lg:text-gray-700 animate-fade-up animate-delay-200 leading-relaxed">
               {t("hero.description")}
             </p>
@@ -138,7 +159,7 @@ export default function Hero() {
             <dl className="mt-10 grid gap-6 sm:grid-cols-3 animate-fade-up animate-delay-400">
               {stats.map((stat) => (
                 <div
-                  key={stat.label}
+                  key={stat.id}
                   className="group flex flex-col gap-2 border-t border-slate-200 pt-5 text-slate-700 transition-colors duration-300 hover:border-blue-400"
                 >
                   <span className="flex items-center gap-2">
@@ -152,22 +173,13 @@ export default function Hero() {
                     {stat.label}
                   </dt>
                   <dd className="text-[2.2rem] font-bold text-cyan-700">
-                    <CountUp
-                      start={0}
-                      end={stat.value}
-                      duration={2.6}
-                      decimals={stat.decimals}
-                      suffix={stat.suffix}
-                      enableScrollSpy
-                      scrollSpyOnce
-                    />
+                    {stat.value.toFixed(stat.id === 1 ? 0 : 1)}
+                    {stat.suffix}
                   </dd>
                 </div>
               ))}
             </dl>
           </div>
-
-          {/* Removed side visual; background image covers entire width on desktop */}
         </div>
       </div>
 
@@ -234,18 +246,16 @@ export default function Hero() {
           display: inline-block;
           word-break: break-word;
           overflow-wrap: anywhere;
-          white-space: normal; /* allow wrapping on small screens */
+          white-space: normal;
         }
 
-        /* Button polish */
         .btn-primary-hero,
         .btn-secondary-hero {
           position: relative;
           overflow: hidden;
-          border-radius: 0.75rem; /* rounded-xl to match tailwind */
+          border-radius: 0.75rem;
         }
 
-        /* Subtle shine sweep on hover */
         .btn-shine::after {
           content: "";
           position: absolute;
@@ -267,7 +277,6 @@ export default function Hero() {
           left: 150%;
         }
 
-        /* Gradient outline base for secondary button */
         .btn-secondary-hero {
           border: 2px solid transparent;
           background:
@@ -275,9 +284,8 @@ export default function Hero() {
             linear-gradient(90deg, #2563eb, #06b6d4) border-box;
           backdrop-filter: blur(6px);
         }
-        /* When hovered, fill with gradient (Tailwind hover: classes also apply) */
         .btn-secondary-hero:hover {
-          border-color: transparent; /* rely on fill gradient */
+          border-color: transparent;
         }
       `}</style>
     </section>

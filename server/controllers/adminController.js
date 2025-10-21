@@ -545,7 +545,7 @@ exports.verifyWorker = asyncHandler(async (req, res) => {
 
 // @desc    Get all jobs with filtering
 // @route   GET /api/admin/jobs
-// @access  Private/Super Admin
+// @access  Private/Admins
 exports.getJobs = asyncHandler(async (req, res) => {
   const {
     status,
@@ -630,7 +630,7 @@ exports.getJobs = asyncHandler(async (req, res) => {
 
 // @desc    Get single job by ID
 // @route   GET /api/admin/jobs/:id
-// @access  Private/Super Admin
+// @access  Private/Admins
 exports.getJob = asyncHandler(async (req, res) => {
   const job = await Job.findById(req.params.id)
     .populate("client", "name email profile.avatar clientProfile")
@@ -673,29 +673,130 @@ exports.getJob = asyncHandler(async (req, res) => {
 });
 
 // @desc    Create a job (admin)
-// @route   POST /api/admin/jobs
-// @access  Private/Super Admin
+// @route   POST /api/admin/jobs/create
+// @access  Private/Admins
 exports.createJob = asyncHandler(async (req, res) => {
-  const job = await Job.create({ ...req.body });
-  res.status(201).json({ success: true, data: job });
+  const jobData = {
+    ...req.body,
+    admin: req.user._id,
+  };
+
+  // Validate required fields
+  const requiredFields = [
+    "title",
+    "description",
+    "category",
+    "budget",
+    "deadline",
+    "company",
+    "industry",
+  ];
+  for (const field of requiredFields) {
+    if (!jobData[field]) {
+      return res.status(400).json({
+        success: false,
+        message: `${field} is required`,
+      });
+    }
+  }
+
+  const job = await Job.create(jobData);
+
+  // Find all verified workers to notify them about the new job
+  const verifiedWorkers = await User.find({
+    role: "worker",
+    isVerified: true,
+    isActive: true,
+  }).select("_id");
+
+  // Notify all verified workers about the new job
+  if (verifiedWorkers.length > 0) {
+    try {
+      await NotificationService.notifyJobPosted(
+        job._id,
+        req.user._id,
+        verifiedWorkers.map((w) => w._id)
+      );
+      console.log(
+        `Notified ${verifiedWorkers.length} verified workers about new job`
+      );
+    } catch (error) {
+      console.error("Failed to send job notifications:", error);
+      // Don't fail the job creation if notifications fail
+    }
+  } else {
+    console.log("No verified workers found for job notification");
+  }
+
+  // Create notification for admin outsource
+  const adminOutsource = await User.findOne({ role: "admin_outsource" });
+  if (adminOutsource) {
+    await Notification.create({
+      recipient: adminOutsource._id,
+      sender: req.user._id,
+      title: "New Job Posted",
+      message: `A new job "${job.title}" has been posted`,
+      type: "job_posted",
+      relatedJob: job._id,
+      actionButton: {
+        text: "View Job",
+        action: "view_job",
+      },
+    });
+  }
+
+  res.status(201).json({
+    success: true,
+    data: job,
+  });
 });
 
 // @desc    Update a job (admin)
-// @route   PUT /api/admin/jobs/:id
-// @access  Private/Super Admin
+// @route   PUT /api/admin/jobs/update/:id
+// @access  Private/Admins
 exports.updateJob = asyncHandler(async (req, res) => {
-  const job = await Job.findByIdAndUpdate(req.params.id, req.body, {
+  let job = await Job.findOne({
+    _id: req.params.id,
+    admin: req.user._id,
+  });
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: "Job not found",
+    });
+  }
+
+  // Prevent updating certain fields if job is already assigned
+  if (job.status === "assigned" || job.status === "in_progress") {
+    const restrictedFields = ["budget", "deadline", "requiredSkills"];
+    const hasRestrictedUpdates = restrictedFields.some(
+      (field) => req.body[field]
+    );
+
+    if (hasRestrictedUpdates) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Cannot update budget, deadline, or required skills for assigned jobs",
+      });
+    }
+  }
+
+  job = await Job.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
+  }).populate("region", "name");
+
+  res.status(200).json({
+    success: true,
+    data: job,
   });
-  if (!job)
-    return res.status(404).json({ success: false, message: "Job not found" });
-  res.status(200).json({ success: true, data: job });
 });
 
 // @desc    Delete a job (admin)
-// @route   DELETE /api/admin/jobs/:id
-// @access  Private/Super Admin
+// @route   DELETE /api/admin/jobs/delete/:id
+// @access  Private/Admins
 exports.deleteJob = asyncHandler(async (req, res) => {
   const job = await Job.findByIdAndDelete(req.params.id);
   if (!job)

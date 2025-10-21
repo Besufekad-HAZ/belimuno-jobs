@@ -437,24 +437,8 @@ export const adminAPI = {
     sort?: string;
     select?: string;
   }) => api.get("/admin/jobs", { params }),
-  createJob: (jobData: {
-    title?: string;
-    description?: string;
-    category?: string;
-    budget?: { min: number; max: number } | number;
-    status?:
-      | "draft"
-      | "open"
-      | "posted"
-      | "in_progress"
-      | "completed"
-      | "cancelled"
-      | string;
-    featured?: boolean;
-    deadline?: string;
-    location?: string;
-    tags?: string[];
-  }) => api.post("/admin/jobs", jobData),
+  createJob: (jobData: Record<string, unknown>) =>
+    api.post("/admin/jobs/create", jobData),
   getAllJobs: (params?: {
     status?: "draft" | "open" | "in_progress" | "completed" | "cancelled";
     category?: string;
