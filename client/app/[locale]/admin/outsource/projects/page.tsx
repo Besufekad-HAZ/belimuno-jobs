@@ -411,6 +411,7 @@ const ProjectOversight: React.FC = () => {
       setSelectedJobForDelete(null);
       queryClient.invalidateQueries({ queryKey: ["outsourceDashboard"] });
       toast.success("Job deleted successfully");
+      window.location.reload();
     } catch (error) {
       console.error("Failed to delete job:", error);
       toast.error("Failed to delete job");

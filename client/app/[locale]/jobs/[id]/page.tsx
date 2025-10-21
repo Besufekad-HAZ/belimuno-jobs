@@ -39,6 +39,8 @@ type Job = {
   priority: string;
   status: string;
   experienceLevel: string;
+  company: string;
+  industry: string;
   requiredSkills: string[];
   tags: string[];
   deliverables: string[];
@@ -435,9 +437,10 @@ const JobDetailPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-medium">{job.client?.name}</p>
-                    {job.client?.clientProfile?.companyName && (
+                    {(job.company ||
+                      job.client?.clientProfile?.companyName) && (
                       <p className="text-sm text-gray-500">
-                        {job.client.clientProfile.companyName}
+                        {job.company || job.client.clientProfile.companyName}
                       </p>
                     )}
                     {job.client?.clientProfile?.rating && (
