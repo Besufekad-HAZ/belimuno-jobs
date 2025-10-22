@@ -7,6 +7,7 @@ import { adminAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Card from "@/components/ui/Card";
+import { toast } from "sonner";
 
 const NewJobPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -114,15 +115,19 @@ const NewJobPage: React.FC = () => {
       };
 
       await adminAPI.createJob(jobData);
+      toast.success("Job posted successfully");
       router.push("/admin/outsource/dashboard");
+      window.location.reload();
     } catch (error: unknown) {
       if (typeof error === "object" && error && "response" in error) {
         const axiosErr = error as {
           response?: { data?: { message?: string } };
         };
         setError(axiosErr.response?.data?.message || "Failed to create job");
+        toast.error(axiosErr.response?.data?.message || "Failed to create job");
       } else {
         setError("Failed to create job");
+        toast.error("Failed to create job");
       }
     } finally {
       setLoading(false);

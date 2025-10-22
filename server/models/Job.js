@@ -9,6 +9,7 @@ const JobSchema = new mongoose.Schema({
   tags: [String],
   company: { type: String, required: true },
   industry: { type: String },
+  location: { type: String },
 
   // Financial Details
   budget: { type: Number, required: true },
