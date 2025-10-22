@@ -77,6 +77,7 @@ type Job = {
     status: string;
   };
   workerAcceptance: string;
+  location: string;
 };
 
 const JobDetailPage: React.FC = () => {
@@ -309,7 +310,9 @@ const JobDetailPage: React.FC = () => {
                     <MapPin className="h-5 w-5 text-gray-400" />
                     <div>
                       <p className="text-sm text-gray-500">{t("location")}</p>
-                      <p className="font-medium">{job.region?.name}</p>
+                      <p className="font-medium">
+                        {job.location || "No location specified"}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">

@@ -689,7 +689,6 @@ exports.createJob = asyncHandler(async (req, res) => {
     "budget",
     "deadline",
     "company",
-    "industry",
   ];
   for (const field of requiredFields) {
     if (!jobData[field]) {
