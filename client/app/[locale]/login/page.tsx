@@ -8,6 +8,7 @@ import { setAuth, getRoleDashboardPath, getStoredUser } from "@/lib/auth";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useTranslations } from "next-intl";
+import { useLoading } from "@/contexts/LoadingContext";
 import {
   Formik,
   Form,
@@ -47,6 +48,7 @@ const LoginPage: React.FC = () => {
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const formikRef = useRef<FormikProps<LoginFormValues>>(null);
   const t = useTranslations("LoginPage");
+  const { startDashboardLoading } = useLoading();
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Email is required"),
@@ -99,7 +101,14 @@ const LoginPage: React.FC = () => {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("authChanged"));
       }
-      router.push(getRoleDashboardPath(user.role));
+
+      // Start dashboard loading animation
+      startDashboardLoading();
+
+      // Small delay to ensure loading screen shows before navigation
+      setTimeout(() => {
+        router.push(getRoleDashboardPath(user.role));
+      }, 100);
     } catch (err: unknown) {
       const error = err as {
         response?: {

@@ -31,6 +31,8 @@ import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 import { useClientDashboardData } from "@/hooks/useDashboardData";
 import { queryClient } from "@/lib/queryClient";
+import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const ClientDashboard: React.FC = () => {
   interface ApplicationPreview {
@@ -66,6 +68,7 @@ const ClientDashboard: React.FC = () => {
   const jobs = data?.jobs || [];
   const disputes = data?.disputes || [];
   const loading = isLoading;
+  const { isDashboardLoading } = useLoading();
   const [selectedJob, setSelectedJob] = useState<EnrichedJob | null>(null);
   const [selectedJobForDetails, setSelectedJobForDetails] =
     useState<EnrichedJob | null>(null);
@@ -320,7 +323,7 @@ const ClientDashboard: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !isDashboardLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
@@ -363,1073 +366,1067 @@ const ClientDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
-          <div>
-            <BackToDashboard
-              currentRole="client"
-              variant="breadcrumb"
-              className="mb-2"
-            />
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {t("header.title")}
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
-              {t("header.subtitle")}
-            </p>
+    <WithDashboardLoading isLoading={loading && !isDashboardLoading}>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4">
+            <div>
+              <BackToDashboard
+                currentRole="client"
+                variant="breadcrumb"
+                className="mb-2"
+              />
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                {t("header.title")}
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+                {t("header.subtitle")}
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <BackToDashboard
+                currentRole="client"
+                variant="button"
+                className="w-full sm:w-auto"
+              />
+              <Button
+                onClick={() => router.push("/client/jobs/new")}
+                className="w-full sm:w-auto"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {t("header.postJob")}
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <BackToDashboard
-              currentRole="client"
-              variant="button"
-              className="w-full sm:w-auto"
-            />
-            <Button
-              onClick={() => router.push("/client/jobs/new")}
-              className="w-full sm:w-auto"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {t("header.postJob")}
-            </Button>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <Card className="bg-blue-50 border-blue-200">
+              <div className="text-center">
+                <Briefcase className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-1 sm:mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-blue-600">
+                  {t("stats.totalJobs.label")}
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-blue-900">
+                  {stats?.totalJobs || 0}
+                </p>
+              </div>
+            </Card>
+
+            <Card className="bg-yellow-50 border-yellow-200">
+              <div className="text-center">
+                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 mx-auto mb-1 sm:mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-yellow-600">
+                  {t("stats.activeJobs.label")}
+                </p>
+                <p className="text-2xl font-bold text-yellow-900">
+                  {stats?.activeJobs.length || 0}
+                </p>
+              </div>
+            </Card>
+
+            <Card className="bg-green-50 border-green-200">
+              <div className="text-center">
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 mx-auto mb-1 sm:mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-green-600">
+                  {t("stats.completedJobs.label")}
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-green-900">
+                  {stats?.completedJobs || 0}
+                </p>
+              </div>
+            </Card>
+
+            <Card className="bg-purple-50 border-purple-200">
+              <div className="text-center">
+                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 mx-auto mb-1 sm:mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-purple-600">
+                  {t("stats.totalSpent.label")}
+                </p>
+                <p className="text-sm sm:text-xl font-bold text-purple-900">
+                  ETB {stats?.totalSpent?.toLocaleString() || 0}
+                </p>
+              </div>
+            </Card>
+
+            <Card className="bg-indigo-50 border-indigo-200">
+              <div className="text-center">
+                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 mx-auto mb-1 sm:mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-indigo-600">
+                  {t("stats.rating.label")}
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-indigo-900">
+                  {stats?.averageRating?.toFixed(1) || "N/A"}
+                </p>
+              </div>
+            </Card>
+
+            <Card className="bg-orange-50 border-orange-200">
+              <div className="text-center">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600 mx-auto mb-1 sm:mb-2" />
+                <p className="text-xs sm:text-sm font-medium text-orange-600">
+                  {t("stats.applications.label")}
+                </p>
+                <p className="text-2xl font-bold text-orange-900">
+                  {stats?.totalApplications || 0}
+                </p>
+              </div>
+            </Card>
           </div>
-        </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <Card className="bg-blue-50 border-blue-200">
-            <div className="text-center">
-              <Briefcase className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mx-auto mb-1 sm:mb-2" />
-              <p className="text-xs sm:text-sm font-medium text-blue-600">
-                {t("stats.totalJobs.label")}
-              </p>
-              <p className="text-lg sm:text-2xl font-bold text-blue-900">
-                {stats?.totalJobs || 0}
-              </p>
+          {/* Jobs List */}
+          <Card>
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                {t("sections.jobs.title")}
+              </h3>
             </div>
-          </Card>
-
-          <Card className="bg-yellow-50 border-yellow-200">
-            <div className="text-center">
-              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 mx-auto mb-1 sm:mb-2" />
-              <p className="text-xs sm:text-sm font-medium text-yellow-600">
-                {t("stats.activeJobs.label")}
-              </p>
-              <p className="text-2xl font-bold text-yellow-900">
-                {stats?.activeJobs.length || 0}
-              </p>
-            </div>
-          </Card>
-
-          <Card className="bg-green-50 border-green-200">
-            <div className="text-center">
-              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 mx-auto mb-1 sm:mb-2" />
-              <p className="text-xs sm:text-sm font-medium text-green-600">
-                {t("stats.completedJobs.label")}
-              </p>
-              <p className="text-lg sm:text-2xl font-bold text-green-900">
-                {stats?.completedJobs || 0}
-              </p>
-            </div>
-          </Card>
-
-          <Card className="bg-purple-50 border-purple-200">
-            <div className="text-center">
-              <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600 mx-auto mb-1 sm:mb-2" />
-              <p className="text-xs sm:text-sm font-medium text-purple-600">
-                {t("stats.totalSpent.label")}
-              </p>
-              <p className="text-sm sm:text-xl font-bold text-purple-900">
-                ETB {stats?.totalSpent?.toLocaleString() || 0}
-              </p>
-            </div>
-          </Card>
-
-          <Card className="bg-indigo-50 border-indigo-200">
-            <div className="text-center">
-              <Star className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 mx-auto mb-1 sm:mb-2" />
-              <p className="text-xs sm:text-sm font-medium text-indigo-600">
-                {t("stats.rating.label")}
-              </p>
-              <p className="text-lg sm:text-2xl font-bold text-indigo-900">
-                {stats?.averageRating?.toFixed(1) || "N/A"}
-              </p>
-            </div>
-          </Card>
-
-          <Card className="bg-orange-50 border-orange-200">
-            <div className="text-center">
-              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-orange-600 mx-auto mb-1 sm:mb-2" />
-              <p className="text-xs sm:text-sm font-medium text-orange-600">
-                {t("stats.applications.label")}
-              </p>
-              <p className="text-2xl font-bold text-orange-900">
-                {stats?.totalApplications || 0}
-              </p>
-            </div>
-          </Card>
-        </div>
-
-        {/* Jobs List */}
-        <Card>
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-              {t("sections.jobs.title")}
-            </h3>
-          </div>
-          <div className="space-y-3 sm:space-y-4">
-            {jobs.map((job) => (
-              <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
-                      {job.title}
-                    </h4>
-                    {/* Payment Proof Modal */}
-                    <Modal
-                      isOpen={showProofModal}
-                      onClose={() => setShowProofModal(false)}
-                      title="Upload Payment Check Proof"
-                    >
-                      <div className="space-y-3">
-                        <p className="text-sm text-gray-600">
-                          Upload a photo/scan of the payment check. This helps
-                          admins verify and mark your payment as completed.
-                        </p>
-                        <label className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer hover:bg-gray-50 w-fit">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => onPickProof(e.target.files)}
-                          />
-                          Choose image…
-                        </label>
-                        {pendingProof && (
-                          <div className="mt-2">
-                            <Image
-                              src={pendingProof.dataUrl}
-                              alt="Check preview"
-                              width={220}
-                              height={140}
-                              className="rounded border"
+            <div className="space-y-3 sm:space-y-4">
+              {jobs.map((job) => (
+                <div key={job._id} className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">
+                        {job.title}
+                      </h4>
+                      {/* Payment Proof Modal */}
+                      <Modal
+                        isOpen={showProofModal}
+                        onClose={() => setShowProofModal(false)}
+                        title="Upload Payment Check Proof"
+                      >
+                        <div className="space-y-3">
+                          <p className="text-sm text-gray-600">
+                            Upload a photo/scan of the payment check. This helps
+                            admins verify and mark your payment as completed.
+                          </p>
+                          <label className="flex items-center gap-2 border rounded px-3 py-2 cursor-pointer hover:bg-gray-50 w-fit">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => onPickProof(e.target.files)}
                             />
+                            Choose image…
+                          </label>
+                          {pendingProof && (
+                            <div className="mt-2">
+                              <Image
+                                src={pendingProof.dataUrl}
+                                alt="Check preview"
+                                width={220}
+                                height={140}
+                                className="rounded border"
+                              />
+                            </div>
+                          )}
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowProofModal(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={uploadProof}
+                              disabled={!pendingProof}
+                            >
+                              Upload Proof
+                            </Button>
                           </div>
-                        )}
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setShowProofModal(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={uploadProof}
-                            disabled={!pendingProof}
-                          >
-                            Upload Proof
-                          </Button>
                         </div>
-                      </div>
-                    </Modal>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {job.description}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`px-3 py-1 text-sm rounded-full ${
-                        job.status === "open"
-                          ? "bg-green-100 text-green-800"
-                          : job.status === "in_progress"
-                            ? "bg-blue-100 text-blue-800"
-                            : job.status === "completed"
-                              ? "bg-gray-100 text-gray-800"
-                              : job.status === "awaiting_completion"
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {job.status.replace("_", " ")}
-                    </span>
-                    <p className="text-sm font-semibold text-gray-900 mt-1">
-                      ETB {job.budget?.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
-                    <span>
-                      {t("sections.jobs.due")}:{" "}
-                      {new Date(job.deadline).toLocaleDateString()}
-                    </span>
-                    <span>
-                      {t("sections.jobs.applications")}:{" "}
-                      {job.applicationCount ??
-                        job.recentApplications?.length ??
-                        0}
-                    </span>
-                    {job.assignedWorker && (
-                      <span>
-                        {t("sections.jobs.worker")}: {job.assignedWorker.name}
+                      </Modal>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {job.description}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`px-3 py-1 text-sm rounded-full ${
+                          job.status === "open"
+                            ? "bg-green-100 text-green-800"
+                            : job.status === "in_progress"
+                              ? "bg-blue-100 text-blue-800"
+                              : job.status === "completed"
+                                ? "bg-gray-100 text-gray-800"
+                                : job.status === "awaiting_completion"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {job.status.replace("_", " ")}
                       </span>
-                    )}
+                      <p className="text-sm font-semibold text-gray-900 mt-1">
+                        ETB {job.budget?.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-                    {/* Status-based action buttons */}
-                    {/* Client can view details, see applications and delete while job is posted (before assignment) */}
-                    {job.status === "posted" && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setSelectedJobForDetails(job)}
-                          className="w-full sm:w-auto"
-                        >
-                          <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          <span className="text-xs sm:text-sm">
-                            {t("sections.jobs.actions.viewDetails")}
-                          </span>
-                        </Button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                      <span>
+                        {t("sections.jobs.due")}:{" "}
+                        {new Date(job.deadline).toLocaleDateString()}
+                      </span>
+                      <span>
+                        {t("sections.jobs.applications")}:{" "}
+                        {job.applicationCount ??
+                          job.recentApplications?.length ??
+                          0}
+                      </span>
+                      {job.assignedWorker && (
+                        <span>
+                          {t("sections.jobs.worker")}: {job.assignedWorker.name}
+                        </span>
+                      )}
+                    </div>
 
-                        <Link
-                          href={`/client/jobs/${job._id}/applications`}
-                          className="inline-block w-full sm:w-auto"
-                        >
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                      {/* Status-based action buttons */}
+                      {/* Client can view details, see applications and delete while job is posted (before assignment) */}
+                      {job.status === "posted" && (
+                        <>
                           <Button
                             size="sm"
-                            variant="primary"
+                            variant="outline"
+                            onClick={() => setSelectedJobForDetails(job)}
+                            className="w-full sm:w-auto"
+                          >
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.jobs.actions.viewDetails")}
+                            </span>
+                          </Button>
+
+                          <Link
+                            href={`/client/jobs/${job._id}/applications`}
+                            className="inline-block w-full sm:w-auto"
+                          >
+                            <Button
+                              size="sm"
+                              variant="primary"
+                              className="w-full sm:w-auto"
+                            >
+                              <span className="text-xs sm:text-sm">
+                                {t("sections.jobs.actions.applications")}
+                              </span>
+                            </Button>
+                          </Link>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              router.push(`/client/jobs/${job._id}/update`)
+                            }
                             className="w-full sm:w-auto"
                           >
                             <span className="text-xs sm:text-sm">
-                              {t("sections.jobs.actions.applications")}
+                              {t("sections.jobs.actions.editJob")}
                             </span>
                           </Button>
-                        </Link>
 
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeleteJob(job)}
+                            className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
+                          >
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.jobs.actions.deleteJob")}
+                            </span>
+                          </Button>
+                        </>
+                      )}
+
+                      {/* Client can cancel after assignment but before work starts */}
+                      {job.status === "assigned" && (
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() =>
-                            router.push(`/client/jobs/${job._id}/update`)
-                          }
-                          className="w-full sm:w-auto"
+                          onClick={() => handleCancelAssignment(job)}
+                          className="text-red-600 hover:bg-red-50 border-red-600"
                         >
-                          <span className="text-xs sm:text-sm">
-                            {t("sections.jobs.actions.editJob")}
-                          </span>
-                        </Button>
-
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteJob(job)}
-                          className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
-                        >
-                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          <span className="text-xs sm:text-sm">
-                            {t("sections.jobs.actions.deleteJob")}
-                          </span>
-                        </Button>
-                      </>
-                    )}
-
-                    {/* Client can cancel after assignment but before work starts */}
-                    {job.status === "assigned" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleCancelAssignment(job)}
-                        className="text-red-600 hover:bg-red-50 border-red-600"
-                      >
-                        {t("sections.jobs.actions.cancelAssignment")}
-                      </Button>
-                    )}
-
-                    {/* Client can request revisions or approve work and mark as complete after submission */}
-                    {job.status === "submitted" && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            handleUpdateJobStatus(job._id, "revision_requested")
-                          }
-                        >
-                          <RefreshCw className="h-4 w-4 mr-1" />
-                          {t("sections.jobs.actions.requestRevision")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            handleUpdateJobStatus(job._id, "completed")
-                          }
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          {t("sections.jobs.actions.approveWork")}
-                        </Button>
-                      </>
-                    )}
-
-                    {/* Payment and rating happens after completion */}
-                    {job.status === "completed" &&
-                      job.payment?.paymentStatus !== "paid" && (
-                        <Button
-                          size="sm"
-                          onClick={() => handlePaymentAndRating(job)}
-                        >
-                          <CreditCard className="h-4 w-4 mr-1" />
-                          {t("sections.jobs.actions.payAndRate")}
+                          {t("sections.jobs.actions.cancelAssignment")}
                         </Button>
                       )}
 
-                    {/* Client can dispute during active phases */}
-                    {(job.status === "in_progress" ||
-                      job.status === "submitted" ||
-                      job.status === "revision_requested") && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedJobForDispute(job);
-                          setShowDisputeModal(true);
-                        }}
-                        className="text-red-600 hover:bg-red-50 border-red-600"
-                      >
-                        <AlertTriangle className="h-4 w-4 mr-1" />
-                        {t("sections.jobs.actions.raiseDispute")}
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                      {/* Client can request revisions or approve work and mark as complete after submission */}
+                      {job.status === "submitted" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              handleUpdateJobStatus(
+                                job._id,
+                                "revision_requested",
+                              )
+                            }
+                          >
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            {t("sections.jobs.actions.requestRevision")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleUpdateJobStatus(job._id, "completed")
+                            }
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            {t("sections.jobs.actions.approveWork")}
+                          </Button>
+                        </>
+                      )}
 
-                {/* Applications for open jobs */}
-                {job.status === "open" &&
-                  job.recentApplications &&
-                  job.recentApplications.length > 0 && (
-                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
-                      <h5 className="font-medium text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">
-                        {t("sections.recentApplications.title")} (
-                        {job.applicationCount || job.recentApplications.length})
-                      </h5>
-                      <div className="space-y-2 sm:space-y-3">
-                        {job.recentApplications
-                          .slice(0, 3)
-                          .map((application: ApplicationPreview) => (
-                            <div
-                              key={application._id}
-                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 bg-white rounded border gap-3"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-gray-900 text-sm sm:text-base">
-                                  {application.worker.name}
-                                </p>
-                                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
-                                  {application.proposal}
-                                </p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <p className="text-xs sm:text-sm font-semibold text-green-600">
-                                    ETB{" "}
-                                    {application.proposedBudget?.toLocaleString()}
+                      {/* Payment and rating happens after completion */}
+                      {job.status === "completed" &&
+                        job.payment?.paymentStatus !== "paid" && (
+                          <Button
+                            size="sm"
+                            onClick={() => handlePaymentAndRating(job)}
+                          >
+                            <CreditCard className="h-4 w-4 mr-1" />
+                            {t("sections.jobs.actions.payAndRate")}
+                          </Button>
+                        )}
+
+                      {/* Client can dispute during active phases */}
+                      {(job.status === "in_progress" ||
+                        job.status === "submitted" ||
+                        job.status === "revision_requested") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedJobForDispute(job);
+                            setShowDisputeModal(true);
+                          }}
+                          className="text-red-600 hover:bg-red-50 border-red-600"
+                        >
+                          <AlertTriangle className="h-4 w-4 mr-1" />
+                          {t("sections.jobs.actions.raiseDispute")}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Applications for open jobs */}
+                  {job.status === "open" &&
+                    job.recentApplications &&
+                    job.recentApplications.length > 0 && (
+                      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                        <h5 className="font-medium text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">
+                          {t("sections.recentApplications.title")} (
+                          {job.applicationCount ||
+                            job.recentApplications.length}
+                          )
+                        </h5>
+                        <div className="space-y-2 sm:space-y-3">
+                          {job.recentApplications
+                            .slice(0, 3)
+                            .map((application: ApplicationPreview) => (
+                              <div
+                                key={application._id}
+                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 bg-white rounded border gap-3"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-gray-900 text-sm sm:text-base">
+                                    {application.worker.name}
                                   </p>
-                                  <span className="text-xs text-gray-500">
-                                    Shortlisted by{" "}
-                                    {application.shortlistedBy?.name}
-                                  </span>
+                                  <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+                                    {application.proposal}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <p className="text-xs sm:text-sm font-semibold text-green-600">
+                                      ETB{" "}
+                                      {application.proposedBudget?.toLocaleString()}
+                                    </p>
+                                    <span className="text-xs text-gray-500">
+                                      Shortlisted by{" "}
+                                      {application.shortlistedBy?.name}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleRejectApplication(
+                                        job._id,
+                                        application._id,
+                                      )
+                                    }
+                                    className="w-full sm:w-auto"
+                                  >
+                                    <span className="text-xs sm:text-sm">
+                                      {t(
+                                        "sections.recentApplications.actions.reject",
+                                      )}
+                                    </span>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      handleAcceptApplication(
+                                        job._id,
+                                        application._id,
+                                      )
+                                    }
+                                    className="w-full sm:w-auto"
+                                  >
+                                    <span className="text-xs sm:text-sm">
+                                      {t(
+                                        "sections.recentApplications.actions.accept",
+                                      )}
+                                    </span>
+                                  </Button>
                                 </div>
                               </div>
-                              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    handleRejectApplication(
-                                      job._id,
-                                      application._id,
-                                    )
-                                  }
-                                  className="w-full sm:w-auto"
-                                >
-                                  <span className="text-xs sm:text-sm">
-                                    {t(
-                                      "sections.recentApplications.actions.reject",
-                                    )}
-                                  </span>
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={() =>
-                                    handleAcceptApplication(
-                                      job._id,
-                                      application._id,
-                                    )
-                                  }
-                                  className="w-full sm:w-auto"
-                                >
-                                  <span className="text-xs sm:text-sm">
-                                    {t(
-                                      "sections.recentApplications.actions.accept",
-                                    )}
-                                  </span>
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
+                            ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Active Disputes */}
-        <Card className="mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Active Disputes
-            </h3>
-          </div>
-          <div className="space-y-4">
-            {disputes
-              .filter((d) => d.status !== "resolved" && d.status !== "closed")
-              .map((dispute) => (
-                <div key={dispute._id} className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium text-gray-900">
-                        {dispute.title}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {dispute.job?.title}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge
-                        variant={
-                          dispute.priority === "urgent"
-                            ? "danger"
-                            : dispute.priority === "high"
-                              ? "warning"
-                              : "info"
-                        }
-                      >
-                        {dispute.priority}
-                      </Badge>
-                      <Badge
-                        variant={
-                          dispute.status === "open"
-                            ? "danger"
-                            : dispute.status === "investigating"
-                              ? "warning"
-                              : "success"
-                        }
-                      >
-                        {dispute.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    {dispute.description}
-                  </p>
-                  <div className="flex items-center justify-between text-xs text-gray-600">
-                    <span>
-                      Created{" "}
-                      {formatDistanceToNow(new Date(dispute.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                    <span>Type: {dispute.type}</span>
-                  </div>
+                    )}
                 </div>
               ))}
-            {disputes.filter(
-              (d) => d.status !== "resolved" && d.status !== "closed",
-            ).length === 0 && (
-              <p className="text-center text-gray-600 py-4">
-                No active disputes
-              </p>
-            )}
-          </div>
-        </Card>
-
-        {/* Job Details Modal */}
-        {selectedJobForDetails && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-96 overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {selectedJobForDetails.title}
-                </h3>
-                <Button
-                  variant="ghost"
-                  onClick={() => setSelectedJobForDetails(null)}
-                >
-                  ×
-                </Button>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-gray-900">
-                    {t("modals.jobDetails.fields.description")}
-                  </h4>
-                  <p className="text-gray-600">
-                    {selectedJobForDetails.description}
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {t("modals.jobDetails.fields.budget")}
-                    </h4>
-                    <p className="text-gray-600">
-                      ETB {selectedJobForDetails.budget?.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {t("modals.jobDetails.fields.deadline")}
-                    </h4>
-                    <p className="text-gray-600">
-                      {new Date(
-                        selectedJobForDetails.deadline,
-                      ).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {t("modals.jobDetails.fields.category")}
-                    </h4>
-                    <p className="text-gray-600">
-                      {selectedJobForDetails.category}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {t("modals.jobDetails.fields.status")}
-                    </h4>
-                    <p className="text-gray-600 capitalize">
-                      {selectedJobForDetails.status.replace("_", " ")}
-                    </p>
-                  </div>
-                </div>
-                {selectedJobForDetails.requiredSkills && (
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {t("modals.jobDetails.fields.requirements")}
-                    </h4>
-                    <ul className="text-gray-600 list-disc list-inside">
-                      {selectedJobForDetails.requiredSkills.map(
-                        (req: string, index: number) => (
-                          <li key={index}>{req}</li>
-                        ),
-                      )}
-                    </ul>
-                  </div>
-                )}
-              </div>
             </div>
-          </div>
-        )}
+          </Card>
 
-        {/* Payment Modal */}
-        <Modal
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          title={t("modals.payment.title")}
-          size="md"
-        >
-          <div className="space-y-6">
-            {selectedJob && selectedWorker && (
-              <>
-                {/* Job Summary */}
-                <Card className="bg-gray-50">
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900">
-                      {t("modals.payment.summary.title")}
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+          {/* Active Disputes */}
+          <Card className="mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Active Disputes
+              </h3>
+            </div>
+            <div className="space-y-4">
+              {disputes
+                .filter((d) => d.status !== "resolved" && d.status !== "closed")
+                .map((dispute) => (
+                  <div key={dispute._id} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-gray-600">
-                          {t("modals.payment.summary.fields.jobTitle")}
-                        </p>
-                        <p className="font-medium">{selectedJob.title}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">
-                          {t("modals.payment.summary.fields.worker")}
-                        </p>
-                        <p className="font-medium">{selectedWorker.name}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">
-                          {t("modals.payment.summary.fields.amount")}
-                        </p>
-                        <p className="font-semibold text-green-600">
-                          ETB{" "}
-                          {(
-                            selectedJob.acceptedApplication?.proposedBudget ||
-                            selectedJob.budget
-                          )?.toLocaleString()}
+                        <h4 className="font-medium text-gray-900">
+                          {dispute.title}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {dispute.job?.title}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-gray-600">
-                          {t("modals.payment.summary.fields.status")}
-                        </p>
-                        <Badge variant="success">
-                          {t("modals.payment.summary.fields.readyForPayment")}
+                      <div className="flex items-center space-x-2">
+                        <Badge
+                          variant={
+                            dispute.priority === "urgent"
+                              ? "danger"
+                              : dispute.priority === "high"
+                                ? "warning"
+                                : "info"
+                          }
+                        >
+                          {dispute.priority}
+                        </Badge>
+                        <Badge
+                          variant={
+                            dispute.status === "open"
+                              ? "danger"
+                              : dispute.status === "investigating"
+                                ? "warning"
+                                : "success"
+                          }
+                        >
+                          {dispute.status}
                         </Badge>
                       </div>
                     </div>
-                  </div>
-                </Card>
-
-                {/* Chapa Payment Integration */}
-                <Card className="bg-blue-50 border-blue-200">
-                  <div className="text-center">
-                    <CreditCard className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                    <h4 className="font-medium text-gray-900 mb-2">
-                      {t("modals.payment.chapa.title")}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {t("modals.payment.chapa.description")}
+                    <p className="text-sm text-gray-600 mb-3">
+                      {dispute.description}
                     </p>
-                    <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="flex items-center justify-between text-xs text-gray-600">
                       <span>
-                        {t("modals.payment.chapa.security.encrypted")}
+                        Created{" "}
+                        {formatDistanceToNow(new Date(dispute.createdAt), {
+                          addSuffix: true,
+                        })}
                       </span>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>
-                        {t("modals.payment.chapa.security.bankGrade")}
-                      </span>
+                      <span>Type: {dispute.type}</span>
                     </div>
                   </div>
-                </Card>
+                ))}
+              {disputes.filter(
+                (d) => d.status !== "resolved" && d.status !== "closed",
+              ).length === 0 && (
+                <p className="text-center text-gray-600 py-4">
+                  No active disputes
+                </p>
+              )}
+            </div>
+          </Card>
 
-                {/* Payment Actions */}
-                <div className="flex space-x-3">
+          {/* Job Details Modal */}
+          {selectedJobForDetails && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-96 overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {selectedJobForDetails.title}
+                  </h3>
                   <Button
-                    variant="outline"
-                    onClick={() => setShowPaymentModal(false)}
+                    variant="ghost"
+                    onClick={() => setSelectedJobForDetails(null)}
                   >
-                    {t("modals.payment.actions.cancel")}
-                  </Button>
-                  <Button onClick={processPayment} className="flex-1">
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    {t("modals.payment.actions.process")}
+                    ×
                   </Button>
                 </div>
-              </>
-            )}
-          </div>
-        </Modal>
-
-        {/* Rating Modal */}
-        <Modal
-          isOpen={showRatingModal}
-          onClose={() => setShowRatingModal(false)}
-          title={t("modals.rating.title")}
-          size="md"
-        >
-          <div className="space-y-6">
-            {selectedWorker && (
-              <>
-                {/* Worker Info */}
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-8 w-8 text-blue-600" />
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      {t("modals.jobDetails.fields.description")}
+                    </h4>
+                    <p className="text-gray-600">
+                      {selectedJobForDetails.description}
+                    </p>
                   </div>
-                  <h4 className="font-medium text-gray-900">
-                    {selectedWorker.name}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {t("modals.jobDetails.fields.budget")}
+                      </h4>
+                      <p className="text-gray-600">
+                        ETB {selectedJobForDetails.budget?.toLocaleString()}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {t("modals.jobDetails.fields.deadline")}
+                      </h4>
+                      <p className="text-gray-600">
+                        {new Date(
+                          selectedJobForDetails.deadline,
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {t("modals.jobDetails.fields.category")}
+                      </h4>
+                      <p className="text-gray-600">
+                        {selectedJobForDetails.category}
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {t("modals.jobDetails.fields.status")}
+                      </h4>
+                      <p className="text-gray-600 capitalize">
+                        {selectedJobForDetails.status.replace("_", " ")}
+                      </p>
+                    </div>
+                  </div>
+                  {selectedJobForDetails.requiredSkills && (
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {t("modals.jobDetails.fields.requirements")}
+                      </h4>
+                      <ul className="text-gray-600 list-disc list-inside">
+                        {selectedJobForDetails.requiredSkills.map(
+                          (req: string, index: number) => (
+                            <li key={index}>{req}</li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Payment Modal */}
+          <Modal
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+            title={t("modals.payment.title")}
+            size="md"
+          >
+            <div className="space-y-6">
+              {selectedJob && selectedWorker && (
+                <>
+                  {/* Job Summary */}
+                  <Card className="bg-gray-50">
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-900">
+                        {t("modals.payment.summary.title")}
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-600">
+                            {t("modals.payment.summary.fields.jobTitle")}
+                          </p>
+                          <p className="font-medium">{selectedJob.title}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">
+                            {t("modals.payment.summary.fields.worker")}
+                          </p>
+                          <p className="font-medium">{selectedWorker.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">
+                            {t("modals.payment.summary.fields.amount")}
+                          </p>
+                          <p className="font-semibold text-green-600">
+                            ETB{" "}
+                            {(
+                              selectedJob.acceptedApplication?.proposedBudget ||
+                              selectedJob.budget
+                            )?.toLocaleString()}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-600">
+                            {t("modals.payment.summary.fields.status")}
+                          </p>
+                          <Badge variant="success">
+                            {t("modals.payment.summary.fields.readyForPayment")}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Chapa Payment Integration */}
+                  <Card className="bg-blue-50 border-blue-200">
+                    <div className="text-center">
+                      <CreditCard className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                      <h4 className="font-medium text-gray-900 mb-2">
+                        {t("modals.payment.chapa.title")}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        {t("modals.payment.chapa.description")}
+                      </p>
+                      <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>
+                          {t("modals.payment.chapa.security.encrypted")}
+                        </span>
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>
+                          {t("modals.payment.chapa.security.bankGrade")}
+                        </span>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Payment Actions */}
+                  <div className="flex space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowPaymentModal(false)}
+                    >
+                      {t("modals.payment.actions.cancel")}
+                    </Button>
+                    <Button onClick={processPayment} className="flex-1">
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      {t("modals.payment.actions.process")}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </Modal>
+
+          {/* Rating Modal */}
+          <Modal
+            isOpen={showRatingModal}
+            onClose={() => setShowRatingModal(false)}
+            title={t("modals.rating.title")}
+            size="md"
+          >
+            <div className="space-y-6">
+              {selectedWorker && (
+                <>
+                  {/* Worker Info */}
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <h4 className="font-medium text-gray-900">
+                      {selectedWorker.name}
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      {t("modals.rating.subtitle")}
+                    </p>
+                  </div>
+
+                  {/* Rating Stars */}
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-700 mb-3">
+                      {t("modals.rating.rating.label")}
+                    </p>
+                    <div className="flex justify-center space-x-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setRating(star)}
+                          className={`p-1 ${star <= rating ? "text-yellow-400" : "text-gray-300"} hover:text-yellow-400 transition-colors`}
+                        >
+                          <Star className="h-8 w-8 fill-current" />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">
+                      {rating} {t("modals.rating.rating.outOf")}
+                    </p>
+                  </div>
+
+                  {/* Review Text */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t("modals.rating.review.label")}
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={review}
+                      onChange={(e) => setReview(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder={t("modals.rating.review.placeholder")}
+                    />
+                  </div>
+
+                  {/* Submit Actions */}
+                  <div className="flex space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowRatingModal(false);
+                        setRating(5);
+                        setReview("");
+                      }}
+                    >
+                      {t("modals.rating.actions.skip")}
+                    </Button>
+                    <Button onClick={submitRating} className="flex-1">
+                      <Star className="h-4 w-4 mr-2" />
+                      {t("modals.rating.actions.submit")}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </Modal>
+
+          {/* Delete Job Confirmation Modal */}
+          <Modal
+            isOpen={showDeleteJobModal}
+            onClose={() => {
+              setShowDeleteJobModal(false);
+              setSelectedJobForDelete(null);
+            }}
+            title="Delete Job"
+            size="md"
+          >
+            {selectedJobForDelete && (
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                      <Trash2 className="h-5 w-5 text-red-600" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Are you sure you want to delete this job?
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      This action cannot be undone.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Job Details
                   </h4>
+                  <p className="text-gray-700">{selectedJobForDelete.title}</p>
                   <p className="text-sm text-gray-500">
-                    {t("modals.rating.subtitle")}
+                    Budget: ETB {selectedJobForDelete.budget?.toLocaleString()}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Status: {selectedJobForDelete.status.replace("_", " ")}
                   </p>
                 </div>
 
-                {/* Rating Stars */}
-                <div className="text-center">
-                  <p className="text-sm font-medium text-gray-700 mb-3">
-                    {t("modals.rating.rating.label")}
-                  </p>
-                  <div className="flex justify-center space-x-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => setRating(star)}
-                        className={`p-1 ${star <= rating ? "text-yellow-400" : "text-gray-300"} hover:text-yellow-400 transition-colors`}
-                      >
-                        <Star className="h-8 w-8 fill-current" />
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {rating} {t("modals.rating.rating.outOf")}
-                  </p>
-                </div>
-
-                {/* Review Text */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("modals.rating.review.label")}
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={review}
-                    onChange={(e) => setReview(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder={t("modals.rating.review.placeholder")}
-                  />
-                </div>
-
-                {/* Submit Actions */}
-                <div className="flex space-x-3">
+                <div className="flex justify-end space-x-3 pt-4 border-t">
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setShowRatingModal(false);
-                      setRating(5);
-                      setReview("");
+                      setShowDeleteJobModal(false);
+                      setSelectedJobForDelete(null);
                     }}
                   >
-                    {t("modals.rating.actions.skip")}
+                    Cancel
                   </Button>
-                  <Button onClick={submitRating} className="flex-1">
-                    <Star className="h-4 w-4 mr-2" />
-                    {t("modals.rating.actions.submit")}
+                  <Button
+                    onClick={confirmDeleteJob}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Job
                   </Button>
                 </div>
-              </>
+              </div>
             )}
-          </div>
-        </Modal>
+          </Modal>
 
-        {/* Delete Job Confirmation Modal */}
-        <Modal
-          isOpen={showDeleteJobModal}
-          onClose={() => {
-            setShowDeleteJobModal(false);
-            setSelectedJobForDelete(null);
-          }}
-          title="Delete Job"
-          size="md"
-        >
-          {selectedJobForDelete && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                    <Trash2 className="h-5 w-5 text-red-600" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Are you sure you want to delete this job?
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    This action cannot be undone.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
-                <p className="text-gray-700">{selectedJobForDelete.title}</p>
-                <p className="text-sm text-gray-500">
-                  Budget: ETB {selectedJobForDelete.budget?.toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Status: {selectedJobForDelete.status.replace("_", " ")}
-                </p>
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowDeleteJobModal(false);
-                    setSelectedJobForDelete(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={confirmDeleteJob}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Job
-                </Button>
-              </div>
-            </div>
-          )}
-        </Modal>
-
-        {/* Cancel Assignment Confirmation Modal */}
-        <Modal
-          isOpen={showCancelAssignmentModal}
-          onClose={() => {
-            setShowCancelAssignmentModal(false);
-            setSelectedJobForCancel(null);
-          }}
-          title="Cancel Assignment"
-          size="md"
-        >
-          {selectedJobForCancel && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Are you sure you want to cancel this assignment?
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    The worker will be notified and the job will be reopened for
-                    applications.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
-                <p className="text-gray-700">{selectedJobForCancel.title}</p>
-                <p className="text-sm text-gray-500">
-                  Budget: ETB {selectedJobForCancel.budget?.toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Assigned Worker:{" "}
-                  {selectedJobForCancel.worker?.name || "Not Available"}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Status: {selectedJobForCancel.status.replace("_", " ")}
-                </p>
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowCancelAssignmentModal(false);
-                    setSelectedJobForCancel(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={confirmCancelAssignment}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  Cancel Assignment
-                </Button>
-              </div>
-            </div>
-          )}
-        </Modal>
-
-        {/* Dispute Modal */}
-        <Modal
-          isOpen={showDisputeModal}
-          onClose={() => {
-            setShowDisputeModal(false);
-            setSelectedJobForDispute(null);
-            setDisputeData({
-              title: "",
-              description: "",
-              type: "payment",
-              priority: "medium",
-              evidence: [],
-            });
-          }}
-          title="Raise a Dispute"
-          size="lg"
-        >
-          {selectedJobForDispute && (
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2">Job Details</h4>
-                <p className="text-gray-700">{selectedJobForDispute.title}</p>
-                <p className="text-sm text-gray-500">
-                  Budget: ETB {selectedJobForDispute.budget?.toLocaleString()}
-                </p>
-              </div>
-
+          {/* Cancel Assignment Confirmation Modal */}
+          <Modal
+            isOpen={showCancelAssignmentModal}
+            onClose={() => {
+              setShowCancelAssignmentModal(false);
+              setSelectedJobForCancel(null);
+            }}
+            title="Cancel Assignment"
+            size="md"
+          >
+            {selectedJobForCancel && (
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Dispute Title
-                  </label>
-                  <input
-                    type="text"
-                    value={disputeData.title}
-                    onChange={(e) =>
-                      setDisputeData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    placeholder="Brief title describing the issue"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={disputeData.description}
-                    onChange={(e) =>
-                      setDisputeData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    placeholder="Detailed description of the issue..."
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                    </div>
+                  </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Type
-                    </label>
-                    <select
-                      value={disputeData.type}
-                      onChange={(e) =>
-                        setDisputeData((prev) => ({
-                          ...prev,
-                          type: e.target.value as typeof disputeData.type,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="payment">Payment Issue</option>
-                      <option value="quality">Quality Issue</option>
-                      <option value="communication">Communication Issue</option>
-                      <option value="deadline">Deadline Issue</option>
-                      <option value="scope">Scope Issue</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Priority
-                    </label>
-                    <select
-                      value={disputeData.priority}
-                      onChange={(e) =>
-                        setDisputeData((prev) => ({
-                          ...prev,
-                          priority: e.target
-                            .value as typeof disputeData.priority,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Are you sure you want to cancel this assignment?
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      The worker will be notified and the job will be reopened
+                      for applications.
+                    </p>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Evidence
-                  </label>
-                  <div className="space-y-2">
-                    {disputeData.evidence.map((evidence, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
-                      >
-                        <div>
-                          <p className="text-sm font-medium">
-                            {evidence.description}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {evidence.type}
-                          </p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setDisputeData((prev) => ({
-                              ...prev,
-                              evidence: prev.evidence.filter(
-                                (_, i) => i !== index,
-                              ),
-                            }))
-                          }
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        // Here you would typically open a file picker or evidence upload modal
-                        // For now, we'll just add a dummy evidence item
-                        setDisputeData((prev) => ({
-                          ...prev,
-                          evidence: [
-                            ...prev.evidence,
-                            {
-                              type: "document",
-                              url: "https://example.com/evidence.pdf",
-                              description: "Supporting document",
-                            },
-                          ],
-                        }));
-                      }}
-                    >
-                      Add Evidence
-                    </Button>
-                  </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Job Details
+                  </h4>
+                  <p className="text-gray-700">{selectedJobForCancel.title}</p>
+                  <p className="text-sm text-gray-500">
+                    Budget: ETB {selectedJobForCancel.budget?.toLocaleString()}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Assigned Worker:{" "}
+                    {selectedJobForCancel.worker?.name || "Not Available"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Status: {selectedJobForCancel.status.replace("_", " ")}
+                  </p>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowCancelAssignmentModal(false);
+                      setSelectedJobForCancel(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={confirmCancelAssignment}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Cancel Assignment
+                  </Button>
                 </div>
               </div>
+            )}
+          </Modal>
 
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowDisputeModal(false);
-                    setSelectedJobForDispute(null);
-                    setDisputeData({
-                      title: "",
-                      description: "",
-                      type: "payment",
-                      priority: "medium",
-                      evidence: [],
-                    });
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      await clientAPI.createDispute({
-                        ...disputeData,
-                        job: selectedJobForDispute._id,
-                      });
+          {/* Dispute Modal */}
+          <Modal
+            isOpen={showDisputeModal}
+            onClose={() => {
+              setShowDisputeModal(false);
+              setSelectedJobForDispute(null);
+              setDisputeData({
+                title: "",
+                description: "",
+                type: "payment",
+                priority: "medium",
+                evidence: [],
+              });
+            }}
+            title="Raise a Dispute"
+            size="lg"
+          >
+            {selectedJobForDispute && (
+              <div className="space-y-6">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    Job Details
+                  </h4>
+                  <p className="text-gray-700">{selectedJobForDispute.title}</p>
+                  <p className="text-sm text-gray-500">
+                    Budget: ETB {selectedJobForDispute.budget?.toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dispute Title
+                    </label>
+                    <input
+                      type="text"
+                      value={disputeData.title}
+                      onChange={(e) =>
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      placeholder="Brief title describing the issue"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      value={disputeData.description}
+                      onChange={(e) =>
+                        setDisputeData((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      placeholder="Detailed description of the issue..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Type
+                      </label>
+                      <select
+                        value={disputeData.type}
+                        onChange={(e) =>
+                          setDisputeData((prev) => ({
+                            ...prev,
+                            type: e.target.value as typeof disputeData.type,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="payment">Payment Issue</option>
+                        <option value="quality">Quality Issue</option>
+                        <option value="communication">
+                          Communication Issue
+                        </option>
+                        <option value="deadline">Deadline Issue</option>
+                        <option value="scope">Scope Issue</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Priority
+                      </label>
+                      <select
+                        value={disputeData.priority}
+                        onChange={(e) =>
+                          setDisputeData((prev) => ({
+                            ...prev,
+                            priority: e.target
+                              .value as typeof disputeData.priority,
+                          }))
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Evidence
+                    </label>
+                    <div className="space-y-2">
+                      {disputeData.evidence.map((evidence, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                        >
+                          <div>
+                            <p className="text-sm font-medium">
+                              {evidence.description}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {evidence.type}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setDisputeData((prev) => ({
+                                ...prev,
+                                evidence: prev.evidence.filter(
+                                  (_, i) => i !== index,
+                                ),
+                              }))
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Here you would typically open a file picker or evidence upload modal
+                          // For now, we'll just add a dummy evidence item
+                          setDisputeData((prev) => ({
+                            ...prev,
+                            evidence: [
+                              ...prev.evidence,
+                              {
+                                type: "document",
+                                url: "https://example.com/evidence.pdf",
+                                description: "Supporting document",
+                              },
+                            ],
+                          }));
+                        }}
+                      >
+                        Add Evidence
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
                       setShowDisputeModal(false);
                       setSelectedJobForDispute(null);
                       setDisputeData({
@@ -1439,27 +1436,48 @@ const ClientDashboard: React.FC = () => {
                         priority: "medium",
                         evidence: [],
                       });
-                      queryClient.invalidateQueries({
-                        queryKey: ["clientDashboard"],
-                      }); // Refresh the dashboard data
-                      toast.success("Dispute created successfully");
-                    } catch (error) {
-                      console.error("Failed to create dispute:", error);
-                      toast.error(
-                        "Failed to create dispute. Please try again.",
-                      );
-                    }
-                  }}
-                  disabled={!disputeData.title || !disputeData.description}
-                >
-                  Submit Dispute
-                </Button>
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await clientAPI.createDispute({
+                          ...disputeData,
+                          job: selectedJobForDispute._id,
+                        });
+                        setShowDisputeModal(false);
+                        setSelectedJobForDispute(null);
+                        setDisputeData({
+                          title: "",
+                          description: "",
+                          type: "payment",
+                          priority: "medium",
+                          evidence: [],
+                        });
+                        queryClient.invalidateQueries({
+                          queryKey: ["clientDashboard"],
+                        }); // Refresh the dashboard data
+                        toast.success("Dispute created successfully");
+                      } catch (error) {
+                        console.error("Failed to create dispute:", error);
+                        toast.error(
+                          "Failed to create dispute. Please try again.",
+                        );
+                      }
+                    }}
+                    disabled={!disputeData.title || !disputeData.description}
+                  >
+                    Submit Dispute
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
-        </Modal>
+            )}
+          </Modal>
+        </div>
       </div>
-    </div>
+    </WithDashboardLoading>
   );
 };
 

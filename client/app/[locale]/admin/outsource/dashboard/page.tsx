@@ -23,6 +23,8 @@ import BackToDashboard from "@/components/ui/BackToDashboard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useTranslations } from "next-intl";
 import { useOutsourceDashboardData } from "@/hooks/useDashboardData";
+import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const OutsourceAdminDashboard: React.FC = () => {
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -51,6 +53,7 @@ const OutsourceAdminDashboard: React.FC = () => {
   console.log(projects);
   const revenueData = data?.revenueData || [];
   const loading = isLoading;
+  const { isDashboardLoading } = useLoading();
 
   useEffect(() => {
     const user = getStoredUser();
@@ -89,7 +92,7 @@ const OutsourceAdminDashboard: React.FC = () => {
     }).format(amount);
   };
 
-  if (loading) {
+  if (loading && !isDashboardLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,7 +140,8 @@ const OutsourceAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <WithDashboardLoading isLoading={loading && !isDashboardLoading}>
+      <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -731,6 +735,7 @@ const OutsourceAdminDashboard: React.FC = () => {
         </Modal>
       </div>
     </div>
+    </WithDashboardLoading>
   );
 };
 

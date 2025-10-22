@@ -5,6 +5,7 @@ import "./[locale]/fonts.css";
 import "react-chatbot-kit/build/main.css";
 import { resolveAssetUrl } from "@/lib/assets";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { LoadingProvider } from "@/contexts/LoadingContext";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -44,7 +45,9 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${notoEthiopic.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <LoadingProvider>{children}</LoadingProvider>
+        </QueryProvider>
       </body>
     </html>
   );

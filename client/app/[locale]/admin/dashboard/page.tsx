@@ -26,6 +26,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useTranslations } from "next-intl";
 import { useAdminDashboardData } from "@/hooks/useDashboardData";
 import { queryClient } from "@/lib/queryClient";
+import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const AdminDashboard: React.FC = () => {
   const [showReportsModal, setShowReportsModal] = useState(false);
@@ -42,6 +44,7 @@ const AdminDashboard: React.FC = () => {
   const recentJobs = data?.recentJobs || [];
   const disputes = data?.disputes || [];
   const loading = isLoading;
+  const { isDashboardLoading } = useLoading();
 
   useEffect(() => {
     const user = getStoredUser();
@@ -113,7 +116,7 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !isDashboardLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
@@ -161,481 +164,485 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <BackToDashboard
-                currentRole="admin_hr"
-                variant="breadcrumb"
-                className="mb-2"
-              />
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                {t("header.title")}
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
-                {t("header.subtitle")}
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Button
-                variant="primary"
-                onClick={() => router.push("/admin/chat")}
-                className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
-                size="sm"
-              >
-                <MessageSquarePlus className="h-4 w-4 mr-2" />
-                Team Chat
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowReportsModal(true)}
-                className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
-                size="sm"
-              >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">
-                  {t("header.buttons.generateReports")}
-                </span>
-                <span className="sm:hidden">Reports</span>
-              </Button>
-              {disputes.length > 0 && (
+    <WithDashboardLoading isLoading={loading && !isDashboardLoading}>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+          {/* Header */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <BackToDashboard
+                  currentRole="admin_hr"
+                  variant="breadcrumb"
+                  className="mb-2"
+                />
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  {t("header.title")}
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+                  {t("header.subtitle")}
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
-                  variant="outline"
-                  onClick={() => setShowDisputeModal(true)}
+                  variant="primary"
+                  onClick={() => router.push("/admin/chat")}
                   className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
                   size="sm"
                 >
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">
-                    {t("header.buttons.resolveDisputes")} ({disputes.length})
-                  </span>
-                  <span className="sm:hidden">
-                    Disputes ({disputes.length})
-                  </span>
+                  <MessageSquarePlus className="h-4 w-4 mr-2" />
+                  Team Chat
                 </Button>
-              )}
+                <Button
+                  variant="outline"
+                  onClick={() => setShowReportsModal(true)}
+                  className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
+                  size="sm"
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">
+                    {t("header.buttons.generateReports")}
+                  </span>
+                  <span className="sm:hidden">Reports</span>
+                </Button>
+                {disputes.length > 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDisputeModal(true)}
+                    className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
+                    size="sm"
+                  >
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">
+                      {t("header.buttons.resolveDisputes")} ({disputes.length})
+                    </span>
+                    <span className="sm:hidden">
+                      Disputes ({disputes.length})
+                    </span>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <Card className="bg-blue-50 border-blue-200">
-            <div className="flex items-center">
-              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <Card className="bg-blue-50 border-blue-200">
+              <div className="flex items-center">
+                <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-blue-600">
+                    {t("stats.totalUsers.label")}
+                  </p>
+                  <p className="text-lg sm:text-2xl font-bold text-blue-900">
+                    {stats?.totalUsers || 0}
+                  </p>
+                </div>
               </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-blue-600">
-                  {t("stats.totalUsers.label")}
-                </p>
-                <p className="text-lg sm:text-2xl font-bold text-blue-900">
-                  {stats?.totalUsers || 0}
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="bg-green-50 border-green-200">
-            <div className="flex items-center">
-              <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
-                <Briefcase className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+            <Card className="bg-green-50 border-green-200">
+              <div className="flex items-center">
+                <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
+                  <Briefcase className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-green-600">
+                    {t("stats.totalJobs.label")}
+                  </p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-900">
+                    {stats?.totalJobs || 0}
+                  </p>
+                </div>
               </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-green-600">
-                  {t("stats.totalJobs.label")}
-                </p>
-                <p className="text-lg sm:text-2xl font-bold text-green-900">
-                  {stats?.totalJobs || 0}
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="bg-yellow-50 border-yellow-200">
-            <div className="flex items-center">
-              <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-lg">
-                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
+            <Card className="bg-yellow-50 border-yellow-200">
+              <div className="flex items-center">
+                <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-lg">
+                  <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
+                </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-yellow-600">
+                    {t("stats.totalRevenue.label")}
+                  </p>
+                  <p className="text-sm sm:text-2xl font-bold text-yellow-900">
+                    ETB {stats?.totalRevenue?.toLocaleString() || 0}
+                  </p>
+                </div>
               </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-yellow-600">
-                  {t("stats.totalRevenue.label")}
-                </p>
-                <p className="text-sm sm:text-2xl font-bold text-yellow-900">
-                  ETB {stats?.totalRevenue?.toLocaleString() || 0}
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="bg-purple-50 border-purple-200">
-            <div className="flex items-center">
-              <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
+            <Card className="bg-purple-50 border-purple-200">
+              <div className="flex items-center">
+                <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg">
+                  <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
+                </div>
+                <div className="ml-3 sm:ml-4">
+                  <p className="text-xs sm:text-sm font-medium text-purple-600">
+                    {t("stats.monthlyGrowth.label")}
+                  </p>
+                  <p className="text-2xl font-bold text-purple-900">
+                    {stats?.monthlyGrowth || 0}%
+                  </p>
+                </div>
               </div>
-              <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-purple-600">
-                  {t("stats.monthlyGrowth.label")}
-                </p>
-                <p className="text-2xl font-bold text-purple-900">
-                  {stats?.monthlyGrowth || 0}%
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
-        {/* Activity Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600">
-                  {t("activity.activeJobs.label")}
-                </p>
-                <p className="text-xl sm:text-3xl font-bold text-gray-900">
-                  {stats?.activeJobs || 0}
-                </p>
+          {/* Activity Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">
+                    {t("activity.activeJobs.label")}
+                  </p>
+                  <p className="text-xl sm:text-3xl font-bold text-gray-900">
+                    {stats?.activeJobs || 0}
+                  </p>
+                </div>
+                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
               </div>
-              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600">
-                  {t("activity.completedJobs.label")}
-                </p>
-                <p className="text-xl sm:text-3xl font-bold text-gray-900">
-                  {stats?.completedJobs || 0}
-                </p>
+            <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">
+                    {t("activity.completedJobs.label")}
+                  </p>
+                  <p className="text-xl sm:text-3xl font-bold text-gray-900">
+                    {stats?.completedJobs || 0}
+                  </p>
+                </div>
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
               </div>
-              <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600">
-                  {t("activity.pendingVerifications.label")}
-                </p>
-                <p className="text-xl sm:text-3xl font-bold text-gray-900">
-                  {stats?.pendingVerifications || 0}
-                </p>
+            <Card>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">
+                    {t("activity.pendingVerifications.label")}
+                  </p>
+                  <p className="text-xl sm:text-3xl font-bold text-gray-900">
+                    {stats?.pendingVerifications || 0}
+                  </p>
+                </div>
+                <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
               </div>
-              <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-          {/* Recent Users */}
-          <Card>
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                {t("recentUsers.title")}
-              </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            {/* Recent Users */}
+            <Card>
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                  {t("recentUsers.title")}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/admin/users")}
+                >
+                  {t("recentUsers.viewAll")}
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {recentUsers.map((user) => (
+                  <div
+                    key={user._id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {user.email}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        <Badge
+                          variant={
+                            user.role === "super_admin"
+                              ? "purple"
+                              : user.role === "admin_hr" ||
+                                  user.role === "admin_outsource"
+                                ? "blue"
+                                : user.role === "worker"
+                                  ? "teal"
+                                  : "orange"
+                          }
+                          size="sm"
+                        >
+                          {user.role.replace("_", " ")}
+                        </Badge>
+                        <Badge
+                          variant={user.isVerified ? "success" : "gray"}
+                          size="sm"
+                        >
+                          {user.isVerified
+                            ? t("recentUsers.tags.verified")
+                            : t("recentUsers.tags.unverified")}
+                        </Badge>
+                        <Badge
+                          variant={
+                            user.isActive === false ? "danger" : "success"
+                          }
+                          size="sm"
+                        >
+                          {user.isActive === false
+                            ? t("recentUsers.tags.inactive")
+                            : t("recentUsers.tags.active")}
+                        </Badge>
+                      </div>
+                    </div>
+                    {user.role === "worker" && !user.isVerified && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleVerifyWorker(user._id)}
+                      >
+                        <UserCheck className="h-4 w-4 mr-1" />
+                        {t("recentUsers.buttons.verify")}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* Recent Jobs */}
+            <Card>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t("recentJobs.title")}
+                </h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push("/admin/jobs")}
+                >
+                  {t("recentJobs.viewAll")}
+                </Button>
+              </div>
+              <div className="space-y-4">
+                {recentJobs.map((job) => (
+                  <div key={job._id} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-gray-900 truncate">
+                        {job.title}
+                      </h4>
+                      <span
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          job.status === "posted"
+                            ? "bg-green-100 text-green-800"
+                            : job.status === "in_progress"
+                              ? "bg-blue-100 text-blue-800"
+                              : job.status === "completed"
+                                ? "bg-gray-100 text-gray-800"
+                                : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {job.status.replace("_", " ")}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      {t("recentJobs.fields.amount")}{" "}
+                      {job.budget?.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {t("recentJobs.fields.posted")}{" "}
+                      {new Date(job.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <Card className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
+              {t("quickActions.title")}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button
                 variant="outline"
-                size="sm"
+                className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
                 onClick={() => router.push("/admin/users")}
               >
-                {t("recentUsers.viewAll")}
+                <Users className="h-6 w-6 mb-2" />
+                {t("quickActions.buttons.manageUsers")}
               </Button>
-            </div>
-            <div className="space-y-4">
-              {recentUsers.map((user) => (
-                <div
-                  key={user._id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium text-gray-900 truncate">
-                      {user.name}
-                    </p>
-                    <p className="text-sm text-gray-500 truncate">
-                      {user.email}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      <Badge
-                        variant={
-                          user.role === "super_admin"
-                            ? "purple"
-                            : user.role === "admin_hr" ||
-                                user.role === "admin_outsource"
-                              ? "blue"
-                              : user.role === "worker"
-                                ? "teal"
-                                : "orange"
-                        }
-                        size="sm"
-                      >
-                        {user.role.replace("_", " ")}
-                      </Badge>
-                      <Badge
-                        variant={user.isVerified ? "success" : "gray"}
-                        size="sm"
-                      >
-                        {user.isVerified
-                          ? t("recentUsers.tags.verified")
-                          : t("recentUsers.tags.unverified")}
-                      </Badge>
-                      <Badge
-                        variant={user.isActive === false ? "danger" : "success"}
-                        size="sm"
-                      >
-                        {user.isActive === false
-                          ? t("recentUsers.tags.inactive")
-                          : t("recentUsers.tags.active")}
-                      </Badge>
-                    </div>
-                  </div>
-                  {user.role === "worker" && !user.isVerified && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleVerifyWorker(user._id)}
-                    >
-                      <UserCheck className="h-4 w-4 mr-1" />
-                      {t("recentUsers.buttons.verify")}
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          {/* Recent Jobs */}
-          <Card>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("recentJobs.title")}
-              </h3>
               <Button
                 variant="outline"
-                size="sm"
+                className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
                 onClick={() => router.push("/admin/jobs")}
               >
-                {t("recentJobs.viewAll")}
+                <Briefcase className="h-6 w-6 mb-2" />
+                {t("quickActions.buttons.manageJobs")}
               </Button>
-            </div>
-            <div className="space-y-4">
-              {recentJobs.map((job) => (
-                <div key={job._id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900 truncate">
-                      {job.title}
-                    </h4>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        job.status === "posted"
-                          ? "bg-green-100 text-green-800"
-                          : job.status === "in_progress"
-                            ? "bg-blue-100 text-blue-800"
-                            : job.status === "completed"
-                              ? "bg-gray-100 text-gray-800"
-                              : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {job.status.replace("_", " ")}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {t("recentJobs.fields.amount")}{" "}
-                    {job.budget?.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {t("recentJobs.fields.posted")}{" "}
-                    {new Date(job.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <Card className="mt-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">
-            {t("quickActions.title")}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              variant="outline"
-              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
-              onClick={() => router.push("/admin/users")}
-            >
-              <Users className="h-6 w-6 mb-2" />
-              {t("quickActions.buttons.manageUsers")}
-            </Button>
-            <Button
-              variant="outline"
-              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
-              onClick={() => router.push("/admin/jobs")}
-            >
-              <Briefcase className="h-6 w-6 mb-2" />
-              {t("quickActions.buttons.manageJobs")}
-            </Button>
-            <Button
-              variant="outline"
-              className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
-              onClick={() => router.push("/admin/payments")}
-            >
-              <DollarSign className="h-6 w-6 mb-2" />
-              {t("quickActions.buttons.paymentDisputes")}
-            </Button>
-          </div>
-        </Card>
-
-        {/* Reports Modal */}
-        <Modal
-          isOpen={showReportsModal}
-          onClose={() => setShowReportsModal(false)}
-          title={t("reports.title")}
-          size="md"
-        >
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("reports.fields.type.label")}
-              </label>
-              <select
-                value={reportType}
-                onChange={(e) => setReportType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="revenue">
-                  {t("reports.fields.type.options.revenue")}
-                </option>
-                <option value="completion">
-                  {t("reports.fields.type.options.completion")}
-                </option>
-                <option value="users">
-                  {t("reports.fields.type.options.users")}
-                </option>
-                <option value="performance">
-                  {t("reports.fields.type.options.performance")}
-                </option>
-              </select>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">
-                {t("reports.preview.title")}
-              </h4>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p>
-                  • {t("reports.preview.fields.totalUsers")}:{" "}
-                  {stats?.totalUsers || 0}
-                </p>
-                <p>
-                  • {t("reports.preview.fields.totalJobs")}:{" "}
-                  {stats?.totalJobs || 0}
-                </p>
-                <p>
-                  • {t("reports.preview.fields.totalRevenue")}: ETB{" "}
-                  {stats?.totalRevenue?.toLocaleString() || 0}
-                </p>
-                <p>
-                  • {t("reports.preview.fields.monthlyGrowth")}: +
-                  {stats?.monthlyGrowth || 0}%
-                </p>
-              </div>
-            </div>
-
-            <div className="flex space-x-3">
               <Button
                 variant="outline"
-                onClick={() => setShowReportsModal(false)}
+                className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
+                onClick={() => router.push("/admin/payments")}
               >
-                {t("reports.buttons.cancel")}
-              </Button>
-              <Button onClick={generateReport}>
-                <Download className="h-4 w-4 mr-2" />
-                {t("reports.buttons.download")}
+                <DollarSign className="h-6 w-6 mb-2" />
+                {t("quickActions.buttons.paymentDisputes")}
               </Button>
             </div>
-          </div>
-        </Modal>
+          </Card>
 
-        {/* Disputes Modal */}
-        <Modal
-          isOpen={showDisputeModal}
-          onClose={() => setShowDisputeModal(false)}
-          title={t("disputes.title")}
-          size="lg"
-        >
-          <div className="space-y-4">
-            {disputes.length > 0 ? (
-              disputes.map((dispute) => (
-                <Card key={dispute._id} className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-medium text-gray-900">
-                        {t("disputes.fields.paymentId")}:{" "}
-                        {dispute._id?.slice(-6) || "Unknown"}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {t("disputes.fields.amount")}: ETB{" "}
-                        {dispute.amount?.toLocaleString() || 0}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {t("disputes.fields.date")}:{" "}
-                        {new Date(dispute.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge variant="danger">
-                      {t("disputes.fields.status")}
-                    </Badge>
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        handleResolveDispute(dispute._id, "refund")
-                      }
-                    >
-                      {t("disputes.buttons.refundClient")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        handleResolveDispute(dispute._id, "release")
-                      }
-                    >
-                      {t("disputes.buttons.payWorker")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        handleResolveDispute(dispute._id, "investigate")
-                      }
-                    >
-                      {t("disputes.buttons.investigate")}
-                    </Button>
-                  </div>
-                </Card>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {t("disputes.empty.title")}
-                </h3>
-                <p className="text-gray-600">{t("disputes.empty.message")}</p>
+          {/* Reports Modal */}
+          <Modal
+            isOpen={showReportsModal}
+            onClose={() => setShowReportsModal(false)}
+            title={t("reports.title")}
+            size="md"
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t("reports.fields.type.label")}
+                </label>
+                <select
+                  value={reportType}
+                  onChange={(e) => setReportType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="revenue">
+                    {t("reports.fields.type.options.revenue")}
+                  </option>
+                  <option value="completion">
+                    {t("reports.fields.type.options.completion")}
+                  </option>
+                  <option value="users">
+                    {t("reports.fields.type.options.users")}
+                  </option>
+                  <option value="performance">
+                    {t("reports.fields.type.options.performance")}
+                  </option>
+                </select>
               </div>
-            )}
-          </div>
-        </Modal>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">
+                  {t("reports.preview.title")}
+                </h4>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p>
+                    • {t("reports.preview.fields.totalUsers")}:{" "}
+                    {stats?.totalUsers || 0}
+                  </p>
+                  <p>
+                    • {t("reports.preview.fields.totalJobs")}:{" "}
+                    {stats?.totalJobs || 0}
+                  </p>
+                  <p>
+                    • {t("reports.preview.fields.totalRevenue")}: ETB{" "}
+                    {stats?.totalRevenue?.toLocaleString() || 0}
+                  </p>
+                  <p>
+                    • {t("reports.preview.fields.monthlyGrowth")}: +
+                    {stats?.monthlyGrowth || 0}%
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowReportsModal(false)}
+                >
+                  {t("reports.buttons.cancel")}
+                </Button>
+                <Button onClick={generateReport}>
+                  <Download className="h-4 w-4 mr-2" />
+                  {t("reports.buttons.download")}
+                </Button>
+              </div>
+            </div>
+          </Modal>
+
+          {/* Disputes Modal */}
+          <Modal
+            isOpen={showDisputeModal}
+            onClose={() => setShowDisputeModal(false)}
+            title={t("disputes.title")}
+            size="lg"
+          >
+            <div className="space-y-4">
+              {disputes.length > 0 ? (
+                disputes.map((dispute) => (
+                  <Card key={dispute._id} className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-medium text-gray-900">
+                          {t("disputes.fields.paymentId")}:{" "}
+                          {dispute._id?.slice(-6) || "Unknown"}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {t("disputes.fields.amount")}: ETB{" "}
+                          {dispute.amount?.toLocaleString() || 0}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {t("disputes.fields.date")}:{" "}
+                          {new Date(dispute.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Badge variant="danger">
+                        {t("disputes.fields.status")}
+                      </Badge>
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleResolveDispute(dispute._id, "refund")
+                        }
+                      >
+                        {t("disputes.buttons.refundClient")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleResolveDispute(dispute._id, "release")
+                        }
+                      >
+                        {t("disputes.buttons.payWorker")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          handleResolveDispute(dispute._id, "investigate")
+                        }
+                      >
+                        {t("disputes.buttons.investigate")}
+                      </Button>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {t("disputes.empty.title")}
+                  </h3>
+                  <p className="text-gray-600">{t("disputes.empty.message")}</p>
+                </div>
+              )}
+            </div>
+          </Modal>
+        </div>
       </div>
-    </div>
+    </WithDashboardLoading>
   );
 };
 

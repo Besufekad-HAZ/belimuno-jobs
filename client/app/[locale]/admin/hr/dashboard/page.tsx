@@ -27,6 +27,8 @@ import { useTranslations } from "next-intl";
 import { toast } from "@/components/ui/sonner";
 import { useHRDashboardData } from "@/hooks/useDashboardData";
 import { queryClient } from "@/lib/queryClient";
+import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const HRAdminDashboard: React.FC = () => {
   const [showWorkerModal, setShowWorkerModal] = useState(false);
@@ -74,6 +76,7 @@ const HRAdminDashboard: React.FC = () => {
   const workers = data?.workers || [];
   const disputes = data?.disputes || [];
   const loading = isLoading;
+  const { isDashboardLoading } = useLoading();
 
   useEffect(() => {
     const user = getStoredUser();
@@ -161,7 +164,7 @@ const HRAdminDashboard: React.FC = () => {
     ? Math.round((stats.disputesResolved / stats.totalDisputes) * 100)
     : 0;
 
-  if (loading) {
+  if (loading && !isDashboardLoading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -209,160 +212,214 @@ const HRAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {t("header.title")}
-            </h1>
-            <p className="text-gray-600">{t("header.subtitle")}</p>
+    <WithDashboardLoading isLoading={loading && !isDashboardLoading}>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {t("header.title")}
+              </h1>
+              <p className="text-gray-600">{t("header.subtitle")}</p>
+            </div>
+            <div className="flex space-x-3 mt-4 sm:mt-0">
+              <Button
+                onClick={() => router.push("/admin/chat")}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <MessageSquarePlus className="h-4 w-4" />
+                <span>Team Chat</span>
+              </Button>
+              <Button
+                onClick={() => setShowAnnouncementModal(true)}
+                variant="primary"
+                className="flex items-center space-x-2"
+              >
+                <Bell className="h-4 w-4" />
+                <span>{t("header.buttons.sendAnnouncement")}</span>
+              </Button>
+              <Button
+                onClick={() => router.push("/admin/hr/workers")}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <Users className="h-4 w-4" />
+                <span>{t("header.buttons.manageWorkers")}</span>
+              </Button>
+            </div>
           </div>
-          <div className="flex space-x-3 mt-4 sm:mt-0">
-            <Button
-              onClick={() => router.push("/admin/chat")}
-              variant="outline"
-              className="flex items-center space-x-2"
-            >
-              <MessageSquarePlus className="h-4 w-4" />
-              <span>Team Chat</span>
-            </Button>
-            <Button
-              onClick={() => setShowAnnouncementModal(true)}
-              variant="primary"
-              className="flex items-center space-x-2"
-            >
-              <Bell className="h-4 w-4" />
-              <span>{t("header.buttons.sendAnnouncement")}</span>
-            </Button>
-            <Button
-              onClick={() => router.push("/admin/hr/workers")}
-              variant="outline"
-              className="flex items-center space-x-2"
-            >
-              <Users className="h-4 w-4" />
-              <span>{t("header.buttons.manageWorkers")}</span>
-            </Button>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-blue-100">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">
+                    {t("stats.totalWorkers.label")}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats?.totalWorkers || 0}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-green-100">
+                  <UserCheck className="h-6 w-6 text-green-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">
+                    {t("stats.verifiedWorkers.label")}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats?.verifiedWorkers || 0}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-orange-100">
+                  <Clock className="h-6 w-6 text-orange-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">
+                    {t("stats.pendingVerification.label")}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats?.pendingVerifications || 0}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center">
+                <div className="p-3 rounded-lg bg-red-100">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">
+                    {t("stats.openDisputes.label")}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats?.disputesOpen || 0}
+                  </p>
+                </div>
+              </div>
+            </Card>
           </div>
-        </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-blue-100">
-                <Users className="h-6 w-6 text-blue-600" />
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Pending Worker Verifications */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {t("verifications.title")}
+                </h2>
+                <Badge variant="warning">
+                  {
+                    workers.filter((w) => !w.isVerified && !w.profile?.verified)
+                      .length
+                  }
+                </Badge>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t("stats.totalWorkers.label")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats?.totalWorkers || 0}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-green-100">
-                <UserCheck className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t("stats.verifiedWorkers.label")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats?.verifiedWorkers || 0}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-orange-100">
-                <Clock className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t("stats.pendingVerification.label")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats?.pendingVerifications || 0}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="p-3 rounded-lg bg-red-100">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  {t("stats.openDisputes.label")}
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats?.disputesOpen || 0}
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Pending Worker Verifications */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {t("verifications.title")}
-              </h2>
-              <Badge variant="warning">
-                {
-                  workers.filter((w) => !w.isVerified && !w.profile?.verified)
-                    .length
-                }
-              </Badge>
-            </div>
-            <div className="space-y-3">
-              {workers
-                .filter((w) => !w.isVerified && !w.profile?.verified)
-                .slice(0, 5)
-                .map((worker) => (
-                  <div
-                    key={worker._id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <Users className="h-5 w-5 text-gray-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {worker.name}
-                        </p>
-                        <p className="text-sm text-gray-600">{worker.email}</p>
-                        <div className="flex space-x-1 mt-1">
-                          {worker.workerProfile?.skills
-                            ?.slice(0, 2)
-                            .map((skill, idx) => (
-                              <Badge key={idx} variant="info" size="sm">
-                                {skill}
-                              </Badge>
-                            ))}
+              <div className="space-y-3">
+                {workers
+                  .filter((w) => !w.isVerified && !w.profile?.verified)
+                  .slice(0, 5)
+                  .map((worker) => (
+                    <div
+                      key={worker._id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
+                          <Users className="h-5 w-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {worker.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {worker.email}
+                          </p>
+                          <div className="flex space-x-1 mt-1">
+                            {worker.workerProfile?.skills
+                              ?.slice(0, 2)
+                              .map((skill, idx) => (
+                                <Badge key={idx} variant="info" size="sm">
+                                  {skill}
+                                </Badge>
+                              ))}
+                          </div>
                         </div>
                       </div>
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={() => {
+                            setSelectedWorker(worker);
+                            setShowWorkerModal(true);
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex space-x-2">
+                  ))}
+                {workers.filter((w) => !w.isVerified && !w.profile?.verified)
+                  .length === 0 && (
+                  <p className="text-gray-500 text-center py-4">
+                    {t("verifications.empty")}
+                  </p>
+                )}
+              </div>
+            </Card>
+
+            {/* Active Disputes */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {t("disputes.title")}
+                </h2>
+                <Badge variant="danger">{disputes.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {disputes.slice(0, 5).map((dispute) => (
+                  <div key={dispute._id} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Badge
+                          variant={
+                            dispute.priority === "high"
+                              ? "danger"
+                              : dispute.priority === "medium"
+                                ? "warning"
+                                : "info"
+                          }
+                          size="sm"
+                        >
+                          {t(`disputes.priority.${dispute.priority}`)}
+                        </Badge>
+                        <Badge variant="secondary" size="sm">
+                          {dispute.status}
+                        </Badge>
+                      </div>
                       <Button
                         onClick={() => {
-                          setSelectedWorker(worker);
-                          setShowWorkerModal(true);
+                          setSelectedDispute(dispute);
+                          setShowDisputeModal(true);
                         }}
                         variant="outline"
                         size="sm"
@@ -370,519 +427,472 @@ const HRAdminDashboard: React.FC = () => {
                         <Eye className="h-4 w-4" />
                       </Button>
                     </div>
+                    <p className="font-medium text-gray-900 mb-1">
+                      {dispute.worker.name} vs {dispute.client.name}
+                    </p>
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {dispute.description}
+                    </p>
+                    {dispute.job && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        {t("disputes.details.fields.job")}: {dispute.job.title}
+                      </p>
+                    )}
                   </div>
                 ))}
-              {workers.filter((w) => !w.isVerified && !w.profile?.verified)
-                .length === 0 && (
-                <p className="text-gray-500 text-center py-4">
-                  {t("verifications.empty")}
-                </p>
-              )}
-            </div>
-          </Card>
+                {disputes.length === 0 && (
+                  <p className="text-gray-500 text-center py-4">
+                    {t("disputes.empty")}
+                  </p>
+                )}
+              </div>
+            </Card>
+          </div>
 
-          {/* Active Disputes */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {t("disputes.title")}
+          {/* Recent Activity and Performance Metrics */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* HR Actions */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                {t("actions.title")}
               </h2>
-              <Badge variant="danger">{disputes.length}</Badge>
-            </div>
-            <div className="space-y-3">
-              {disputes.slice(0, 5).map((dispute) => (
-                <div key={dispute._id} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <Badge
-                        variant={
-                          dispute.priority === "high"
-                            ? "danger"
-                            : dispute.priority === "medium"
-                              ? "warning"
-                              : "info"
-                        }
-                        size="sm"
-                      >
-                        {t(`disputes.priority.${dispute.priority}`)}
-                      </Badge>
-                      <Badge variant="secondary" size="sm">
-                        {dispute.status}
-                      </Badge>
-                    </div>
-                    <Button
-                      onClick={() => {
-                        setSelectedDispute(dispute);
-                        setShowDisputeModal(true);
-                      }}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => router.push("/admin/hr/team")}
+                  variant="primary"
+                  className="w-full justify-start"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  {t("actions.buttons.manageTeam")}
+                </Button>
+                <Button
+                  onClick={() => router.push("/admin/hr/news")}
+                  variant="primary"
+                  className="w-full justify-start"
+                >
+                  <Newspaper className="h-4 w-4 mr-2" />
+                  {t("actions.buttons.manageNews")}
+                </Button>
+                <Button
+                  onClick={() => router.push("/admin/hr/clients")}
+                  variant="primary"
+                  className="w-full justify-start"
+                >
+                  <Building className="h-4 w-4 mr-2" />
+                  {t("actions.buttons.manageClients")}
+                </Button>
+                <Button
+                  onClick={() => router.push("/admin/hr/workers")}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  {t("actions.buttons.workerManagement")}
+                </Button>
+                <Button
+                  onClick={() => router.push("/admin/hr/disputes")}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  {t("actions.buttons.disputeResolution")}
+                </Button>
+                <Button
+                  onClick={() => router.push("/admin/hr/performance")}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <Award className="h-4 w-4 mr-2" />
+                  {t("actions.buttons.performanceReviews")}
+                </Button>
+              </div>
+            </Card>
+
+            {/* Performance Metrics */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                {t("metrics.performance.title")}
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-900">
+                      {t("metrics.performance.workerSatisfaction")}
+                    </span>
+                    <span className="text-gray-900">{`${workerSatisfactionRate}%`}</span>
                   </div>
-                  <p className="font-medium text-gray-900 mb-1">
-                    {dispute.worker.name} vs {dispute.client.name}
-                  </p>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {dispute.description}
-                  </p>
-                  {dispute.job && (
-                    <p className="text-xs text-blue-600 mt-1">
-                      {t("disputes.details.fields.job")}: {dispute.job.title}
-                    </p>
-                  )}
-                </div>
-              ))}
-              {disputes.length === 0 && (
-                <p className="text-gray-500 text-center py-4">
-                  {t("disputes.empty")}
-                </p>
-              )}
-            </div>
-          </Card>
-        </div>
-
-        {/* Recent Activity and Performance Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* HR Actions */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              {t("actions.title")}
-            </h2>
-            <div className="space-y-3">
-              <Button
-                onClick={() => router.push("/admin/hr/team")}
-                variant="primary"
-                className="w-full justify-start"
-              >
-                <Users className="h-4 w-4 mr-2" />
-                {t("actions.buttons.manageTeam")}
-              </Button>
-              <Button
-                onClick={() => router.push("/admin/hr/news")}
-                variant="primary"
-                className="w-full justify-start"
-              >
-                <Newspaper className="h-4 w-4 mr-2" />
-                {t("actions.buttons.manageNews")}
-              </Button>
-              <Button
-                onClick={() => router.push("/admin/hr/clients")}
-                variant="primary"
-                className="w-full justify-start"
-              >
-                <Building className="h-4 w-4 mr-2" />
-                {t("actions.buttons.manageClients")}
-              </Button>
-              <Button
-                onClick={() => router.push("/admin/hr/workers")}
-                variant="outline"
-                className="w-full justify-start"
-              >
-                <Users className="h-4 w-4 mr-2" />
-                {t("actions.buttons.workerManagement")}
-              </Button>
-              <Button
-                onClick={() => router.push("/admin/hr/disputes")}
-                variant="outline"
-                className="w-full justify-start"
-              >
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                {t("actions.buttons.disputeResolution")}
-              </Button>
-              <Button
-                onClick={() => router.push("/admin/hr/performance")}
-                variant="outline"
-                className="w-full justify-start"
-              >
-                <Award className="h-4 w-4 mr-2" />
-                {t("actions.buttons.performanceReviews")}
-              </Button>
-            </div>
-          </Card>
-
-          {/* Performance Metrics */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              {t("metrics.performance.title")}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-900">
-                    {t("metrics.performance.workerSatisfaction")}
-                  </span>
-                  <span className="text-gray-900">{`${workerSatisfactionRate}%`}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-600 h-2 rounded-full"
-                    style={{ width: `${workerSatisfactionRate}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-900">
-                    {t("metrics.performance.verificationRate")}
-                  </span>
-                  <span className="text-gray-900">{`${verificationRate}%`}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: `${verificationRate}%` }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-900">
-                    {t("metrics.performance.disputeResolution")}
-                  </span>
-                  <span className="text-gray-900">{`${disputeResolutionRate}%`}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-orange-600 h-2 rounded-full"
-                    style={{ width: `${disputeResolutionRate}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Recent Metrics */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              {t("metrics.monthly.title")}
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">
-                  {t("metrics.monthly.fields.newWorkers")}
-                </span>
-                <span className="font-semibold text-gray-900">
-                  {stats?.workersThisMonth || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">
-                  {t("metrics.monthly.fields.verifications")}
-                </span>
-                <span className="font-semibold text-gray-900">
-                  {stats?.verifiedWorkers || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">
-                  {t("metrics.monthly.fields.disputesResolved")}
-                </span>
-                <span className="font-semibold text-gray-900">
-                  {stats?.disputesResolved || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">
-                  {t("metrics.monthly.fields.trainingCompleted")}
-                </span>
-                <span className="font-semibold text-gray-900">
-                  {stats?.trainingCompleted || 0}
-                </span>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Worker Details Modal */}
-        <Modal
-          isOpen={showWorkerModal}
-          onClose={() => {
-            setShowWorkerModal(false);
-            setSelectedWorker(null);
-          }}
-          title={t("worker.verification.title")}
-          size="lg"
-        >
-          {selectedWorker && (
-            <div className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <div className="h-16 w-16 bg-gray-300 rounded-full flex items-center justify-center">
-                  <Users className="h-8 w-8 text-gray-600" />
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-green-600 h-2 rounded-full"
+                      style={{ width: `${workerSatisfactionRate}%` }}
+                    ></div>
+                  </div>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-700">
-                    {selectedWorker.name}
-                  </h3>
-                  <p className="text-gray-600">{selectedWorker.email}</p>
-                  {getWorkerStatusBadge(selectedWorker)}
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-900">
+                      {t("metrics.performance.verificationRate")}
+                    </span>
+                    <span className="text-gray-900">{`${verificationRate}%`}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{ width: `${verificationRate}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-900">
+                      {t("metrics.performance.disputeResolution")}
+                    </span>
+                    <span className="text-gray-900">{`${disputeResolutionRate}%`}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-orange-600 h-2 rounded-full"
+                      style={{ width: `${disputeResolutionRate}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
+            </Card>
 
-              {selectedWorker.workerProfile && (
-                <div>
-                  <h4 className="font-medium mb-2 text-gray-700">
-                    {t("worker.verification.profile.title")}
-                  </h4>
-                  <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-gray-700">
-                    <p>
-                      <strong>
-                        {t("worker.verification.profile.fields.experience")}:
-                      </strong>{" "}
-                      {selectedWorker.workerProfile.experience}
-                    </p>
-                    <p>
-                      <strong>
-                        {t("worker.verification.profile.fields.rating")}:
-                      </strong>{" "}
-                      {selectedWorker.workerProfile.rating}/5
-                    </p>
-                    <p>
-                      <strong>
-                        {t("worker.verification.profile.fields.jobsCompleted")}:
-                      </strong>{" "}
-                      {selectedWorker.workerProfile.completedJobs}/
-                      {selectedWorker.workerProfile.totalJobs}
-                    </p>
-                    <div>
-                      <strong>
-                        {t("worker.verification.profile.fields.skills")}:
-                      </strong>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {selectedWorker.workerProfile.skills?.map(
-                          (skill, idx) => (
-                            <Badge key={idx} variant="info" size="sm">
-                              {skill}
-                            </Badge>
-                          ),
-                        )}
+            {/* Recent Metrics */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                {t("metrics.monthly.title")}
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">
+                    {t("metrics.monthly.fields.newWorkers")}
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    {stats?.workersThisMonth || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">
+                    {t("metrics.monthly.fields.verifications")}
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    {stats?.verifiedWorkers || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">
+                    {t("metrics.monthly.fields.disputesResolved")}
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    {stats?.disputesResolved || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">
+                    {t("metrics.monthly.fields.trainingCompleted")}
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    {stats?.trainingCompleted || 0}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Worker Details Modal */}
+          <Modal
+            isOpen={showWorkerModal}
+            onClose={() => {
+              setShowWorkerModal(false);
+              setSelectedWorker(null);
+            }}
+            title={t("worker.verification.title")}
+            size="lg"
+          >
+            {selectedWorker && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-4">
+                  <div className="h-16 w-16 bg-gray-300 rounded-full flex items-center justify-center">
+                    <Users className="h-8 w-8 text-gray-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-700">
+                      {selectedWorker.name}
+                    </h3>
+                    <p className="text-gray-600">{selectedWorker.email}</p>
+                    {getWorkerStatusBadge(selectedWorker)}
+                  </div>
+                </div>
+
+                {selectedWorker.workerProfile && (
+                  <div>
+                    <h4 className="font-medium mb-2 text-gray-700">
+                      {t("worker.verification.profile.title")}
+                    </h4>
+                    <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-gray-700">
+                      <p>
+                        <strong>
+                          {t("worker.verification.profile.fields.experience")}:
+                        </strong>{" "}
+                        {selectedWorker.workerProfile.experience}
+                      </p>
+                      <p>
+                        <strong>
+                          {t("worker.verification.profile.fields.rating")}:
+                        </strong>{" "}
+                        {selectedWorker.workerProfile.rating}/5
+                      </p>
+                      <p>
+                        <strong>
+                          {t(
+                            "worker.verification.profile.fields.jobsCompleted",
+                          )}
+                          :
+                        </strong>{" "}
+                        {selectedWorker.workerProfile.completedJobs}/
+                        {selectedWorker.workerProfile.totalJobs}
+                      </p>
+                      <div>
+                        <strong>
+                          {t("worker.verification.profile.fields.skills")}:
+                        </strong>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {selectedWorker.workerProfile.skills?.map(
+                            (skill, idx) => (
+                              <Badge key={idx} variant="info" size="sm">
+                                {skill}
+                              </Badge>
+                            ),
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
+                )}
+
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() =>
+                      handleWorkerVerification(selectedWorker._id, "verify")
+                    }
+                    variant="primary"
+                    className="flex items-center space-x-2"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    <span>{t("worker.verification.buttons.verify")}</span>
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      handleWorkerVerification(selectedWorker._id, "reject")
+                    }
+                    variant="outline"
+                    className="flex items-center space-x-2 text-red-600"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    <span>{t("worker.verification.buttons.reject")}</span>
+                  </Button>
                 </div>
-              )}
-
-              <div className="flex space-x-3">
-                <Button
-                  onClick={() =>
-                    handleWorkerVerification(selectedWorker._id, "verify")
-                  }
-                  variant="primary"
-                  className="flex items-center space-x-2"
-                >
-                  <CheckCircle className="h-4 w-4" />
-                  <span>{t("worker.verification.buttons.verify")}</span>
-                </Button>
-                <Button
-                  onClick={() =>
-                    handleWorkerVerification(selectedWorker._id, "reject")
-                  }
-                  variant="outline"
-                  className="flex items-center space-x-2 text-red-600"
-                >
-                  <XCircle className="h-4 w-4" />
-                  <span>{t("worker.verification.buttons.reject")}</span>
-                </Button>
               </div>
-            </div>
-          )}
-        </Modal>
+            )}
+          </Modal>
 
-        {/* Dispute Details Modal */}
-        <Modal
-          isOpen={showDisputeModal}
-          onClose={() => {
-            setShowDisputeModal(false);
-            setSelectedDispute(null);
-          }}
-          title={t("disputes.details.title")}
-          size="lg"
-        >
-          {selectedDispute && (
-            <div className="space-y-6">
-              <div className="flex items-center space-x-2">
-                <Badge
-                  variant={
-                    selectedDispute.priority === "high"
-                      ? "danger"
-                      : selectedDispute.priority === "medium"
-                        ? "warning"
-                        : "info"
-                  }
-                >
-                  {t(`disputes.priority.${selectedDispute.priority}`)}{" "}
-                  {t("disputes.details.priority")}
-                </Badge>
-                <Badge variant="secondary">{selectedDispute.status}</Badge>
-              </div>
+          {/* Dispute Details Modal */}
+          <Modal
+            isOpen={showDisputeModal}
+            onClose={() => {
+              setShowDisputeModal(false);
+              setSelectedDispute(null);
+            }}
+            title={t("disputes.details.title")}
+            size="lg"
+          >
+            {selectedDispute && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-2">
+                  <Badge
+                    variant={
+                      selectedDispute.priority === "high"
+                        ? "danger"
+                        : selectedDispute.priority === "medium"
+                          ? "warning"
+                          : "info"
+                    }
+                  >
+                    {t(`disputes.priority.${selectedDispute.priority}`)}{" "}
+                    {t("disputes.details.priority")}
+                  </Badge>
+                  <Badge variant="secondary">{selectedDispute.status}</Badge>
+                </div>
 
-              <div>
-                <h4 className="font-medium mb-2 text-gray-700">
-                  {t("disputes.details.partiesInvolved")}
-                </h4>
-                <div className="bg-gray-50 p-4 rounded-lg text-gray-700">
-                  <p>
-                    <strong>{t("disputes.details.fields.worker")}:</strong>{" "}
-                    {selectedDispute.worker.name}
-                  </p>
-                  <p>
-                    <strong>{t("disputes.details.fields.client")}:</strong>{" "}
-                    {selectedDispute.client.name}
-                  </p>
-                  {selectedDispute.job && (
+                <div>
+                  <h4 className="font-medium mb-2 text-gray-700">
+                    {t("disputes.details.partiesInvolved")}
+                  </h4>
+                  <div className="bg-gray-50 p-4 rounded-lg text-gray-700">
                     <p>
-                      <strong>{t("disputes.details.fields.job")}:</strong>{" "}
-                      {selectedDispute.job.title}
+                      <strong>{t("disputes.details.fields.worker")}:</strong>{" "}
+                      {selectedDispute.worker.name}
                     </p>
-                  )}
+                    <p>
+                      <strong>{t("disputes.details.fields.client")}:</strong>{" "}
+                      {selectedDispute.client.name}
+                    </p>
+                    {selectedDispute.job && (
+                      <p>
+                        <strong>{t("disputes.details.fields.job")}:</strong>{" "}
+                        {selectedDispute.job.title}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium mb-2 text-gray-700">
+                    {t("disputes.details.fields.description")}
+                  </h4>
+                  <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
+                    {selectedDispute.description}
+                  </p>
+                </div>
+
+                <div className="flex space-x-3">
+                  <Button variant="primary">
+                    {t("disputes.details.buttons.investigate")}
+                  </Button>
+                  <Button variant="outline">
+                    {t("disputes.details.buttons.contactParties")}
+                  </Button>
+                  <Button variant="outline" className="text-green-600">
+                    {t("disputes.details.buttons.resolve")}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Modal>
+
+          {/* Announcement Modal */}
+          <Modal
+            isOpen={showAnnouncementModal}
+            onClose={() => setShowAnnouncementModal(false)}
+            title={t("announcement.title")}
+            size="lg"
+          >
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("announcement.fields.title.label")}
+                </label>
+                <input
+                  type="text"
+                  value={announcement.title}
+                  onChange={(e) =>
+                    setAnnouncement((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder={t("announcement.fields.title.placeholder")}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("announcement.fields.message.label")}
+                </label>
+                <textarea
+                  value={announcement.message}
+                  onChange={(e) =>
+                    setAnnouncement((prev) => ({
+                      ...prev,
+                      message: e.target.value,
+                    }))
+                  }
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder={t("announcement.fields.message.placeholder")}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t("announcement.fields.targetAudience.label")}
+                  </label>
+                  <select
+                    value={announcement.targetRoles[0]}
+                    onChange={(e) =>
+                      setAnnouncement((prev) => ({
+                        ...prev,
+                        targetRoles: [e.target.value],
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="worker">
+                      {t("announcement.fields.targetAudience.options.workers")}
+                    </option>
+                    <option value="client">
+                      {t("announcement.fields.targetAudience.options.clients")}
+                    </option>
+                    <option value="both">
+                      {t("announcement.fields.targetAudience.options.both")}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t("announcement.fields.priority.label")}
+                  </label>
+                  <select
+                    value={announcement.priority}
+                    onChange={(e) =>
+                      setAnnouncement((prev) => ({
+                        ...prev,
+                        priority: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="low">
+                      {t("announcement.fields.priority.options.low")}
+                    </option>
+                    <option value="medium">
+                      {t("announcement.fields.priority.options.medium")}
+                    </option>
+                    <option value="high">
+                      {t("announcement.fields.priority.options.high")}
+                    </option>
+                    <option value="urgent">
+                      {t("announcement.fields.priority.options.urgent")}
+                    </option>
+                  </select>
                 </div>
               </div>
 
-              <div>
-                <h4 className="font-medium mb-2 text-gray-700">
-                  {t("disputes.details.fields.description")}
-                </h4>
-                <p className="text-gray-700 bg-gray-50 p-4 rounded-lg">
-                  {selectedDispute.description}
-                </p>
-              </div>
-
-              <div className="flex space-x-3">
-                <Button variant="primary">
-                  {t("disputes.details.buttons.investigate")}
-                </Button>
-                <Button variant="outline">
-                  {t("disputes.details.buttons.contactParties")}
-                </Button>
-                <Button variant="outline" className="text-green-600">
-                  {t("disputes.details.buttons.resolve")}
-                </Button>
-              </div>
-            </div>
-          )}
-        </Modal>
-
-        {/* Announcement Modal */}
-        <Modal
-          isOpen={showAnnouncementModal}
-          onClose={() => setShowAnnouncementModal(false)}
-          title={t("announcement.title")}
-          size="lg"
-        >
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("announcement.fields.title.label")}
-              </label>
-              <input
-                type="text"
-                value={announcement.title}
-                onChange={(e) =>
-                  setAnnouncement((prev) => ({
-                    ...prev,
-                    title: e.target.value,
-                  }))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder={t("announcement.fields.title.placeholder")}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("announcement.fields.message.label")}
-              </label>
-              <textarea
-                value={announcement.message}
-                onChange={(e) =>
-                  setAnnouncement((prev) => ({
-                    ...prev,
-                    message: e.target.value,
-                  }))
-                }
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                placeholder={t("announcement.fields.message.placeholder")}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("announcement.fields.targetAudience.label")}
-                </label>
-                <select
-                  value={announcement.targetRoles[0]}
-                  onChange={(e) =>
-                    setAnnouncement((prev) => ({
-                      ...prev,
-                      targetRoles: [e.target.value],
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              <div className="flex space-x-3 pt-4">
+                <Button
+                  onClick={handleSendAnnouncement}
+                  variant="primary"
+                  disabled={!announcement.title || !announcement.message}
                 >
-                  <option value="worker">
-                    {t("announcement.fields.targetAudience.options.workers")}
-                  </option>
-                  <option value="client">
-                    {t("announcement.fields.targetAudience.options.clients")}
-                  </option>
-                  <option value="both">
-                    {t("announcement.fields.targetAudience.options.both")}
-                  </option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("announcement.fields.priority.label")}
-                </label>
-                <select
-                  value={announcement.priority}
-                  onChange={(e) =>
-                    setAnnouncement((prev) => ({
-                      ...prev,
-                      priority: e.target.value,
-                    }))
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  {t("announcement.buttons.send")}
+                </Button>
+                <Button
+                  onClick={() => setShowAnnouncementModal(false)}
+                  variant="outline"
                 >
-                  <option value="low">
-                    {t("announcement.fields.priority.options.low")}
-                  </option>
-                  <option value="medium">
-                    {t("announcement.fields.priority.options.medium")}
-                  </option>
-                  <option value="high">
-                    {t("announcement.fields.priority.options.high")}
-                  </option>
-                  <option value="urgent">
-                    {t("announcement.fields.priority.options.urgent")}
-                  </option>
-                </select>
+                  {t("announcement.buttons.cancel")}
+                </Button>
               </div>
             </div>
-
-            <div className="flex space-x-3 pt-4">
-              <Button
-                onClick={handleSendAnnouncement}
-                variant="primary"
-                disabled={!announcement.title || !announcement.message}
-              >
-                {t("announcement.buttons.send")}
-              </Button>
-              <Button
-                onClick={() => setShowAnnouncementModal(false)}
-                variant="outline"
-              >
-                {t("announcement.buttons.cancel")}
-              </Button>
-            </div>
-          </div>
-        </Modal>
+          </Modal>
+        </div>
       </div>
-    </div>
+    </WithDashboardLoading>
   );
 };
 

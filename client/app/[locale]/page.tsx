@@ -10,7 +10,6 @@ import {
   TrendingUp,
   CheckCircle,
   // Star,
-  MapPin,
   Newspaper,
   Calendar,
   ExternalLink,

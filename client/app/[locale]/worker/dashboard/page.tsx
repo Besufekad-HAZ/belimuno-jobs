@@ -35,6 +35,8 @@ import { toast } from "@/components/ui/sonner";
 import UniversalChatSystem from "@/components/ui/UniversalChatSystem";
 import { useWorkerDashboardData } from "@/hooks/useDashboardData";
 import { queryClient } from "@/lib/queryClient";
+import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const WorkerDashboard: React.FC = () => {
   interface SimpleJob {
@@ -60,6 +62,7 @@ const WorkerDashboard: React.FC = () => {
   const myJobsMemo = useMemo(() => data?.myJobs || [], [data?.myJobs]);
   const appliedJobIds = data?.appliedJobIds || new Set();
   const earnings = data?.earnings || null;
+  const { isDashboardLoading } = useLoading();
   const [notifications, setNotifications] = useState<
     {
       _id: string;
@@ -601,7 +604,7 @@ const WorkerDashboard: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ["workerDashboard"] });
   };
 
-  if (loading) {
+  if (loading && !isDashboardLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
@@ -664,7 +667,8 @@ const WorkerDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <WithDashboardLoading isLoading={loading && !isDashboardLoading}>
+      <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -2097,6 +2101,7 @@ const WorkerDashboard: React.FC = () => {
         )}
       </div>
     </div>
+    </WithDashboardLoading>
   );
 };
 
