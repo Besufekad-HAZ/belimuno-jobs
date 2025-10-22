@@ -183,77 +183,89 @@
       "title": "Naannolee keessatti hojjenna",
       "subtitle": "Naannolee guddoo Itoophiyaa keessatti hojjettoota fi maamiltoota walitti fidna",
       "description": "Magaalaa guddoo irraa hanga naannolee misoomaa jiranitti Belimuno hojiilee gahaa biyya guutuu geessa.",
+      "afar": {
+        "name": "Naannoo Afar",
+        "description": "Projektoota humna ibsaa, tajaajila ittisaa fi hojii dirree.",
+        "jobs": "25+ hojii hojii irra jiran",
+        "tagline": "Korridori humna ibsaa"
+      },
+      "amhara": {
+        "name": "Naannoo Amaaraa",
+        "description": "Carraa turaizimii, barnootaa fi tajaajila fayyaa.",
+        "jobs": "60+ hojii hojii irra jiran",
+        "tagline": "Turaizimii fi misooma hawaasaa"
+      },
+      "benishangul": {
+        "name": "Naannoo Beniishaangul-Gumuz",
+        "description": "Projektoota gurguddaa fi hojii hidha lagaatti.",
+        "jobs": "28+ hojii hojii irra jiran",
+        "tagline": "Hidhaa fi mega projektii"
+      },
+      "gambela": {
+        "name": "Naannoo Gambeellaa",
+        "description": "Deeggarsa balaa namoomaa, kuusaa fi logistiksii.",
+        "jobs": "30+ hojii hojii irra jiran",
+        "tagline": "Bu'uura balaa namoomaa"
+      },
+      "harari": {
+        "name": "Naannoo Hararii",
+        "description": "Turaizimii aadaa, hospitaalityii fi hojjettoota bulchiinsa magaalotaa.",
+        "jobs": "22+ hojii hojii irra jiran",
+        "tagline": "Magaalaa dhaala aadaa"
+      },
+      "oromia": {
+        "name": "Naannoo Oromiyaa",
+        "description": "Ogeeyyii logistiksii, qonnaa fi projektoota dirree.",
+        "jobs": "80+ hojii hojii irra jiran",
+        "tagline": "Qonnaa fi logistiksii"
+      },
+      "sidama": {
+        "name": "Naannoo Siidaamaa",
+        "description": "Qonna bunaa, daldala gabaa fi tajaajila maamilaa.",
+        "jobs": "45+ hojii hojii irra jiran",
+        "tagline": "Buna fi tajaajila"
+      },
+      "somali": {
+        "name": "Naannoo Somaalee",
+        "description": "Daldala daangaa, logistiksii fi deeggarsa karooraa NGO.",
+        "jobs": "35+ hojii hojii irra jiran",
+        "tagline": "Daandii daldalaa bahaa"
+      },
+      "southEthiopia": {
+        "name": "Mootummaa Naannoo Bahaa Itoophiyaa",
+        "description": "Bakka oomisha, hospitaalityii fi projektoota aadaa.",
+        "jobs": "55+ hojii hojii irra jiran",
+        "tagline": "Korridori oomisha"
+      },
+      "southWestEthiopia": {
+        "name": "Naannoo Bahaa Dhihaa Itoophiyaa",
+        "description": "Naannoo qabeenyaa misoomaa jiranii carraawwan garaagaraa.",
+        "jobs": "35+ hojii hojii irra jiran",
+        "tagline": "Carraawwan misoomaa jiran"
+      },
+      "tigray": {
+        "name": "Naannoo Tigraay",
+        "description": "Ijaarsa haaromsaa, tajaajila fi hojii teeknikaa.",
+        "jobs": "40+ hojii hojii irra jiran",
+        "tagline": "Deebii ijaarsa"
+      },
+      "centralEthiopia": {
+        "name": "Mootummaa Naannoo Gidduu Itoophiyaa",
+        "description": "Bu'uura bulchiinsaa carraawwan qophii garaagaraa.",
+        "jobs": "50+ hojii hojii irra jiran",
+        "tagline": "Bu'uura bulchiinsaa"
+      },
       "addisAbaba": {
         "name": "Finfinnee",
         "description": "Bu'uura faayinaansii, tekinooloojii fi bulchiinsa yakka keessatti.",
         "jobs": "120+ hojii hojii irra jiran",
         "tagline": "Magaalaa mootummaa"
       },
-      "oromia": {
-        "name": "Oromiyaa",
-        "description": "Ogeeyyii logistiksii, qonnaa fi projektoota dirree.",
-        "jobs": "80+ hojii hojii irra jiran",
-        "tagline": "Qonnaa fi logistiksii"
-      },
-      "amhara": {
-        "name": "Amaaraa",
-        "description": "Carraa turaizimii, barnootaa fi tajaajila fayyaa.",
-        "jobs": "60+ hojii hojii irra jiran",
-        "tagline": "Turaizimii fi misooma hawaasaa"
-      },
-      "tigray": {
-        "name": "Tigraay",
-        "description": "Ijaarsa haaromsaa, tajaajila fi hojii teeknikaa.",
-        "jobs": "40+ hojii hojii irra jiran",
-        "tagline": "Deebii ijaarsa"
-      },
-      "snnp": {
-        "name": "SNNP",
-        "description": "Bakka oomisha, hospitaalityii fi projektoota aadaa.",
-        "jobs": "55+ hojii hojii irra jiran",
-        "tagline": "Korridori oomisha"
-      },
-      "sidama": {
-        "name": "Siidaamaa",
-        "description": "Qonna bunaa, daldala gabaa fi tajaajila maamilaa.",
-        "jobs": "45+ hojii hojii irra jiran",
-        "tagline": "Buna fi tajaajila"
-      },
-      "gambela": {
-        "name": "Gambeellaa",
-        "description": "Deeggarsa balaa namoomaa, kuusaa fi logistiksii.",
-        "jobs": "30+ hojii hojii irra jiran",
-        "tagline": "Bu'uura balaa namoomaa"
-      },
-      "afar": {
-        "name": "Afar",
-        "description": "Projektoota humna ibsaa, tajaajila ittisaa fi hojii dirree.",
-        "jobs": "25+ hojii hojii irra jiran",
-        "tagline": "Korridori humna ibsaa"
-      },
-      "benishangul": {
-        "name": "Beniishaangul-Gumuz",
-        "description": "Projektoota gurguddaa fi hojii hidha lagaatti.",
-        "jobs": "28+ hojii hojii irra jiran",
-        "tagline": "Hidhaa fi mega projektii"
-      },
       "direDawa": {
         "name": "Dirree Dhawaa",
         "description": "Paarkii industirii, saffisa geejjibaa fi tajaajila xiyyaaraa.",
         "jobs": "38+ hojii hojii irra jiran",
         "tagline": "Balbala industirii"
-      },
-      "harari": {
-        "name": "Hararii",
-        "description": "Turaizimii aadaa, hospitaalityii fi hojjettoota bulchiinsa magaalotaa.",
-        "jobs": "22+ hojii hojii irra jiran",
-        "tagline": "Magaalaa dhaala aadaa"
-      },
-      "somali": {
-        "name": "Somaalee (Jiijigaa)",
-        "description": "Daldala daangaa, logistiksii fi deeggarsa karooraa NGO.",
-        "jobs": "35+ hojii hojii irra jiran",
-        "tagline": "Daandii daldalaa bahaa"
       }
     },
     "news": {

@@ -107,77 +107,89 @@
       "title": "Regions we operate in",
       "subtitle": "Connecting workers and employers across Ethiopia's major regions",
       "description": "From city centers to emerging corridors, our recruiters mobilize talent everywhere Belimuno partners grow.",
+      "afar": {
+        "name": "Afar Region",
+        "description": "Energy, infrastructure maintenance and field operations.",
+        "jobs": "25+ active jobs",
+        "tagline": "Energy corridor"
+      },
+      "amhara": {
+        "name": "Amhara Region",
+        "description": "Tourism, education and healthcare opportunities.",
+        "jobs": "60+ active jobs",
+        "tagline": "Tourism & social impact"
+      },
+      "benishangul": {
+        "name": "Benishangul-Gumuz Region",
+        "description": "Large-scale projects and dam operations workforce.",
+        "jobs": "28+ active jobs",
+        "tagline": "Dam & mega projects"
+      },
+      "gambela": {
+        "name": "Gambela Region",
+        "description": "Humanitarian response, warehousing and logistics support.",
+        "jobs": "30+ active jobs",
+        "tagline": "Humanitarian hub"
+      },
+      "harari": {
+        "name": "Harari Region",
+        "description": "Cultural tourism, hospitality and civic administration roles.",
+        "jobs": "22+ active jobs",
+        "tagline": "Heritage city"
+      },
+      "oromia": {
+        "name": "Oromia Region",
+        "description": "Logistics, agriculture and field project specialists.",
+        "jobs": "80+ active jobs",
+        "tagline": "Agriculture & logistics"
+      },
+      "sidama": {
+        "name": "Sidama Region",
+        "description": "Agri-business, retail and customer support roles.",
+        "jobs": "45+ active jobs",
+        "tagline": "Coffee & service"
+      },
+      "somali": {
+        "name": "Somali Region",
+        "description": "Cross-border trade, logistics and NGO programme support.",
+        "jobs": "35+ active jobs",
+        "tagline": "Eastern trade routes"
+      },
+      "southEthiopia": {
+        "name": "South Ethiopia Regional State",
+        "description": "Manufacturing, hospitality and cultural projects.",
+        "jobs": "55+ active jobs",
+        "tagline": "Manufacturing corridor"
+      },
+      "southWestEthiopia": {
+        "name": "South West Ethiopia Peoples' Region",
+        "description": "Emerging economic zone with diverse opportunities.",
+        "jobs": "35+ active jobs",
+        "tagline": "Emerging opportunities"
+      },
+      "tigray": {
+        "name": "Tigray Region",
+        "description": "Reconstruction, services and operations roles.",
+        "jobs": "40+ active jobs",
+        "tagline": "Rebuilding capacity"
+      },
+      "centralEthiopia": {
+        "name": "Central Ethiopia Regional State",
+        "description": "Administrative hub with diverse professional opportunities.",
+        "jobs": "50+ active jobs",
+        "tagline": "Administrative center"
+      },
       "addisAbaba": {
         "name": "Addis Ababa",
         "description": "Finance, technology and administration talent hub.",
         "jobs": "120+ active jobs",
         "tagline": "Capital headquarters"
       },
-      "oromia": {
-        "name": "Oromia",
-        "description": "Logistics, agriculture and field project specialists.",
-        "jobs": "80+ active jobs",
-        "tagline": "Agriculture & logistics"
-      },
-      "amhara": {
-        "name": "Amhara",
-        "description": "Tourism, education and healthcare opportunities.",
-        "jobs": "60+ active jobs",
-        "tagline": "Tourism & social impact"
-      },
-      "tigray": {
-        "name": "Tigray",
-        "description": "Reconstruction, services and operations roles.",
-        "jobs": "40+ active jobs",
-        "tagline": "Rebuilding capacity"
-      },
-      "snnp": {
-        "name": "SNNP",
-        "description": "Manufacturing, hospitality and cultural projects.",
-        "jobs": "55+ active jobs",
-        "tagline": "Manufacturing corridor"
-      },
-      "sidama": {
-        "name": "Sidama",
-        "description": "Agri-business, retail and customer support roles.",
-        "jobs": "45+ active jobs",
-        "tagline": "Coffee & service"
-      },
-      "gambela": {
-        "name": "Gambela",
-        "description": "Humanitarian response, warehousing and logistics support.",
-        "jobs": "30+ active jobs",
-        "tagline": "Humanitarian hub"
-      },
-      "afar": {
-        "name": "Afar",
-        "description": "Energy, infrastructure maintenance and field operations.",
-        "jobs": "25+ active jobs",
-        "tagline": "Energy corridor"
-      },
-      "benishangul": {
-        "name": "Benishangul-Gumuz",
-        "description": "Large-scale projects and dam operations workforce.",
-        "jobs": "28+ active jobs",
-        "tagline": "Dam & mega projects"
-      },
       "direDawa": {
         "name": "Dire Dawa",
         "description": "Industrial park staffing, supply chain and aviation services.",
         "jobs": "38+ active jobs",
         "tagline": "Industrial gateway"
-      },
-      "harari": {
-        "name": "Harari",
-        "description": "Cultural tourism, hospitality and civic administration roles.",
-        "jobs": "22+ active jobs",
-        "tagline": "Heritage city"
-      },
-      "somali": {
-        "name": "Somali (Jijiga)",
-        "description": "Cross-border trade, logistics and NGO programme support.",
-        "jobs": "35+ active jobs",
-        "tagline": "Eastern trade routes"
       }
     },
     "news": {
