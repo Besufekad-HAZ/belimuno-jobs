@@ -13,6 +13,8 @@ import {
   AlertCircle,
   Users,
   Trash2,
+  Plus,
+  ArrowLeft,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import { adminAPI } from "@/lib/api";
@@ -441,8 +443,17 @@ const ProjectOversight: React.FC = () => {
             <Button
               onClick={() => router.push("/admin/outsource/dashboard")}
               variant="outline"
+              className="w-full sm:w-auto"
             >
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Dashboard
+            </Button>
+            <Button
+              onClick={() => router.push("/admin/outsource/jobs/new")}
+              className="w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Post New Job
             </Button>
           </div>
         </div>

@@ -47,6 +47,7 @@ const WorkerDashboard: React.FC = () => {
     region?: { name?: string };
     status?: string;
     progress?: number;
+    location?: string;
     acceptedApplication?: { proposedBudget?: number };
     applicationCount?: number;
     review?: { workerReview?: { rating?: number } };
@@ -200,6 +201,7 @@ const WorkerDashboard: React.FC = () => {
           region: j.region as { name?: string } | undefined,
           status: String(j.status || ""),
           progress: Number(j.progress || 0),
+          location: String(j.location || ""),
           acceptedApplication: j.acceptedApplication as
             | {
                 proposedBudget?: number;
@@ -1433,9 +1435,9 @@ const WorkerDashboard: React.FC = () => {
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-500">Region</p>
+                    <p className="text-gray-500">Location</p>
                     <p className="font-medium text-gray-900">
-                      {selectedJob.region?.name || "—"}
+                      {selectedJob.location || "No location specified"}
                     </p>
                   </div>
                 </div>
