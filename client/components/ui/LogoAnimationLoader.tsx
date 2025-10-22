@@ -1,59 +1,77 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface LogoAnimationLoaderProps {
   isVisible: boolean;
   onComplete?: () => void;
-  duration?: number; // Duration in milliseconds
+  duration?: number; // Duration in milliseconds for progress animation
+  fadeDuration?: number; // Fade out duration in milliseconds
 }
 
 const LogoAnimationLoader: React.FC<LogoAnimationLoaderProps> = ({
   isVisible,
   onComplete,
-  duration = 5000, // Default 5 seconds
+  duration = 5000,
+  fadeDuration = 350,
 }) => {
-  const [showLoader, setShowLoader] = useState(false);
+  const [isMounted, setIsMounted] = useState(isVisible);
+  const [isShowing, setIsShowing] = useState(isVisible);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const completionRef = useRef(false);
 
   useEffect(() => {
     if (isVisible) {
-      setShowLoader(true);
       setVideoLoaded(false);
-
-      // Set a timer to complete the loading
-      const timer = setTimeout(() => {
-        if (onComplete) {
-          onComplete();
+      completionRef.current = false;
+      setIsMounted(true);
+      const frame = requestAnimationFrame(() => setIsShowing(true));
+      const durationTimer = window.setTimeout(() => {
+        if (!completionRef.current) {
+          completionRef.current = true;
+          if (onComplete) {
+            onComplete();
+          }
         }
-        // Fade out animation
-        setTimeout(() => {
-          setShowLoader(false);
-        }, 500);
       }, duration);
-
-      return () => clearTimeout(timer);
+      return () => {
+        cancelAnimationFrame(frame);
+        window.clearTimeout(durationTimer);
+      };
     }
-  }, [isVisible, onComplete, duration]);
+
+    setIsShowing(false);
+    const timer = window.setTimeout(() => {
+      setIsMounted(false);
+    }, fadeDuration);
+
+    return () => window.clearTimeout(timer);
+  }, [duration, fadeDuration, isVisible, onComplete]);
 
   const handleVideoLoad = () => {
     setVideoLoaded(true);
   };
 
-  const handleVideoEnd = () => {
+  const handleVideoEnded = () => {
+    if (completionRef.current) return;
+    completionRef.current = true;
     if (onComplete) {
       onComplete();
     }
-    // Fade out animation
-    setTimeout(() => {
-      setShowLoader(false);
-    }, 500);
   };
 
-  if (!showLoader) return null;
+  if (!isMounted) return null;
+  if (typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600">
+  const loader = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-600 transition-opacity"
+      style={{
+        opacity: isShowing ? 1 : 0,
+        transitionDuration: `${fadeDuration}ms`,
+      }}
+    >
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]" />
@@ -69,9 +87,8 @@ const LogoAnimationLoader: React.FC<LogoAnimationLoaderProps> = ({
               autoPlay
               muted
               playsInline
-              loop
               onLoadedData={handleVideoLoad}
-              onEnded={handleVideoEnd}
+              onEnded={handleVideoEnded}
               onError={() => {
                 console.log("Video failed to load");
                 setVideoLoaded(true);
@@ -145,6 +162,8 @@ const LogoAnimationLoader: React.FC<LogoAnimationLoaderProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(loader, document.body);
 };
 
 export default LogoAnimationLoader;

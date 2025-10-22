@@ -22,13 +22,11 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { useTranslations } from "next-intl";
 import { toast } from "@/components/ui/sonner";
 import { useHRDashboardData } from "@/hooks/useDashboardData";
 import { queryClient } from "@/lib/queryClient";
 import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
-import { useLoading } from "@/contexts/LoadingContext";
 
 const HRAdminDashboard: React.FC = () => {
   const [showWorkerModal, setShowWorkerModal] = useState(false);
@@ -76,7 +74,6 @@ const HRAdminDashboard: React.FC = () => {
   const workers = data?.workers || [];
   const disputes = data?.disputes || [];
   const loading = isLoading;
-  const { isDashboardLoading } = useLoading();
 
   useEffect(() => {
     const user = getStoredUser();
@@ -164,55 +161,8 @@ const HRAdminDashboard: React.FC = () => {
     ? Math.round((stats.disputesResolved / stats.totalDisputes) * 100)
     : 0;
 
-  if (loading && !isDashboardLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header Skeleton */}
-          <div className="mb-8">
-            <Skeleton height={36} width={250} className="mb-2" />
-            <Skeleton height={20} width={350} />
-          </div>
-
-          {/* Stats Cards Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-              <Card key={i} className="p-6">
-                <Skeleton height={20} width={120} className="mb-2" />
-                <Skeleton height={32} width={80} className="mb-2" />
-                <Skeleton height={16} width={100} />
-              </Card>
-            ))}
-          </div>
-
-          {/* Lists Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <Skeleton height={24} width={200} className="mb-4" />
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="mb-4">
-                  <Skeleton height={20} width="100%" className="mb-2" />
-                  <Skeleton height={16} width="80%" />
-                </div>
-              ))}
-            </Card>
-            <Card className="p-6">
-              <Skeleton height={24} width={200} className="mb-4" />
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="mb-4">
-                  <Skeleton height={20} width="100%" className="mb-2" />
-                  <Skeleton height={16} width="80%" />
-                </div>
-              ))}
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <WithDashboardLoading isLoading={loading && !isDashboardLoading}>
+    <WithDashboardLoading isLoading={loading}>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}

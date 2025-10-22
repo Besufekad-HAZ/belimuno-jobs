@@ -25,14 +25,12 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import BackToDashboard from "@/components/ui/BackToDashboard";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { toast } from "@/components/ui/sonner";
 import { useTranslations } from "next-intl";
 import { formatDistanceToNow } from "date-fns";
 import { useClientDashboardData } from "@/hooks/useDashboardData";
 import { queryClient } from "@/lib/queryClient";
 import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
-import { useLoading } from "@/contexts/LoadingContext";
 
 const ClientDashboard: React.FC = () => {
   interface ApplicationPreview {
@@ -68,7 +66,6 @@ const ClientDashboard: React.FC = () => {
   const jobs = data?.jobs || [];
   const disputes = data?.disputes || [];
   const loading = isLoading;
-  const { isDashboardLoading } = useLoading();
   const [selectedJob, setSelectedJob] = useState<EnrichedJob | null>(null);
   const [selectedJobForDetails, setSelectedJobForDetails] =
     useState<EnrichedJob | null>(null);
@@ -323,50 +320,8 @@ const ClientDashboard: React.FC = () => {
     }
   };
 
-  if (loading && !isDashboardLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-          {/* Header Skeleton */}
-          <div className="mb-6 sm:mb-8">
-            <Skeleton height={32} width={250} className="mb-4" />
-            <Skeleton height={20} width={350} />
-          </div>
-
-          {/* Stats Cards Skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="p-4 sm:p-6">
-                <Skeleton height={20} width={130} className="mb-2" />
-                <Skeleton height={32} width={85} className="mb-2" />
-                <Skeleton height={16} width={105} />
-              </Card>
-            ))}
-          </div>
-
-          {/* Jobs List Skeleton */}
-          <Card className="p-4 sm:p-6 mb-6">
-            <Skeleton height={24} width={180} className="mb-4" />
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="border-b pb-4">
-                  <Skeleton height={20} width="80%" className="mb-2" />
-                  <Skeleton height={16} width="60%" className="mb-3" />
-                  <div className="flex gap-2">
-                    <Skeleton height={32} width={100} />
-                    <Skeleton height={32} width={100} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <WithDashboardLoading isLoading={loading && !isDashboardLoading}>
+    <WithDashboardLoading isLoading={loading}>
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
           {/* Header */}

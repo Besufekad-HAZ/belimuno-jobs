@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLoading } from "@/contexts/LoadingContext";
 import LogoAnimationLoader from "@/components/ui/LogoAnimationLoader";
 
@@ -17,39 +17,48 @@ const WithDashboardLoading: React.FC<WithDashboardLoadingProps> = ({
 }) => {
   const { isDashboardLoading, stopDashboardLoading } = useLoading();
   const [showContent, setShowContent] = useState(false);
+  const [videoComplete, setVideoComplete] = useState(false);
+  const wasPrimingRef = useRef(false);
+
+  const isPriming = isDashboardLoading || isLoading;
+  const loaderVisible = isPriming || !videoComplete;
 
   useEffect(() => {
-    // If dashboard loading is active, hide content until video completes
-    if (isDashboardLoading) {
+    if (isPriming && !wasPrimingRef.current) {
+      setVideoComplete(false);
+    }
+    wasPrimingRef.current = isPriming;
+  }, [isPriming]);
+
+  useEffect(() => {
+    if (!isLoading && isDashboardLoading) {
+      stopDashboardLoading();
+    }
+  }, [isLoading, isDashboardLoading, stopDashboardLoading]);
+
+  useEffect(() => {
+    if (loaderVisible) {
       setShowContent(false);
-    } else {
-      // Show content when dashboard loading is complete
-      setShowContent(true);
+      return;
     }
-  }, [isDashboardLoading]);
 
-  useEffect(() => {
-    // If the component's isLoading prop becomes false and we're not showing dashboard loading,
-    // make sure content is visible
-    if (!isLoading && !isDashboardLoading) {
-      setShowContent(true);
-    }
-  }, [isLoading, isDashboardLoading]);
-
-  const handleLoadingComplete = () => {
-    stopDashboardLoading();
-    // Small delay to ensure smooth transition
-    setTimeout(() => {
+    const timer = window.setTimeout(() => {
       setShowContent(true);
     }, 200);
+
+    return () => window.clearTimeout(timer);
+  }, [loaderVisible]);
+
+  const handleVideoComplete = () => {
+    setVideoComplete(true);
   };
 
   return (
     <>
       <LogoAnimationLoader
-        isVisible={isDashboardLoading}
-        onComplete={handleLoadingComplete}
+        isVisible={loaderVisible}
         duration={loadingDuration}
+        onComplete={handleVideoComplete}
       />
       {/* Only show content when not in dashboard loading state */}
       {showContent && children}

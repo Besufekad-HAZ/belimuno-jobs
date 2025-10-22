@@ -230,7 +230,11 @@ const LoginPage: React.FC = () => {
           setAuth(token, user);
           if (typeof window !== "undefined")
             window.dispatchEvent(new Event("authChanged"));
-          router.push(getRoleDashboardPath(user.role));
+          // Trigger dashboard loader for Google sign-ins before redirecting
+          startDashboardLoading();
+          setTimeout(() => {
+            router.push(getRoleDashboardPath(user.role));
+          }, 100);
         } catch (e) {
           console.error(e);
           setError(t("errors.googleSignIn"));
@@ -248,7 +252,7 @@ const LoginPage: React.FC = () => {
         logo_alignment: "left",
       });
     }
-  }, [googleReady, router, t]);
+  }, [googleReady, router, startDashboardLoading, t]);
 
   // Auto-dismiss top error banner after a short duration
   useEffect(() => {
