@@ -13,19 +13,60 @@ interface WithDashboardLoadingProps {
 const WithDashboardLoading: React.FC<WithDashboardLoadingProps> = ({
   children,
   isLoading = false,
-  loadingDuration = 5000,
+  loadingDuration = 950,
 }) => {
   const { isDashboardLoading, stopDashboardLoading } = useLoading();
-  const [showContent, setShowContent] = useState(false);
-  const [videoComplete, setVideoComplete] = useState(false);
+  const loaderStorageKey = "belimuno:dashboard-loader-shown";
+  const getStoredLoaderState = () =>
+    typeof window === "undefined"
+      ? false
+      : window.sessionStorage.getItem(loaderStorageKey) === "true";
+
+  const [hasSeenLoader, setHasSeenLoader] =
+    useState<boolean>(getStoredLoaderState);
+  const [animationComplete, setAnimationComplete] =
+    useState<boolean>(getStoredLoaderState);
+  const [showContent, setShowContent] = useState<boolean>(getStoredLoaderState);
   const wasPrimingRef = useRef(false);
 
   const isPriming = isDashboardLoading || isLoading;
-  const loaderVisible = isPriming || !videoComplete;
+  const loaderVisible = isPriming || (!animationComplete && !hasSeenLoader);
+  // For repeat visits, use a compact short animation (around 1s) to improve perceived performance
+  const effectiveDuration = hasSeenLoader
+    ? Math.min(loadingDuration, 1000)
+    : loadingDuration;
+  const compact = hasSeenLoader;
+
+  useEffect(() => {
+    if (hasSeenLoader) {
+      return;
+    }
+
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const stored = window.sessionStorage.getItem(loaderStorageKey) === "true";
+    if (stored) {
+      setHasSeenLoader(true);
+      setAnimationComplete(true);
+      setShowContent(true);
+    }
+  }, [hasSeenLoader, loaderStorageKey]);
+
+  useEffect(() => {
+    if (!hasSeenLoader) {
+      return;
+    }
+
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(loaderStorageKey, "true");
+    }
+  }, [hasSeenLoader]);
 
   useEffect(() => {
     if (isPriming && !wasPrimingRef.current) {
-      setVideoComplete(false);
+      setAnimationComplete(false);
     }
     wasPrimingRef.current = isPriming;
   }, [isPriming]);
@@ -37,30 +78,40 @@ const WithDashboardLoading: React.FC<WithDashboardLoadingProps> = ({
   }, [isLoading, isDashboardLoading, stopDashboardLoading]);
 
   useEffect(() => {
-    if (loaderVisible) {
+    if (!hasSeenLoader && loaderVisible) {
       setShowContent(false);
       return;
     }
 
-    const timer = window.setTimeout(() => {
-      setShowContent(true);
-    }, 200);
+    const timer = window.setTimeout(
+      () => {
+        setShowContent(true);
+      },
+      hasSeenLoader ? 0 : 160,
+    );
 
     return () => window.clearTimeout(timer);
-  }, [loaderVisible]);
+  }, [loaderVisible, hasSeenLoader]);
 
-  const handleVideoComplete = () => {
-    setVideoComplete(true);
+  const handleAnimationComplete = () => {
+    setAnimationComplete(true);
+    if (!hasSeenLoader) {
+      setHasSeenLoader(true);
+    }
+    if (isDashboardLoading) {
+      stopDashboardLoading();
+    }
   };
 
   return (
     <>
       <LogoAnimationLoader
         isVisible={loaderVisible}
-        duration={loadingDuration}
-        onComplete={handleVideoComplete}
+        duration={effectiveDuration}
+        compact={compact}
+        onComplete={handleAnimationComplete}
       />
-      {/* Only show content when not in dashboard loading state */}
+      {/* Keep content hidden only until the first intro animation completes */}
       {showContent && children}
     </>
   );

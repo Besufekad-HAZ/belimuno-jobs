@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery } from "@tanstack/react-query";
 import {
   adminAPI,
@@ -6,6 +7,15 @@ import {
   jobsAPI,
   notificationsAPI,
 } from "@/lib/api";
+
+const DASHBOARD_QUERY_DEFAULTS = {
+  staleTime: 1000 * 60 * 5, // keep data warm for 5 minutes
+  gcTime: 1000 * 60 * 30, // dispose cached dashboards after 30 minutes idle
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+  refetchOnMount: false,
+  retry: 1,
+} as const;
 
 // Admin Dashboard Data (Super Admin)
 export const useAdminDashboardData = () => {
@@ -91,8 +101,7 @@ export const useAdminDashboardData = () => {
         ).filter((p: any) => p.status === "disputed"),
       };
     },
-    staleTime: 1000 * 60 * 1, // Data considered fresh for 1 minute
-    gcTime: 1000 * 60 * 5, // Data garbage collected after 5 minutes of inactivity
+    ...DASHBOARD_QUERY_DEFAULTS,
   });
 };
 
@@ -145,8 +154,7 @@ export const useHRDashboardData = () => {
         disputes: disputesData,
       };
     },
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 5,
+    ...DASHBOARD_QUERY_DEFAULTS,
   });
 };
 
@@ -157,7 +165,12 @@ export const useOutsourceDashboardData = () => {
     queryFn: async () => {
       const [usersResponse, jobsResponse] = await Promise.all([
         adminAPI.getUsers({ role: "client", limit: 100 }),
-        adminAPI.getAllJobs(),
+        adminAPI.getAllJobs({
+          limit: 60,
+          sort: "-createdAt",
+          select:
+            "title status budget createdAt deadline client worker company industry",
+        }),
       ]);
 
       const clientsData =
@@ -255,8 +268,7 @@ export const useOutsourceDashboardData = () => {
         revenueData: mockRevenueData,
       };
     },
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 5,
+    ...DASHBOARD_QUERY_DEFAULTS,
   });
 };
 
@@ -278,8 +290,7 @@ export const useClientDashboardData = () => {
         disputes: disputesResponse.data.data || [],
       };
     },
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 5,
+    ...DASHBOARD_QUERY_DEFAULTS,
   });
 };
 
@@ -352,7 +363,6 @@ export const useWorkerDashboardData = () => {
         unreadCount: unreadCount,
       };
     },
-    staleTime: 1000 * 60 * 1,
-    gcTime: 1000 * 60 * 5,
+    ...DASHBOARD_QUERY_DEFAULTS,
   });
 };
