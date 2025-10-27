@@ -2,6 +2,7 @@ const TeamMember = require("../models/TeamMember");
 const asyncHandler = require("../utils/asyncHandler");
 const News = require("../models/News");
 const Client = require("../models/Client");
+const Service = require("../models/Service");
 const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 
 // Public controller to return deduped team members for About page
@@ -258,5 +259,69 @@ exports.getClients = asyncHandler(async (req, res) => {
       pages: Math.ceil(total / limit),
     },
     data: clients,
+  });
+});
+
+// @desc    Get all services with filtering
+// @route   GET /api/public/services
+// @access  Public
+exports.getServices = asyncHandler(async (req, res) => {
+  const {
+    status = "active",
+    page = 1,
+    limit = 20,
+    search,
+    sort = "createdAt",
+  } = req.query;
+
+  const query = {};
+  if (status) query.status = status;
+
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const sortBy = sort ? String(sort).split(",").join(" ") : "createdAt";
+  const servicesQuery = Service.find(query)
+    .sort(sortBy)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
+
+  const services = await servicesQuery;
+  const total = await Service.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: services.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit),
+    },
+    data: services,
+  });
+});
+
+// @desc    Get single service details
+// @route   GET /api/public/services/:id
+// @access  Public
+exports.getService = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+
+  if (!service) {
+    return res.status(404).json({
+      success: false,
+      message: "Service not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: service,
   });
 });
