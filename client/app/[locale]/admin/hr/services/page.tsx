@@ -87,23 +87,15 @@ const ManageServicesPage: React.FC = () => {
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
 
-  const sortedServices = useMemo(
-    () =>
-      [...services].sort((a, b) => {
-        return (
-          new Date(b.createdAt || "").getTime() -
-          new Date(a.createdAt || "").getTime()
-        );
-      }),
-    [services],
-  );
+  // Services are already sorted oldest first from the API
+  const sortedServices = useMemo(() => services, [services]);
 
   const fetchServices = useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminAPI.getServices({
         limit: 50,
-        sort: "-createdAt",
+        sort: "createdAt",
       });
 
       const servicesData = response.data?.data || [];
@@ -415,7 +407,7 @@ const ManageServicesPage: React.FC = () => {
             label="Service Title"
             value={form.title}
             onChange={(event) => handleInputChange("title")(event.target.value)}
-            placeholder="e.g. Professional Cleaning"
+            placeholder="e.g. Manpower Supply"
             error={formErrors.title}
             required
           />

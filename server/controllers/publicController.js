@@ -271,7 +271,7 @@ exports.getServices = asyncHandler(async (req, res) => {
     page = 1,
     limit = 20,
     search,
-    sort = "-createdAt",
+    sort = "createdAt",
   } = req.query;
 
   const query = {};
@@ -284,7 +284,7 @@ exports.getServices = asyncHandler(async (req, res) => {
     ];
   }
 
-  const sortBy = sort ? String(sort).split(",").join(" ") : "-createdAt";
+  const sortBy = sort ? String(sort).split(",").join(" ") : "createdAt";
   const servicesQuery = Service.find(query)
     .sort(sortBy)
     .limit(limit * 1)
