@@ -4,6 +4,8 @@ const {
   getNews,
   getNewsArticle,
   getClients,
+  getServices,
+  getService,
 } = require("../controllers/publicController");
 
 const router = express.Router();
@@ -17,5 +19,9 @@ router.get("/news/:id", getNewsArticle);
 
 // Client management
 router.get("/clients", getClients);
+
+// Service management
+router.get("/services", getServices);
+router.get("/services/:id", getService);
 
 module.exports = router;
