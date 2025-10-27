@@ -486,6 +486,14 @@ const AboutPage: React.FC = () => {
               </div>
             ))}
           </div>
+          {/* Organizational Structure CTA */}
+          <div className="mt-14 flex justify-center">
+            <Link href="/org-structure">
+              <Button variant="secondary" size="lg" className="px-8">
+                <Users className="h-5 w-5" /> See our organizational structure
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
