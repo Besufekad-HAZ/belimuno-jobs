@@ -30,6 +30,23 @@ declare global {
   }
 }
 
+const REGIONS = [
+  "Addis Ababa",
+  "Afar",
+  "Amhara",
+  "Benishangul",
+  "Gambela",
+  "Harari",
+  "Oromia",
+  "Sidama",
+  "Somali",
+  "South Ethiopia",
+  "Southwest Ethiopia",
+  "Tigray",
+  "Central Ethiopia",
+  "Dire Dawa",
+];
+
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -37,6 +54,11 @@ const RegisterPage: React.FC = () => {
     password: "",
     confirmPassword: "",
     role: "worker",
+    phone: "",
+    city: "",
+    profession: "",
+    experience: "",
+    bio: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -199,7 +221,10 @@ const RegisterPage: React.FC = () => {
 
     try {
       interface RegistrationProfile {
+        phone?: string;
         bio?: string;
+        profession?: string;
+        experience?: string;
         address?: { city?: string; country?: string };
       }
 
@@ -216,7 +241,16 @@ const RegisterPage: React.FC = () => {
         email: formData.email,
         password: formData.password,
         role: "worker",
-        profile: {},
+        profile: {
+          phone: formData.phone || undefined,
+          bio: formData.bio || undefined,
+          profession: formData.profession || undefined,
+          experience: formData.experience || undefined,
+          address: {
+            city: formData.city || undefined,
+            country: "Ethiopia",
+          },
+        },
       };
 
       const response = await authAPI.register(
@@ -402,11 +436,6 @@ const RegisterPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Google Sign Up Button */}
-                <div className="flex justify-center md:col-span-2 xl:col-span-3">
-                  <div ref={googleBtnRef} />
-                </div>
-
                 <div className="md:col-span-1">
                   <Input
                     label={t("form.fields.password")}
@@ -533,7 +562,82 @@ const RegisterPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="md:col-span-2 xl:col-span-3 flex justify-center">
+                <div className="md:col-span-1">
+                  <Input
+                    label="Phone Number"
+                    labelClassName="text-white"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+251 9XX XXX XXXX"
+                  />
+                </div>
+
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Region / City
+                  </label>
+                  <select
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 rounded-lg border border-white/30 bg-white/10 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  >
+                    <option value="" className="text-gray-900">
+                      Select a region
+                    </option>
+                    {REGIONS.map((region) => (
+                      <option
+                        key={region}
+                        value={region}
+                        className="text-gray-900"
+                      >
+                        {region}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="md:col-span-1">
+                  <Input
+                    label="Profession"
+                    labelClassName="text-white"
+                    name="profession"
+                    type="text"
+                    value={formData.profession}
+                    onChange={handleChange}
+                    placeholder="e.g., Software Engineer, Teacher"
+                  />
+                </div>
+
+                <div className="md:col-span-1">
+                  <Input
+                    label="Years of Experience"
+                    labelClassName="text-white"
+                    name="experience"
+                    type="text"
+                    value={formData.experience}
+                    onChange={handleChange}
+                    placeholder="e.g., 0-1 years, 2-5 years"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Professional Summary
+                  </label>
+                  <textarea
+                    name="bio"
+                    value={formData.bio}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Brief description of your professional background and skills..."
+                    className="w-full px-4 py-2 rounded-lg border border-white/30 bg-white/10 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+                  />
+                </div>
+
+                <div className="md:col-span-2 xl:col-span-3 flex flex-col gap-2 justify-center items-center">
                   <Button
                     type="submit"
                     className="w-full max-w-xs"
@@ -543,6 +647,11 @@ const RegisterPage: React.FC = () => {
                       ? t("form.buttons.submit.loading")
                       : t("form.buttons.submit.default")}
                   </Button>
+
+                  {/* Google Sign Up Button */}
+                  <div className="flex justify-center">
+                    <div ref={googleBtnRef} />
+                  </div>
                 </div>
               </form>
             </div>
