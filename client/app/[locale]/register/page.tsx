@@ -664,8 +664,8 @@ const RegisterPage: React.FC = () => {
                   </div>
 
                   {/* Google Sign Up Button */}
-                  <div className="flex justify-center w-full max-w-xs">
-                    <div ref={googleBtnRef} className="w-full" />
+                  <div className="flex justify-center items-center w-full max-w-xs">
+                    <div ref={googleBtnRef} className="w-full mx-auto" />
                   </div>
                 </div>
               </form>
