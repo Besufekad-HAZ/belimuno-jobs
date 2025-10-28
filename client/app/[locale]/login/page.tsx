@@ -288,11 +288,11 @@ const LoginPage: React.FC = () => {
       password: "Belimuno#2025!",
       role: "Worker",
     },
-    {
-      email: "client1@belimuno.com",
-      password: "Belimuno#2025!",
-      role: "Client",
-    },
+    // {
+    //   email: "client1@belimuno.com",
+    //   password: "Belimuno#2025!",
+    //   role: "Client",
+    // },
   ] as const;
 
   const fillTestAccount = (email: string, password: string) => {
