@@ -50,6 +50,7 @@ const UserSchema = new mongoose.Schema({
     experience: String,
     hourlyRate: Number,
     gender: String,
+    profession: String,
   },
 
   // Worker-specific fields (for general worker metadata)

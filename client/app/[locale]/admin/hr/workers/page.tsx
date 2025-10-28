@@ -107,11 +107,37 @@ type WorkerWithMeta = Worker & {
 
 const NOT_SPECIFIED_EXPERIENCE = "Not specified";
 
+const REGIONS = [
+  "Addis Ababa",
+  "Afar",
+  "Amhara",
+  "Benishangul",
+  "Gambela",
+  "Harari",
+  "Oromia",
+  "Sidama",
+  "Somali",
+  "South Ethiopia",
+  "Southwest Ethiopia",
+  "Tigray",
+  "Central Ethiopia",
+  "Dire Dawa",
+];
+
 const formatExperienceLabel = (experience?: string | null) => {
   if (!experience) return NOT_SPECIFIED_EXPERIENCE;
   const cleaned = experience.replace(/[_-]/g, " ").trim().toLowerCase();
   if (!cleaned) return NOT_SPECIFIED_EXPERIENCE;
   return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const formatRegionLabel = (region?: string | null) => {
+  if (!region) return "Not specified";
+  return region
     .split(" ")
     .filter(Boolean)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -141,6 +167,7 @@ const WorkerManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<Status>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [experienceFilter, setExperienceFilter] = useState<string>("all");
+  const [regionFilter, setRegionFilter] = useState<string>("all");
   const [selectedWorker, setSelectedWorker] = useState<WorkerWithMeta | null>(
     null,
   );
@@ -178,15 +205,23 @@ const WorkerManagement: React.FC = () => {
       statusFilter !== "all" ||
       categoryFilter !== "all" ||
       experienceFilter !== "all" ||
+      regionFilter !== "all" ||
       Boolean(searchQuery.trim())
     );
-  }, [statusFilter, categoryFilter, experienceFilter, searchQuery]);
+  }, [
+    statusFilter,
+    categoryFilter,
+    experienceFilter,
+    regionFilter,
+    searchQuery,
+  ]);
 
   const resetFilters = useCallback(() => {
     setSearchQuery("");
     setStatusFilter("all");
     setCategoryFilter("all");
     setExperienceFilter("all");
+    setRegionFilter("all");
   }, []);
 
   useEffect(() => {
@@ -255,8 +290,22 @@ const WorkerManagement: React.FC = () => {
       );
     }
 
+    if (regionFilter !== "all") {
+      filtered = filtered.filter((w) => {
+        const city = w.profile?.address?.city?.toLowerCase();
+        return city === regionFilter.toLowerCase();
+      });
+    }
+
     setFilteredWorkers(filtered);
-  }, [workers, searchQuery, statusFilter, categoryFilter, experienceFilter]);
+  }, [
+    workers,
+    searchQuery,
+    statusFilter,
+    categoryFilter,
+    experienceFilter,
+    regionFilter,
+  ]);
 
   useEffect(() => {
     filterWorkers();
@@ -270,6 +319,7 @@ const WorkerManagement: React.FC = () => {
         response.data?.users ||
         response.data ||
         []) as Worker[];
+      console.log("workersData", workersData);
 
       const normalized: WorkerWithMeta[] = workersData.map((worker) => {
         const category = classifyWorkerCategory(
@@ -557,7 +607,7 @@ const WorkerManagement: React.FC = () => {
               )}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:items-end">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-end">
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                   Keyword Search
@@ -603,6 +653,23 @@ const WorkerManagement: React.FC = () => {
                   {experienceOptions.map((experience) => (
                     <option key={experience} value={experience}>
                       {experience}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Region
+                </label>
+                <select
+                  value={regionFilter}
+                  onChange={(e) => setRegionFilter(e.target.value)}
+                  className="w-full rounded-xl border border-blue-100 bg-white/90 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 hover:border-blue-200"
+                >
+                  <option value="all">All regions</option>
+                  {REGIONS.map((region) => (
+                    <option key={region} value={region}>
+                      {region}
                     </option>
                   ))}
                 </select>
@@ -657,6 +724,11 @@ const WorkerManagement: React.FC = () => {
                 {experienceFilter !== "all" && (
                   <Badge variant="info" size="sm">
                     Experience: {experienceFilter}
+                  </Badge>
+                )}
+                {regionFilter !== "all" && (
+                  <Badge variant="info" size="sm">
+                    Region: {regionFilter}
                   </Badge>
                 )}
                 {searchQuery.trim() && (
@@ -738,6 +810,14 @@ const WorkerManagement: React.FC = () => {
                               {worker.phone}
                             </p>
                           )}
+
+                          <p className="text-sm text-gray-600 flex items-center mt-1">
+                            <span className="text-xs font-semibold mr-1">
+                              📍
+                            </span>
+                            <strong>Region:</strong>{" "}
+                            {formatRegionLabel(worker.profile.address.city)}
+                          </p>
                         </div>
 
                         <div>
