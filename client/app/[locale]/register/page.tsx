@@ -618,7 +618,7 @@ const RegisterPage: React.FC = () => {
                     type="text"
                     value={formData.experience}
                     onChange={handleChange}
-                    placeholder="e.g., 0-1 years, 2-5 years"
+                    placeholder="e.g., 2"
                   />
                 </div>
 
