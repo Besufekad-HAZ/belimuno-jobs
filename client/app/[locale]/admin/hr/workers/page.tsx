@@ -108,20 +108,20 @@ type WorkerWithMeta = Worker & {
 const NOT_SPECIFIED_EXPERIENCE = "Not specified";
 
 const REGIONS = [
-  "afar",
-  "amhara",
-  "benishangul",
-  "gambela",
-  "harari",
-  "oromia",
-  "sidama",
-  "somali",
-  "south ethiopia",
-  "southwest ethiopia",
-  "tigray",
-  "central ethiopia",
-  "addis ababa",
-  "diredawa",
+  "Addis Ababa",
+  "Afar",
+  "Amhara",
+  "Benishangul",
+  "Gambela",
+  "Harari",
+  "Oromia",
+  "Sidama",
+  "Somali",
+  "South Ethiopia",
+  "Southwest Ethiopia",
+  "Tigray",
+  "Central Ethiopia",
+  "Dire Dawa",
 ];
 
 const formatExperienceLabel = (experience?: string | null) => {
@@ -129,6 +129,15 @@ const formatExperienceLabel = (experience?: string | null) => {
   const cleaned = experience.replace(/[_-]/g, " ").trim().toLowerCase();
   if (!cleaned) return NOT_SPECIFIED_EXPERIENCE;
   return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const formatRegionLabel = (region?: string | null) => {
+  if (!region) return "Not specified";
+  return region
     .split(" ")
     .filter(Boolean)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -801,6 +810,14 @@ const WorkerManagement: React.FC = () => {
                               {worker.phone}
                             </p>
                           )}
+
+                          <p className="text-sm text-gray-600 flex items-center mt-1">
+                            <span className="text-xs font-semibold mr-1">
+                              📍
+                            </span>
+                            <strong>Region:</strong>{" "}
+                            {formatRegionLabel(worker.profile.address.city)}
+                          </p>
                         </div>
 
                         <div>
