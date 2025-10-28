@@ -225,7 +225,7 @@ const RegisterPage: React.FC = () => {
         bio?: string;
         profession?: string;
         experience?: string;
-        address?: { city?: string; country?: string };
+        address?: { city?: string };
       }
 
       interface RegistrationData {
@@ -248,7 +248,6 @@ const RegisterPage: React.FC = () => {
           experience: formData.experience || undefined,
           address: {
             city: formData.city || undefined,
-            country: "Ethiopia",
           },
         },
       };
