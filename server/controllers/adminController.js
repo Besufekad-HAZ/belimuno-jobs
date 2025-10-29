@@ -10,6 +10,7 @@ const TeamMember = require("../models/TeamMember");
 const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 const News = require("../models/News");
 const Client = require("../models/Client");
+const Service = require("../models/Service");
 const TrustedCompany = require("../models/TrustedCompany");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
@@ -2664,5 +2665,163 @@ exports.deleteClient = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "Client deleted successfully",
+  });
+});
+
+// @desc    Get all services with filtering
+// @route   GET /api/admin/services
+// @access  Private/Any Admin
+exports.getServices = asyncHandler(async (req, res) => {
+  const {
+    status,
+    page = 1,
+    limit = 20,
+    search,
+    sort = "createdAt",
+  } = req.query;
+
+  const query = {};
+  if (status) query.status = status;
+
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const sortBy = sort ? String(sort).split(",").join(" ") : "createdAt";
+  const servicesQuery = Service.find(query)
+    .sort(sortBy)
+    .limit(limit * 1)
+    .skip((page - 1) * limit)
+    .lean();
+
+  const services = await servicesQuery;
+  const total = await Service.countDocuments(query);
+
+  res.status(200).json({
+    success: true,
+    count: services.length,
+    total,
+    pagination: {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      pages: Math.ceil(total / limit),
+    },
+    data: services,
+  });
+});
+
+// @desc    Get single service details
+// @route   GET /api/admin/services/:id
+// @access  Private/Any Admin
+exports.getService = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+
+  if (!service) {
+    return res.status(404).json({
+      success: false,
+      message: "Service not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: service,
+  });
+});
+
+// @desc    Create a new service
+// @route   POST /api/admin/services
+// @access  Private/Any Admin
+exports.createService = asyncHandler(async (req, res) => {
+  const { title, description } = req.body;
+
+  if (!title || !description) {
+    return res.status(400).json({
+      success: false,
+      message: "Title and description are required",
+    });
+  }
+
+  const serviceData = {
+    title: title.trim(),
+    description: description.trim(),
+    createdBy: req.user._id,
+    updatedBy: req.user._id,
+  };
+
+  const service = await Service.create(serviceData);
+
+  res.status(201).json({
+    success: true,
+    message: "Service created successfully",
+    data: service,
+  });
+});
+
+// @desc    Update a service
+// @route   PUT /api/admin/services/:id
+// @access  Private/Any Admin
+exports.updateService = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+
+  if (!service) {
+    return res.status(404).json({
+      success: false,
+      message: "Service not found",
+    });
+  }
+
+  const allowedFields = ["title", "description", "status"];
+
+  const updateData = {};
+  Object.keys(req.body).forEach((key) => {
+    if (allowedFields.includes(key)) {
+      if (typeof req.body[key] === "string") {
+        updateData[key] = req.body[key].trim();
+      } else {
+        updateData[key] = req.body[key];
+      }
+    }
+  });
+
+  updateData.updatedBy = req.user._id;
+
+  const updatedService = await Service.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Service updated successfully",
+    data: updatedService,
+  });
+});
+
+// @desc    Delete a service
+// @route   DELETE /api/admin/services/:id
+// @access  Private/Any Admin
+exports.deleteService = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+
+  if (!service) {
+    return res.status(404).json({
+      success: false,
+      message: "Service not found",
+    });
+  }
+
+  await service.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Service deleted successfully",
   });
 });

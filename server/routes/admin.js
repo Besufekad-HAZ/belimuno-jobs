@@ -46,6 +46,11 @@ const {
   uploadClientLogo,
   uploadTrustedCompanyLogo,
   seedDefaultTeamMembers,
+  getServices,
+  getService,
+  createService,
+  updateService,
+  deleteService,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
 const {
@@ -161,5 +166,11 @@ router
   .get(authorize("super_admin", "admin_outsource"), getTrustedCompany)
   .put(authorize("super_admin", "admin_outsource"), updateTrustedCompany)
   .delete(authorize("super_admin", "admin_outsource"), deleteTrustedCompany);
+// Service management (any admin)
+router.get("/services", getServices);
+router.get("/services/:id", getService);
+router.post("/services/create", createService);
+router.put("/services/update/:id", updateService);
+router.delete("/services/delete/:id", deleteService);
 
 module.exports = router;

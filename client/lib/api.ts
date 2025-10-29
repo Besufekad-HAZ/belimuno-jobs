@@ -682,6 +682,30 @@ export const adminAPI = {
   ) => api.put(`/admin/clients/${id}`, payload),
   deleteClient: (id: string) => api.delete(`/admin/clients/${id}`),
 
+  // Service management
+  getServices: (params?: {
+    status?: "active" | "inactive" | "archived";
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/admin/services", { params }),
+  getService: (id: string) => api.get(`/admin/services/${id}`),
+  createService: (payload: {
+    title: string;
+    description: string;
+    status?: "active" | "inactive" | "archived";
+  }) => api.post("/admin/services/create", payload),
+  updateService: (
+    id: string,
+    payload: {
+      title?: string;
+      description?: string;
+      status?: "active" | "inactive" | "archived";
+    },
+  ) => api.put(`/admin/services/update/${id}`, payload),
+  deleteService: (id: string) => api.delete(`/admin/services/delete/${id}`),
+
   // Trusted companies management
   getTrustedCompanies: (params?: {
     status?: "active" | "inactive" | "archived";
@@ -847,6 +871,14 @@ export const publicAPI = {
     limit?: number;
     sort?: string;
   }) => api.get("/public/trusted-companies", { params }),
+  getServices: (params?: {
+    status?: "active" | "inactive" | "archived";
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/public/services", { params }),
+  getService: (id: string) => api.get(`/public/services/${id}`),
 };
 
 export default api;
