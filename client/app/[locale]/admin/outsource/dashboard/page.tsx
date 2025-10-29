@@ -13,6 +13,7 @@ import {
   Eye,
   Users,
   Plus,
+  Handshake,
 } from "lucide-react";
 import { getStoredUser, hasRole } from "@/lib/auth";
 import Card from "@/components/ui/Card";
@@ -128,6 +129,16 @@ const OutsourceAdminDashboard: React.FC = () => {
               >
                 <Building className="h-4 w-4" />
                 <span>{t("header.buttons.clientManagement")}</span>
+              </Button>
+              <Button
+                onClick={() =>
+                  router.push("/admin/outsource/trusted-companies")
+                }
+                variant="secondary"
+                className="flex items-center space-x-2"
+              >
+                <Handshake className="h-4 w-4" />
+                <span>Trusted companies</span>
               </Button>
             </div>
           </div>

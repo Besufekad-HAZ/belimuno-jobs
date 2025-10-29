@@ -2,6 +2,7 @@ const TeamMember = require("../models/TeamMember");
 const asyncHandler = require("../utils/asyncHandler");
 const News = require("../models/News");
 const Client = require("../models/Client");
+const TrustedCompany = require("../models/TrustedCompany");
 const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 
 // Public controller to return deduped team members for About page
@@ -258,5 +259,48 @@ exports.getClients = asyncHandler(async (req, res) => {
       pages: Math.ceil(total / limit),
     },
     data: clients,
+  });
+});
+
+// @desc    Get trusted companies for marquee display
+// @route   GET /api/public/trusted-companies
+// @access  Public
+exports.getTrustedCompanies = asyncHandler(async (req, res) => {
+  const {
+    status,
+    search,
+    sort = "order name",
+    limit = 60,
+  } = req.query;
+
+  const query = {};
+  if (status) {
+    const normalizedStatus = String(status).toLowerCase();
+    if (normalizedStatus !== "all") {
+      query.status = status;
+    }
+  } else {
+    query.status = "active";
+  }
+
+  if (search) {
+    query.name = { $regex: search, $options: "i" };
+  }
+
+  const numericLimit = Math.min(
+    Math.max(parseInt(String(limit), 10) || 60, 1),
+    200
+  );
+  const sortBy = sort ? String(sort).split(",").join(" ") : "order name";
+
+  const companies = await TrustedCompany.find(query)
+    .sort(sortBy)
+    .limit(numericLimit)
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    count: companies.length,
+    data: companies,
   });
 });

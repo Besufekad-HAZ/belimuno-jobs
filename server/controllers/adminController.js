@@ -10,6 +10,7 @@ const TeamMember = require("../models/TeamMember");
 const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 const News = require("../models/News");
 const Client = require("../models/Client");
+const TrustedCompany = require("../models/TrustedCompany");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
@@ -207,6 +208,64 @@ const generateTeamObjectKey = (originalName) => {
 };
 
 const buildTeamPhotoUrl = (key) => buildPublicUrl(key);
+
+const safeString = (value) => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed || undefined;
+};
+
+const stringOrNull = (value) => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  const normalized = safeString(String(value));
+  return normalized || null;
+};
+
+const parseFiniteNumber = (value) => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const normalizeTagList = (value) => {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return [];
+  }
+
+  const base = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : [value];
+
+  const deduped = Array.from(
+    new Set(
+      base
+        .map((item) => {
+          if (item === null || item === undefined) {
+            return undefined;
+          }
+          const asString = String(item).trim();
+          return asString || undefined;
+        })
+        .filter(Boolean)
+    )
+  );
+
+  return deduped;
+};
 // @desc    Seed default team members if collection is empty
 // @route   POST /api/admin/team/seed-defaults
 // @access  Private/Admin HR
@@ -2123,6 +2182,286 @@ exports.deleteNews = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "News article deleted successfully",
+  });
+});
+
+// @desc    Get trusted companies with filtering
+// @route   GET /api/admin/trusted-companies
+// @access  Private/Admin Outsource
+exports.getTrustedCompanies = asyncHandler(async (req, res) => {
+  const {
+    status,
+    search,
+    sort = "order name",
+    page = 1,
+    limit = 50,
+  } = req.query;
+
+  const query = {};
+  if (status) query.status = status;
+
+  if (search) {
+    const regex = { $regex: search, $options: "i" };
+    query.$or = [{ name: regex }, { description: regex }, { tags: regex }];
+  }
+
+  const numericLimit = Math.min(
+    Math.max(parseInt(String(limit), 10) || 50, 1),
+    200
+  );
+  const numericPage = Math.max(parseInt(String(page), 10) || 1, 1);
+  const sortBy = sort ? String(sort).split(",").join(" ") : "order name";
+
+  const [companies, total] = await Promise.all([
+    TrustedCompany.find(query)
+      .sort(sortBy)
+      .limit(numericLimit)
+      .skip((numericPage - 1) * numericLimit)
+      .lean(),
+    TrustedCompany.countDocuments(query),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    count: companies.length,
+    total,
+    pagination: {
+      page: numericPage,
+      limit: numericLimit,
+      pages: Math.max(Math.ceil(total / numericLimit), 1),
+    },
+    data: companies,
+  });
+});
+
+// @desc    Get single trusted company
+// @route   GET /api/admin/trusted-companies/:id
+// @access  Private/Admin Outsource
+exports.getTrustedCompany = asyncHandler(async (req, res) => {
+  const company = await TrustedCompany.findById(req.params.id);
+
+  if (!company) {
+    return res.status(404).json({
+      success: false,
+      message: "Trusted company not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: company,
+  });
+});
+
+// @desc    Upload a trusted company logo
+// @route   POST /api/admin/trusted-companies/upload-logo
+// @access  Private/Admin Outsource
+exports.uploadTrustedCompanyLogo = asyncHandler(async (req, res) => {
+  try {
+    const result = await handlePhotoUpload(
+      req,
+      res,
+      "trustedCompany",
+      "trusted-company-logo"
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Trusted company logo uploaded successfully.",
+      data: result,
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to upload logo",
+    });
+  }
+});
+
+// @desc    Create a trusted company entry
+// @route   POST /api/admin/trusted-companies
+// @access  Private/Admin Outsource
+exports.createTrustedCompany = asyncHandler(async (req, res) => {
+  const {
+    name,
+    status,
+    order,
+    brandColor,
+    website,
+    description,
+    logo,
+    logoAlt,
+    tags,
+  } = req.body;
+
+  const normalizedName = safeString(name);
+  if (!normalizedName) {
+    return res.status(400).json({
+      success: false,
+      message: "Name is required",
+    });
+  }
+
+  const desiredOrder = parseFiniteNumber(order);
+  let resolvedOrder = desiredOrder;
+  if (resolvedOrder === undefined) {
+    const maxOrderDoc = await TrustedCompany.findOne()
+      .sort("-order")
+      .select("order")
+      .lean();
+    resolvedOrder = (maxOrderDoc?.order ?? 0) + 1;
+  }
+
+  const companyData = {
+    name: normalizedName,
+    status: safeString(status) || "active",
+    order: resolvedOrder,
+    createdBy: req.user._id,
+    updatedBy: req.user._id,
+  };
+
+  const normalizedBrand = stringOrNull(brandColor);
+  if (normalizedBrand !== undefined) companyData.brandColor = normalizedBrand;
+
+  const normalizedWebsite = stringOrNull(website);
+  if (normalizedWebsite !== undefined) companyData.website = normalizedWebsite;
+
+  const normalizedDescription = stringOrNull(description);
+  if (normalizedDescription !== undefined)
+    companyData.description = normalizedDescription;
+
+  const normalizedLogo = stringOrNull(logo);
+  if (normalizedLogo !== undefined) companyData.logo = normalizedLogo;
+
+  const normalizedAlt = stringOrNull(logoAlt);
+  if (normalizedAlt !== undefined) companyData.logoAlt = normalizedAlt;
+
+  const normalizedTags = normalizeTagList(tags);
+  if (normalizedTags !== undefined) companyData.tags = normalizedTags;
+
+  const company = await TrustedCompany.create(companyData);
+
+  res.status(201).json({
+    success: true,
+    message: "Trusted company created successfully",
+    data: company,
+  });
+});
+
+// @desc    Update a trusted company entry
+// @route   PUT /api/admin/trusted-companies/:id
+// @access  Private/Admin Outsource
+exports.updateTrustedCompany = asyncHandler(async (req, res) => {
+  const company = await TrustedCompany.findById(req.params.id);
+
+  if (!company) {
+    return res.status(404).json({
+      success: false,
+      message: "Trusted company not found",
+    });
+  }
+
+  const updateData = {};
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "name")) {
+    const normalizedName = stringOrNull(req.body.name);
+    if (!normalizedName) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required",
+      });
+    }
+    updateData.name = normalizedName;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "status")) {
+    const normalizedStatus = stringOrNull(req.body.status);
+    if (normalizedStatus !== undefined) updateData.status = normalizedStatus;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "order")) {
+    const parsedOrder = parseFiniteNumber(req.body.order);
+    if (parsedOrder !== undefined) updateData.order = parsedOrder;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "brandColor")) {
+    const normalizedBrand = stringOrNull(req.body.brandColor);
+    updateData.brandColor = normalizedBrand;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "website")) {
+    const normalizedWebsite = stringOrNull(req.body.website);
+    updateData.website = normalizedWebsite;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "description")) {
+    const normalizedDescription = stringOrNull(req.body.description);
+    updateData.description = normalizedDescription;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "logo")) {
+    const normalizedLogo = stringOrNull(req.body.logo);
+    updateData.logo = normalizedLogo;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "logoAlt")) {
+    const normalizedAlt = stringOrNull(req.body.logoAlt);
+    updateData.logoAlt = normalizedAlt;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(req.body, "tags")) {
+    const normalizedTags = normalizeTagList(req.body.tags);
+    updateData.tags = normalizedTags ?? [];
+  }
+
+  updateData.updatedBy = req.user._id;
+
+  if (
+    Object.prototype.hasOwnProperty.call(updateData, "logo") &&
+    company.logo &&
+    updateData.logo !== company.logo
+  ) {
+    await deletePhoto(company.logo, "trustedCompany");
+  }
+
+  const updatedCompany = await TrustedCompany.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Trusted company updated successfully",
+    data: updatedCompany,
+  });
+});
+
+// @desc    Delete a trusted company entry
+// @route   DELETE /api/admin/trusted-companies/:id
+// @access  Private/Admin Outsource
+exports.deleteTrustedCompany = asyncHandler(async (req, res) => {
+  const company = await TrustedCompany.findById(req.params.id);
+
+  if (!company) {
+    return res.status(404).json({
+      success: false,
+      message: "Trusted company not found",
+    });
+  }
+
+  if (company.logo) {
+    await deletePhoto(company.logo, "trustedCompany");
+  }
+
+  await company.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Trusted company deleted successfully",
   });
 });
 

@@ -605,6 +605,15 @@ export const adminAPI = {
       },
     });
   },
+  uploadTrustedCompanyLogo: (file: File) => {
+    const formData = new FormData();
+    formData.append("photo", file);
+    return api.post("/admin/trusted-companies/upload-logo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 
   // News management
   getNews: (params?: {
@@ -672,6 +681,43 @@ export const adminAPI = {
     },
   ) => api.put(`/admin/clients/${id}`, payload),
   deleteClient: (id: string) => api.delete(`/admin/clients/${id}`),
+
+  // Trusted companies management
+  getTrustedCompanies: (params?: {
+    status?: "active" | "inactive" | "archived";
+    search?: string;
+    page?: number;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/admin/trusted-companies", { params }),
+  getTrustedCompany: (id: string) => api.get(`/admin/trusted-companies/${id}`),
+  createTrustedCompany: (payload: {
+    name: string;
+    status?: "active" | "inactive" | "archived";
+    order?: number;
+    brandColor?: string | null;
+    website?: string | null;
+    description?: string | null;
+    logo?: string | null;
+    logoAlt?: string | null;
+    tags?: string[] | string | null;
+  }) => api.post("/admin/trusted-companies", payload),
+  updateTrustedCompany: (
+    id: string,
+    payload: {
+      name?: string;
+      status?: "active" | "inactive" | "archived";
+      order?: number;
+      brandColor?: string | null;
+      website?: string | null;
+      description?: string | null;
+      logo?: string | null;
+      logoAlt?: string | null;
+      tags?: string[] | string | null;
+    },
+  ) => api.put(`/admin/trusted-companies/${id}`, payload),
+  deleteTrustedCompany: (id: string) =>
+    api.delete(`/admin/trusted-companies/${id}`),
 
   // Additional endpoints from second adminAPI
   getStats: () => api.get("/admin/stats"),
@@ -795,6 +841,12 @@ export const publicAPI = {
     limit?: number;
     sort?: string;
   }) => api.get("/public/clients", { params }),
+  getTrustedCompanies: (params?: {
+    status?: "active" | "inactive" | "archived" | "all";
+    search?: string;
+    limit?: number;
+    sort?: string;
+  }) => api.get("/public/trusted-companies", { params }),
 };
 
 export default api;

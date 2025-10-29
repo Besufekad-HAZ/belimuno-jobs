@@ -37,8 +37,14 @@ const {
   createClient,
   updateClient,
   deleteClient,
+  getTrustedCompanies,
+  getTrustedCompany,
+  createTrustedCompany,
+  updateTrustedCompany,
+  deleteTrustedCompany,
   uploadNewsImage,
   uploadClientLogo,
+  uploadTrustedCompanyLogo,
   seedDefaultTeamMembers,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
@@ -109,6 +115,12 @@ router.post(
   uploadClientLogo
 );
 
+router.post(
+  "/trusted-companies/upload-logo",
+  authorize("super_admin", "admin_outsource"),
+  uploadTrustedCompanyLogo
+);
+
 // Public team route (no auth) for the About page and public site
 const { getPublicTeamMembers } = require("../controllers/publicController");
 router.get("/public/team", getPublicTeamMembers);
@@ -137,5 +149,17 @@ router.get("/clients/:id", getClient);
 router.post("/clients", createClient);
 router.put("/clients/:id", updateClient);
 router.delete("/clients/:id", deleteClient);
+
+// Trusted companies management (super admin & outsource admin)
+router
+  .route("/trusted-companies")
+  .get(authorize("super_admin", "admin_outsource"), getTrustedCompanies)
+  .post(authorize("super_admin", "admin_outsource"), createTrustedCompany);
+
+router
+  .route("/trusted-companies/:id")
+  .get(authorize("super_admin", "admin_outsource"), getTrustedCompany)
+  .put(authorize("super_admin", "admin_outsource"), updateTrustedCompany)
+  .delete(authorize("super_admin", "admin_outsource"), deleteTrustedCompany);
 
 module.exports = router;

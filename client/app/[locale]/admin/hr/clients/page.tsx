@@ -443,7 +443,7 @@ const ManageClientsPage: React.FC = () => {
               </div>
             ) : sortedClients.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {sortedClients.map((client) => {
+                {sortedClients.map((client, index) => {
                   return (
                     <div
                       key={client._id || `${client.name}-${client.type}`}
@@ -457,6 +457,14 @@ const ManageClientsPage: React.FC = () => {
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className="object-cover"
+                            priority={index < 2}
+                            loading={index < 2 ? "eager" : "lazy"}
+                            unoptimized
+                            onError={(event) => {
+                              event.currentTarget.parentElement?.classList.add(
+                                "bg-blue-50",
+                              );
+                            }}
                           />
                         </div>
                       )}

@@ -11,6 +11,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { CLIENTS, type ClientItem } from "@/data/clients";
+import { publicAPI } from "@/lib/api";
 import { Sparkles } from "lucide-react";
 import { resolveAssetUrl } from "@/lib/assets";
 
@@ -31,11 +32,17 @@ type EnhancedClient = ClientItem & {
   logoSrc?: string;
 };
 
+type RemoteTrustedClient = ClientItem & {
+  order?: number;
+};
+
 const TrustedBySection: React.FC = () => {
   const t = useTranslations("Home.trustedBy");
   const searchParams = useSearchParams();
   const isTestMode =
     (searchParams?.get("logos") || "").toLowerCase() === "test";
+
+  const [remoteClients, setRemoteClients] = useState<RemoteTrustedClient[]>([]);
 
   // Respect user’s reduced-motion preference
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -69,6 +76,121 @@ const TrustedBySection: React.FC = () => {
     return () => io.disconnect();
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTrustedCompanies = async () => {
+      try {
+        const response = await publicAPI.getTrustedCompanies({
+          status: "active",
+          sort: "order name",
+          limit: 60,
+        });
+
+        const payload = Array.isArray(response?.data?.data)
+          ? response.data.data
+          : Array.isArray(response?.data)
+          ? response.data
+          : [];
+
+        if (!isMounted || !Array.isArray(payload)) {
+          return;
+        }
+
+        const normalized = (payload as Array<Record<string, unknown>>)
+          .map((item) => {
+            const entry = item as {
+              name?: unknown;
+              description?: unknown;
+              logo?: unknown;
+              brandColor?: unknown;
+              order?: unknown;
+              tags?: unknown;
+              website?: unknown;
+            };
+
+            if (typeof entry.name !== "string") {
+              return undefined;
+            }
+
+            const nameValue = entry.name.trim();
+            if (!nameValue) {
+              return undefined;
+            }
+
+            const descriptionValue =
+              typeof entry.description === "string"
+                ? entry.description.trim()
+                : undefined;
+
+            const tagsValue = Array.isArray(entry.tags)
+              ? entry.tags
+                  .map((tag) =>
+                    typeof tag === "string" ? tag.trim() : "",
+                  )
+                  .filter(Boolean)
+                  .join(", ") || undefined
+              : undefined;
+
+            const orderValue =
+              typeof entry.order === "number" && Number.isFinite(entry.order)
+                ? entry.order
+                : undefined;
+
+            const logoValue =
+              typeof entry.logo === "string"
+                ? entry.logo.trim() || undefined
+                : undefined;
+
+            const brandColorValue =
+              typeof entry.brandColor === "string"
+                ? entry.brandColor.trim() || undefined
+                : undefined;
+
+            const typeValue =
+              typeof entry.website === "string"
+                ? entry.website.trim() || undefined
+                : undefined;
+
+            return {
+              name: nameValue,
+              service: descriptionValue || tagsValue,
+              type: typeValue,
+              logo: logoValue,
+              brandColor: brandColorValue,
+              order: orderValue,
+            } as RemoteTrustedClient;
+          })
+          .filter((item): item is RemoteTrustedClient => Boolean(item));
+
+        if (!normalized.length) {
+          return;
+        }
+
+        const sorted = normalized.sort((a, b) => {
+          const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+          const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+          if (orderA !== orderB) {
+            return orderA - orderB;
+          }
+          return a.name.localeCompare(b.name);
+        });
+
+        if (isMounted) {
+          setRemoteClients(sorted);
+        }
+      } catch (error) {
+        console.warn("Failed to load trusted companies", error);
+      }
+    };
+
+    loadTrustedCompanies();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Base enhanced clients list
   const enhancedClients = useMemo<EnhancedClient[]>(() => {
     // Test set: use the specific logos from the provided list (mapped to existing assets)
@@ -89,6 +211,8 @@ const TrustedBySection: React.FC = () => {
 
     const source = isTestMode
       ? CLIENTS.filter((c) => testNames.has(c.name))
+      : remoteClients.length
+      ? remoteClients
       : CLIENTS;
 
     return source.map((client) => ({
@@ -98,7 +222,7 @@ const TrustedBySection: React.FC = () => {
         ? (resolveAssetUrl(client.logo) ?? client.logo)
         : undefined,
     }));
-  }, [isTestMode]);
+  }, [isTestMode, remoteClients]);
 
   // Static list for marquee; no timed rotation to avoid visual jumps
 
@@ -354,8 +478,7 @@ const TrustedBySection: React.FC = () => {
           transform: translateX(-50%);
           border-width: 6px;
           border-style: solid;
-          border-color: rgba(15, 23, 42, 0.92) transparent transparent
-            transparent;
+          border-color: rgba(15, 23, 42, 0.92) transparent transparent transparent;
           z-index: 30;
         }
 
@@ -381,3 +504,4 @@ const TrustedBySection: React.FC = () => {
 };
 
 export default TrustedBySection;
+

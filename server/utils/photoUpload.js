@@ -19,6 +19,11 @@ const UPLOAD_PREFIXES = {
   client: (process.env.AWS_S3_CLIENT_PREFIX || "public/client")
     .replace(/^\/+/, "")
     .replace(/\/+$/, ""),
+  trustedCompany: (
+    process.env.AWS_S3_TRUSTED_COMPANY_PREFIX || "public/trusted-companies"
+  )
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, ""),
 };
 
 // Generic file upload configuration
