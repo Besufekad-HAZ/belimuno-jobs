@@ -15,7 +15,6 @@ import {
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { DEFAULT_TEAM_MEMBERS } from "@/data/defaultTeamMembers";
@@ -23,6 +22,11 @@ import type { DefaultTeamMember } from "@/data/defaultTeamMembers";
 import { useEffect, useState } from "react";
 import { publicAPI } from "@/lib/api";
 import { DEFAULT_UPLOADS_BASE, resolveAssetUrl } from "@/lib/assets";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+const HERO_VIDEO_URL =
+  "https://belimuno-uploads.s3.eu-north-1.amazonaws.com/public/videos/logo-animation.mp4";
 
 type TeamMember = {
   _id?: string;
@@ -110,10 +114,17 @@ const ResolvedTeamImage: React.FC<ResolvedTeamImageProps> = ({
 
 const AboutPage: React.FC = () => {
   const t = useTranslations("AboutPage");
+  const router = useRouter();
 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(
     DEFAULT_TEAM_FALLBACK,
   );
+
+  const heroHighlights = [
+    { value: "13+", label: "Years fueling Ethiopian talent" },
+    { value: "3,000+", label: "Professionals actively managed" },
+    { value: "36", label: "Organizations we proudly support" },
+  ];
 
   useEffect(() => {
     let mounted = true;
@@ -215,43 +226,162 @@ const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-background">
       {/* Hero Section */}
-      <div className="bg-gradient-primary text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">{t("hero.title")}</h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              {t("hero.subtitle")}
-            </p>
-            <div className="mt-8">
+      <section className="relative isolate overflow-hidden bg-slate-950 text-white">
+        <div className="absolute inset-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            className="h-full w-full object-cover opacity-80"
+          >
+            <source src={HERO_VIDEO_URL} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-950/80 to-blue-900/60" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-950" />
+        </div>
+
+        <div className="relative">
+          <div className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-24 sm:px-6 lg:px-8 lg:flex-row lg:items-end lg:py-32">
+            <div className="flex-1 space-y-6">
               <Badge
                 variant="secondary"
-                className="bg-white/20 text-white border-white/30 text-lg px-6 py-2"
+                className="!bg-white/10 !text-white/90 !border-white/20 backdrop-blur"
               >
                 {t("hero.motto")}
               </Badge>
+              <div>
+                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                  {t("hero.title")}
+                </h1>
+                <p className="mt-4 max-w-2xl text-lg text-slate-100/90 sm:text-xl">
+                  {t("hero.subtitle")}
+                </p>
+              </div>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <Button
+                  size="lg"
+                  className="h-12 rounded-full px-8 text-base font-semibold shadow-2xl transition-transform duration-200 transform-gpu bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:scale-[1.03] hover:shadow-[0_20px_40px_rgba(59,130,246,0.25)] focus-visible:ring-4 focus-visible:ring-cyan-400/30"
+                  onClick={() =>
+                    window.scrollTo({
+                      top: window.innerHeight,
+                      behavior: "smooth",
+                    })
+                  }
+                >
+                  Discover Our Story
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="h-12 rounded-full border border-white/25 bg-white/6 px-8 text-base text-white shadow-sm backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-white/90 hover:text-slate-900 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-white/30"
+                  onClick={() => router.push("/contact")}
+                >
+                  Partner With Us
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-1 flex-wrap gap-4 lg:justify-end">
+              {heroHighlights.map((item) => (
+                <Card
+                  key={item.label}
+                  padding="none"
+                  className="flex min-w-[160px] flex-1 flex-col rounded-2xl !border-white/15 !bg-white/10 p-5 text-left backdrop-blur shadow-2xl shadow-blue-500/15"
+                >
+                  <span className="text-2xl font-bold text-white">
+                    {item.value}
+                  </span>
+                  <span className="mt-2 text-sm text-white/70">
+                    {item.label}
+                  </span>
+                </Card>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Executive Summary */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {t("executiveSummary.title")}
-            </h2>
-            <div className="w-24 h-1 bg-gradient-primary mx-auto"></div>
-          </div>
+      <section className="relative py-20">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.08),_transparent_55%)]" />
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-12 px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-[2fr_3fr]">
+            <Card
+              padding="none"
+              className="relative overflow-hidden rounded-3xl !border-blue-100 !bg-white/90 p-8 shadow-2xl shadow-blue-500/15"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-100/60 via-transparent to-cyan-100/30" />
+              <div className="relative space-y-4">
+                <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
+                  Our Story in Motion
+                </span>
+                <h2 className="text-3xl font-bold text-slate-900">
+                  {t("executiveSummary.title")}
+                </h2>
+                <p className="text-base text-slate-600">
+                  {t("executiveSummary.content.part1")}
+                </p>
+                <p className="text-base text-slate-600">
+                  {t("executiveSummary.content.part2")}
+                </p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Card
+                    padding="none"
+                    className="rounded-2xl !border-blue-200 bg-white p-4 shadow-sm"
+                  >
+                    <p className="text-sm font-semibold text-blue-800">
+                      Why we lead
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      We combine human intuition with data-driven workforce
+                      planning so every placement feels handcrafted.
+                    </p>
+                  </Card>
+                  <Card
+                    padding="none"
+                    className="rounded-2xl !border-cyan-200 bg-white p-4 shadow-sm"
+                  >
+                    <p className="text-sm font-semibold text-cyan-800">
+                      Inspired by our clients
+                    </p>
+                    <p className="mt-2 text-sm text-slate-600">
+                      From NGOs to engineering giants, our partnerships keep
+                      shaping the next chapter of Ethiopian employment.
+                    </p>
+                  </Card>
+                </div>
+              </div>
+            </Card>
 
-          <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 p-8">
-            <p className="text-lg text-gray-700 leading-relaxed">
-              {t("executiveSummary.content.part1")}
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed mt-4">
-              {t("executiveSummary.content.part2")}
-            </p>
-          </Card>
+            <Card
+              padding="none"
+              className="relative min-h-[360px] overflow-hidden rounded-3xl !border-blue-200 !bg-slate-950/95 shadow-2xl shadow-blue-500/25 sm:min-h-[420px]"
+            >
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="absolute inset-0 h-full w-full bg-slate-950 object-contain"
+              >
+                <source src={HERO_VIDEO_URL} type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/35 via-transparent to-slate-950/60" />
+              <div className="absolute inset-0 flex flex-col justify-end gap-4 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent p-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-200">
+                  Belimuno in 5 seconds
+                </p>
+                <p className="text-lg text-white/90">
+                  A glimpse into how we connect talent, technology, and trust to
+                  deliver workforce solutions that move organizations forward.
+                </p>
+              </div>
+            </Card>
+          </div>
         </div>
       </section>
 
