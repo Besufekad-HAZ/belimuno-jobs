@@ -51,6 +51,9 @@ const {
   createService,
   updateService,
   deleteService,
+  getOrgStructureDocumentAdmin,
+  uploadOrgStructurePdf,
+  deleteOrgStructurePdf,
 } = require("../controllers/adminController");
 const { protect } = require("../middleware/auth");
 const {
@@ -113,6 +116,13 @@ router.post(
   authorize("super_admin", "admin_hr"),
   uploadNewsImage
 );
+
+// Organizational structure management
+router
+  .route("/org-structure")
+  .get(requireSuperAdmin, getOrgStructureDocumentAdmin)
+  .post(requireSuperAdmin, uploadOrgStructurePdf)
+  .delete(requireSuperAdmin, deleteOrgStructurePdf);
 
 router.post(
   "/clients/upload-photo",

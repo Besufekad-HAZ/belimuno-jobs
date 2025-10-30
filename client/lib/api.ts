@@ -471,6 +471,17 @@ export const adminAPI = {
     }),
   markPaymentPaid: (paymentId: string) =>
     api.put(`/admin/payments/${paymentId}/mark-paid`),
+  getOrgStructureDocument: () => api.get("/admin/org-structure"),
+  uploadOrgStructurePdf: (file: File) => {
+    const formData = new FormData();
+    formData.append("pdf", file);
+    return api.post("/admin/org-structure", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+  deleteOrgStructurePdf: () => api.delete("/admin/org-structure"),
   // Reviews moderation
   getReviews: (params?: {
     status?: "draft" | "published" | "hidden" | string;

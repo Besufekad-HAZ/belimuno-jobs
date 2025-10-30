@@ -12,6 +12,7 @@ const News = require("../models/News");
 const Client = require("../models/Client");
 const Service = require("../models/Service");
 const TrustedCompany = require("../models/TrustedCompany");
+const OrgStructureDocument = require("../models/OrgStructureDocument");
 const asyncHandler = require("../utils/asyncHandler");
 const Review = require("../models/Review");
 const NotificationService = require("../utils/notificationService");
@@ -25,6 +26,7 @@ const {
   inferManagedPhotoKey,
 } = require("../utils/photoUpload");
 const {
+  uploadObject,
   deleteObject,
   buildPublicUrl,
   resolveKeyFromUrl,
@@ -267,6 +269,237 @@ const normalizeTagList = (value) => {
 
   return deduped;
 };
+
+const findActiveOrgStructureDocument = () =>
+  OrgStructureDocument.findOne({ isActive: true }).sort({ createdAt: -1 });
+
+const toOrgStructureResponse = (doc) => {
+  if (!doc) {
+    return null;
+  }
+
+  const plain =
+    typeof doc.toObject === "function" ? doc.toObject({ virtuals: false }) : doc;
+
+  return {
+    ...plain,
+    id: plain._id?.toString?.() || plain._id,
+  };
+};
+
+// @desc    Get current organizational structure PDF metadata
+// @route   GET /api/admin/org-structure
+// @access  Private/Super Admin
+exports.getOrgStructureDocumentAdmin = asyncHandler(async (_req, res) => {
+  const activeDoc = await findActiveOrgStructureDocument().populate(
+    "uploadedBy",
+    "name email role"
+  );
+
+  res.status(200).json({
+    success: true,
+    data: toOrgStructureResponse(activeDoc),
+  });
+});
+
+// @desc    Upload or replace the organizational structure PDF
+// @route   POST /api/admin/org-structure
+// @access  Private/Super Admin
+exports.uploadOrgStructurePdf = asyncHandler(async (req, res) => {
+  let uploadResult;
+  try {
+    uploadResult = await handleOrgStructureUpload(req, res);
+  } catch (error) {
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Failed to upload PDF",
+    });
+  }
+
+  const existingActive = await findActiveOrgStructureDocument();
+  const nextVersion = existingActive ? (existingActive.version || 1) + 1 : 1;
+
+  const newDoc = await OrgStructureDocument.create({
+    filename: uploadResult.filename,
+    key: uploadResult.key,
+    url: uploadResult.url,
+    size: uploadResult.size,
+    contentType: uploadResult.mimeType,
+    version: nextVersion,
+    uploadedBy: req.user?._id,
+    metadata: {
+      originalName: uploadResult.originalName,
+      storedFilename: uploadResult.storedFilename,
+    },
+  });
+
+  if (existingActive) {
+    existingActive.isActive = false;
+    existingActive.deactivatedAt = new Date();
+    existingActive.deactivatedBy = req.user?._id;
+    await existingActive.save();
+  }
+
+  res.status(existingActive ? 200 : 201).json({
+    success: true,
+    message: existingActive
+      ? "Organizational structure PDF updated successfully."
+      : "Organizational structure PDF uploaded successfully.",
+    data: toOrgStructureResponse(newDoc),
+  });
+
+  if (existingActive?.key) {
+    deleteObject(existingActive.key).catch((error) => {
+      console.warn(
+        "Failed to delete previous organizational structure PDF from S3",
+        existingActive.key,
+        error
+      );
+    });
+  }
+});
+
+// @desc    Delete the current organizational structure PDF
+// @route   DELETE /api/admin/org-structure
+// @access  Private/Super Admin
+exports.deleteOrgStructurePdf = asyncHandler(async (_req, res) => {
+  const activeDoc = await findActiveOrgStructureDocument();
+
+  if (!activeDoc) {
+    return res.status(404).json({
+      success: false,
+      message: "No organizational structure PDF to delete.",
+    });
+  }
+
+  try {
+    if (activeDoc.key) {
+      await deleteObject(activeDoc.key);
+    }
+  } catch (error) {
+    console.warn(
+      "Failed to delete organizational structure PDF from S3",
+      activeDoc.key,
+      error
+    );
+  }
+
+  await OrgStructureDocument.deleteOne({ _id: activeDoc._id });
+
+  res.status(200).json({
+    success: true,
+    message: "Organizational structure PDF deleted successfully.",
+  });
+});
+
+const ORG_STRUCTURE_PREFIX = (
+  process.env.AWS_S3_ORG_STRUCTURE_PREFIX || "public/pdfs"
+)
+  .replace(/^\/+/, "")
+  .replace(/\/+$/, "");
+
+const ensureOrgStructureKeyPrefix = (filename) =>
+  ORG_STRUCTURE_PREFIX ? `${ORG_STRUCTURE_PREFIX}/${filename}` : filename;
+
+const sanitizePdfFilename = (rawName) => {
+  const fallbackBase = "belimuno-org-structure";
+  if (!rawName) {
+    return `${fallbackBase}.pdf`;
+  }
+
+  const withoutQuery = rawName.split("?")[0]?.split("#")[0] || rawName;
+  const ext = path.extname(withoutQuery);
+  const baseName = path.basename(withoutQuery, ext);
+
+  const sanitizedBase = baseName
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  const finalBase = sanitizedBase || fallbackBase;
+  return `${finalBase}.pdf`;
+};
+
+const generateOrgStructureKey = (originalName) => {
+  const sanitizedName = sanitizePdfFilename(originalName);
+  const base = path.basename(sanitizedName, path.extname(sanitizedName));
+  const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
+  const combined = `${uniqueSuffix}-${base}`
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return ensureOrgStructureKeyPrefix(`${combined}.pdf`);
+};
+
+const orgStructureUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20MB
+  },
+  fileFilter: (_req, file, cb) => {
+    const mimeLower = (file.mimetype || "").toLowerCase();
+    const nameLower = (file.originalname || "").toLowerCase();
+    if (mimeLower === "application/pdf" || nameLower.endsWith(".pdf")) {
+      cb(null, true);
+      return;
+    }
+    cb(new Error("Only PDF files are allowed."));
+  },
+});
+
+const handleOrgStructureUpload = (req, res) =>
+  new Promise((resolve, reject) => {
+    orgStructureUpload.single("pdf")(req, res, async (err) => {
+      if (err) {
+        let message = err.message || "Unable to upload PDF.";
+        if (err.code === "LIMIT_FILE_SIZE" || err.message === "File too large") {
+          message = "PDF exceeds the 20MB limit.";
+        }
+        reject({ status: 400, message });
+        return;
+      }
+
+      if (!req.file) {
+        reject({
+          status: 400,
+          message: "Please attach a PDF file in the 'pdf' field.",
+        });
+        return;
+      }
+
+      try {
+        const originalName = req.file.originalname || "belimuno-org-structure.pdf";
+        const key = generateOrgStructureKey(originalName);
+
+        await uploadObject({
+          key,
+          body: req.file.buffer,
+          contentType: "application/pdf",
+          cacheControl: "public, max-age=86400",
+        });
+
+        const fileUrl = buildPublicUrl(key);
+        resolve({
+          key,
+          url: fileUrl,
+          filename: sanitizePdfFilename(originalName),
+          originalName,
+          storedFilename: path.basename(key),
+          size: req.file.size,
+          mimeType: req.file.mimetype || "application/pdf",
+        });
+      } catch (uploadError) {
+        console.error(
+          "Failed to upload organizational structure PDF to S3",
+          uploadError
+        );
+        reject({
+          status: 500,
+          message: "Failed to upload PDF to storage.",
+        });
+      }
+    });
+  });
 // @desc    Seed default team members if collection is empty
 // @route   POST /api/admin/team/seed-defaults
 // @access  Private/Admin HR

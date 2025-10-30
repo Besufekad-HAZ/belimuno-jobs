@@ -4,6 +4,7 @@ const News = require("../models/News");
 const Client = require("../models/Client");
 const Service = require("../models/Service");
 const TrustedCompany = require("../models/TrustedCompany");
+const OrgStructureDocument = require("../models/OrgStructureDocument");
 const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
 
 // Public controller to return deduped team members for About page
@@ -367,5 +368,31 @@ exports.getTrustedCompanies = asyncHandler(async (req, res) => {
     success: true,
     count: companies.length,
     data: companies,
+  });
+});
+
+// @desc    Get current organizational structure PDF metadata (public)
+// @route   GET /api/public/org-structure
+// @access  Public
+exports.getOrgStructureDocument = asyncHandler(async (_req, res) => {
+  const doc = await OrgStructureDocument.findOne({ isActive: true })
+    .select(
+      "filename url size contentType version createdAt updatedAt metadata"
+    )
+    .lean();
+
+  if (!doc) {
+    return res.status(404).json({
+      success: false,
+      message: "Organizational structure PDF not found",
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      ...doc,
+      id: doc._id?.toString?.() || doc._id,
+    },
   });
 });

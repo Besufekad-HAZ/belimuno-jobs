@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Users,
@@ -12,6 +12,13 @@ import {
   Clock,
   UserCheck,
   Download,
+  RefreshCcw,
+  UploadCloud,
+  Trash2,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  FilePenLine,
   BarChart3,
   MessageSquarePlus,
 } from "lucide-react";
@@ -26,6 +33,48 @@ import { useTranslations } from "next-intl";
 import { useAdminDashboardData } from "@/hooks/useDashboardData";
 import { queryClient } from "@/lib/queryClient";
 import WithDashboardLoading from "@/components/hoc/WithDashboardLoading";
+import { toast } from "@/components/ui/sonner";
+
+interface OrgStructureDoc {
+  id?: string;
+  filename?: string;
+  url?: string;
+  size?: number;
+  contentType?: string;
+  version?: number;
+  updatedAt?: string;
+  createdAt?: string;
+}
+
+const formatBytes = (bytes?: number) => {
+  if (!bytes || Number.isNaN(bytes) || bytes <= 0) {
+    return undefined;
+  }
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let value = bytes;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  const formatted =
+    value < 10 && unitIndex > 0 ? value.toFixed(1) : value.toFixed(0);
+  return `${formatted} ${units[unitIndex]}`;
+};
+
+const formatDateTime = (value?: string) => {
+  if (!value) {
+    return undefined;
+  }
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(value));
+  } catch {
+    return new Date(value).toLocaleString();
+  }
+};
 
 const AdminDashboard: React.FC = () => {
   const [showReportsModal, setShowReportsModal] = useState(false);
@@ -42,6 +91,152 @@ const AdminDashboard: React.FC = () => {
   const recentJobs = data?.recentJobs || [];
   const disputes = data?.disputes || [];
   const loading = isLoading;
+  const [orgDoc, setOrgDoc] = useState<OrgStructureDoc | null>(null);
+  const [orgDocLoading, setOrgDocLoading] = useState(false);
+  const [orgDocRefreshing, setOrgDocRefreshing] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState<File | null>(null);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [deletingPdf, setDeletingPdf] = useState(false);
+  const [showOrgPdf, setShowOrgPdf] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const loadOrgStructure = useCallback(
+    async (options?: { silent?: boolean; suppressToast?: boolean }) => {
+      const silent = options?.silent ?? false;
+      const suppressToast = options?.suppressToast ?? false;
+      if (!silent) {
+        setOrgDocLoading(true);
+      }
+
+      try {
+        const response = await adminAPI.getOrgStructureDocument();
+        setOrgDoc(response.data?.data || null);
+      } catch (error) {
+        const status = (
+          error as {
+            response?: { status?: number; data?: { message?: string } };
+          }
+        )?.response?.status;
+        if (status === 404) {
+          setOrgDoc(null);
+        } else {
+          console.error("Failed to load organizational structure PDF", error);
+          if (!suppressToast) {
+            const message =
+              (error as { response?: { data?: { message?: string } } })
+                ?.response?.data?.message ||
+              "Failed to load organizational structure PDF.";
+            toast.error(message);
+          }
+        }
+      } finally {
+        if (!silent) {
+          setOrgDocLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    loadOrgStructure({ suppressToast: true });
+  }, [loadOrgStructure]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setSelectedPdf(null);
+      return;
+    }
+
+    const isPdf =
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast.error("Please select a PDF file.");
+      event.target.value = "";
+      setSelectedPdf(null);
+      return;
+    }
+
+    setSelectedPdf(file);
+  };
+
+  const handleUploadPdf = async () => {
+    if (!selectedPdf) {
+      toast.error("Choose a PDF to upload.");
+      return;
+    }
+
+    setUploadingPdf(true);
+    try {
+      await adminAPI.uploadOrgStructurePdf(selectedPdf);
+      toast.success("Organizational structure PDF uploaded successfully.");
+      setSelectedPdf(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      await loadOrgStructure({ silent: true });
+    } catch (error) {
+      console.error("Failed to upload organizational structure PDF", error);
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Failed to upload PDF.";
+      toast.error(message);
+    } finally {
+      setUploadingPdf(false);
+    }
+  };
+
+  const handleDeletePdf = async () => {
+    if (!orgDoc) {
+      toast.error("No PDF to delete.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete the current organizational structure PDF?",
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingPdf(true);
+    try {
+      await adminAPI.deleteOrgStructurePdf();
+      toast.success("Organizational structure PDF deleted.");
+      setOrgDoc(null);
+      setSelectedPdf(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Failed to delete organizational structure PDF", error);
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Failed to delete PDF.";
+      toast.error(message);
+    } finally {
+      setDeletingPdf(false);
+    }
+  };
+
+  const handleRefreshPdf = async () => {
+    setOrgDocRefreshing(true);
+    try {
+      await loadOrgStructure({ silent: true });
+      toast.success("Organizational structure PDF metadata refreshed.");
+    } finally {
+      setOrgDocRefreshing(false);
+    }
+  };
+
+  const toggleOrgPdfSection = () => {
+    if (!showOrgPdf) {
+      loadOrgStructure({ suppressToast: true });
+    }
+    setShowOrgPdf((prev) => !prev);
+  };
 
   useEffect(() => {
     const user = getStoredUser();
@@ -112,6 +307,11 @@ const AdminDashboard: React.FC = () => {
       console.error("Failed to generate report:", error);
     }
   };
+
+  const orgDocUpdatedAtLabel = formatDateTime(
+    orgDoc?.updatedAt || orgDoc?.createdAt,
+  );
+  const orgDocSizeLabel = formatBytes(orgDoc?.size);
 
   return (
     <WithDashboardLoading isLoading={loading}>
@@ -415,35 +615,222 @@ const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <Card className="mt-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">
-              {t("quickActions.title")}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="mt-8 space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                {t("quickActions.title")}
+              </h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <Button
+                  variant="outline"
+                  className="group relative h-auto overflow-hidden rounded-xl border border-blue-200 bg-white p-0 text-blue-600 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-transparent hover:!bg-gradient-to-r hover:!from-blue-500 hover:!to-indigo-500 hover:text-white hover:shadow-xl"
+                  onClick={() => router.push("/admin/users")}
+                >
+                  <div className="flex h-full w-full flex-col items-center gap-2 text-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors duration-200 group-hover:bg-white/20 group-hover:text-white">
+                      <Users className="h-6 w-6" />
+                    </span>
+                    <span className="text-sm font-semibold">
+                      {t("quickActions.buttons.manageUsers")}
+                    </span>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="group relative h-auto overflow-hidden rounded-xl border border-blue-200 bg-white p-0 text-blue-600 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-transparent hover:!bg-gradient-to-r hover:!from-blue-500 hover:!to-indigo-500 hover:text-white hover:shadow-xl"
+                  onClick={() => router.push("/admin/jobs")}
+                >
+                  <div className="flex h-full w-full flex-col items-center gap-2 text-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors duration-200 group-hover:bg-white/20 group-hover:text-white">
+                      <Briefcase className="h-6 w-6" />
+                    </span>
+                    <span className="text-sm font-semibold">
+                      {t("quickActions.buttons.manageJobs")}
+                    </span>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="group relative h-auto overflow-hidden rounded-xl border border-blue-200 bg-white p-0 text-blue-600 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-transparent hover:!bg-gradient-to-r hover:!from-blue-500 hover:!to-indigo-500 hover:text-white hover:shadow-xl"
+                  onClick={() => router.push("/admin/payments")}
+                >
+                  <div className="flex h-full w-full flex-col items-center gap-2 text-center">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors duration-200 group-hover:bg-white/20 group-hover:text-white">
+                      <DollarSign className="h-6 w-6" />
+                    </span>
+                    <span className="text-sm font-semibold">
+                      {t("quickActions.buttons.paymentDisputes")}
+                    </span>
+                  </div>
+                </Button>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-100 pt-6">
               <Button
+                type="button"
                 variant="outline"
-                className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
-                onClick={() => router.push("/admin/users")}
+                onClick={toggleOrgPdfSection}
+                aria-expanded={showOrgPdf}
+                aria-controls="org-structure-manager"
+                className="flex w-full items-center justify-between gap-3 rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-blue-600 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-500 hover:bg-blue-50"
               >
-                <Users className="h-6 w-6 mb-2" />
-                {t("quickActions.buttons.manageUsers")}
+                <span className="flex items-center gap-2">
+                  <FilePenLine className="h-4 w-4" />
+                  Edit Organizational Structure PDF
+                </span>
+                {showOrgPdf ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
-              <Button
-                variant="outline"
-                className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
-                onClick={() => router.push("/admin/jobs")}
+
+              <div
+                id="org-structure-manager"
+                className={`overflow-hidden transition-all duration-300 ease-out ${showOrgPdf ? "pointer-events-auto max-h-[1200px] opacity-100" : "pointer-events-none max-h-0 opacity-0"}`}
               >
-                <Briefcase className="h-6 w-6 mb-2" />
-                {t("quickActions.buttons.manageJobs")}
-              </Button>
-              <Button
-                variant="outline"
-                className="p-4 h-auto flex flex-col items-center transition-transform hover:-translate-y-0.5"
-                onClick={() => router.push("/admin/payments")}
-              >
-                <DollarSign className="h-6 w-6 mb-2" />
-                {t("quickActions.buttons.paymentDisputes")}
-              </Button>
+                <div
+                  className={`mt-4 flex flex-col gap-6 rounded-xl bg-slate-50/60 p-4 ring-1 ring-inset ring-blue-100 transition-all duration-300 lg:flex-row lg:items-start lg:justify-between ${showOrgPdf ? "translate-y-0" : "-translate-y-2"}`}
+                >
+                  <div className="flex-1 space-y-3">
+                    <h4 className="text-base font-semibold text-gray-900">
+                      Organizational Structure PDF
+                    </h4>
+                    {orgDocLoading ? (
+                      <p className="text-sm text-gray-600">
+                        Loading current PDF metadata...
+                      </p>
+                    ) : orgDoc ? (
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <p>
+                          <span className="font-medium text-gray-900">
+                            Filename:
+                          </span>{" "}
+                          {orgDoc.filename || "belimuno-org-structure.pdf"}
+                        </p>
+                        {orgDoc.version ? (
+                          <p>
+                            <span className="font-medium text-gray-900">
+                              Version:
+                            </span>{" "}
+                            {orgDoc.version}
+                          </p>
+                        ) : null}
+                        {orgDocSizeLabel ? (
+                          <p>
+                            <span className="font-medium text-gray-900">
+                              File size:
+                            </span>{" "}
+                            {orgDocSizeLabel}
+                          </p>
+                        ) : null}
+                        {orgDocUpdatedAtLabel ? (
+                          <p>
+                            <span className="font-medium text-gray-900">
+                              Last updated:
+                            </span>{" "}
+                            {orgDocUpdatedAtLabel}
+                          </p>
+                        ) : null}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() =>
+                              window.open(
+                                orgDoc.url || "/org-structure",
+                                "_blank",
+                              )
+                            }
+                            className="text-sm"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Open PDF
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.push("/org-structure")}
+                            className="text-sm"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            View live page
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">
+                        No organizational structure PDF is currently published.
+                        Upload a PDF to make it available on the public page.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="w-full max-w-md space-y-3">
+                    <div>
+                      <label
+                        htmlFor="org-structure-pdf"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Upload PDF
+                      </label>
+                      <input
+                        id="org-structure-pdf"
+                        ref={fileInputRef}
+                        type="file"
+                        accept="application/pdf"
+                        onChange={handleFileChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                      />
+                      {selectedPdf ? (
+                        <p className="mt-2 text-xs text-gray-500">
+                          Selected: {selectedPdf.name} (
+                          {formatBytes(selectedPdf.size)})
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs text-gray-500">
+                          Accepts .pdf, up to 20 MB.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        onClick={handleUploadPdf}
+                        loading={uploadingPdf}
+                        disabled={!selectedPdf || uploadingPdf}
+                        className="flex-1"
+                      >
+                        <UploadCloud className="h-4 w-4" />
+                        Upload / Replace
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleRefreshPdf}
+                        loading={orgDocRefreshing}
+                        className="flex-1"
+                      >
+                        <RefreshCcw className="h-4 w-4" />
+                        Refresh
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        onClick={handleDeletePdf}
+                        loading={deletingPdf}
+                        disabled={!orgDoc || deletingPdf}
+                        className="flex-1"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </Card>
 

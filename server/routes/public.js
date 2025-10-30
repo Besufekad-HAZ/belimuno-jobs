@@ -7,6 +7,7 @@ const {
   getTrustedCompanies,
   getServices,
   getService,
+  getOrgStructureDocument,
 } = require("../controllers/publicController");
 
 const router = express.Router();
@@ -20,7 +21,9 @@ router.get("/news/:id", getNewsArticle);
 
 // Client management
 router.get("/clients", getClients);
-router.get("/trusted-companies", getTrustedCompanies);
+   router.get("/trusted-companies", getTrustedCompanies);
+   router.get("/org-structure", getOrgStructureDocument);
+router.get("/org-structure", getOrgStructureDocument);
 
 // Service management
 router.get("/services", getServices);
