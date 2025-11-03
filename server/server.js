@@ -43,10 +43,17 @@ const rawOrigins = (
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+const LOCAL_DEV_ORIGINS = [
+  "http://localhost:3000",
+  "https://localhost:3000",
+  "http://127.0.0.1:3000",
+  "https://127.0.0.1:3000",
+];
 const allowVercelPreviews = process.env.ALLOW_VERCEL_PREVIEWS !== "false";
 const isAllowedOrigin = (origin) => {
   if (!origin) return true; // allow same-origin/SSR
   if (rawOrigins.includes(origin)) return true;
+  if (LOCAL_DEV_ORIGINS.includes(origin)) return true;
   if (allowVercelPreviews && /\.vercel\.app$/.test(origin)) return true;
   return false;
 };
