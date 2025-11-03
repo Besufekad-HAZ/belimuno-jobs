@@ -1,4 +1,5 @@
 const express = require("express");
+const dns = require("dns");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
@@ -6,6 +7,14 @@ const path = require("path");
 const connectDB = require("./config/db");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
+
+// Ensure external SMTP providers (e.g., Gmail) resolve over IPv4 in environments
+// where IPv6 connectivity may be blocked (common on cloud hosts).
+try {
+  dns.setDefaultResultOrder?.("ipv4first");
+} catch (err) {
+  console.warn("DNS default result order not set:", err?.message || err);
+}
 
 // Load env vars
 dotenv.config({ path: "./.env" });
