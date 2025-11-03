@@ -1,12 +1,36 @@
 const nodemailer = require('nodemailer');
 
+// Normalize environment variable strings to avoid stray quotes/spaces that
+// can sneak in when values are copied from dashboards (common in prod).
+const sanitizeEnvString = (value) => {
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim().replace(/^['"]+|['"]+$/g, '');
+  return trimmed;
+};
+
+const getEmailCredentials = () => {
+  const rawUser = sanitizeEnvString(process.env.SMTP_USER);
+  const rawPass = sanitizeEnvString(process.env.SMTP_PASS);
+
+  // Gmail app passwords are often copied with spaces for readability – strip
+  // them so authentication works even if the dashboard kept the spacing.
+  const normalizedPass = typeof rawPass === 'string' ? rawPass.replace(/\s+/g, '') : rawPass;
+
+  return {
+    user: rawUser,
+    pass: normalizedPass,
+  };
+};
+
 // Create reusable transporter object using SMTP transport
 const createTransporter = () => {
+  const { user: smtpUser, pass: smtpPass } = getEmailCredentials();
+
   // Check if SMTP credentials are properly configured
-  const isEmailConfigured = process.env.SMTP_USER &&
-                           process.env.SMTP_USER !== 'your-email@gmail.com' &&
-                           process.env.SMTP_PASS &&
-                           process.env.SMTP_PASS !== 'your-app-password';
+  const isEmailConfigured = smtpUser &&
+                           smtpUser !== 'your-email@gmail.com' &&
+                           smtpPass &&
+                           smtpPass !== 'your-app-password';
 
 
   // For development or when SMTP credentials are not configured, use console logging
@@ -32,8 +56,8 @@ const createTransporter = () => {
     port: process.env.SMTP_PORT || 587,
     secure: false, // true for 465, false for other ports
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+      user: smtpUser,
+      pass: smtpPass
     }
   });
 
@@ -53,9 +77,10 @@ const getTransporter = () => {
 // Send password reset email
 const sendPasswordResetEmail = async (email, resetToken, userName) => {
   const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+  const { user: smtpUser } = getEmailCredentials();
 
   const mailOptions = {
-    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+    from: `"Belimuno Jobs" <${smtpUser || 'noreply@belimuno.com'}>`,
     to: email,
     subject: 'Password Reset Request - Belimuno Jobs',
     text: `
@@ -135,8 +160,9 @@ The Belimuno Jobs Team
 
 // Send password reset success email
 const sendPasswordResetSuccessEmail = async (email, userName) => {
+  const { user: smtpUser } = getEmailCredentials();
   const mailOptions = {
-    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+    from: `"Belimuno Jobs" <${smtpUser || 'noreply@belimuno.com'}>`,
     to: email,
     subject: 'Password Reset Successful - Belimuno Jobs',
     text: `
@@ -201,8 +227,9 @@ The Belimuno Jobs Team
 
 // Test email functionality
 const testEmail = async (testEmail) => {
+  const { user: smtpUser } = getEmailCredentials();
   const mailOptions = {
-    from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+    from: `"Belimuno Jobs" <${smtpUser || 'noreply@belimuno.com'}>`,
     to: testEmail,
     subject: 'Test Email - Belimuno Jobs',
     text: 'This is a test email from Belimuno Jobs to verify email configuration.',
@@ -232,8 +259,9 @@ module.exports = {
   // New contact email helpers
   sendContactMessageEmail: async (toEmail, payload) => {
     const { name, email, phone, subject, message } = payload || {};
+    const { user: smtpUser } = getEmailCredentials();
     const mailOptions = {
-      from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+      from: `"Belimuno Jobs" <${smtpUser || 'noreply@belimuno.com'}>`,
       to: toEmail,
       subject: `📬 New Contact Message: ${subject || 'No subject'}`,
       text: `You have received a new contact message.\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || '-'}\nSubject: ${subject}\n\nMessage:\n${message}\n` ,
@@ -258,6 +286,10 @@ module.exports = {
       `
     };
 
+    if (email) {
+      mailOptions.replyTo = email;
+    }
+
     try {
       const result = await getTransporter().sendMail(mailOptions);
       console.log('✅ Contact admin email sent:', result.messageId);
@@ -268,8 +300,9 @@ module.exports = {
     }
   },
   sendContactAutoReply: async (toEmail, name) => {
+    const { user: smtpUser } = getEmailCredentials();
     const mailOptions = {
-      from: `"Belimuno Jobs" <${process.env.SMTP_USER || 'noreply@belimuno.com'}>`,
+      from: `"Belimuno Jobs" <${smtpUser || 'noreply@belimuno.com'}>`,
       to: toEmail,
       subject: 'We received your message – Belimuno Jobs',
       text: `Hello ${name || ''},\n\nThanks for reaching out to Belimuno Jobs. We have received your message and our team will get back to you shortly.\n\nBest regards,\nBelimuno Jobs Team`,
