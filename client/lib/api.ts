@@ -35,7 +35,6 @@ const collectBaseUrls = (): string[] => {
 
   pushUnique(envBase);
 
-  // Allow optional build-time fallback via NEXT_PUBLIC_API_FALLBACK
   const fallbackEnv =
     typeof process !== "undefined"
       ? ((
@@ -46,32 +45,19 @@ const collectBaseUrls = (): string[] => {
       : undefined;
   pushUnique(fallbackEnv);
 
-  // Derive from deployed Vercel environment when possible (evaluates client-side)
-  if (typeof window !== "undefined" && window.location?.origin) {
-    pushUnique(`${window.location.origin}/api`);
-  } else {
-    const vercelUrl =
-      typeof process !== "undefined"
-        ? ((
-            process as unknown as {
-              env?: { NEXT_PUBLIC_VERCEL_URL?: string };
-            }
-          ).env?.NEXT_PUBLIC_VERCEL_URL ?? undefined)
-        : undefined;
-    if (vercelUrl) {
-      const normalized = vercelUrl.startsWith("http")
-        ? vercelUrl
-        : `https://${vercelUrl}`;
-      pushUnique(`${normalized}/api`);
-    }
-  }
-
   [
     "https://belimuno-jobs.onrender.com/api",
     "https://www.belimunojobs.com/api",
     "https://belimunojobs.com/api",
     "http://localhost:5000/api",
   ].forEach(pushUnique);
+
+  if (typeof window !== "undefined" && window.location?.origin) {
+    const origin = window.location.origin;
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)/.test(origin)) {
+      pushUnique(`${origin}/api`);
+    }
+  }
 
   return bases;
 };
