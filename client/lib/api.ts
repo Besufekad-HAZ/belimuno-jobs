@@ -11,22 +11,75 @@ interface ApiResponse<T> {
   data: T;
 }
 
-// Resolve API base URL: prefer env, otherwise try localhost ports (helpful in dev when server auto-binds next free port)
+// Resolve API base URL: prefer env, otherwise try a list of safe fallbacks (prod + dev)
 const envBase =
   typeof process !== "undefined"
     ? (process as unknown as { env?: { NEXT_PUBLIC_API_BASE_URL?: string } })
         .env?.NEXT_PUBLIC_API_BASE_URL
     : undefined;
-const DEFAULT_BASES = [
-  "http://localhost:5000/api",
-  // "https://belimuno-jobs.onrender.com/api",
-  // "http://localhost:5000/api",
-  // "http://localhost:5002/api",
-  // "http://localhost:5003/api",
-  // "http://localhost:5004/api",
-  // "http://localhost:5005/api",
-];
-const BASES = envBase ? [envBase] : DEFAULT_BASES;
+
+const sanitizeBaseUrl = (value?: string | null): string | undefined => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  return trimmed.replace(/\/+$/, "");
+};
+
+const collectBaseUrls = (): string[] => {
+  const bases: string[] = [];
+  const pushUnique = (candidate?: string | null) => {
+    const sanitized = sanitizeBaseUrl(candidate);
+    if (!sanitized || bases.includes(sanitized)) return;
+    bases.push(sanitized);
+  };
+
+  pushUnique(envBase);
+
+  // Allow optional build-time fallback via NEXT_PUBLIC_API_FALLBACK
+  const fallbackEnv =
+    typeof process !== "undefined"
+      ? ((
+          process as unknown as {
+            env?: { NEXT_PUBLIC_API_FALLBACK?: string };
+          }
+        ).env?.NEXT_PUBLIC_API_FALLBACK ?? undefined)
+      : undefined;
+  pushUnique(fallbackEnv);
+
+  // Derive from deployed Vercel environment when possible (evaluates client-side)
+  if (typeof window !== "undefined" && window.location?.origin) {
+    pushUnique(`${window.location.origin}/api`);
+  } else {
+    const vercelUrl =
+      typeof process !== "undefined"
+        ? ((
+            process as unknown as {
+              env?: { NEXT_PUBLIC_VERCEL_URL?: string };
+            }
+          ).env?.NEXT_PUBLIC_VERCEL_URL ?? undefined)
+        : undefined;
+    if (vercelUrl) {
+      const normalized = vercelUrl.startsWith("http")
+        ? vercelUrl
+        : `https://${vercelUrl}`;
+      pushUnique(`${normalized}/api`);
+    }
+  }
+
+  [
+    "https://belimuno-jobs.onrender.com/api",
+    "https://www.belimunojobs.com/api",
+    "https://belimunojobs.com/api",
+    "http://localhost:5000/api",
+  ].forEach(pushUnique);
+
+  return bases;
+};
+
+const BASE_CANDIDATES = collectBaseUrls();
+const BASES = BASE_CANDIDATES.length
+  ? BASE_CANDIDATES
+  : ["https://belimuno-jobs.onrender.com/api", "http://localhost:5000/api"];
 let currentBaseIndex = 0;
 
 const api = axios.create({
