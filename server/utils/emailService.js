@@ -22,6 +22,18 @@ const getEmailCredentials = () => {
   };
 };
 
+const resolveFromAddress = () => {
+  const override = sanitizeEnvString(process.env.SMTP_FROM_EMAIL);
+  if (override) {
+    return override;
+  }
+  const { user: smtpUser } = getEmailCredentials();
+  if (smtpUser) {
+    return `"Belimuno Jobs" <${smtpUser}>`;
+  }
+  return 'Belimuno Jobs <noreply@belimunojobs.com>';
+};
+
 // Create reusable transporter object using SMTP transport
 const createTransporter = () => {
   const { user: smtpUser, pass: smtpPass } = getEmailCredentials();
@@ -51,14 +63,23 @@ const createTransporter = () => {
   }
 
   // Production email configuration
+  const smtpPortRaw = sanitizeEnvString(process.env.SMTP_PORT);
+  const smtpPort = smtpPortRaw ? Number(smtpPortRaw) : 587;
+  const smtpSecure = sanitizeEnvString(process.env.SMTP_SECURE);
+  const useSecure = smtpSecure ? smtpSecure.toLowerCase() === 'true' : smtpPort === 465;
+  const ignoreTls = sanitizeEnvString(process.env.SMTP_IGNORE_TLS);
+  const shouldIgnoreTls = ignoreTls ? ignoreTls.toLowerCase() === 'true' : false;
+
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: false, // true for 465, false for other ports
+    host: sanitizeEnvString(process.env.SMTP_HOST) || 'smtp.gmail.com',
+    port: smtpPort,
+    secure: useSecure,
     auth: {
       user: smtpUser,
       pass: smtpPass
-    }
+    },
+    requireTLS: !shouldIgnoreTls,
+    tls: shouldIgnoreTls ? { rejectUnauthorized: false } : undefined,
   });
 
   return transporter;
@@ -259,9 +280,9 @@ module.exports = {
   // New contact email helpers
   sendContactMessageEmail: async (toEmail, payload) => {
     const { name, email, phone, subject, message } = payload || {};
-    const { user: smtpUser } = getEmailCredentials();
+    const fromAddress = resolveFromAddress();
     const mailOptions = {
-      from: `"Belimuno Jobs" <${smtpUser || 'noreply@belimuno.com'}>`,
+      from: fromAddress,
       to: toEmail,
       subject: `📬 New Contact Message: ${subject || 'No subject'}`,
       text: `You have received a new contact message.\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || '-'}\nSubject: ${subject}\n\nMessage:\n${message}\n` ,
@@ -300,9 +321,9 @@ module.exports = {
     }
   },
   sendContactAutoReply: async (toEmail, name) => {
-    const { user: smtpUser } = getEmailCredentials();
+    const fromAddress = resolveFromAddress();
     const mailOptions = {
-      from: `"Belimuno Jobs" <${smtpUser || 'noreply@belimuno.com'}>`,
+      from: fromAddress,
       to: toEmail,
       subject: 'We received your message – Belimuno Jobs',
       text: `Hello ${name || ''},\n\nThanks for reaching out to Belimuno Jobs. We have received your message and our team will get back to you shortly.\n\nBest regards,\nBelimuno Jobs Team`,
