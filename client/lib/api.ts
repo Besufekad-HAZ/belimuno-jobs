@@ -45,11 +45,7 @@ const collectBaseUrls = (): string[] => {
       : undefined;
   pushUnique(fallbackEnv);
 
-  [
-    "https://belimuno-jobs-bawl.vercel.app/api",
-    "https://www.belimunojobs.com/api",
-    "https://belimunojobs.com/api",
-  ].forEach(pushUnique);
+  ["https://belimuno-jobs-bawl.vercel.app/api"].forEach(pushUnique);
 
   if (typeof window !== "undefined" && window.location?.origin) {
     const origin = window.location.origin;
