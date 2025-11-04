@@ -46,7 +46,8 @@ const collectBaseUrls = (): string[] => {
   pushUnique(fallbackEnv);
 
   [
-    "https://belimuno-jobs.onrender.com/api",
+    // "https://belimuno-jobs.onrender.com/api",
+    "https://belimuno-jobs-bawl.vercel.app/api",
     "https://www.belimunojobs.com/api",
     "https://belimunojobs.com/api",
     "http://localhost:5000/api",
@@ -65,7 +66,11 @@ const collectBaseUrls = (): string[] => {
 const BASE_CANDIDATES = collectBaseUrls();
 const BASES = BASE_CANDIDATES.length
   ? BASE_CANDIDATES
-  : ["https://belimuno-jobs.onrender.com/api", "http://localhost:5000/api"];
+  : [
+      "https://belimuno-jobs-bawl.vercel.app/api",
+      "http://localhost:5000/api",
+      "",
+    ];
 let currentBaseIndex = 0;
 
 const api = axios.create({
