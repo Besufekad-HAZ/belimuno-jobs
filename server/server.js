@@ -97,6 +97,10 @@ const notification = require("./routes/notification");
 const contact = require("./routes/contact");
 const chat = require("./routes/chat");
 const publicRoutes = require("./routes/public");
+const welcome = require("./routes/welcome");
+
+// Friendly landing page for the API root
+app.use("/", welcome);
 
 // API Info route
 app.get("/api", (req, res) => {
