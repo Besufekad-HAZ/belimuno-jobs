@@ -97,6 +97,20 @@ const candidateValues = [
 const remotePatterns = registerPatterns(candidateValues);
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
+          },
+          // you can keep any other security headers here
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns,
   },
