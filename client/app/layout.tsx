@@ -6,6 +6,7 @@ import "react-chatbot-kit/build/main.css";
 import { resolveAssetUrl } from "@/lib/assets";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { LoadingProvider } from "@/contexts/LoadingContext";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -48,6 +49,7 @@ export default function RootLayout({
         <QueryProvider>
           <LoadingProvider>{children}</LoadingProvider>
         </QueryProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
