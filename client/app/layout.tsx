@@ -7,6 +7,7 @@ import { resolveAssetUrl } from "@/lib/assets";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -50,6 +51,7 @@ export default function RootLayout({
           <LoadingProvider>{children}</LoadingProvider>
         </QueryProvider>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
