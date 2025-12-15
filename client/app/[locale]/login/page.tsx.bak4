@@ -322,14 +322,14 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Main Form Card */}
-        <div className="mt-6 sm:mt-10 mx-auto w-full max-w-lg sm:max-w-xl lg:max-w-2xl">
+        <div className="mt-6 sm:mt-10 mx-auto w/full max-w-lg sm:max-w-xl lg:max-w-2xl">
           <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl shadow-[0_20px_80px_rgba(0,0,0,0.35)] border border-white/20 overflow-hidden ring-1 ring-white/10">
             <div className="h-1 w-full bg-gradient-to-r from-white/60 via-white/30 to-white/60" />
             {/* Form + Test Accounts layout */}
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <div className="flex flex-col lg:flex-row lg:items-stretch lg:gap-6">
                 {/* Form Section*/}
-                <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
+                <div className="w/full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
                   {/* Email/Password Sign-In */}
 
                   <Formik

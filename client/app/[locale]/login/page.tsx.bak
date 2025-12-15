@@ -262,6 +262,18 @@ const LoginPage: React.FC = () => {
   }, [error]);
 
 
+  const fillTestAccount = (email: string, password: string) => {
+    if (formikRef.current) {
+      formikRef.current.setValues({ email, password, remember: true });
+      // Clear any previous errors/touched when selecting a test account
+      formikRef.current.setErrors({});
+      formikRef.current.setTouched({
+        email: false,
+        password: false,
+        remember: true,
+      });
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#0E4AA1] via-[#0D63C6] to-[#0E4AA1] flex flex-col justify-center py-6 sm:py-10 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -322,14 +334,14 @@ const LoginPage: React.FC = () => {
         </div>
 
         {/* Main Form Card */}
-        <div className="mt-6 sm:mt-10 mx-auto w-full max-w-lg sm:max-w-xl lg:max-w-2xl">
+        <div className="mt-6 sm:mt-10 mx-auto w-full sm:max-w-3xl lg:max-w-4xl">
           <div className="relative bg-white/10 backdrop-blur-2xl rounded-3xl shadow-[0_20px_80px_rgba(0,0,0,0.35)] border border-white/20 overflow-hidden ring-1 ring-white/10">
             <div className="h-1 w-full bg-gradient-to-r from-white/60 via-white/30 to-white/60" />
             {/* Form + Test Accounts layout */}
             <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <div className="flex flex-col lg:flex-row lg:items-stretch lg:gap-6">
                 {/* Form Section*/}
-                <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto">
+                <div className="flex-1 min-w-0">
                   {/* Email/Password Sign-In */}
 
                   <Formik
@@ -518,6 +530,78 @@ const LoginPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Test Accounts Section */}
+                <aside className="mt-6 lg:mt-0 lg:w-80 xl:w-96 bg-white/5 backdrop-blur px-4 sm:px-6 lg:px-5 py-4 sm:py-6 border-t border-white/10 lg:border-t-0 lg:border-l lg:border-white/10 rounded-3xl lg:rounded-2xl lg:self-stretch">
+                  <div className="flex items-center mb-3 sm:mb-4">
+                    <div className="flex-1 border-t border-white/10"></div>
+                    <span className="px-2 sm:px-3 text-xs sm:text-sm font-medium text-blue-50/80">
+                      {t("testAccounts.title")}
+                    </span>
+                    <div className="flex-1 border-t border-white/10"></div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-2">
+                    {testAccounts.map((account, index) => (
+                      <button
+                        key={index}
+                        onClick={() =>
+                          fillTestAccount(account.email, account.password)
+                        }
+                        className="group w-full text-left px-3 sm:px-4 py-2 sm:py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl border border-white/20 hover:border-white/30 transition-all duration-200 hover:shadow-md transform hover:scale-[1.01]"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium text-white text-xs sm:text-sm group-hover:text-white transition-colors truncate">
+                              {account.role}
+                            </div>
+                            <div className="text-blue-100 text-xs mt-0.5 truncate">
+                              {account.email}
+                            </div>
+                          </div>
+                          <svg
+                            className="w-3 h-3 sm:w-4 sm:h-4 text-blue-100 group-hover:text-white transition-colors flex-shrink-0 ml-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-start">
+                      <svg
+                        className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      <p className="text-xs text-blue-700 leading-relaxed">
+                        <span className="font-medium">
+                          {t("testAccounts.info.title")}
+                        </span>{" "}
+                        {t("testAccounts.info.description")}{" "}
+                        <code className="bg-blue-100 px-1 rounded text-xs">
+                          {t("testAccounts.info.command")}
+                        </code>{" "}
+                        {t("testAccounts.info.location")}
+                      </p>
+                    </div>
+                  </div>
+                </aside>
               </div>
             </div>
           </div>
