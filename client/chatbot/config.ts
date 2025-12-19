@@ -1,13 +1,12 @@
 import { createChatBotMessage } from "react-chatbot-kit";
 import BotAvatar from "@/components/Chatbot/BotAvatar";
 import UserAvatar from "@/components/Chatbot/UserAvatar";
-// @ts-ignore - Type definitions for react-chatbot-kit are incomplete
+// @ts-expect-error - Type definitions for react-chatbot-kit are incomplete
 import type { Config } from "react-chatbot-kit";
 import React from "react";
 
-export interface AvatarProps {
-  className?: string;
-}
+type BotAvatarProps = React.ComponentProps<typeof BotAvatar>;
+type UserAvatarProps = React.ComponentProps<typeof UserAvatar>;
 
 const currentHour = new Date().getHours();
 const timeOfDay =
@@ -34,8 +33,9 @@ const config: Config = {
     },
   },
   customComponents: {
-    botAvatar: (props: any) => React.createElement(BotAvatar, props),
-    userAvatar: (props: any) => React.createElement(UserAvatar, props),
+    botAvatar: (props: BotAvatarProps) => React.createElement(BotAvatar, props),
+    userAvatar: (props: UserAvatarProps) =>
+      React.createElement(UserAvatar, props),
   },
   state: {
     userData: {},

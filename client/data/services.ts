@@ -6,11 +6,12 @@ import {
   Building2,
   Wrench,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export type ServiceItem = {
   title: string;
   description: string;
-  icon: any; // lucide-react icon component
+  icon: LucideIcon; // lucide-react icon component
 };
 
 export const SERVICES: ServiceItem[] = [

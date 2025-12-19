@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from "react";
 
 interface Message {
   id: string;
@@ -9,7 +9,7 @@ interface Message {
   content: string;
   timestamp: string;
   read: boolean;
-  type?: 'text' | 'image' | 'file';
+  type?: "text" | "image" | "file";
   attachments?: Array<{
     id: string;
     name: string;
@@ -32,11 +32,13 @@ interface Conversation {
 
 interface UseChatOptions {
   userId: string;
-  onSendMessage?: (conversationId: string, content: string, attachments?: File[]) => Promise<unknown>;
+  onSendMessage?: (
+    conversationId: string,
+    content: string,
+    attachments?: File[],
+  ) => Promise<unknown>;
   onMarkAsRead?: (conversationId: string) => void;
   onSearch?: (query: string) => void;
-  autoFocus?: boolean;
-  pollInterval?: number;
 }
 
 interface UseChatReturn {
@@ -53,7 +55,11 @@ interface UseChatReturn {
   setMessages: (messages: Message[]) => void;
   addMessage: (message: Message) => void;
   selectConversation: (conversationId: string) => void;
-  sendMessage: (conversationId: string, content: string, attachments?: File[]) => Promise<void>;
+  sendMessage: (
+    conversationId: string,
+    content: string,
+    attachments?: File[],
+  ) => Promise<void>;
   markAsRead: (conversationId: string) => void;
   search: (query: string) => void;
   openChat: () => void;
@@ -66,19 +72,14 @@ interface UseChatReturn {
 }
 
 export const useChat = (options: UseChatOptions): UseChatReturn => {
-  const {
-    userId,
-    onSendMessage,
-    onMarkAsRead,
-    onSearch,
-    autoFocus = true,
-    pollInterval = 5000,
-  } = options;
+  const { userId, onSendMessage, onMarkAsRead, onSearch } = options;
 
   // State
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentConversationId, setCurrentConversationId] = useState<
+    string | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -87,72 +88,94 @@ export const useChat = (options: UseChatOptions): UseChatReturn => {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Current conversation
-  const currentConversation = conversations.find(c => c.id === currentConversationId) || null;
+  const currentConversation =
+    conversations.find((c) => c.id === currentConversationId) || null;
 
   // Actions
-  const selectConversation = useCallback((conversationId: string) => {
-    setCurrentConversationId(conversationId);
-    if (onMarkAsRead) {
-      onMarkAsRead(conversationId);
-    }
-  }, [onMarkAsRead]);
-
-  const addMessage = useCallback((message: Message) => {
-    setMessages(prev => {
-      // Avoid duplicates
-      if (prev.find(m => m.id === message.id)) {
-        return prev;
+  const selectConversation = useCallback(
+    (conversationId: string) => {
+      setCurrentConversationId(conversationId);
+      if (onMarkAsRead) {
+        onMarkAsRead(conversationId);
       }
-      return [...prev, message].sort((a, b) =>
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    },
+    [onMarkAsRead],
+  );
+
+  const addMessage = useCallback(
+    (message: Message) => {
+      setMessages((prev) => {
+        // Avoid duplicates
+        if (prev.find((m) => m.id === message.id)) {
+          return prev;
+        }
+        return [...prev, message].sort(
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+        );
+      });
+
+      // Update conversation's last message
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id === currentConversationId) {
+            return {
+              ...conv,
+              lastMessage: message,
+              unreadCount:
+                message.senderId !== userId
+                  ? conv.unreadCount + 1
+                  : conv.unreadCount,
+            };
+          }
+          return conv;
+        }),
       );
-    });
+    },
+    [currentConversationId, userId],
+  );
 
-    // Update conversation's last message
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === currentConversationId) {
-        return {
-          ...conv,
-          lastMessage: message,
-          unreadCount: message.senderId !== userId ? conv.unreadCount + 1 : conv.unreadCount,
-        };
+  const sendMessage = useCallback(
+    async (conversationId: string, content: string, attachments?: File[]) => {
+      if (!onSendMessage) {
+        throw new Error("onSendMessage handler not provided");
       }
-      return conv;
-    }));
-  }, [currentConversationId, userId]);
 
-  const sendMessage = useCallback(async (conversationId: string, content: string, attachments?: File[]) => {
-    if (!onSendMessage) {
-      throw new Error('onSendMessage handler not provided');
-    }
+      try {
+        await onSendMessage(conversationId, content, attachments);
+      } catch (error) {
+        console.error("Failed to send message:", error);
+        throw error;
+      }
+    },
+    [onSendMessage],
+  );
 
-    try {
-      await onSendMessage(conversationId, content, attachments);
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      throw error;
-    }
-  }, [onSendMessage]);
+  const markAsRead = useCallback(
+    (conversationId: string) => {
+      // Update local state
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv,
+        ),
+      );
 
-  const markAsRead = useCallback((conversationId: string) => {
-    // Update local state
-    setConversations(prev => prev.map(conv =>
-      conv.id === conversationId
-        ? { ...conv, unreadCount: 0 }
-        : conv
-    ));
+      // Call external handler
+      if (onMarkAsRead) {
+        onMarkAsRead(conversationId);
+      }
+    },
+    [onMarkAsRead],
+  );
 
-    // Call external handler
-    if (onMarkAsRead) {
-      onMarkAsRead(conversationId);
-    }
-  }, [onMarkAsRead]);
-
-  const search = useCallback((query: string) => {
-    if (onSearch) {
-      onSearch(query);
-    }
-  }, [onSearch]);
+  const search = useCallback(
+    (query: string) => {
+      if (onSearch) {
+        onSearch(query);
+      }
+    },
+    [onSearch],
+  );
 
   const openChat = useCallback(() => {
     setIsOpen(true);
@@ -166,14 +189,16 @@ export const useChat = (options: UseChatOptions): UseChatReturn => {
   }, []);
 
   const toggleMinimize = useCallback(() => {
-    setIsMinimized(prev => !prev);
+    setIsMinimized((prev) => !prev);
   }, []);
 
   // Cleanup polling on unmount
   useEffect(() => {
+    const intervalId = pollIntervalRef.current;
+
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
   }, []);
