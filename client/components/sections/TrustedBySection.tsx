@@ -79,112 +79,199 @@ const TrustedBySection: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const loadTrustedCompanies = async () => {
-      try {
-        const response = await publicAPI.getTrustedCompanies({
-          status: "active",
-          sort: "order name",
-          limit: 60,
-        });
+    const nameKey = (name: string) => name.trim().toLowerCase();
 
-        const payload = Array.isArray(response?.data?.data)
-          ? response.data.data
-          : Array.isArray(response?.data)
+    const sortTrustedList = (list: RemoteTrustedClient[]) => {
+      return [...list].sort((a, b) => {
+        const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        return a.name.localeCompare(b.name);
+      });
+    };
+
+    const loadTrustedCompanies = async (): Promise<RemoteTrustedClient[]> => {
+      const response = await publicAPI.getTrustedCompanies({
+        status: "active",
+        sort: "order name",
+        limit: 60,
+      });
+
+      const payload = Array.isArray(response?.data?.data)
+        ? response.data.data
+        : Array.isArray(response?.data)
           ? response.data
           : [];
 
-        if (!isMounted || !Array.isArray(payload)) {
-          return;
-        }
+      if (!Array.isArray(payload)) {
+        return [];
+      }
 
-        const normalized = (payload as Array<Record<string, unknown>>)
-          .map((item) => {
-            const entry = item as {
-              name?: unknown;
-              description?: unknown;
-              logo?: unknown;
-              brandColor?: unknown;
-              order?: unknown;
-              tags?: unknown;
-              website?: unknown;
-            };
+      const normalized = (payload as Array<Record<string, unknown>>)
+        .map((item) => {
+          const entry = item as {
+            name?: unknown;
+            description?: unknown;
+            logo?: unknown;
+            brandColor?: unknown;
+            order?: unknown;
+            tags?: unknown;
+            website?: unknown;
+          };
 
-            if (typeof entry.name !== "string") {
-              return undefined;
-            }
+          if (typeof entry.name !== "string") {
+            return undefined;
+          }
 
-            const nameValue = entry.name.trim();
-            if (!nameValue) {
-              return undefined;
-            }
+          const nameValue = entry.name.trim();
+          if (!nameValue) {
+            return undefined;
+          }
 
-            const descriptionValue =
-              typeof entry.description === "string"
-                ? entry.description.trim()
-                : undefined;
-
-            const tagsValue = Array.isArray(entry.tags)
-              ? entry.tags
-                  .map((tag) =>
-                    typeof tag === "string" ? tag.trim() : "",
-                  )
-                  .filter(Boolean)
-                  .join(", ") || undefined
+          const descriptionValue =
+            typeof entry.description === "string"
+              ? entry.description.trim()
               : undefined;
 
-            const orderValue =
-              typeof entry.order === "number" && Number.isFinite(entry.order)
-                ? entry.order
-                : undefined;
+          const tagsValue = Array.isArray(entry.tags)
+            ? entry.tags
+                .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+                .filter(Boolean)
+                .join(", ") || undefined
+            : undefined;
 
-            const logoValue =
-              typeof entry.logo === "string"
-                ? entry.logo.trim() || undefined
-                : undefined;
+          const orderValue =
+            typeof entry.order === "number" && Number.isFinite(entry.order)
+              ? entry.order
+              : undefined;
 
-            const brandColorValue =
-              typeof entry.brandColor === "string"
-                ? entry.brandColor.trim() || undefined
-                : undefined;
+          const logoValue =
+            typeof entry.logo === "string"
+              ? entry.logo.trim() || undefined
+              : undefined;
 
-            const typeValue =
-              typeof entry.website === "string"
-                ? entry.website.trim() || undefined
-                : undefined;
+          const brandColorValue =
+            typeof entry.brandColor === "string"
+              ? entry.brandColor.trim() || undefined
+              : undefined;
 
-            return {
-              name: nameValue,
-              service: descriptionValue || tagsValue,
-              type: typeValue,
-              logo: logoValue,
-              brandColor: brandColorValue,
-              order: orderValue,
-            } as RemoteTrustedClient;
-          })
-          .filter((item): item is RemoteTrustedClient => Boolean(item));
+          const typeValue =
+            typeof entry.website === "string"
+              ? entry.website.trim() || undefined
+              : undefined;
 
-        if (!normalized.length) {
-          return;
-        }
+          return {
+            name: nameValue,
+            service: descriptionValue || tagsValue,
+            type: typeValue,
+            logo: logoValue,
+            brandColor: brandColorValue,
+            order: orderValue,
+          } as RemoteTrustedClient;
+        })
+        .filter((item): item is RemoteTrustedClient => Boolean(item));
 
-        const sorted = normalized.sort((a, b) => {
-          const orderA = a.order ?? Number.MAX_SAFE_INTEGER;
-          const orderB = b.order ?? Number.MAX_SAFE_INTEGER;
-          if (orderA !== orderB) {
-            return orderA - orderB;
+      return sortTrustedList(normalized);
+    };
+
+    const loadClientsFallback = async (): Promise<RemoteTrustedClient[]> => {
+      const response = await publicAPI.getClients({
+        status: "active",
+        sort: "name",
+        limit: 60,
+      });
+
+      const payload = Array.isArray(response?.data?.data)
+        ? response.data.data
+        : [];
+
+      if (!Array.isArray(payload)) {
+        return [];
+      }
+
+      const normalized = (payload as Array<Record<string, unknown>>)
+        .map((item) => {
+          const entry = item as {
+            name?: unknown;
+            type?: unknown;
+            service?: unknown;
+            logo?: unknown;
+            brandColor?: unknown;
+          };
+
+          if (typeof entry.name !== "string") {
+            return undefined;
           }
-          return a.name.localeCompare(b.name);
-        });
 
-        if (isMounted) {
-          setRemoteClients(sorted);
-        }
+          const nameValue = entry.name.trim();
+          if (!nameValue) {
+            return undefined;
+          }
+
+          const typeValue =
+            typeof entry.type === "string" ? entry.type.trim() : undefined;
+          const serviceValue =
+            typeof entry.service === "string"
+              ? entry.service.trim()
+              : undefined;
+          const logoValue =
+            typeof entry.logo === "string" ? entry.logo.trim() : undefined;
+          const brandColorValue =
+            typeof entry.brandColor === "string"
+              ? entry.brandColor.trim() || undefined
+              : undefined;
+
+          return {
+            name: nameValue,
+            type: typeValue,
+            service: serviceValue,
+            logo: logoValue,
+            brandColor: brandColorValue,
+          } as RemoteTrustedClient;
+        })
+        .filter((item): item is RemoteTrustedClient => Boolean(item));
+
+      return sortTrustedList(normalized);
+    };
+
+    const load = async () => {
+      let trustedCompanies: RemoteTrustedClient[] = [];
+      let clients: RemoteTrustedClient[] = [];
+
+      try {
+        trustedCompanies = await loadTrustedCompanies();
       } catch (error) {
         console.warn("Failed to load trusted companies", error);
       }
+
+      try {
+        clients = await loadClientsFallback();
+      } catch (error) {
+        console.warn("Failed to load clients for trusted by", error);
+      }
+
+      if (!isMounted) return;
+
+      if (trustedCompanies.length && clients.length) {
+        const seen = new Set(trustedCompanies.map((c) => nameKey(c.name)));
+        const extras = clients.filter((c) => !seen.has(nameKey(c.name)));
+        setRemoteClients([...trustedCompanies, ...extras]);
+        return;
+      }
+
+      if (trustedCompanies.length) {
+        setRemoteClients(trustedCompanies);
+        return;
+      }
+
+      if (clients.length) {
+        setRemoteClients(clients);
+      }
     };
 
-    loadTrustedCompanies();
+    load();
 
     return () => {
       isMounted = false;
@@ -212,8 +299,8 @@ const TrustedBySection: React.FC = () => {
     const source = isTestMode
       ? CLIENTS.filter((c) => testNames.has(c.name))
       : remoteClients.length
-      ? remoteClients
-      : CLIENTS;
+        ? remoteClients
+        : CLIENTS;
 
     return source.map((client) => ({
       ...client,
@@ -478,7 +565,8 @@ const TrustedBySection: React.FC = () => {
           transform: translateX(-50%);
           border-width: 6px;
           border-style: solid;
-          border-color: rgba(15, 23, 42, 0.92) transparent transparent transparent;
+          border-color: rgba(15, 23, 42, 0.92) transparent transparent
+            transparent;
           z-index: 30;
         }
 
@@ -504,4 +592,3 @@ const TrustedBySection: React.FC = () => {
 };
 
 export default TrustedBySection;
-
