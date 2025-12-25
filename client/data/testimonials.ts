@@ -13,9 +13,9 @@ export type Testimonial = {
 export const testimonials: Testimonial[] = [
   {
     id: 1,
-    name: "Hanna Tesfaye",
+    name: "Lidet Tesfaye",
     role: "HR Director",
-    company: "WFP Ethiopia",
+    company: "Goal Ethiopia",
     quote:
       "Belimuno scaled our field teams in weeks, not months. The vetting process and onboarding support have been seamless across every region.",
     highlight: "Cut hiring time by 60%",
