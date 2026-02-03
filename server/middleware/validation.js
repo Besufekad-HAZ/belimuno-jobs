@@ -21,17 +21,83 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
+// Helper function to detect suspicious/randomized names
+const isSuspiciousName = (name) => {
+  if (!name || typeof name !== 'string') return true;
+  const trimmed = name.trim();
+
+  // Check for random character patterns (too many consecutive consonants/vowels)
+  const randomPattern = /[bcdfghjklmnpqrstvwxyz]{5,}|[aeiou]{5,}/i;
+  if (randomPattern.test(trimmed)) return true;
+
+  // Very long single words without spaces are suspicious
+  if (!trimmed.includes(' ') && trimmed.length > 20) return true;
+
+  // All caps or all lowercase long strings are suspicious
+  if (trimmed.length > 15) {
+    if (trimmed === trimmed.toUpperCase() && !trimmed.includes(' ')) return true;
+    if (trimmed === trimmed.toLowerCase() && !trimmed.includes(' ') && trimmed.length > 20) return true;
+  }
+
+  return false;
+};
+
+// Helper function to detect randomized text in bio/experience/profession
+const isRandomizedText = (text) => {
+  if (!text || typeof text !== 'string') return false;
+  const trimmed = text.trim();
+
+  if (trimmed.length < 5) return false;
+
+  // Check for random character patterns
+  const randomPattern = /[bcdfghjklmnpqrstvwxyz]{6,}|[aeiou]{5,}/i;
+  if (randomPattern.test(trimmed)) return true;
+
+  // All caps or all lowercase long strings without spaces
+  if (trimmed.length > 10) {
+    if (trimmed === trimmed.toUpperCase() && !trimmed.includes(' ')) return true;
+    if (trimmed === trimmed.toLowerCase() && !trimmed.includes(' ') && trimmed.length > 15) return true;
+  }
+
+  return false;
+};
+
 // Registration validation rules
 const validateRegistration = [
   body('name')
     .trim()
     .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters'),
+    .withMessage('Name must be between 2 and 50 characters')
+    .custom((value) => {
+      if (isSuspiciousName(value)) {
+        throw new Error('Name appears to be invalid or randomized. Please use your real name.');
+      }
+      return true;
+    }),
 
   body('email')
     .isEmail()
     .normalizeEmail()
-    .withMessage('Please provide a valid email'),
+    .withMessage('Please provide a valid email')
+    .custom((value) => {
+      // Check for suspicious email domains
+      const domain = value.split('@')[1]?.toLowerCase();
+      if (!domain) {
+        throw new Error('Invalid email format');
+      }
+
+      // Block known temporary/disposable email domains
+      const blockedDomains = [
+        'tempmail.com', 'guerrillamail.com', '10minutemail.com',
+        'throwaway.email', 'mailinator.com', 'getnada.com'
+      ];
+
+      if (blockedDomains.some(blocked => domain.includes(blocked))) {
+        throw new Error('Temporary or disposable email addresses are not allowed');
+      }
+
+      return true;
+    }),
 
   body('password')
     .isLength({ min: 8 })
@@ -47,6 +113,34 @@ const validateRegistration = [
     .optional()
     .matches(/^(\+251|0)[1-9]\d{8}$/)
     .withMessage('Please provide a valid Ethiopian phone number'),
+
+  // Validate profile fields to detect randomized content
+  body('profile.bio')
+    .optional()
+    .custom((value) => {
+      if (value && isRandomizedText(value)) {
+        throw new Error('Bio appears to contain invalid or randomized content');
+      }
+      return true;
+    }),
+
+  body('profile.experience')
+    .optional()
+    .custom((value) => {
+      if (value && isRandomizedText(value)) {
+        throw new Error('Experience appears to contain invalid or randomized content');
+      }
+      return true;
+    }),
+
+  body('profile.profession')
+    .optional()
+    .custom((value) => {
+      if (value && isRandomizedText(value)) {
+        throw new Error('Profession appears to contain invalid or randomized content');
+      }
+      return true;
+    }),
 
   handleValidationErrors
 ];
@@ -100,7 +194,13 @@ const validateProfileUpdate = [
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters'),
+    .withMessage('Name must be between 2 and 50 characters')
+    .custom((value) => {
+      if (value && isSuspiciousName(value)) {
+        throw new Error('Name appears to be invalid or randomized. Please use your real name.');
+      }
+      return true;
+    }),
 
   body('phone')
     .optional()
@@ -123,7 +223,13 @@ const validateProfileUpdate = [
     .optional()
     .trim()
     .isLength({ max: 500 })
-    .withMessage('Bio must not exceed 500 characters'),
+    .withMessage('Bio must not exceed 500 characters')
+    .custom((value) => {
+      if (value && isRandomizedText(value)) {
+        throw new Error('Bio appears to contain invalid or randomized content');
+      }
+      return true;
+    }),
 
   body('profile.dob')
     .optional({ nullable: true })

@@ -25,13 +25,18 @@ const {
   validateNewPassword,
   validateProfileUpdate,
 } = require('../middleware/validation');
+const {
+  registerLimiter,
+  authLimiter,
+  passwordResetLimiter,
+} = require('../middleware/rateLimiter');
 
 // Public routes
-router.post('/register', validateRegistration, register);
-router.post('/login', validateLogin, login);
-router.post('/google', googleAuth);
-router.post('/forgot-password', validatePasswordReset, forgotPassword);
-router.post('/reset-password/:token', validateNewPassword, resetPassword);
+router.post('/register', registerLimiter, validateRegistration, register);
+router.post('/login', authLimiter, validateLogin, login);
+router.post('/google', authLimiter, googleAuth);
+router.post('/forgot-password', passwordResetLimiter, validatePasswordReset, forgotPassword);
+router.post('/reset-password/:token', passwordResetLimiter, validateNewPassword, resetPassword);
 router.get('/verify-email/:token', verifyEmail);
 
 // Protected routes

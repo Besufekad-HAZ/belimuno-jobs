@@ -41,7 +41,7 @@ const register = async (req, res, next) => {
       email,
       password: hashedPassword,
       role,
-      isVerified: true, // Auto-verify all users for testing (can be changed to false for production)
+      isVerified: false, // Require email verification for security
     };
 
     // Include profile data if provided
