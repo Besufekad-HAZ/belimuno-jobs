@@ -80,10 +80,11 @@ const Footer = () => {
               <Phone className="h-4 w-4 mt-1" />
               <div className="flex flex-col space-y-1">
                 {[
-                  "+251-930-014332",
+                  "+251-930-014333",
                   "+251-935-402674",
                   "+251-935-402673",
                   "+251-978-009084",
+                  "+251-1166-84777",
                 ].map((phone) => (
                   <a
                     key={phone}
