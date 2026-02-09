@@ -339,15 +339,16 @@ const ClientDashboard: React.FC = () => {
                 {t("header.subtitle")}
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-wrap gap-2">
               <BackToDashboard
                 currentRole="client"
                 variant="button"
-                className="w-full sm:w-auto"
+                className="flex-1 sm:flex-none min-w-[120px]"
               />
               <Button
                 onClick={() => router.push("/client/jobs/new")}
-                className="w-full sm:w-auto"
+                className="flex-1 sm:flex-none min-w-[140px]"
+                size="sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 {t("header.postJob")}
@@ -537,7 +538,7 @@ const ClientDashboard: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {/* Status-based action buttons */}
                       {/* Client can view details, see applications and delete while job is posted (before assignment) */}
                       {job.status === "posted" && (
@@ -546,7 +547,7 @@ const ClientDashboard: React.FC = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => setSelectedJobForDetails(job)}
-                            className="w-full sm:w-auto"
+                            className="flex-1 sm:flex-none min-w-[100px]"
                           >
                             <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="text-xs sm:text-sm">
@@ -556,12 +557,12 @@ const ClientDashboard: React.FC = () => {
 
                           <Link
                             href={`/client/jobs/${job._id}/applications`}
-                            className="inline-block w-full sm:w-auto"
+                            className="inline-block flex-1 sm:flex-none min-w-[100px]"
                           >
                             <Button
                               size="sm"
                               variant="primary"
-                              className="w-full sm:w-auto"
+                              className="w-full"
                             >
                               <span className="text-xs sm:text-sm">
                                 {t("sections.jobs.actions.applications")}
@@ -575,7 +576,7 @@ const ClientDashboard: React.FC = () => {
                             onClick={() =>
                               router.push(`/client/jobs/${job._id}/update`)
                             }
-                            className="w-full sm:w-auto"
+                            className="flex-1 sm:flex-none min-w-[100px]"
                           >
                             <span className="text-xs sm:text-sm">
                               {t("sections.jobs.actions.editJob")}
@@ -586,7 +587,7 @@ const ClientDashboard: React.FC = () => {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDeleteJob(job)}
-                            className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
+                            className="flex-1 sm:flex-none min-w-[100px] text-red-600 hover:bg-red-50 border-red-600"
                           >
                             <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="text-xs sm:text-sm">
@@ -602,7 +603,7 @@ const ClientDashboard: React.FC = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleCancelAssignment(job)}
-                          className="text-red-600 hover:bg-red-50 border-red-600"
+                          className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
                         >
                           {t("sections.jobs.actions.cancelAssignment")}
                         </Button>
@@ -620,18 +621,24 @@ const ClientDashboard: React.FC = () => {
                                 "revision_requested",
                               )
                             }
+                            className="flex-1 sm:flex-none min-w-[120px]"
                           >
                             <RefreshCw className="h-4 w-4 mr-1" />
-                            {t("sections.jobs.actions.requestRevision")}
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.jobs.actions.requestRevision")}
+                            </span>
                           </Button>
                           <Button
                             size="sm"
                             onClick={() =>
                               handleUpdateJobStatus(job._id, "completed")
                             }
+                            className="flex-1 sm:flex-none min-w-[120px]"
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
-                            {t("sections.jobs.actions.approveWork")}
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.jobs.actions.approveWork")}
+                            </span>
                           </Button>
                         </>
                       )}
@@ -642,9 +649,12 @@ const ClientDashboard: React.FC = () => {
                           <Button
                             size="sm"
                             onClick={() => handlePaymentAndRating(job)}
+                            className="w-full sm:w-auto"
                           >
                             <CreditCard className="h-4 w-4 mr-1" />
-                            {t("sections.jobs.actions.payAndRate")}
+                            <span className="text-xs sm:text-sm">
+                              {t("sections.jobs.actions.payAndRate")}
+                            </span>
                           </Button>
                         )}
 
@@ -659,10 +669,12 @@ const ClientDashboard: React.FC = () => {
                             setSelectedJobForDispute(job);
                             setShowDisputeModal(true);
                           }}
-                          className="text-red-600 hover:bg-red-50 border-red-600"
+                          className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
                         >
                           <AlertTriangle className="h-4 w-4 mr-1" />
-                          {t("sections.jobs.actions.raiseDispute")}
+                          <span className="text-xs sm:text-sm">
+                            {t("sections.jobs.actions.raiseDispute")}
+                          </span>
                         </Button>
                       )}
                     </div>
@@ -976,14 +988,18 @@ const ClientDashboard: React.FC = () => {
                   </Card>
 
                   {/* Payment Actions */}
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <Button
                       variant="outline"
                       onClick={() => setShowPaymentModal(false)}
+                      className="w-full sm:w-auto order-2 sm:order-1"
                     >
                       {t("modals.payment.actions.cancel")}
                     </Button>
-                    <Button onClick={processPayment} className="flex-1">
+                    <Button
+                      onClick={processPayment}
+                      className="w-full sm:flex-1 order-1 sm:order-2"
+                    >
                       <CreditCard className="h-4 w-4 mr-2" />
                       {t("modals.payment.actions.process")}
                     </Button>
@@ -1052,7 +1068,7 @@ const ClientDashboard: React.FC = () => {
                   </div>
 
                   {/* Submit Actions */}
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <Button
                       variant="outline"
                       onClick={() => {
@@ -1060,10 +1076,14 @@ const ClientDashboard: React.FC = () => {
                         setRating(5);
                         setReview("");
                       }}
+                      className="w-full sm:w-auto order-2 sm:order-1"
                     >
                       {t("modals.rating.actions.skip")}
                     </Button>
-                    <Button onClick={submitRating} className="flex-1">
+                    <Button
+                      onClick={submitRating}
+                      className="w-full sm:flex-1 order-1 sm:order-2"
+                    >
                       <Star className="h-4 w-4 mr-2" />
                       {t("modals.rating.actions.submit")}
                     </Button>
@@ -1378,7 +1398,7 @@ const ClientDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end pt-4 border-t">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -1392,6 +1412,7 @@ const ClientDashboard: React.FC = () => {
                         evidence: [],
                       });
                     }}
+                    className="w-full sm:w-auto order-2 sm:order-1"
                   >
                     Cancel
                   </Button>
@@ -1423,6 +1444,7 @@ const ClientDashboard: React.FC = () => {
                       }
                     }}
                     disabled={!disputeData.title || !disputeData.description}
+                    className="w-full sm:flex-1 order-1 sm:order-2"
                   >
                     Submit Dispute
                   </Button>

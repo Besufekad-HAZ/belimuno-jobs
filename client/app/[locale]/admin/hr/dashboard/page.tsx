@@ -167,101 +167,113 @@ const HRAdminDashboard: React.FC = () => {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div className="flex flex-col gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>
-              <p className="text-gray-600">{t("header.subtitle")}</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
+                {t("header.subtitle")}
+              </p>
             </div>
-            <div className="flex space-x-3 mt-4 sm:mt-0">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <Button
                 onClick={() => router.push("/admin/chat")}
                 variant="outline"
-                className="flex items-center space-x-2"
+                className="flex-1 sm:flex-none min-w-[120px]"
+                size="sm"
               >
-                <MessageSquarePlus className="h-4 w-4" />
-                <span>Team Chat</span>
+                <MessageSquarePlus className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Team Chat</span>
+                <span className="sm:hidden">Chat</span>
               </Button>
               <Button
                 onClick={() => setShowAnnouncementModal(true)}
                 variant="primary"
-                className="flex items-center space-x-2"
+                className="flex-1 sm:flex-none min-w-[140px]"
+                size="sm"
               >
-                <Bell className="h-4 w-4" />
-                <span>{t("header.buttons.sendAnnouncement")}</span>
+                <Bell className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">
+                  {t("header.buttons.sendAnnouncement")}
+                </span>
+                <span className="sm:hidden">Announce</span>
               </Button>
               <Button
                 onClick={() => router.push("/admin/hr/workers")}
                 variant="outline"
-                className="flex items-center space-x-2"
+                className="flex-1 sm:flex-none min-w-[120px]"
+                size="sm"
               >
-                <Users className="h-4 w-4" />
-                <span>{t("header.buttons.manageWorkers")}</span>
+                <Users className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">
+                  {t("header.buttons.manageWorkers")}
+                </span>
+                <span className="sm:hidden">Workers</span>
               </Button>
             </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-blue-100">
-                  <Users className="h-6 w-6 text-blue-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-blue-100 flex-shrink-0">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.totalWorkers.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.totalWorkers || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-green-100">
-                  <UserCheck className="h-6 w-6 text-green-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-green-100 flex-shrink-0">
+                  <UserCheck className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.verifiedWorkers.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.verifiedWorkers || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-orange-100">
-                  <Clock className="h-6 w-6 text-orange-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-orange-100 flex-shrink-0">
+                  <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.pendingVerification.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.pendingVerifications || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-red-100">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-red-100 flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.openDisputes.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.disputesOpen || 0}
                   </p>
                 </div>
@@ -631,15 +643,15 @@ const HRAdminDashboard: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <Button
                     onClick={() =>
                       handleWorkerVerification(selectedWorker._id, "verify")
                     }
                     variant="primary"
-                    className="flex items-center space-x-2"
+                    className="w-full sm:w-auto"
                   >
-                    <CheckCircle className="h-4 w-4" />
+                    <CheckCircle className="h-4 w-4 mr-2" />
                     <span>{t("worker.verification.buttons.verify")}</span>
                   </Button>
                   <Button
@@ -647,9 +659,9 @@ const HRAdminDashboard: React.FC = () => {
                       handleWorkerVerification(selectedWorker._id, "reject")
                     }
                     variant="outline"
-                    className="flex items-center space-x-2 text-red-600"
+                    className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
                   >
-                    <XCircle className="h-4 w-4" />
+                    <XCircle className="h-4 w-4 mr-2" />
                     <span>{t("worker.verification.buttons.reject")}</span>
                   </Button>
                 </div>
@@ -716,14 +728,17 @@ const HRAdminDashboard: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex space-x-3">
-                  <Button variant="primary">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <Button variant="primary" className="w-full sm:w-auto">
                     {t("disputes.details.buttons.investigate")}
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     {t("disputes.details.buttons.contactParties")}
                   </Button>
-                  <Button variant="outline" className="text-green-600">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto text-green-600 hover:bg-green-50 border-green-600"
+                  >
                     {t("disputes.details.buttons.resolve")}
                   </Button>
                 </div>
@@ -832,17 +847,19 @@ const HRAdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex space-x-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4">
                 <Button
                   onClick={handleSendAnnouncement}
                   variant="primary"
                   disabled={!announcement.title || !announcement.message}
+                  className="w-full sm:w-auto"
                 >
                   {t("announcement.buttons.send")}
                 </Button>
                 <Button
                   onClick={() => setShowAnnouncementModal(false)}
                   variant="outline"
+                  className="w-full sm:w-auto"
                 >
                   {t("announcement.buttons.cancel")}
                 </Button>

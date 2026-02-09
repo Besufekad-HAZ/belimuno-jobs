@@ -110,17 +110,28 @@ export const useHRDashboardData = () => {
   return useQuery({
     queryKey: ["hrDashboard"],
     queryFn: async () => {
-      const [usersResponse, disputesResponse] = await Promise.all([
-        adminAPI.getUsers({ role: "worker", limit: 100 }),
-        adminAPI.getDisputes(),
+      const [usersResponse, disputesResponse] = await Promise.allSettled([
+        adminAPI.getUsers({ role: "worker", limit: 100 }).catch((err) => {
+          console.warn("Failed to fetch workers:", err);
+          return { data: { data: [] } };
+        }),
+        adminAPI.getDisputes().catch((err) => {
+          console.warn("Failed to fetch disputes:", err);
+          return { data: { data: [] } };
+        }),
       ]);
 
       const workersData =
-        usersResponse.data?.data ||
-        usersResponse.data?.users ||
-        usersResponse.data ||
-        [];
-      const disputesData = disputesResponse.data?.data || [];
+        usersResponse.status === "fulfilled"
+          ? usersResponse.value.data?.data ||
+            usersResponse.value.data?.users ||
+            usersResponse.value.data ||
+            []
+          : [];
+      const disputesData =
+        disputesResponse.status === "fulfilled"
+          ? disputesResponse.value.data?.data || []
+          : [];
 
       const hrStats = {
         totalWorkers: workersData.length,
@@ -316,7 +327,7 @@ export const useWorkerDashboardData = () => {
         workerAPI.getEarnings(),
         workerAPI.getDisputes(),
         workerAPI.getJobsForYou({ limit: 5 }),
-        notificationsAPI.getAll(),
+        notificationsAPI.getAll().catch(() => ({ data: { data: [] } })),
       ]);
 
       const apps: { job?: { _id: string } }[] =

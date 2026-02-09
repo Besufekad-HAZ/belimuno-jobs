@@ -172,14 +172,18 @@ export default function Home() {
 
   const fetchPublicData = async () => {
     try {
-      const [statsResponse, jobsResponse] = await Promise.all([
+      const [statsResponse, jobsResponse] = await Promise.allSettled([
         jobsAPI.getStats(),
         jobsAPI.getAll({ limit: 6, status: "posted" }),
       ]);
 
-      setStats(statsResponse.data);
-      setFeaturedJobs(jobsResponse.data.data || []);
-      setCategories(statsResponse.data.data?.jobsByCategory || []);
+      if (statsResponse.status === "fulfilled") {
+        setStats(statsResponse.value.data);
+        setCategories(statsResponse.value.data?.data?.jobsByCategory || []);
+      }
+      if (jobsResponse.status === "fulfilled") {
+        setFeaturedJobs(jobsResponse.value.data.data || []);
+      }
     } catch (error) {
       console.error("Failed to fetch public data:", error);
     }

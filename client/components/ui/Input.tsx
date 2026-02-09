@@ -54,6 +54,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             `}
               aria-invalid={!!error}
               aria-describedby={error ? errorId : undefined}
+              suppressHydrationWarning
               {...props}
             />
             <button
@@ -112,6 +113,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           `}
             aria-invalid={!!error}
             aria-describedby={error ? errorId : undefined}
+            suppressHydrationWarning
             {...props}
           />
         )}

@@ -21,14 +21,16 @@ const LogoAnimationLoader: React.FC<LogoAnimationLoaderProps> = ({
 }) => {
   const TAIL_PLAYBACK_SECONDS = 1;
   const logoSrc = "/belimuno-logo.png";
-  const [isMounted, setIsMounted] = useState(isVisible);
-  const [isShowing, setIsShowing] = useState(isVisible);
+  const [isClient, setIsClient] = useState(false);
+  const [isMounted, setIsMounted] = useState(false); // Start as false to prevent SSR rendering
+  const [isShowing, setIsShowing] = useState(false);
   const [isSliding, setIsSliding] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [hasSeekedToTail, setHasSeekedToTail] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(compact);
   const completionRef = useRef(false);
   const pendingTailPlaybackRef = useRef(false);
+  
   const resolvedDuration = useMemo(() => {
     if (compact) {
       return Math.min(duration, 1000);
@@ -36,7 +38,14 @@ const LogoAnimationLoader: React.FC<LogoAnimationLoaderProps> = ({
     return Math.max(duration, TAIL_PLAYBACK_SECONDS * 1000 + 200);
   }, [compact, duration]);
 
+  // Ensure we only render on client side to prevent hydration mismatch
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return; // Don't run effects during SSR
+
     if (!isVisible) {
       setIsShowing(false);
       const timer = window.setTimeout(() => {
@@ -73,9 +82,10 @@ const LogoAnimationLoader: React.FC<LogoAnimationLoaderProps> = ({
       cancelAnimationFrame(frame);
       window.clearTimeout(durationTimer);
     };
-  }, [compact, fadeDuration, isVisible, onComplete, resolvedDuration]);
+  }, [isClient, compact, fadeDuration, isVisible, onComplete, resolvedDuration]);
 
-  if (!isMounted || typeof document === "undefined") return null;
+  // Prevent hydration mismatch - don't render anything during SSR
+  if (!isClient || typeof document === "undefined" || !isMounted) return null;
 
   const seekToTail = () => {
     if (compact) {

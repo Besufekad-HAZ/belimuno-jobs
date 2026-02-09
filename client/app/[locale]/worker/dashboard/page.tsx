@@ -623,11 +623,11 @@ const WorkerDashboard: React.FC = () => {
                   {t("header.subtitle")}
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 <Button
                   variant="outline"
                   onClick={() => setShowNotificationsModal(true)}
-                  className="relative w-full sm:w-auto"
+                  className="relative flex-1 sm:flex-none min-w-[120px]"
                   size="sm"
                 >
                   <Bell className="h-4 w-4 mr-2" />
@@ -644,7 +644,7 @@ const WorkerDashboard: React.FC = () => {
                 <Button
                   variant="outline"
                   onClick={() => setShowWalletModal(true)}
-                  className="w-full sm:w-auto"
+                  className="flex-1 sm:flex-none min-w-[120px]"
                   size="sm"
                 >
                   <Wallet className="h-4 w-4 mr-2" />
@@ -1023,7 +1023,7 @@ const WorkerDashboard: React.FC = () => {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => declineAssignment(job._id)}
-                                  className="flex-1 sm:flex-none text-red-600 hover:bg-red-50 border-red-600"
+                                  className="flex-1 sm:flex-none min-w-[100px] text-red-600 hover:bg-red-50 border-red-600"
                                 >
                                   <ThumbsDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                                   <span className="text-xs sm:text-sm">
@@ -1033,7 +1033,7 @@ const WorkerDashboard: React.FC = () => {
                                 <Button
                                   size="sm"
                                   onClick={() => acceptAssignment(job._id)}
-                                  className="flex-1 sm:flex-none"
+                                  className="flex-1 sm:flex-none min-w-[100px]"
                                 >
                                   <ThumbsUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                                   <span className="text-xs sm:text-sm">
@@ -1089,10 +1089,14 @@ const WorkerDashboard: React.FC = () => {
                                   setSelectedJobForDispute(job);
                                   setShowDisputeModal(true);
                                 }}
-                                className="text-red-600 hover:bg-red-50 "
+                                className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
                               >
                                 <AlertTriangle className="h-4 w-4 mr-1" />
-                                {t("sections.activeJobs.actions.raiseDispute")}
+                                <span className="text-xs sm:text-sm">
+                                  {t(
+                                    "sections.activeJobs.actions.raiseDispute",
+                                  )}
+                                </span>
                               </Button>
                             )}
 
@@ -1105,7 +1109,7 @@ const WorkerDashboard: React.FC = () => {
                                     setRateJobId(job._id);
                                     setShowRateModal(true);
                                   }}
-                                  className="flex-1 sm:flex-none"
+                                  className="w-full sm:w-auto"
                                 >
                                   <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                                   <span className="text-xs sm:text-sm">
@@ -1121,12 +1125,15 @@ const WorkerDashboard: React.FC = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => openChat(job._id)}
-                              className="flex-1 sm:flex-none"
+                              className="w-full sm:w-auto"
                               title={t(
                                 "sections.activeJobs.actions.viewMessages",
                               )}
                             >
-                              <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="text-xs sm:text-sm sm:hidden">
+                                Chat
+                              </span>
                             </Button>
                           </div>
                         </div>
@@ -1479,7 +1486,7 @@ const WorkerDashboard: React.FC = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between pt-2 gap-3">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2">
                       <Button
                         type="button"
                         variant="outline"
@@ -1490,7 +1497,7 @@ const WorkerDashboard: React.FC = () => {
                             proposedBudget: "",
                           });
                         }}
-                        className="w-full sm:w-auto"
+                        className="w-full sm:w-auto order-2 sm:order-1"
                       >
                         Cancel
                       </Button>
@@ -1500,7 +1507,7 @@ const WorkerDashboard: React.FC = () => {
                           !applicationData.proposal ||
                           !applicationData.proposedBudget
                         }
-                        className="w-full sm:min-w-[160px]"
+                        className="w-full sm:flex-1 sm:min-w-[160px] order-1 sm:order-2"
                       >
                         Submit Application
                       </Button>
@@ -1675,7 +1682,7 @@ const WorkerDashboard: React.FC = () => {
                   placeholder={t("modals.rating.feedback.placeholder")}
                 />
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -1683,11 +1690,12 @@ const WorkerDashboard: React.FC = () => {
                     setClientRating(5);
                     setClientReview("");
                   }}
+                  className="w-full sm:w-auto order-2 sm:order-1"
                 >
                   {t("buttons.cancel")}
                 </Button>
                 <Button
-                  className="flex-1"
+                  className="w-full sm:flex-1 order-1 sm:order-2"
                   onClick={async () => {
                     if (!rateJobId) return;
                     try {

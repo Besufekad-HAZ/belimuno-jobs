@@ -498,20 +498,25 @@ const WorkerManagement: React.FC = () => {
               Manage worker profiles, verifications, and HR operations
             </p>
           </div>
-          <div className="flex space-x-3 mt-4 sm:mt-0">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-0">
             <Button
               onClick={() => router.push("/admin/chat")}
               variant="primary"
-              className="flex items-center gap-2"
+              className="flex-1 sm:flex-none min-w-[120px] flex items-center gap-2"
+              size="sm"
             >
               <MessageSquarePlus className="h-4 w-4" />
-              Team Chat
+              <span className="hidden sm:inline">Team Chat</span>
+              <span className="sm:hidden">Chat</span>
             </Button>
             <Button
               onClick={() => router.push("/admin/hr/dashboard")}
               variant="outline"
+              className="flex-1 sm:flex-none min-w-[120px]"
+              size="sm"
             >
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
             </Button>
           </div>
         </div>
@@ -761,79 +766,81 @@ const WorkerManagement: React.FC = () => {
                 key={worker._id}
                 className="p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:border-blue-100/80"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                     {/* Avatar */}
-                    <div className="h-16 w-16 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="h-12 w-12 sm:h-16 sm:w-16 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                       {worker.profile?.avatar ? (
                         <Image
                           src={worker.profile.avatar}
                           alt={worker.name}
                           width={64}
                           height={64}
-                          className="h-16 w-16 rounded-full object-cover"
+                          className="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-cover"
                         />
                       ) : (
-                        <Users className="h-8 w-8 text-gray-600" />
+                        <Users className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600" />
                       )}
                     </div>
 
                     {/* Worker Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 truncate">
                           {worker.name}
                         </h3>
                         {getWorkerStatusBadge(worker)}
                         {worker.__meta?.category && (
-                          <Badge variant="secondary">
+                          <Badge variant="secondary" size="sm">
                             {worker.__meta.category}
                           </Badge>
                         )}
                         <div className="flex items-center space-x-1">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="text-sm font-medium">
+                          <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
+                          <span className="text-xs sm:text-sm font-medium">
                             {worker.workerProfile?.rating || 0}/5
                           </span>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
                         <div>
-                          <p className="text-sm text-gray-600 flex items-center">
-                            <Mail className="h-4 w-4 mr-1" />
-                            {worker.email}
+                          <p className="text-xs sm:text-sm text-gray-600 flex items-center break-words">
+                            <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{worker.email}</span>
                           </p>
                           {worker.phone && (
-                            <p className="text-sm text-gray-600 flex items-center mt-1">
-                              <Phone className="h-4 w-4 mr-1" />
-                              {worker.phone}
+                            <p className="text-xs sm:text-sm text-gray-600 flex items-center mt-1">
+                              <Phone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                              <span className="truncate">{worker.phone}</span>
                             </p>
                           )}
 
-                          <p className="text-sm text-gray-600 flex items-center mt-1">
-                            <span className="text-xs font-semibold mr-1">
+                          <p className="text-xs sm:text-sm text-gray-600 flex items-center mt-1">
+                            <span className="text-xs font-semibold mr-1 flex-shrink-0">
                               📍
                             </span>
-                            <strong>Region:</strong>{" "}
-                            {formatRegionLabel(worker.profile.address.city)}
+                            <span className="truncate">
+                              <strong>Region:</strong>{" "}
+                              {formatRegionLabel(worker.profile.address.city)}
+                            </span>
                           </p>
                         </div>
 
                         <div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600 break-words">
                             <strong>Experience:</strong>{" "}
                             {worker.__meta?.experience ||
                               worker.workerProfile?.experience ||
                               NOT_SPECIFIED_EXPERIENCE}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600">
                             <strong>Jobs:</strong>{" "}
                             {worker.workerProfile?.completedJobs || 0}/
                             {worker.workerProfile?.totalJobs || 0}
                           </p>
                           {worker.workerProfile?.hourlyRate && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-xs sm:text-sm text-gray-600">
                               <strong>Rate:</strong> $
                               {worker.workerProfile.hourlyRate}/hr
                             </p>
@@ -841,20 +848,20 @@ const WorkerManagement: React.FC = () => {
                         </div>
 
                         <div>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600">
                             <strong>Joined:</strong>{" "}
                             {formatDistanceToNow(new Date(worker.createdAt), {
                               addSuffix: true,
                             })}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600 break-words">
                             <strong>Availability:</strong>{" "}
                             {worker.workerProfile?.availability ||
                               "Not specified"}
                           </p>
                           <div className="flex items-center space-x-1 mt-1">
-                            <Award className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm font-medium text-blue-600">
+                            <Award className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm font-medium text-blue-600">
                               Score: {calculateWorkerScore(worker)}/10
                             </span>
                           </div>
@@ -888,7 +895,7 @@ const WorkerManagement: React.FC = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-col space-y-2 ml-4">
+                  <div className="flex flex-row lg:flex-col gap-2 lg:gap-2 lg:ml-4 flex-shrink-0 w-full lg:w-auto">
                     <Button
                       onClick={() => {
                         setSelectedWorker(worker);
@@ -896,10 +903,11 @@ const WorkerManagement: React.FC = () => {
                       }}
                       variant="outline"
                       size="sm"
-                      className="flex items-center space-x-2"
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-2"
                     >
-                      <Eye className="h-4 w-4" />
-                      <span>View Details</span>
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">View Details</span>
+                      <span className="sm:hidden">View</span>
                     </Button>
 
                     {!worker.isVerified &&
@@ -914,10 +922,11 @@ const WorkerManagement: React.FC = () => {
                             }}
                             variant="primary"
                             size="sm"
-                            className="flex items-center space-x-2"
+                            className="flex-1 lg:flex-none flex items-center justify-center gap-2"
                           >
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Verify</span>
+                            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Verify</span>
+                            <span className="sm:hidden">✓</span>
                           </Button>
                           <Button
                             onClick={() => {
@@ -927,10 +936,11 @@ const WorkerManagement: React.FC = () => {
                             }}
                             variant="outline"
                             size="sm"
-                            className="flex items-center space-x-2 text-red-600"
+                            className="flex-1 lg:flex-none flex items-center justify-center gap-2 text-red-600"
                           >
-                            <XCircle className="h-4 w-4" />
-                            <span>Reject</span>
+                            <XCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Reject</span>
+                            <span className="sm:hidden">✗</span>
                           </Button>
                         </>
                       )}
@@ -942,10 +952,11 @@ const WorkerManagement: React.FC = () => {
                       }}
                       variant="outline"
                       size="sm"
-                      className="flex items-center space-x-2"
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-2"
                     >
-                      <MessageSquare className="h-4 w-4" />
-                      <span>Message</span>
+                      <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">Message</span>
+                      <span className="sm:hidden">Msg</span>
                     </Button>
 
                     <Button
@@ -954,16 +965,21 @@ const WorkerManagement: React.FC = () => {
                       }
                       variant="outline"
                       size="sm"
-                      className={`flex items-center space-x-2 ${
+                      className={`flex-1 lg:flex-none flex items-center justify-center gap-2 ${
                         worker.isActive ? "text-red-600" : "text-green-600"
                       }`}
                     >
                       {worker.isActive ? (
-                        <XCircle className="h-4 w-4" />
+                        <XCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <CheckCircle className="h-4 w-4" />
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
                       )}
-                      <span>{worker.isActive ? "Deactivate" : "Activate"}</span>
+                      <span className="hidden sm:inline">
+                        {worker.isActive ? "Deactivate" : "Activate"}
+                      </span>
+                      <span className="sm:hidden">
+                        {worker.isActive ? "Deact" : "Act"}
+                      </span>
                     </Button>
                   </div>
                 </div>

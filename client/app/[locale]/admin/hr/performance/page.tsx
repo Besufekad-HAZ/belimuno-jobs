@@ -497,20 +497,25 @@ const PerformanceReviews: React.FC = () => {
               Manage worker performance evaluations and development goals
             </p>
           </div>
-          <div className="flex space-x-3 mt-4 sm:mt-0">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-0">
             <Button
               onClick={() => setShowCreateModal(true)}
               variant="primary"
-              className="flex items-center space-x-2"
+              className="flex-1 sm:flex-none min-w-[140px] flex items-center gap-2"
+              size="sm"
             >
               <Plus className="h-4 w-4" />
-              <span>Create Review</span>
+              <span className="hidden sm:inline">Create Review</span>
+              <span className="sm:hidden">Create</span>
             </Button>
             <Button
               onClick={() => router.push("/admin/hr/dashboard")}
               variant="outline"
+              className="flex-1 sm:flex-none min-w-[120px]"
+              size="sm"
             >
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
             </Button>
           </div>
         </div>
@@ -708,11 +713,11 @@ const PerformanceReviews: React.FC = () => {
             </Card>
           ) : (
             filteredReviews.map((review) => (
-              <Card key={review._id} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
+              <Card key={review._id} className="p-4 sm:p-6">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate flex-1 min-w-0">
                         {review.worker.name}
                       </h3>
                       {getStatusBadge(review.status)}
@@ -721,18 +726,18 @@ const PerformanceReviews: React.FC = () => {
                       </Badge>
                       <div className="flex items-center space-x-1">
                         {getRatingStars(review.overallRating)}
-                        <span className="text-sm font-medium text-gray-600 ml-1">
+                        <span className="text-xs sm:text-sm font-medium text-gray-600 ml-1">
                           ({review.overallRating.toFixed(1)})
                         </span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Review Period
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">
                           {new Date(
                             review.period.startDate,
                           ).toLocaleDateString()}{" "}
@@ -741,18 +746,18 @@ const PerformanceReviews: React.FC = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Reviewer
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">
                           {review.reviewer.name}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Key Metrics
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">
                           Quality: {review.metrics.qualityRating}/5, Completion:{" "}
                           {review.metrics.jobCompletion}%
                         </p>
@@ -761,7 +766,7 @@ const PerformanceReviews: React.FC = () => {
 
                     {review.strengths.length > 0 && (
                       <div className="mb-2">
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Strengths:
                         </p>
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -779,7 +784,7 @@ const PerformanceReviews: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm text-gray-500">
                       <span>
                         Created{" "}
                         {formatDistanceToNow(new Date(review.createdAt), {
@@ -797,7 +802,7 @@ const PerformanceReviews: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col space-y-2 ml-4">
+                  <div className="flex flex-row lg:flex-col gap-2 lg:gap-2 lg:ml-4 flex-shrink-0 w-full lg:w-auto">
                     <Button
                       onClick={() => {
                         setSelectedReview(review);
@@ -805,20 +810,22 @@ const PerformanceReviews: React.FC = () => {
                       }}
                       variant="outline"
                       size="sm"
-                      className="flex items-center space-x-2"
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-2"
                     >
-                      <Eye className="h-4 w-4" />
-                      <span>View Details</span>
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">View Details</span>
+                      <span className="sm:hidden">View</span>
                     </Button>
 
                     {review.status === "draft" && (
                       <Button
                         variant="primary"
                         size="sm"
-                        className="flex items-center space-x-2"
+                        className="flex-1 lg:flex-none flex items-center justify-center gap-2"
                       >
-                        <Edit className="h-4 w-4" />
-                        <span>Edit</span>
+                        <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Edit</span>
+                        <span className="sm:hidden">Edit</span>
                       </Button>
                     )}
                   </div>
@@ -1284,7 +1291,7 @@ const PerformanceReviews: React.FC = () => {
               />
             </div>
 
-            <div className="flex space-x-3 pt-4">
+            <div className="flex flex-wrap gap-2 sm:gap-3 pt-4">
               <Button
                 onClick={handleCreateReview}
                 variant="primary"
@@ -1293,12 +1300,16 @@ const PerformanceReviews: React.FC = () => {
                   !newReview.startDate ||
                   !newReview.endDate
                 }
+                className="flex-1 sm:flex-none min-w-[120px]"
+                size="sm"
               >
                 Create Review
               </Button>
               <Button
                 onClick={() => setShowCreateModal(false)}
                 variant="outline"
+                className="flex-1 sm:flex-none min-w-[120px]"
+                size="sm"
               >
                 Cancel
               </Button>

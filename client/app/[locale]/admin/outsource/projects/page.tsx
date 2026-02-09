@@ -562,31 +562,33 @@ const ProjectOversight: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <Card className="p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div className="flex-1 max-w-md">
+        <Card className="p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex-1 w-full">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search jobs by title, client, worker, or tags..."
+                  placeholder="Search jobs by title, client, worker..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">Status:</span>
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              <div className="flex items-center space-x-2 flex-1 sm:flex-none min-w-[140px]">
+                <Filter className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                  Status:
+                </span>
                 <select
                   value={statusFilter}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     setStatusFilter(e.target.value as StatusFilter)
                   }
-                  className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 sm:flex-none px-2 sm:px-3 py-1 rounded-md border border-gray-300 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
                   <option value="posted">Posted</option>
@@ -597,14 +599,16 @@ const ProjectOversight: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Priority:</span>
+              <div className="flex items-center space-x-2 flex-1 sm:flex-none min-w-[140px]">
+                <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+                  Priority:
+                </span>
                 <select
                   value={priorityFilter}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     setPriorityFilter(e.target.value as PriorityFilter)
                   }
-                  className="px-3 py-1 rounded-md border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 sm:flex-none px-2 sm:px-3 py-1 rounded-md border border-gray-300 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">All</option>
                   <option value="urgent">Urgent</option>
@@ -637,39 +641,41 @@ const ProjectOversight: React.FC = () => {
                 key={project._id}
                 className={`p-6 ${isOverdue(project.deadline, project.status) ? "border-l-4 border-red-500 bg-red-50" : ""}`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 line-clamp-2 flex-1 min-w-0">
                         {project.title}
                       </h3>
-                      {getStatusBadge(project.status)}
-                      {getPriorityBadge(project.priority)}
-                      {isOverdue(project.deadline, project.status) && (
-                        <Badge variant="danger">
-                          <AlertCircle className="h-3 w-3 mr-1" />
-                          Expired
-                        </Badge>
-                      )}
+                      <div className="flex flex-wrap gap-2 flex-shrink-0">
+                        {getStatusBadge(project.status)}
+                        {getPriorityBadge(project.priority)}
+                        {isOverdue(project.deadline, project.status) && (
+                          <Badge variant="danger">
+                            <AlertCircle className="h-3 w-3 mr-1" />
+                            Expired
+                          </Badge>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Client
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600 break-words">
                           {project.company || project.client.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 break-words">
                           {project.company || project.client.company}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Worker
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           {project.worker?.name || "Not assigned"}
                         </p>
                         {project.worker?.rating && (
@@ -679,10 +685,10 @@ const ProjectOversight: React.FC = () => {
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Budget & Timeline
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           {formatCurrency(project.budget)}
                         </p>
                         <p className="text-xs text-gray-500">
@@ -690,10 +696,10 @@ const ProjectOversight: React.FC = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700">
+                        <p className="text-xs sm:text-sm font-medium text-gray-700">
                           Applicants
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs sm:text-sm text-gray-600">
                           {typeof project.totalApplicants === "number"
                             ? project.totalApplicants
                             : 0}
@@ -703,7 +709,7 @@ const ProjectOversight: React.FC = () => {
 
                     {/* Progress Bar */}
                     <div className="mb-4">
-                      <div className="flex justify-between text-sm mb-1">
+                      <div className="flex justify-between text-xs sm:text-sm mb-1">
                         <span className="font-medium text-gray-700">
                           Progress
                         </span>
@@ -728,7 +734,7 @@ const ProjectOversight: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm text-gray-500">
                       <span>
                         Created{" "}
                         {formatDistanceToNow(new Date(project.createdAt), {
@@ -744,7 +750,7 @@ const ProjectOversight: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col space-y-2 ml-4">
+                  <div className="flex flex-row lg:flex-col gap-2 lg:gap-2 lg:ml-4 flex-shrink-0">
                     <Button
                       onClick={() => {
                         setSelectedProject(project);
@@ -752,10 +758,11 @@ const ProjectOversight: React.FC = () => {
                       }}
                       variant="outline"
                       size="sm"
-                      className="flex items-center space-x-2"
+                      className="flex-1 lg:flex-none items-center justify-center"
+                      title="View Details"
                     >
-                      <Eye className="h-4 w-4" />
-                      <span>Details</span>
+                      <Eye className="h-4 w-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Details</span>
                     </Button>
 
                     <Button
@@ -766,10 +773,12 @@ const ProjectOversight: React.FC = () => {
                       }
                       variant="primary"
                       size="sm"
-                      className="flex items-center space-x-2"
+                      className="flex-1 lg:flex-none items-center justify-center"
+                      title="Edit Job"
                     >
-                      <Edit className="h-4 w-4" />
-                      <span>Edit Job</span>
+                      <Edit className="h-4 w-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Edit Job</span>
+                      <span className="lg:hidden">Edit</span>
                     </Button>
 
                     <Button
@@ -780,20 +789,28 @@ const ProjectOversight: React.FC = () => {
                       }
                       variant="outline"
                       size="sm"
-                      className="flex items-center space-x-2"
+                      className="flex-1 lg:flex-none items-center justify-center"
+                      title="View Applicants"
                     >
-                      <Users className="h-4 w-4" />
-                      <span>Applicants</span>
+                      <Users className="h-4 w-4 lg:mr-2" />
+                      <span className="hidden lg:inline">Applicants</span>
+                      <span className="lg:hidden">Apps</span>
                     </Button>
 
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleDeleteJob(project)}
-                      className="w-full sm:w-auto text-red-600 hover:bg-red-50 border-red-600"
+                      className="flex-1 lg:flex-none text-red-600 hover:bg-red-50 border-red-600 items-center justify-center"
+                      title="Delete Job"
                     >
-                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                      <span className="text-xs sm:text-sm">Delete Job</span>
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 lg:mr-1" />
+                      <span className="hidden lg:inline text-xs sm:text-sm">
+                        Delete Job
+                      </span>
+                      <span className="lg:hidden text-xs sm:text-sm">
+                        Delete
+                      </span>
                     </Button>
                   </div>
                 </div>

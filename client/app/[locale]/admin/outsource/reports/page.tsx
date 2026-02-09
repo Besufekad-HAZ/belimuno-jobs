@@ -380,15 +380,15 @@ const FinancialReports: React.FC = () => {
               Comprehensive financial analytics and reporting
             </p>
           </div>
-          <div className="flex space-x-3 mt-4 sm:mt-0">
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4 text-gray-500" />
+          <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-0">
+            <div className="flex items-center space-x-2 flex-1 sm:flex-none min-w-[140px]">
+              <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
               <select
                 value={dateRange}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   setDateRange(e.target.value as DateRange)
                 }
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -396,14 +396,23 @@ const FinancialReports: React.FC = () => {
                 <option value="1y">Last year</option>
               </select>
             </div>
-            <Button onClick={() => setShowReportModal(true)} variant="primary">
-              Generate Report
+            <Button
+              onClick={() => setShowReportModal(true)}
+              variant="primary"
+              className="flex-1 sm:flex-none min-w-[140px]"
+              size="sm"
+            >
+              <span className="hidden sm:inline">Generate Report</span>
+              <span className="sm:hidden">Generate</span>
             </Button>
             <Button
               onClick={() => router.push("/admin/outsource/dashboard")}
               variant="outline"
+              className="flex-1 sm:flex-none min-w-[120px]"
+              size="sm"
             >
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
             </Button>
           </div>
         </div>
@@ -566,19 +575,19 @@ const FinancialReports: React.FC = () => {
 
         {/* Recent Transactions */}
         <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
               Recent Transactions
             </h3>
-            <div className="flex space-x-3">
-              <div className="relative">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <div className="relative flex-1 sm:flex-none min-w-[200px] sm:min-w-[180px]">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search transactions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
               <select
@@ -586,7 +595,7 @@ const FinancialReports: React.FC = () => {
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   setTypeFilter(e.target.value as TypeFilter)
                 }
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
+                className="flex-1 sm:flex-none min-w-[120px] px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="all">All Types</option>
                 <option value="income">Income</option>
@@ -597,7 +606,7 @@ const FinancialReports: React.FC = () => {
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   setStatusFilter(e.target.value as StatusFilter)
                 }
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
+                className="flex-1 sm:flex-none min-w-[120px] px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="all">All Status</option>
                 <option value="completed">Completed</option>
@@ -607,85 +616,97 @@ const FinancialReports: React.FC = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">
-                    Date
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">
-                    Description
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">
-                    Category
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">
-                    Amount
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTransactions.slice(0, 10).map((transaction) => (
-                  <tr
-                    key={transaction.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="py-3 px-4 text-sm text-gray-600">
-                      {new Date(transaction.date).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {transaction.description}
-                        </p>
-                        {transaction.client && (
-                          <p className="text-sm text-gray-600">
-                            {transaction.client}
-                          </p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">
-                      {transaction.category}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`font-semibold ${
-                          transaction.type === "income"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="inline-block min-w-full align-middle">
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-900 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-900 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-900 uppercase tracking-wider hidden sm:table-cell">
+                        Category
+                      </th>
+                      <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-900 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-900 uppercase tracking-wider hidden md:table-cell">
+                        Status
+                      </th>
+                      <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-900 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredTransactions.slice(0, 10).map((transaction) => (
+                      <tr
+                        key={transaction.id}
+                        className="hover:bg-gray-50"
                       >
-                        {transaction.type === "income" ? "+" : "-"}
-                        {formatCurrency(transaction.amount)}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {getStatusBadge(transaction.status)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Button
-                        onClick={() => {
-                          setSelectedTransaction(transaction);
-                          setShowTransactionModal(true);
-                        }}
-                        variant="outline"
-                        size="sm"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        <td className="px-3 sm:px-4 py-3 whitespace-nowrap text-xs sm:text-sm text-gray-600">
+                          {new Date(transaction.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-3 sm:px-4 py-3">
+                          <div>
+                            <p className="text-xs sm:text-sm font-medium text-gray-900 break-words">
+                              {transaction.description}
+                            </p>
+                            {transaction.client && (
+                              <p className="text-xs text-gray-600 break-words">
+                                {transaction.client}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-500 sm:hidden mt-1">
+                              {transaction.category}
+                            </p>
+                            <div className="sm:hidden mt-1">
+                              {getStatusBadge(transaction.status)}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 sm:px-4 py-3 whitespace-nowrap text-xs sm:text-sm text-gray-600 hidden sm:table-cell">
+                          {transaction.category}
+                        </td>
+                        <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                          <span
+                            className={`text-xs sm:text-sm font-semibold ${
+                              transaction.type === "income"
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {transaction.type === "income" ? "+" : "-"}
+                            {formatCurrency(transaction.amount)}
+                          </span>
+                        </td>
+                        <td className="px-3 sm:px-4 py-3 whitespace-nowrap hidden md:table-cell">
+                          {getStatusBadge(transaction.status)}
+                        </td>
+                        <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                          <Button
+                            onClick={() => {
+                              setSelectedTransaction(transaction);
+                              setShowTransactionModal(true);
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="w-full sm:w-auto"
+                          >
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline ml-1">View</span>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </Card>
 

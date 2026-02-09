@@ -93,11 +93,12 @@ const TrustedBySection: React.FC = () => {
     };
 
     const loadTrustedCompanies = async (): Promise<RemoteTrustedClient[]> => {
-      const response = await publicAPI.getTrustedCompanies({
-        status: "active",
-        sort: "order name",
-        limit: 60,
-      });
+      try {
+        const response = await publicAPI.getTrustedCompanies({
+          status: "active",
+          sort: "order name",
+          limit: 60,
+        });
 
       const payload = Array.isArray(response?.data?.data)
         ? response.data.data
@@ -174,14 +175,19 @@ const TrustedBySection: React.FC = () => {
         .filter((item): item is RemoteTrustedClient => Boolean(item));
 
       return sortTrustedList(normalized);
+      } catch (error) {
+        console.warn("Failed to load trusted companies:", error);
+        return [];
+      }
     };
 
     const loadClientsFallback = async (): Promise<RemoteTrustedClient[]> => {
-      const response = await publicAPI.getClients({
-        status: "active",
-        sort: "name",
-        limit: 60,
-      });
+      try {
+        const response = await publicAPI.getClients({
+          status: "active",
+          sort: "name",
+          limit: 60,
+        });
 
       const payload = Array.isArray(response?.data?.data)
         ? response.data.data
@@ -233,7 +239,11 @@ const TrustedBySection: React.FC = () => {
         })
         .filter((item): item is RemoteTrustedClient => Boolean(item));
 
-      return sortTrustedList(normalized);
+        return sortTrustedList(normalized);
+      } catch (error) {
+        console.warn("Failed to load clients fallback:", error);
+        return [];
+      }
     };
 
     const load = async () => {

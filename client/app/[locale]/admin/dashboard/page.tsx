@@ -333,20 +333,21 @@ const AdminDashboard: React.FC = () => {
                   {t("header.subtitle")}
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 <Button
                   variant="primary"
                   onClick={() => router.push("/admin/chat")}
-                  className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
+                  className="flex-1 sm:flex-none min-w-[120px] transition-transform hover:-translate-y-0.5"
                   size="sm"
                 >
                   <MessageSquarePlus className="h-4 w-4 mr-2" />
-                  Team Chat
+                  <span className="hidden sm:inline">Team Chat</span>
+                  <span className="sm:hidden">Chat</span>
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setShowReportsModal(true)}
-                  className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
+                  className="flex-1 sm:flex-none min-w-[120px] transition-transform hover:-translate-y-0.5"
                   size="sm"
                 >
                   <BarChart3 className="h-4 w-4 mr-2" />
@@ -359,7 +360,7 @@ const AdminDashboard: React.FC = () => {
                   <Button
                     variant="outline"
                     onClick={() => setShowDisputeModal(true)}
-                    className="w-full sm:w-auto transition-transform hover:-translate-y-0.5"
+                    className="flex-1 sm:flex-none min-w-[120px] transition-transform hover:-translate-y-0.5"
                     size="sm"
                   >
                     <AlertTriangle className="h-4 w-4 mr-2" />
@@ -890,14 +891,15 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button
                   variant="outline"
                   onClick={() => setShowReportsModal(false)}
+                  className="w-full sm:w-auto"
                 >
                   {t("reports.buttons.cancel")}
                 </Button>
-                <Button onClick={generateReport}>
+                <Button onClick={generateReport} className="w-full sm:w-auto">
                   <Download className="h-4 w-4 mr-2" />
                   {t("reports.buttons.download")}
                 </Button>
@@ -936,13 +938,14 @@ const AdminDashboard: React.FC = () => {
                       </Badge>
                     </div>
 
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() =>
                           handleResolveDispute(dispute._id, "refund")
                         }
+                        className="w-full sm:w-auto"
                       >
                         {t("disputes.buttons.refundClient")}
                       </Button>
@@ -952,6 +955,7 @@ const AdminDashboard: React.FC = () => {
                         onClick={() =>
                           handleResolveDispute(dispute._id, "release")
                         }
+                        className="w-full sm:w-auto"
                       >
                         {t("disputes.buttons.payWorker")}
                       </Button>
@@ -960,6 +964,7 @@ const AdminDashboard: React.FC = () => {
                         onClick={() =>
                           handleResolveDispute(dispute._id, "investigate")
                         }
+                        className="w-full sm:w-auto"
                       >
                         {t("disputes.buttons.investigate")}
                       </Button>

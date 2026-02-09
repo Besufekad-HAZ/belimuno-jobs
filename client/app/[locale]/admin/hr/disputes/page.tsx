@@ -268,12 +268,15 @@ const DisputeResolution: React.FC = () => {
               Manage and resolve disputes between workers and clients
             </p>
           </div>
-          <div className="flex space-x-3 mt-4 sm:mt-0">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-0">
             <Button
               onClick={() => router.push("/admin/hr/dashboard")}
               variant="outline"
+              className="flex-1 sm:flex-none min-w-[120px]"
+              size="sm"
             >
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
             </Button>
           </div>
         </div>
@@ -410,15 +413,15 @@ const DisputeResolution: React.FC = () => {
                 key={dispute._id}
                 className="p-6 hover:shadow-md transition-shadow"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4 flex-1">
-                    <div className="p-3 rounded-lg bg-gray-100">
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+                    <div className="p-2 sm:p-3 rounded-lg bg-gray-100 flex-shrink-0">
                       {getTypeIcon(dispute.type)}
                     </div>
 
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate flex-1 min-w-0">
                           {dispute.title}
                         </h3>
                         {getStatusBadge(dispute.status)}
@@ -428,23 +431,23 @@ const DisputeResolution: React.FC = () => {
                         </Badge>
                       </div>
 
-                      <p className="text-gray-600 mb-4 line-clamp-2">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-4 line-clamp-2 break-words">
                         {dispute.description}
                       </p>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-xs sm:text-sm font-medium text-gray-700">
                             Worker
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600 break-words">
                             {dispute.worker.name}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 break-words">
                             {dispute.worker.email}
                           </p>
                           {dispute.worker.workerProfile && (
-                            <div className="flex items-center space-x-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                               <span className="text-xs text-gray-500">
                                 ⭐{" "}
                                 {dispute.worker.workerProfile.rating.toFixed(1)}
@@ -459,17 +462,17 @@ const DisputeResolution: React.FC = () => {
                         </div>
 
                         <div>
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-xs sm:text-sm font-medium text-gray-700">
                             Client
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600 break-words">
                             {dispute.client.name}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 break-words">
                             {dispute.client.email}
                           </p>
                           {dispute.client.clientProfile?.company && (
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 break-words">
                               {dispute.client.clientProfile.company}
                             </p>
                           )}
@@ -478,10 +481,10 @@ const DisputeResolution: React.FC = () => {
                         <div>
                           {dispute.job && (
                             <>
-                              <p className="text-sm font-medium text-gray-700">
+                              <p className="text-xs sm:text-sm font-medium text-gray-700">
                                 Related Job
                               </p>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-xs sm:text-sm text-gray-600 break-words">
                                 {dispute.job.title}
                               </p>
                               <p className="text-xs text-gray-500">
@@ -495,7 +498,7 @@ const DisputeResolution: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-xs sm:text-sm text-gray-500">
                         <span>
                           Created{" "}
                           {formatDistanceToNow(new Date(dispute.createdAt), {
@@ -514,7 +517,7 @@ const DisputeResolution: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col space-y-2 ml-4">
+                  <div className="flex flex-row lg:flex-col gap-2 lg:gap-2 lg:ml-4 flex-shrink-0 w-full lg:w-auto">
                     <Button
                       onClick={() => {
                         setSelectedDispute(dispute);
@@ -522,10 +525,11 @@ const DisputeResolution: React.FC = () => {
                       }}
                       variant="outline"
                       size="sm"
-                      className="flex items-center space-x-2"
+                      className="flex-1 lg:flex-none flex items-center justify-center gap-2"
                     >
-                      <Eye className="h-4 w-4" />
-                      <span>View Details</span>
+                      <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden sm:inline">View Details</span>
+                      <span className="sm:hidden">View</span>
                     </Button>
 
                     {dispute.status !== "resolved" &&
@@ -546,17 +550,19 @@ const DisputeResolution: React.FC = () => {
                           }}
                           variant="primary"
                           size="sm"
-                          className="flex items-center space-x-2"
+                          className="flex-1 lg:flex-none flex items-center justify-center gap-2"
                         >
                           {dispute.status === "open" ? (
                             <>
-                              <Clock className="h-4 w-4" />
-                              <span>Investigate</span>
+                              <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <span className="hidden sm:inline">Investigate</span>
+                              <span className="sm:hidden">Invest</span>
                             </>
                           ) : (
                             <>
-                              <CheckCircle className="h-4 w-4" />
-                              <span>Resolve</span>
+                              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <span className="hidden sm:inline">Resolve</span>
+                              <span className="sm:hidden">Resolve</span>
                             </>
                           )}
                         </Button>
@@ -982,7 +988,7 @@ const DisputeResolution: React.FC = () => {
                 the system.
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-wrap gap-2 sm:gap-3 justify-end">
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -994,6 +1000,8 @@ const DisputeResolution: React.FC = () => {
                       paymentAction: "",
                     });
                   }}
+                  className="flex-1 sm:flex-none min-w-[120px]"
+                  size="sm"
                 >
                   Cancel
                 </Button>
@@ -1006,6 +1014,8 @@ const DisputeResolution: React.FC = () => {
                       resolutionData.status === "resolved" &&
                       !resolutionData.paymentAction)
                   }
+                  className="flex-1 sm:flex-none min-w-[120px]"
+                  size="sm"
                 >
                   Update Dispute
                 </Button>

@@ -94,115 +94,131 @@ const OutsourceAdminDashboard: React.FC = () => {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div className="flex flex-col gap-4 mb-6 sm:mb-8">
             <div>
               <BackToDashboard
                 currentRole="admin_outsource"
                 variant="breadcrumb"
                 className="mb-2"
               />
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 {t("header.title")}
               </h1>
-              <p className="text-gray-600">{t("header.subtitle")}</p>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
+                {t("header.subtitle")}
+              </p>
             </div>
-            <div className="flex space-x-3 mt-4 sm:mt-0">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <Button
                 onClick={() => router.push("/admin/outsource/jobs/new")}
-                className="w-full sm:w-auto"
+                className="flex-1 sm:flex-none min-w-[140px]"
+                size="sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {t("header.buttons.postJob")}
+                <span className="hidden xs:inline">
+                  {t("header.buttons.postJob")}
+                </span>
+                <span className="xs:hidden">Post Job</span>
               </Button>
               <Button
                 onClick={() => router.push("/admin/outsource/projects")}
                 variant="primary"
-                className="flex items-center space-x-2"
+                className="flex-1 sm:flex-none min-w-[140px]"
+                size="sm"
               >
-                <Briefcase className="h-4 w-4" />
-                <span>{t("header.buttons.manageJobs")}</span>
+                <Briefcase className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">
+                  {t("header.buttons.manageJobs")}
+                </span>
+                <span className="sm:hidden">Jobs</span>
               </Button>
               <Button
                 onClick={() => router.push("/admin/outsource/clients")}
                 variant="outline"
-                className="flex items-center space-x-2"
+                className="flex-1 sm:flex-none min-w-[140px]"
+                size="sm"
               >
-                <Building className="h-4 w-4" />
-                <span>{t("header.buttons.clientManagement")}</span>
+                <Building className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">
+                  {t("header.buttons.clientManagement")}
+                </span>
+                <span className="sm:hidden">Clients</span>
               </Button>
               <Button
                 onClick={() =>
                   router.push("/admin/outsource/trusted-companies")
                 }
                 variant="secondary"
-                className="flex items-center space-x-2"
+                className="flex-1 sm:flex-none min-w-[140px]"
+                size="sm"
               >
-                <Handshake className="h-4 w-4" />
-                <span>Trusted companies</span>
+                <Handshake className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Trusted companies</span>
+                <span className="sm:hidden">Companies</span>
               </Button>
             </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-blue-100">
-                  <Building className="h-6 w-6 text-blue-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-blue-100 flex-shrink-0">
+                  <Building className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.totalClients.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.totalClients || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-green-100">
-                  <Briefcase className="h-6 w-6 text-green-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-green-100 flex-shrink-0">
+                  <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.activeJobs.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {stats?.activeProjects || 0}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-yellow-100">
-                  <DollarSign className="h-6 w-6 text-yellow-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-yellow-100 flex-shrink-0">
+                  <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.totalRevenue.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
                     {formatCurrency(stats?.totalRevenue || 0)}
                   </p>
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-4 sm:p-6">
               <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-purple-100">
-                  <TrendingUp className="h-6 w-6 text-purple-600" />
+                <div className="p-2 sm:p-3 rounded-lg bg-purple-100 flex-shrink-0">
+                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {t("stats.monthlyRevenue.label")}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
                     {formatCurrency(stats?.monthlyRevenue || 0)}
                   </p>
                 </div>
@@ -296,15 +312,47 @@ const OutsourceAdminDashboard: React.FC = () => {
               </div>
               <div className="space-y-3">
                 {projects.slice(0, 5).map((project) => (
-                  <div key={project._id} className="p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-medium text-gray-900 truncate max-w-48">
-                          {project.title}
-                        </h3>
-                        {getProjectStatusBadge(project.status)}
+                  <div
+                    key={project._id}
+                    className="p-3 sm:p-4 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2 flex-1 min-w-0">
+                            {project.title}
+                          </h3>
+                          <div className="flex-shrink-0">
+                            {getProjectStatusBadge(project.status)}
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm text-gray-600 mb-2">
+                          <span className="break-words">
+                            {t("jobs.details.client")}:{" "}
+                            <span className="font-medium">
+                              {project.company || project.client?.name}
+                            </span>
+                          </span>
+                          <span className="font-semibold text-gray-900 sm:text-right">
+                            {formatCurrency(project.budget)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
+                          <span className="text-gray-600">
+                            {t("jobs.details.progress")}
+                          </span>
+                          <span className="font-medium">
+                            {project.progress}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${getProgressColor(project.progress)}`}
+                            style={{ width: `${project.progress}%` }}
+                          ></div>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-row sm:flex-col gap-2 sm:gap-2 flex-shrink-0">
                         <Button
                           onClick={() => {
                             setSelectedProject(project);
@@ -312,8 +360,11 @@ const OutsourceAdminDashboard: React.FC = () => {
                           }}
                           variant="outline"
                           size="sm"
+                          className="flex-1 sm:flex-none"
+                          title="View Details"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 sm:mr-0" />
+                          <span className="ml-1 sm:hidden">Details</span>
                         </Button>
                         <Button
                           onClick={() =>
@@ -323,31 +374,13 @@ const OutsourceAdminDashboard: React.FC = () => {
                           }
                           variant="primary"
                           size="sm"
+                          className="flex-1 sm:flex-none"
+                          title="View Applicants"
                         >
-                          <Users className="h-4 w-4" />
+                          <Users className="h-4 w-4 sm:mr-0" />
+                          <span className="ml-1 sm:hidden">Applicants</span>
                         </Button>
                       </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                      <span>
-                        {t("jobs.details.client")}:{" "}
-                        {project.company || project.client?.name}
-                      </span>
-                      <span>{formatCurrency(project.budget)}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-gray-600">
-                        {t("jobs.details.progress")}
-                      </span>
-                      <span className="font-medium">{project.progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${getProgressColor(project.progress)}`}
-                        style={{ width: `${project.progress}%` }}
-                      ></div>
                     </div>
                   </div>
                 ))}
@@ -680,7 +713,7 @@ const OutsourceAdminDashboard: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <Button
                     onClick={() =>
                       router.push(
@@ -688,13 +721,14 @@ const OutsourceAdminDashboard: React.FC = () => {
                       )
                     }
                     variant="primary"
+                    className="w-full sm:w-auto"
                   >
                     {t("jobs.details.buttons.applicants")}
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     {t("jobs.details.buttons.contactClient")}
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     {t("jobs.details.buttons.generateReport")}
                   </Button>
                 </div>
