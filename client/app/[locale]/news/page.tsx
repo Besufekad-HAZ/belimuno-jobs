@@ -68,7 +68,7 @@ export default function NewsPage() {
   const router = useRouter();
   const t = useTranslations("Home");
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchNews();

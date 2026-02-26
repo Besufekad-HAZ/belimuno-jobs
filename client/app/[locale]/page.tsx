@@ -9,16 +9,21 @@ import {
   Briefcase,
   TrendingUp,
   CheckCircle,
-  // Star,
   Newspaper,
   Calendar,
   ExternalLink,
+  UserPlus,
+  Search,
+  Handshake,
+  ArrowRight,
+  Clock,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
 import { getStoredUser } from "@/lib/auth";
 import { jobsAPI, workerAPI, publicAPI } from "@/lib/api";
 import Button from "@/components/ui/Button";
 import Hero from "@/components/sections/Hero";
-import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";
 import TrustedBySection from "@/components/sections/TrustedBySection";
@@ -115,6 +120,13 @@ const ResolvedNewsImage: React.FC<ResolvedNewsImageProps> = ({
   );
 };
 
+const categoryIcons: Record<string, React.ElementType> = {
+  Technology: Briefcase,
+  Design: Sparkles,
+  Marketing: TrendingUp,
+  default: Briefcase,
+};
+
 export default function Home() {
   const [user, setUser] = useState<StoredUser>(null);
   const [stats, setStats] = useState<Stats>(null);
@@ -129,7 +141,6 @@ export default function Home() {
 
   useEffect(() => {
     const currentUser = getStoredUser();
-    console.log("currentUser", currentUser);
     setUser(currentUser);
 
     let isMounted = true;
@@ -143,7 +154,6 @@ export default function Home() {
         });
         if (!isMounted) return;
         const articles = response.data.data || [];
-        console.log("articles", articles);
         setNewsArticles(
           articles.map((article: NewsArticle) => ({
             ...article,
@@ -194,11 +204,9 @@ export default function Home() {
       setJobsForYouLoading(true);
       const response = await workerAPI.getJobsForYou({ limit: 6 });
       const payload = response.data;
-      console.log("payload", payload);
       const list = (payload.data || []) as unknown as Array<
         Record<string, unknown>
       >;
-      console.log("list", list);
       setJobsForYou(
         list.map((j) => ({
           _id: String(j._id),
@@ -226,426 +234,503 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-background">
-      {/* Hero Section (professional image + CTAs) */}
+    <div className="min-h-screen">
       <Hero />
 
       <TrustedBySection />
 
       {/* Stats Section */}
       {stats && (
-        <div className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900">
+        <section className="relative py-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800" />
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-14">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white">
                 {t("stats.title")}
               </h2>
-              <p className="text-gray-600 mt-4">{t("stats.subtitle")}</p>
+              <p className="text-sky-200 mt-4 text-lg">
+                {t("stats.subtitle")}
+              </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <Card className="text-center bg-blue-50 border-blue-200">
-                <Users className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-blue-900">
-                  {stats.totalUsers?.toLocaleString() || "1,000+"}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+              {[
+                {
+                  icon: Users,
+                  value: stats.totalUsers?.toLocaleString() || "1,000+",
+                  label: t("stats.activeUsers"),
+                  color: "from-sky-400 to-cyan-300",
+                },
+                {
+                  icon: Briefcase,
+                  value: stats.totalJobs?.toLocaleString() || "500+",
+                  label: t("stats.jobsPosted"),
+                  color: "from-emerald-400 to-green-300",
+                },
+                {
+                  icon: CheckCircle,
+                  value: stats.completedJobs?.toLocaleString() || "300+",
+                  label: t("stats.jobsCompleted"),
+                  color: "from-amber-400 to-yellow-300",
+                },
+                {
+                  icon: TrendingUp,
+                  value: "95%",
+                  label: t("stats.successRate"),
+                  color: "from-violet-400 to-purple-300",
+                },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className="group relative rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-sm transition-all duration-500 hover:bg-white/10 hover:-translate-y-1"
+                >
+                  <div
+                    className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${stat.color} shadow-lg mb-4`}
+                  >
+                    <stat.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                    {stat.value}
+                  </div>
+                  <div className="text-sky-200 text-sm font-medium">
+                    {stat.label}
+                  </div>
                 </div>
-                <div className="text-blue-600 font-medium">
-                  {t("stats.activeUsers")}
-                </div>
-              </Card>
-              <Card className="text-center bg-green-50 border-green-200">
-                <Briefcase className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-green-900">
-                  {stats.totalJobs?.toLocaleString() || "500+"}
-                </div>
-                <div className="text-green-600 font-medium">
-                  {t("stats.jobsPosted")}
-                </div>
-              </Card>
-              <Card className="text-center bg-yellow-50 border-yellow-200">
-                <CheckCircle className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-yellow-900">
-                  {stats.completedJobs?.toLocaleString() || "300+"}
-                </div>
-                <div className="text-yellow-600 font-medium">
-                  {t("stats.jobsCompleted")}
-                </div>
-              </Card>
-              <Card className="text-center bg-purple-50 border-purple-200">
-                <TrendingUp className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <div className="text-3xl font-bold text-purple-900">95%</div>
-                <div className="text-purple-600 font-medium">
-                  {t("stats.successRate")}
-                </div>
-              </Card>
+              ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Featured Jobs */}
-      <div className="py-16 bg-gray-50">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">
-              {t("featuredJobs.title")}
-            </h2>
-            <p className="text-gray-600 mt-4">{t("featuredJobs.subtitle")}</p>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12 gap-4">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 text-sm font-semibold text-sky-700 mb-4">
+                <Briefcase className="h-4 w-4" />
+                {t("featuredJobs.title")}
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+                {t("featuredJobs.title")}
+              </h2>
+              <p className="text-slate-600 mt-3 text-lg max-w-xl">
+                {t("featuredJobs.subtitle")}
+              </p>
+            </div>
+            <button
+              onClick={() => router.push("/jobs")}
+              className="group inline-flex items-center gap-2 text-sky-600 font-semibold hover:text-sky-700 transition-colors shrink-0"
+            >
+              {t("featuredJobs.viewAllJobs")}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredJobs.map((job) => (
-              <Card key={job._id} className="hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900 text-lg">
-                    {job.title}
-                  </h3>
-                  <span className="text-green-600 font-bold">
+              <div
+                key={job._id}
+                className="group relative rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-sky-200"
+              >
+                <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="flex items-start justify-between mb-4">
+                  <Badge
+                    variant="primary"
+                    size="sm"
+                    className="bg-sky-50 text-sky-700 border-sky-100"
+                  >
+                    {job.category}
+                  </Badge>
+                  <span className="text-lg font-bold text-emerald-600">
                     ETB {job.budget?.toLocaleString()}
                   </span>
                 </div>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                <h3 className="font-semibold text-slate-900 text-lg mb-2 line-clamp-2 group-hover:text-sky-700 transition-colors">
+                  {job.title}
+                </h3>
+                <p className="text-slate-500 text-sm mb-5 line-clamp-3 leading-relaxed">
                   {job.description}
                 </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="primary" size="sm">
-                      {job.category}
-                    </Badge>
-                    {job.deadline && (
-                      <span className="text-xs text-gray-500">
-                        Due: {new Date(job.deadline).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  {job.deadline && (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <Clock className="h-3.5 w-3.5" />
+                      Due: {new Date(job.deadline).toLocaleDateString()}
+                    </div>
+                  )}
                   <Link href={user ? `/jobs/${job._id}` : "/login"}>
-                    <Button size="sm" className="shadow-sm">
+                    <button className="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition-all hover:bg-sky-100 hover:text-sky-800">
                       {user ? "Apply Now" : "Login to Apply"}
-                    </Button>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
                   </Link>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
-          <div className="text-center mt-8">
-            <Button variant="outline" onClick={() => router.push("/jobs")}>
-              {t("featuredJobs.viewAllJobs")}
-            </Button>
-          </div>
         </div>
-      </div>
+      </section>
 
       {/* Top Job Categories */}
-      <div className="py-16 bg-white">
+      <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">
+          <div className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 text-sm font-semibold text-sky-700 mb-4">
+              <Sparkles className="h-4 w-4" />
+              Browse Categories
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
               {t("categories.title")}
             </h2>
-            <p className="text-gray-600 mt-4">{t("categories.subtitle")}</p>
+            <p className="text-slate-600 mt-4 text-lg max-w-2xl mx-auto">
+              {t("categories.subtitle")}
+            </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {categories.length === 0
-              ? // Loading skeletons
-                Array.from({ length: 3 }).map((_, idx) => (
-                  <Card
+              ? Array.from({ length: 3 }).map((_, idx) => (
+                  <div
                     key={idx}
-                    className="hover:shadow-lg transition-shadow animate-pulse"
+                    className="rounded-2xl border border-slate-200 bg-white p-6 animate-pulse"
                   >
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <div className="h-5 w-5 bg-blue-200 rounded-full" />
-                        </div>
+                        <div className="w-12 h-12 bg-slate-100 rounded-xl" />
                         <div>
-                          <div className="h-4 w-24 bg-gray-200 rounded mb-1" />
+                          <div className="h-4 w-24 bg-slate-100 rounded mb-2" />
+                          <div className="h-3 w-16 bg-slate-50 rounded" />
                         </div>
                       </div>
-                      <div className="h-6 w-8 bg-blue-200 rounded" />
+                      <div className="h-7 w-10 bg-sky-50 rounded-lg" />
                     </div>
-                  </Card>
+                  </div>
                 ))
-              : categories.map((cat, idx) => (
-                  <Card
-                    key={idx}
-                    className="hover:shadow-lg transition-all duration-300 group cursor-pointer border-l-4 border-l-blue-500"
-                  >
+              : categories.map((cat, idx) => {
+                  const IconComp =
+                    categoryIcons[cat._id] || categoryIcons.default;
+                  return (
                     <div
-                      className="flex justify-between items-center"
+                      key={idx}
                       onClick={() =>
                         router.push(
                           `/jobs?category=${encodeURIComponent(cat._id)}`,
                         )
                       }
+                      className="group cursor-pointer rounded-2xl border border-slate-200/80 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-sky-200"
                     >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
-                          <Briefcase className="h-6 w-6 text-blue-600 group-hover:text-blue-700 transition-colors duration-300" />
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-sky-50 to-blue-50 transition-all group-hover:from-sky-100 group-hover:to-blue-100 group-hover:shadow-md">
+                            <IconComp className="h-6 w-6 text-sky-600 transition-colors group-hover:text-sky-700" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-slate-900 group-hover:text-sky-700 transition-colors">
+                              {cat._id}
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                              {cat.count || 0} open positions
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
-                            {cat._id}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            Available positions
-                          </p>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 text-sky-600 transition-all group-hover:bg-sky-600 group-hover:text-white">
+                          <ChevronRight className="h-4 w-4" />
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <Badge variant="primary" size="sm" className="mb-1">
-                          {cat.count || 0}
-                        </Badge>
-                        <span className="text-xs text-gray-400">jobs</span>
                       </div>
                     </div>
-                  </Card>
-                ))}
+                  );
+                })}
           </div>
-          <div className="text-center mt-8">
-            <Button
-              variant="outline"
+          <div className="text-center mt-12">
+            <button
               onClick={() => router.push("/jobs")}
-              className="border-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-300"
+              className="inline-flex items-center gap-2 rounded-xl border-2 border-sky-200 bg-white px-8 py-3 font-semibold text-sky-700 transition-all duration-300 hover:bg-sky-50 hover:border-sky-300 hover:shadow-md"
             >
               {t("categories.viewAllCategories")}
-            </Button>
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Jobs for You Section - Only show for workers */}
       {user?.role === "worker" && (
         <>
           {jobsForYouLoading ? (
-            <div className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+            <section className="py-20 bg-gradient-to-br from-sky-50 via-white to-indigo-50">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
-                  <div className="flex items-center justify-center mb-4">
-                    <Briefcase className="h-8 w-8 text-blue-600 mr-3" />
-                    <h2 className="text-3xl font-bold text-gray-900">
-                      Jobs for You
-                    </h2>
-                  </div>
-                  <p className="text-gray-600 mt-4">
-                    Personalized job recommendations based on your skills and
-                    preferences
+                  <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 text-sm font-semibold text-sky-700 mb-4">
+                    <Sparkles className="h-4 w-4" />
+                    Personalized
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+                    Jobs for You
+                  </h2>
+                  <p className="text-slate-600 mt-4 text-lg">
+                    Personalized job recommendations based on your skills
                   </p>
                 </div>
                 <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600" />
                 </div>
               </div>
-            </div>
+            </section>
           ) : jobsForYou.length > 0 ? (
-            <div className="py-16 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+            <section className="py-20 bg-gradient-to-br from-sky-50 via-white to-indigo-50">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
-                  <div className="flex items-center justify-center mb-4">
-                    <Briefcase className="h-8 w-8 text-blue-600 mr-3" />
-                    <h2 className="text-3xl font-bold text-gray-900">
-                      Jobs for You
-                    </h2>
-                  </div>
-                  <p className="text-gray-600 mt-4">
-                    Personalized job recommendations based on your skills and
-                    preferences
+                  <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 text-sm font-semibold text-sky-700 mb-4">
+                    <Sparkles className="h-4 w-4" />
+                    Personalized
+                  </span>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
+                    Jobs for You
+                  </h2>
+                  <p className="text-slate-600 mt-4 text-lg">
+                    Personalized job recommendations based on your skills
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {jobsForYou.map((job) => (
-                    <Card
+                    <div
                       key={job._id}
-                      className="hover:shadow-lg transition-shadow"
+                      className="group relative rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-sky-200"
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="font-semibold text-gray-900 text-lg">
-                          {job.title}
-                        </h3>
-                        <span className="text-green-600 font-bold">
+                      <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 opacity-0 transition-opacity group-hover:opacity-100" />
+                      <div className="flex items-start justify-between mb-4">
+                        <Badge
+                          variant="primary"
+                          size="sm"
+                          className="bg-sky-50 text-sky-700 border-sky-100"
+                        >
+                          {job.category}
+                        </Badge>
+                        <span className="text-lg font-bold text-emerald-600">
                           ETB {job.budget?.toLocaleString()}
                         </span>
                       </div>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                      <h3 className="font-semibold text-slate-900 text-lg mb-2 line-clamp-2 group-hover:text-sky-700 transition-colors">
+                        {job.title}
+                      </h3>
+                      <p className="text-slate-500 text-sm mb-5 line-clamp-3 leading-relaxed">
                         {job.description}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="primary" size="sm">
-                            {job.category}
-                          </Badge>
-                          {job.deadline && (
-                            <span className="text-xs text-gray-500">
-                              Due: {new Date(job.deadline).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                        {job.deadline && (
+                          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                            <Clock className="h-3.5 w-3.5" />
+                            Due:{" "}
+                            {new Date(job.deadline).toLocaleDateString()}
+                          </div>
+                        )}
                         <Link href={`/jobs/${job._id}`}>
-                          <Button size="sm" className="shadow-sm">
+                          <button className="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition-all hover:bg-sky-100">
                             View Details
-                          </Button>
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
                         </Link>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               </div>
-            </div>
+            </section>
           ) : null}
         </>
       )}
 
-      {/* Regions Where We Operate */}
       <RegionsSection />
 
       {/* How It Works */}
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">
+      <section className="py-20 bg-white relative overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, #0ea5e9 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 text-sm font-semibold text-sky-700 mb-4">
+              How It Works
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
               {t("howItWorks.title")}
             </h2>
-            <p className="text-gray-600 mt-4">{t("howItWorks.subtitle")}</p>
+            <p className="text-slate-600 mt-4 text-lg max-w-2xl mx-auto">
+              {t("howItWorks.subtitle")}
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-blue-600">1</span>
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            {/* Connecting line (desktop) */}
+            <div className="hidden md:block absolute top-16 left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] h-0.5 bg-gradient-to-r from-sky-300 via-blue-300 to-indigo-300" />
+            {[
+              {
+                icon: UserPlus,
+                step: "01",
+                title: t("howItWorks.step1.title"),
+                desc: t("howItWorks.step1.description"),
+                gradient: "from-sky-400 to-cyan-400",
+                shadow: "shadow-sky-400/20",
+              },
+              {
+                icon: Search,
+                step: "02",
+                title: t("howItWorks.step2.title"),
+                desc: t("howItWorks.step2.description"),
+                gradient: "from-blue-500 to-indigo-500",
+                shadow: "shadow-blue-500/20",
+              },
+              {
+                icon: Handshake,
+                step: "03",
+                title: t("howItWorks.step3.title"),
+                desc: t("howItWorks.step3.description"),
+                gradient: "from-indigo-500 to-violet-500",
+                shadow: "shadow-indigo-500/20",
+              },
+            ].map((item, i) => (
+              <div key={i} className="relative text-center group">
+                <div className="relative z-10 mx-auto mb-6">
+                  <div
+                    className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} shadow-xl ${item.shadow} transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}
+                  >
+                    <item.icon className="h-7 w-7 text-white" />
+                  </div>
+                  <span className="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white text-xs font-bold text-slate-700 shadow-md border border-slate-100">
+                    {item.step}
+                  </span>
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                  {item.title}
+                </h3>
+                <p className="text-slate-500 leading-relaxed max-w-xs mx-auto">
+                  {item.desc}
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {t("howItWorks.step1.title")}
-              </h3>
-              <p className="text-gray-600">
-                {t("howItWorks.step1.description")}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-green-600">2</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {t("howItWorks.step2.title")}
-              </h3>
-              <p className="text-gray-600">
-                {t("howItWorks.step2.description")}
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-purple-600">3</span>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {t("howItWorks.step3.title")}
-              </h3>
-              <p className="text-gray-600">
-                {t("howItWorks.step3.description")}
-              </p>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
       <TestimonialsSection />
 
       {/* News Section */}
-      <div className="py-16 bg-gray-50">
+      {newsArticles.length > 0 && (
+      <section className="py-20 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center mb-4">
-              <Newspaper className="h-8 w-8 text-blue-600 mr-3" />
-              <h2 className="text-3xl font-bold text-gray-900">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-12 gap-4">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 text-sm font-semibold text-sky-700 mb-4">
+                <Newspaper className="h-4 w-4" />
+                Latest Updates
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900">
                 {t("news.title")}
               </h2>
+              <p className="text-slate-600 mt-3 text-lg">
+                {t("news.subtitle")}
+              </p>
             </div>
-            <p className="text-gray-600 mt-4">{t("news.subtitle")}</p>
+            <button
+              onClick={() => router.push("/news")}
+              className="group inline-flex items-center gap-2 text-sky-600 font-semibold hover:text-sky-700 transition-colors shrink-0"
+            >
+              {t("news.viewAllNews")}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {newsArticles.slice(0, 3).map((news) => {
-              return (
-                <Card
-                  key={news.id}
-                  className="hover:shadow-lg transition-all duration-300 group overflow-hidden"
-                >
-                  <div className="h-48 relative overflow-hidden flex items-center justify-center bg-gray-100">
-                    <ResolvedNewsImage
-                      news={news}
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      fallback={
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20"></div>
-                          <Newspaper className="h-16 w-16 text-blue-400/60" />
-                        </div>
-                      }
-                    />
-                    <div className="absolute top-4 right-4 z-10">
-                      <Badge variant="secondary" size="sm">
-                        {news.category}
-                      </Badge>
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 pointer-events-none" />
+            {newsArticles.slice(0, 3).map((news) => (
+              <article
+                key={news.id}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-sky-200"
+              >
+                <div className="relative h-52 overflow-hidden bg-gradient-to-br from-sky-50 to-blue-50">
+                  <ResolvedNewsImage
+                    news={news}
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    fallback={
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-sky-100 to-blue-100">
+                        <Newspaper className="h-14 w-14 text-sky-300" />
+                      </div>
+                    }
+                  />
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-sky-700 shadow-sm backdrop-blur-sm">
+                      {news.category}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex items-center text-sm text-slate-400 mb-3">
+                    <Calendar className="h-3.5 w-3.5 mr-1.5" />
+                    {new Date(news.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </div>
 
-                  <div className="p-6">
-                    <div className="flex items-center text-sm text-gray-500 mb-3">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {new Date(news.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3 line-clamp-2 group-hover:text-sky-700 transition-colors">
+                    {news.title}
+                  </h3>
 
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300">
-                      {news.title}
-                    </h3>
+                  <p className="text-slate-500 text-sm mb-5 line-clamp-3 leading-relaxed flex-1">
+                    {news.excerpt}
+                  </p>
 
-                    <p className="text-gray-600 mb-4 line-clamp-3">
-                      {news.excerpt}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="group-hover:bg-blue-50 group-hover:border-blue-300 group-hover:text-blue-600 transition-all duration-300"
-                        onClick={() => router.push(`/news/${news.id}`)}
-                      >
-                        <span className="flex items-center">
-                          {t("news.readMore")}
-                          <ExternalLink className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                        </span>
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-
-          <div className="text-center mt-12">
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-2 border-blue-500 text-blue-600 hover:bg-blue-500 hover:text-white transition-all duration-300"
-              onClick={() => router.push("/news")}
-            >
-              <Newspaper className="h-5 w-5 mr-2" />
-              {t("news.viewAllNews")}
-            </Button>
+                  <button
+                    onClick={() => router.push(`/news/${news.id}`)}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-600 transition-colors hover:text-sky-700"
+                  >
+                    {t("news.readMore")}
+                    <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+      )}
 
       {/* CTA Section */}
-      <div className="py-16 bg-gradient-to-r from-blue-50 via-white to-cyan-50">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800" />
+        <div className="absolute inset-0" aria-hidden="true">
+          <div className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-sky-500/20 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] rounded-full bg-indigo-500/20 blur-3xl" />
+        </div>
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+        <div className="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
             {t("cta.title")}
           </h2>
-          <p className="text-xl text-gray-600 mb-8">{t("cta.subtitle")}</p>
+          <p className="text-xl text-sky-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+            {t("cta.subtitle")}
+          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            <button
               onClick={() => {
                 if (user?.role === "client") {
                   router.push("/client/jobs/new");
@@ -653,20 +738,21 @@ export default function Home() {
                   router.push("/login");
                 }
               }}
+              className="group inline-flex items-center justify-center gap-3 rounded-xl bg-white px-8 py-4 text-base font-semibold text-sky-700 shadow-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:bg-sky-50"
             >
               {t("cta.findWorkers")}
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-2 border-cyan-600 text-cyan-700 hover:bg-cyan-50"
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </button>
+            <button
               onClick={() => router.push("/jobs")}
+              className="inline-flex items-center justify-center gap-3 rounded-xl border-2 border-white/30 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/50"
             >
+              <Briefcase className="h-5 w-5" />
               {t("cta.findWork")}
-            </Button>
+            </button>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
