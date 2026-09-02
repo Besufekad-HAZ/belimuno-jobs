@@ -94,7 +94,7 @@ export default function Hero() {
   return (
     <section
       ref={heroRef}
-      className="hero-root relative min-h-[600px] sm:min-h-[680px] lg:min-h-[720px] overflow-hidden"
+      className="hero-root relative isolate flex min-h-[max(620px,calc(100svh-4rem))] overflow-hidden bg-[#081d36] lg:min-h-[max(700px,calc(100svh-4.25rem))]"
     >
       {/* Full-width background image */}
       <div className="absolute inset-0">
@@ -107,21 +107,16 @@ export default function Hero() {
           className="object-cover"
           quality={90}
         />
-        {/* Multi-layer gradient overlays for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0c1e3d]/90 via-[#0f2847]/75 to-[#0f2847]/30 lg:to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0c1e3d]/60 via-transparent to-[#0c1e3d]/20" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0c1e3d]/40 via-transparent to-transparent h-32" />
-      </div>
-
-      {/* Animated accent orbs (subtle, blend with image) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="hero-orb hero-orb-1" />
-        <div className="hero-orb hero-orb-2" />
+        {/* Layered overlays keep the image visible while protecting text contrast. */}
+        <div className="absolute inset-0 bg-[#071b35]/35" />
+        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#071b35]/95 via-[#0b2749]/80 to-[#0b2749]/25 lg:w-[72%]" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#071b35]/75 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#071b35]/45 to-transparent" />
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 lg:pt-24 pb-20 sm:pb-24 lg:pb-28">
-        <div className="lg:max-w-[55%]">
+      <div className="relative z-10 mx-auto flex w-full flex-1 flex-col px-4 py-16 sm:px-6 sm:py-20 lg:flex-row lg:items-center lg:px-12 lg:py-24">
+        <div className="w-full lg:max-w-[55%]">
           {/* Eyebrow badge */}
           <div
             className={`inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-sky-200 backdrop-blur-md ${mounted ? "animate-hero-fade-up" : "opacity-0"}`}
@@ -272,48 +267,10 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Bottom fade to white */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent z-10" />
+      {/* A restrained edge fade creates a clean handoff to the next section. */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-10 h-14 bg-gradient-to-t from-white/95 via-white/25 to-transparent" />
 
       <style jsx>{`
-        .hero-orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(100px);
-          will-change: transform;
-          opacity: 0.4;
-        }
-
-        .hero-orb-1 {
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(56, 189, 248, 0.3), transparent);
-          top: -100px;
-          left: 10%;
-          animation: hero-orb-drift-1 20s ease-in-out infinite;
-        }
-
-        .hero-orb-2 {
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(99, 102, 241, 0.2), transparent);
-          bottom: -100px;
-          right: 20%;
-          animation: hero-orb-drift-2 25s ease-in-out infinite;
-        }
-
-        @keyframes hero-orb-drift-1 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(-30px, 20px) scale(1.05); }
-          66% { transform: translate(15px, -15px) scale(0.95); }
-        }
-
-        @keyframes hero-orb-drift-2 {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(20px, -30px) scale(1.05); }
-          66% { transform: translate(-15px, 15px) scale(0.95); }
-        }
-
         .hero-gradient-text {
           background-image: linear-gradient(
             135deg,
@@ -396,7 +353,6 @@ export default function Hero() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .hero-orb,
           .hero-float-card,
           .hero-gradient-text,
           .hero-btn-primary {

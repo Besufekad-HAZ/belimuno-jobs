@@ -381,7 +381,7 @@ const TrustedBySection: React.FC = () => {
 
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/40 mt-6 py-10"
+      className="relative overflow-hidden bg-gradient-to-b from-white via-white to-blue-50/40 mt-0 pt-10 pb-12"
       aria-label={t("eyebrow")}
       ref={sectionRef}
     >
