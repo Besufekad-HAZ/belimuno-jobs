@@ -12,18 +12,19 @@ import { Toaster } from "@/components/ui/sonner";
 import "react-chatbot-kit/build/main.css";
 import { resolveAssetUrl } from "@/lib/assets";
 
-const brandIcon = resolveAssetUrl("/belimuno-logo.png") ?? "/belimuno-logo.png";
+const brandIcon = resolveAssetUrl("/belimuno-favicon.png?v=4") ?? "/belimuno-favicon.png?v=4";
 
 export const metadata: Metadata = {
   title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
   icons: {
     icon: [
-      { url: "/favicon.ico", type: "image/x-icon", sizes: "32x32" },
+      { url: "/favicon.ico?v=4", type: "image/x-icon", sizes: "32x32" },
+      { url: brandIcon, type: "image/png", sizes: "256x256" },
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    shortcut: [{ url: "/favicon.ico", type: "image/x-icon" }],
-    apple: [{ url: brandIcon, type: "image/png" }],
+    shortcut: [{ url: "/favicon.ico?v=4", type: "image/x-icon" }],
+    apple: [{ url: brandIcon, type: "image/png", sizes: "180x180" }],
   },
 };
 
