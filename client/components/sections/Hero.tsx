@@ -109,13 +109,13 @@ export default function Hero() {
         />
         {/* Layered overlays keep the image visible while protecting text contrast. */}
         <div className="absolute inset-0 bg-[#071b35]/35" />
-        <div className="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-[#071b35]/95 via-[#0b2749]/80 to-[#0b2749]/25 lg:w-[72%]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#071b35]/95 via-[#0b2749]/80 to-[#0b2749]/25" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#071b35]/75 to-transparent" />
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#071b35]/45 to-transparent" />
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 mx-auto flex w-full flex-1 flex-col px-4 py-16 sm:px-6 sm:py-20 lg:flex-row lg:items-center lg:px-12 lg:py-24">
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-16 sm:px-6 sm:py-20 lg:flex-row lg:items-center lg:px-12 lg:py-24">
         <div className="w-full lg:max-w-[55%]">
           {/* Eyebrow badge */}
           <div

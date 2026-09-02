@@ -18,9 +18,12 @@ export const metadata: Metadata = {
   title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
   icons: {
-    icon: [{ url: brandIcon, type: "image/svg+xml" }],
-    shortcut: [{ url: brandIcon, type: "image/svg+xml" }],
-    apple: [{ url: brandIcon, type: "image/svg+xml" }],
+    icon: [
+      { url: "/favicon.ico", type: "image/x-icon", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: [{ url: "/favicon.ico", type: "image/x-icon" }],
+    apple: [{ url: brandIcon, type: "image/png" }],
   },
 };
 
