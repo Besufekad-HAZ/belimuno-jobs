@@ -6,8 +6,13 @@ const LEGACY_BUCKET_HOSTS = new Set([
   "belimuno-uploads.s3.us-west-1.amazonaws.com",
 ]);
 const PREFERRED_BUCKET_HOST = "belimuno-uploads.s3.eu-north-1.amazonaws.com";
-const FALLBACK_UPLOADS_BASE = `https://${PREFERRED_BUCKET_HOST}${DEFAULT_PUBLIC_PREFIX}`;
-
+const LOCAL_PUBLIC_PREFIXES = [
+  "/clients/",
+  "/news/",
+  "/team/",
+  "/hero",
+  "/belimuno",
+];
 const stripTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
 const isTruthyString = (value?: string | null): value is string =>
@@ -88,11 +93,6 @@ const getEnvValue = (key: string) => {
   return env ? env[key] : undefined;
 };
 
-const stripApiSuffix = (value?: string | null) => {
-  if (!value) return value ?? undefined;
-  return value.replace(/\/?api\/?$/, "");
-};
-
 const ENV_CANDIDATES = [
   "NEXT_PUBLIC_UPLOADS_BASE_URL",
   "NEXT_PUBLIC_ASSET_BASE_URL",
@@ -109,17 +109,7 @@ export const inferUploadsBase = () => {
     if (candidate) return candidate;
   }
 
-  const apiCandidate = sanitizeBase(
-    stripApiSuffix(getEnvValue("NEXT_PUBLIC_API_BASE_URL")),
-  );
-  if (apiCandidate) return apiCandidate;
-
-  const fallbackCandidate = sanitizeBase(
-    stripApiSuffix(getEnvValue("API_BASE_URL")),
-  );
-  if (fallbackCandidate) return fallbackCandidate;
-
-  return FALLBACK_UPLOADS_BASE;
+  return undefined;
 };
 
 const DEFAULT_UPLOADS_BASE = inferUploadsBase();
@@ -141,6 +131,14 @@ export const resolveAssetUrl = (raw?: string | null, base?: string | null) => {
   if (!isTruthyString(raw)) return undefined;
   const trimmed = raw.trim();
   if (trimmed.startsWith("data:")) return trimmed;
+
+  // Bundled public files stay on the frontend origin in every environment.
+  if (
+    trimmed.startsWith("/") &&
+    LOCAL_PUBLIC_PREFIXES.some((prefix) => trimmed.startsWith(prefix))
+  ) {
+    return trimmed;
+  }
 
   if (trimmed.startsWith("//")) {
     return `https:${trimmed}`;

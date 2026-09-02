@@ -7,8 +7,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   User as UserIcon,
   LogOut,
-  Menu,
-  X,
   ChevronDown,
   LayoutDashboard,
   UserCircle,

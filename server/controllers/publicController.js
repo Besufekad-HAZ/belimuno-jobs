@@ -6,6 +6,27 @@ const Service = require("../models/Service");
 const TrustedCompany = require("../models/TrustedCompany");
 const OrgStructureDocument = require("../models/OrgStructureDocument");
 const DEFAULT_TEAM_MEMBERS = require("../data/defaultTeamMembers");
+const {
+  clients: DEFAULT_CLIENTS,
+  services: DEFAULT_SERVICES,
+  news: DEFAULT_NEWS,
+  trustedCompanies: DEFAULT_TRUSTED_COMPANIES,
+} = require("../data/defaultPublicContent");
+
+const seedIfCollectionEmpty = async (Model, docs, label) => {
+  try {
+    const existingCount = await Model.countDocuments();
+    if (existingCount > 0 || !Array.isArray(docs) || docs.length === 0) {
+      return false;
+    }
+
+    await Model.insertMany(docs, { ordered: false });
+    return true;
+  } catch (error) {
+    console.warn(`Default ${label} seed failed:`, error);
+    return false;
+  }
+};
 
 // Public controller to return deduped team members for About page
 exports.getPublicTeamMembers = asyncHandler(async (req, res) => {
@@ -179,8 +200,20 @@ exports.getNews = asyncHandler(async (req, res) => {
     .skip((page - 1) * limit)
     .lean();
 
-  const news = await newsQuery;
-  const total = await News.countDocuments(query);
+  let news = await newsQuery;
+  let total = await News.countDocuments(query);
+
+  if (total === 0) {
+    const seeded = await seedIfCollectionEmpty(News, DEFAULT_NEWS, "news");
+    if (seeded) {
+      news = await News.find(query)
+        .sort(sortBy)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .lean();
+      total = await News.countDocuments(query);
+    }
+  }
 
   res.status(200).json({
     success: true,
@@ -248,8 +281,24 @@ exports.getClients = asyncHandler(async (req, res) => {
     .skip((page - 1) * limit)
     .lean();
 
-  const clients = await clientsQuery;
-  const total = await Client.countDocuments(query);
+  let clients = await clientsQuery;
+  let total = await Client.countDocuments(query);
+
+  if (total === 0) {
+    const seeded = await seedIfCollectionEmpty(
+      Client,
+      DEFAULT_CLIENTS.map(({ brandColor, ...client }) => client),
+      "clients"
+    );
+    if (seeded) {
+      clients = await Client.find(query)
+        .sort(sortBy)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .lean();
+      total = await Client.countDocuments(query);
+    }
+  }
 
   res.status(200).json({
     success: true,
@@ -293,8 +342,24 @@ exports.getServices = asyncHandler(async (req, res) => {
     .skip((page - 1) * limit)
     .lean();
 
-  const services = await servicesQuery;
-  const total = await Service.countDocuments(query);
+  let services = await servicesQuery;
+  let total = await Service.countDocuments(query);
+
+  if (total === 0) {
+    const seeded = await seedIfCollectionEmpty(
+      Service,
+      DEFAULT_SERVICES.map((service) => ({ ...service, status: "active" })),
+      "services"
+    );
+    if (seeded) {
+      services = await Service.find(query)
+        .sort(sortBy)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .lean();
+      total = await Service.countDocuments(query);
+    }
+  }
 
   res.status(200).json({
     success: true,
@@ -359,10 +424,24 @@ exports.getTrustedCompanies = asyncHandler(async (req, res) => {
   );
   const sortBy = sort ? String(sort).split(",").join(" ") : "order name";
 
-  const companies = await TrustedCompany.find(query)
+  let companies = await TrustedCompany.find(query)
     .sort(sortBy)
     .limit(numericLimit)
     .lean();
+
+  if (companies.length === 0) {
+    const seeded = await seedIfCollectionEmpty(
+      TrustedCompany,
+      DEFAULT_TRUSTED_COMPANIES,
+      "trusted companies"
+    );
+    if (seeded) {
+      companies = await TrustedCompany.find(query)
+        .sort(sortBy)
+        .limit(numericLimit)
+        .lean();
+    }
+  }
 
   res.status(200).json({
     success: true,

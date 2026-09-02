@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import { getStoredUser } from "@/lib/auth";
 import { jobsAPI, workerAPI, publicAPI } from "@/lib/api";
-import Button from "@/components/ui/Button";
 import Hero from "@/components/sections/Hero";
 import Badge from "@/components/ui/Badge";
 import { useTranslations } from "next-intl";

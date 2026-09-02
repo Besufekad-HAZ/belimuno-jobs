@@ -13,6 +13,18 @@ const Notification = require('./models/Notification');
 const Payment = require('./models/Payment');
 const Report = require('./models/Report');
 const Review = require('./models/Review');
+const TeamMember = require('./models/TeamMember');
+const News = require('./models/News');
+const Client = require('./models/Client');
+const Service = require('./models/Service');
+const TrustedCompany = require('./models/TrustedCompany');
+const DEFAULT_TEAM_MEMBERS = require('./data/defaultTeamMembers');
+const {
+  clients: defaultClients,
+  services: defaultServices,
+  news: defaultNews,
+  trustedCompanies: defaultTrustedCompanies,
+} = require('./data/defaultPublicContent');
 
 // Load env vars
 dotenv.config({ path: './.env' });
@@ -36,6 +48,11 @@ const seedTestData = async () => {
       Payment.deleteMany({}).catch(() => {}),
       Report.deleteMany({}).catch(() => {}),
       Review.deleteMany({}).catch(() => {}),
+      TeamMember.deleteMany({}).catch(() => {}),
+      News.deleteMany({}).catch(() => {}),
+      Client.deleteMany({}).catch(() => {}),
+      Service.deleteMany({}).catch(() => {}),
+      TrustedCompany.deleteMany({}).catch(() => {}),
     ]);
 
     console.log('🗑️  Cleared existing data');
@@ -212,6 +229,9 @@ const seedTestData = async () => {
         description: 'Build a modern e-commerce website with React and Node.js. Should include user authentication, product catalog, shopping cart, and payment integration.',
         category: 'Technology',
         subcategory: 'Web Development',
+        company: clients[0].clientProfile.companyName,
+        industry: clients[0].clientProfile.industry,
+        location: 'Addis Ababa, Ethiopia',
         budget: 5000,
         budgetType: 'fixed',
         deadline: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
@@ -227,6 +247,9 @@ const seedTestData = async () => {
         description: 'Design user interface and user experience for a mobile application. Should include wireframes, mockups, and interactive prototypes.',
         category: 'Design',
         subcategory: 'UI/UX Design',
+        company: clients[1].clientProfile.companyName,
+        industry: clients[1].clientProfile.industry,
+        location: 'Addis Ababa, Ethiopia',
         budget: 2500,
         budgetType: 'fixed',
         deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -242,6 +265,9 @@ const seedTestData = async () => {
         description: 'Analyze sales data and create interactive dashboards using Python and visualization libraries.',
         category: 'Technology',
         subcategory: 'Data Science',
+        company: clients[0].clientProfile.companyName,
+        industry: clients[0].clientProfile.industry,
+        location: 'Addis Ababa, Ethiopia',
         budget: 3000,
         budgetType: 'fixed',
         deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
@@ -258,6 +284,9 @@ const seedTestData = async () => {
         description: 'Create a complete brand identity package including logo, color palette, typography, and brand guidelines.',
         category: 'Design',
         subcategory: 'Brand Design',
+        company: clients[2].clientProfile.companyName,
+        industry: clients[2].clientProfile.industry,
+        location: 'Oromia, Ethiopia',
         budget: 1500,
         budgetType: 'fixed',
         deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
@@ -273,6 +302,9 @@ const seedTestData = async () => {
         description: 'Regular maintenance and updates for WordPress website including security updates, content updates, and performance optimization.',
         category: 'Technology',
         subcategory: 'Web Development',
+        company: clients[2].clientProfile.companyName,
+        industry: clients[2].clientProfile.industry,
+        location: 'Oromia, Ethiopia',
         budget: 800,
         budgetType: 'fixed',
         deadline: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
@@ -303,11 +335,43 @@ const seedTestData = async () => {
     const createdJobs = await Job.insertMany(jobs);
     console.log(`✅ Created ${createdJobs.length} jobs`);
 
+    const createdTeamMembers = await TeamMember.insertMany(
+      DEFAULT_TEAM_MEMBERS.map((member) => ({
+        name: member.name,
+        role: member.role,
+        department: member.department,
+        photoUrl: member.image,
+        order: member.order,
+        status: 'active',
+      }))
+    );
+    const createdNews = await News.insertMany(defaultNews);
+    const createdClients = await Client.insertMany(
+      defaultClients.map(({ brandColor, ...client }) => client)
+    );
+    const createdServices = await Service.insertMany(
+      defaultServices.map((service) => ({ ...service, status: 'active' }))
+    );
+    const createdTrustedCompanies = await TrustedCompany.insertMany(
+      defaultTrustedCompanies
+    );
+
+    console.log(`✅ Created ${createdTeamMembers.length} team members`);
+    console.log(`✅ Created ${createdNews.length} news articles`);
+    console.log(`✅ Created ${createdClients.length} clients`);
+    console.log(`✅ Created ${createdServices.length} services`);
+    console.log(`✅ Created ${createdTrustedCompanies.length} trusted companies`);
+
     console.log('\n🎉 Test data seeding completed successfully!');
     console.log('\n📋 Summary:');
     console.log(`   • ${createdRegions.length} regions created`);
     console.log(`   • ${createdUsers.length} users created`);
     console.log(`   • ${createdJobs.length} jobs created`);
+    console.log(`   • ${createdClients.length} clients restored`);
+    console.log(`   • ${createdTrustedCompanies.length} trusted companies restored`);
+    console.log(`   • ${createdServices.length} services restored`);
+    console.log(`   • ${createdNews.length} news articles restored`);
+    console.log(`   • ${createdTeamMembers.length} team members restored`);
 
   console.log('\n👥 Test Users Created:');
   console.log('   Super Admins: admin1@belimuno.com, admin2@belimuno.com');
@@ -316,11 +380,26 @@ const seedTestData = async () => {
   console.log('   Clients: client1@belimuno.com, client2@belimuno.com, client3@belimuno.com');
     console.log(`   Password for all: ${strongTestPassword}`);
 
-    process.exit(0);
+    return {
+      regions: createdRegions.length,
+      users: createdUsers.length,
+      jobs: createdJobs.length,
+      teamMembers: createdTeamMembers.length,
+      news: createdNews.length,
+      clients: createdClients.length,
+      services: createdServices.length,
+      trustedCompanies: createdTrustedCompanies.length,
+    };
   } catch (error) {
     console.error('❌ Error seeding data:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
-seedTestData();
+if (require.main === module) {
+  seedTestData()
+    .then(() => process.exit(0))
+    .catch(() => process.exit(1));
+}
+
+module.exports = seedTestData;

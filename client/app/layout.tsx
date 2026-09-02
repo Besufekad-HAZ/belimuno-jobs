@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Manrope, Noto_Sans_Ethiopic } from "next/font/google";
 import "./[locale]/globals.css";
 import "./[locale]/fonts.css";
 import "react-chatbot-kit/build/main.css";
@@ -8,22 +7,6 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { LoadingProvider } from "@/contexts/LoadingContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const notoEthiopic = Noto_Sans_Ethiopic({
-  variable: "--font-noto-ethiopic",
-  weight: ["400", "500", "700"],
-  subsets: ["ethiopic"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const brandIcon = resolveAssetUrl("/belimuno-logo.png") ?? "/belimuno-logo.png";
 
@@ -44,9 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className={`${manrope.variable} ${notoEthiopic.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <QueryProvider>
           <LoadingProvider>{children}</LoadingProvider>
         </QueryProvider>

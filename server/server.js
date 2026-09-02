@@ -19,9 +19,6 @@ try {
 // Load env vars
 dotenv.config({ path: "./.env" });
 
-// Connect to database
-connectDB();
-
 const app = express();
 
 // Body parser middleware (bigger limit to allow base64 attachments)
@@ -182,9 +179,14 @@ app.get("/api", (req, res) => {
 
 // Health check route
 app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Belimuno Jobs API is running",
+  const mongoose = require("mongoose");
+  const databaseReady = mongoose.connection.readyState === 1;
+  res.status(databaseReady ? 200 : 503).json({
+    success: databaseReady,
+    message: databaseReady
+      ? "Belimuno Jobs API is running"
+      : "Database connection is not ready",
+    database: databaseReady ? "connected" : "disconnected",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
   });
@@ -243,14 +245,15 @@ const startServer = (port, attemptsLeft = 5) => {
   });
 };
 
-startServer(DEFAULT_PORT)
-  .then((srv) => {
-    server = srv;
-  })
-  .catch((err) => {
-    console.error("❌ Failed to start server:", err.message || err);
-    process.exit(1);
-  });
+const bootstrap = async () => {
+  await connectDB();
+  server = await startServer(DEFAULT_PORT);
+};
+
+bootstrap().catch((err) => {
+  console.error("❌ Failed to start server:", err.message || err);
+  process.exit(1);
+});
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err, promise) => {

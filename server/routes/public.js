@@ -21,8 +21,7 @@ router.get("/news/:id", getNewsArticle);
 
 // Client management
 router.get("/clients", getClients);
-   router.get("/trusted-companies", getTrustedCompanies);
-   router.get("/org-structure", getOrgStructureDocument);
+router.get("/trusted-companies", getTrustedCompanies);
 router.get("/org-structure", getOrgStructureDocument);
 
 // Service management

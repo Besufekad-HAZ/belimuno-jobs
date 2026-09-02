@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
+    "start:local": "powershell -ExecutionPolicy Bypass -File .\\start-local.ps1",
     "prod": "node server.js",
     "seed": "node seedTestData.js",
     "test": "node test-api.js",
