@@ -8,15 +8,18 @@ import { LoadingProvider } from "@/contexts/LoadingContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 
-const brandIcon = resolveAssetUrl("/belimuno-logo.png") ?? "/belimuno-logo.png";
+const brandIcon = resolveAssetUrl("/belimuno-favicon.png?v=6") ?? "/belimuno-favicon.png?v=6";
 
 export const metadata: Metadata = {
   title: "Belimuno Jobs - Connecting Talent with Opportunities",
   description: "HR outsourcing and job management platform for Ethiopia",
   icons: {
-    icon: [{ url: "/favicon.ico", type: "image/x-icon" }],
-    shortcut: [{ url: "/favicon.ico", type: "image/x-icon" }],
-    apple: [{ url: brandIcon, type: "image/png" }],
+    icon: [
+      { url: brandIcon, type: "image/png", sizes: "256x256" },
+      { url: "/favicon.ico?v=6", type: "image/x-icon" },
+    ],
+    shortcut: [{ url: brandIcon, type: "image/png" }],
+    apple: [{ url: brandIcon, type: "image/png", sizes: "180x180" }],
   },
 };
 
